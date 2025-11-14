@@ -232,7 +232,7 @@ export default function PresencasPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
+      <div className="space-y-4">
         <section className="space-y-3">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <Card
@@ -273,38 +273,6 @@ export default function PresencasPage() {
             isLoading={isRefreshing}
           />
         </section>
-
-        <aside className="card space-y-4">
-          <header className="space-y-1.5">
-            <h2 className="text-lg font-semibold text-bjj-white">Ranking de engajamento</h2>
-            <p className="text-sm text-bjj-gray-200/70">
-              Reconheça quem mais comparece e incentive quem está oscilando nas presenças.
-            </p>
-          </header>
-          {ranking.length === 0 ? (
-            <p className="text-sm text-bjj-gray-200/70">Nenhum registro recente para exibir o ranking.</p>
-          ) : (
-            <ul className="space-y-2.5">
-              {ranking.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3.5"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-bjj-white">{item.nome}</p>
-                    <p className="text-xs text-bjj-gray-200/70">
-                      {item.faixa} · {item.graus}º grau
-                    </p>
-                  </div>
-                  <div className="text-right text-xs text-bjj-gray-200/70">
-                    <p className="font-semibold text-bjj-white">{item.presencas} presenças</p>
-                    <p>{item.faltas} falta(s)</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </aside>
       </div>
 
       <Modal isOpen={isSummaryOpen} onClose={fecharResumo} title="Resumo do treino">

@@ -68,6 +68,30 @@ export default function DashboardPage() {
   }).length;
   const graduacoesPlanejadas = graduacoes.filter((item) => item.status !== 'Concluído').length;
 
+  const rankingPresenca = useMemo(() => {
+    const mapa = new Map();
+    presencas.forEach((registro) => {
+      const atual = mapa.get(registro.alunoId) || {
+        id: registro.alunoId,
+        nome: registro.alunoNome,
+        faixa: registro.faixa,
+        graus: registro.graus,
+        presencas: 0,
+        faltas: 0
+      };
+
+      if (registro.status === 'Presente') {
+        atual.presencas += 1;
+      } else {
+        atual.faltas += 1;
+      }
+
+      mapa.set(registro.alunoId, atual);
+    });
+
+    return Array.from(mapa.values()).sort((a, b) => b.presencas - a.presencas).slice(0, 5);
+  }, [presencas]);
+
   const evolucoes = useMemo(
     () =>
       alunos
@@ -222,6 +246,44 @@ export default function DashboardPage() {
             </ul>
           )}
         </aside>
+      </section>
+
+      <section className="card space-y-4">
+        <header className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-semibold text-bjj-white">Ranking de presença</h2>
+            <p className="text-sm text-bjj-gray-200/70">
+              Top alunos com maior engajamento acumulado nas últimas sessões registradas.
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/70">
+            <Flame size={13} className="text-bjj-red" /> {rankingPresenca.length} destaque(s)
+          </span>
+        </header>
+
+        {rankingPresenca.length === 0 ? (
+          <p className="text-sm text-bjj-gray-200/70">Nenhum registro de presença para exibir o ranking.</p>
+        ) : (
+          <ul className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-5">
+            {rankingPresenca.map((item) => (
+              <li
+                key={item.id}
+                className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-bjj-white">{item.nome}</p>
+                  <p className="text-xs text-bjj-gray-200/70">
+                    {item.faixa} · {item.graus}º grau
+                  </p>
+                </div>
+                <div className="flex items-center justify-between text-xs text-bjj-gray-200/70">
+                  <span className="font-semibold text-bjj-white">{item.presencas} presenças</span>
+                  <span>{item.faltas} falta(s)</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );
