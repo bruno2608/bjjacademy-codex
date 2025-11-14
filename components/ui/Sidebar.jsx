@@ -4,22 +4,13 @@
  * Sidebar component controla navegação principal, com ícones Lucide e responsividade.
  */
 import { useState } from 'react';
-import {
-  Menu,
-  X,
-  LayoutDashboard,
-  Users,
-  UserPlus,
-  CalendarCheck,
-  Medal
-} from 'lucide-react';
+import { Menu, X, LayoutDashboard, Users, CalendarCheck, Medal } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/alunos', label: 'Alunos', icon: Users },
-  { href: '/alunos/novo', label: 'Novo aluno', icon: UserPlus },
   { href: '/presencas', label: 'Presenças', icon: CalendarCheck },
   { href: '/graduacoes', label: 'Graduações', icon: Medal }
 ];

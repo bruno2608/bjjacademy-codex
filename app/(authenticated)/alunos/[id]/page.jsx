@@ -13,6 +13,7 @@ export default function EditarAlunoPage() {
   const params = useParams();
   const [aluno, setAluno] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     getAlunos().then((list) => {
@@ -24,9 +25,9 @@ export default function EditarAlunoPage() {
 
   const handleSubmit = async (data) => {
     if (!aluno) return;
-    setLoading(true);
+    setSaving(true);
     await updateAluno(aluno.id, data);
-    setLoading(false);
+    setSaving(false);
     router.push('/alunos');
   };
 
@@ -44,7 +45,7 @@ export default function EditarAlunoPage() {
         <h2 className="text-2xl font-semibold">Editar aluno</h2>
         <p className="text-sm text-bjj-gray-200/70">Atualize as informações para manter o histórico em dia.</p>
       </div>
-      <AlunoForm initialData={aluno} onSubmit={handleSubmit} />
+      <AlunoForm initialData={aluno} onSubmit={handleSubmit} isSubmitting={saving} submitLabel="Atualizar" />
     </div>
   );
 }

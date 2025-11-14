@@ -27,7 +27,6 @@ export default function AuthenticatedLayout({ children }) {
   }, [login, router, token]);
 
   const pageTitle = useMemo(() => {
-    if (pathname.startsWith('/alunos/novo')) return 'Novo aluno';
     if (pathname.startsWith('/alunos/')) return 'Editar aluno';
     if (pathname.startsWith('/alunos')) return 'Alunos';
     if (pathname.startsWith('/presencas')) return 'Presenças';

@@ -11,7 +11,7 @@ const planos = ['Mensal', 'Trimestral', 'Anual'];
 const statusOptions = ['Ativo', 'Inativo'];
 const beltOptions = BELT_ORDER.filter((faixa) => faixa !== 'Vermelha');
 
-export default function AlunoForm({ initialData, onSubmit }) {
+export default function AlunoForm({ initialData, onSubmit, isSubmitting = false, submitLabel = 'Salvar' }) {
   const [formData, setFormData] = useState({
     nome: '',
     telefone: '',
@@ -68,6 +68,9 @@ export default function AlunoForm({ initialData, onSubmit }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
     onSubmit({
       ...formData,
       graus: Number(formData.graus),
@@ -160,7 +163,13 @@ export default function AlunoForm({ initialData, onSubmit }) {
           onChange={handleChange}
         />
       </div>
-      <button type="submit" className="btn-primary w-full md:w-auto">Salvar</button>
+      <button
+        type="submit"
+        className="btn-primary w-full md:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? 'Salvando...' : submitLabel}
+      </button>
     </form>
   );
 }
