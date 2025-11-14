@@ -31,7 +31,11 @@ export default function PresencasPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isSessionOpen, setIsSessionOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [sessionRecord, setSessionRecord] = useState(null);
+  const [sessionTreinoId, setSessionTreinoId] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const alunos = useUserStore((state) => state.alunos);
   const treinos = useUserStore((state) => state.treinos);
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -114,6 +118,14 @@ export default function PresencasPage() {
     return [...registros, ...placeholders].sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
   }, [alunosAtivos, hoje, presencas, sugerirTreino]);
 
+  const registrosFiltrados = useMemo(() => {
+    if (searchTerm.trim().length < 3) {
+      return registrosDoDia;
+    }
+    const termo = searchTerm.toLowerCase();
+    return registrosDoDia.filter((item) => item.alunoNome.toLowerCase().includes(termo));
+  }, [registrosDoDia, searchTerm]);
+
   const presentesDia = registrosDoDia.filter((item) => item.status === 'Presente').length;
   const ausentesDia = registrosDoDia.length - presentesDia;
   const atrasosDia = registrosDoDia.filter(
@@ -126,25 +138,9 @@ export default function PresencasPage() {
     return conjunto.size;
   }, [presencas]);
 
-  const handleCreate = async (payload) => {
-    const novoRegistro = await createPresenca(payload);
-    setPresencas((prev) => [...prev, novoRegistro]);
-  };
-
   const handleToggle = async (registro) => {
     if (!registro?.id) {
-      const novoRegistro = await createPresenca({
-        alunoId: registro.alunoId,
-        alunoNome: registro.alunoNome,
-        faixa: registro.faixa,
-        graus: registro.graus,
-        data: hoje,
-        status: 'Presente',
-        hora: formatTime(),
-        treinoId: registro.treinoId,
-        tipoTreino: registro.tipoTreino
-      });
-      setPresencas((prev) => [...prev, novoRegistro]);
+      abrirSelecaoSessao(registro);
       return;
     }
 
@@ -169,6 +165,38 @@ export default function PresencasPage() {
   const fecharEdicao = () => {
     setSelectedRecord(null);
     setIsEditOpen(false);
+  };
+
+  const abrirSelecaoSessao = (registro) => {
+    const sugestao = registro.treinoId || sugerirTreino(registro.data)?.id || treinos[0]?.id || '';
+    setSessionTreinoId(sugestao);
+    setSessionRecord(registro);
+    setIsSessionOpen(true);
+  };
+
+  const fecharSelecaoSessao = () => {
+    setIsSessionOpen(false);
+    setSessionRecord(null);
+  };
+
+  const handleSessionSubmit = async () => {
+    if (!sessionRecord) return;
+    const treinoSelecionado =
+      treinos.find((treino) => treino.id === sessionTreinoId) ||
+      sugerirTreino(sessionRecord.data);
+    await createPresenca({
+      alunoId: sessionRecord.alunoId,
+      alunoNome: sessionRecord.alunoNome,
+      faixa: sessionRecord.faixa,
+      graus: sessionRecord.graus,
+      data: sessionRecord.data,
+      status: 'Presente',
+      treinoId: treinoSelecionado?.id || null,
+      tipoTreino: treinoSelecionado?.nome || sessionRecord.tipoTreino || 'Sessão principal',
+      hora: treinoSelecionado?.hora || formatTime()
+    });
+    fecharSelecaoSessao();
+    await atualizarLista();
   };
 
   const handleEditSubmit = async (dados) => {
@@ -216,19 +244,33 @@ export default function PresencasPage() {
 
       <article className="card space-y-3">
         <header className="space-y-1">
-          <h2 className="text-base font-semibold text-bjj-white">Registrar presença manual</h2>
+          <h2 className="text-base font-semibold text-bjj-white">Filtrar alunos</h2>
           <p className="text-sm text-bjj-gray-200/70">
-            Use o formulário para ajustar registros específicos ou incluir treinos anteriores.
+            Digite pelo menos três letras para localizar rapidamente um aluno e registrar a presença.
           </p>
         </header>
-        <PresenceForm onSubmit={handleCreate} />
+        <div className="grid gap-3 md:grid-cols-[minmax(0,320px)_auto] md:items-center">
+          <input
+            type="search"
+            className="input-field"
+            placeholder="Buscar por nome do aluno"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+          <p className="text-xs text-bjj-gray-200/60">
+            {searchTerm.trim().length >= 3
+              ? `${registrosFiltrados.length} aluno(s) encontrados.`
+              : 'Mostrando todos os alunos ativos do dia.'}
+          </p>
+        </div>
       </article>
 
       <AttendanceTable
-        records={registrosDoDia}
+        records={registrosFiltrados}
         onToggle={handleToggle}
         onDelete={handleDelete}
         onEdit={abrirEdicao}
+        onRequestSession={abrirSelecaoSessao}
         isLoading={isRefreshing}
       />
 
@@ -307,6 +349,43 @@ export default function PresencasPage() {
             submitLabel="Salvar ajustes"
           />
         )}
+      </Modal>
+
+      <Modal
+        isOpen={isSessionOpen}
+        onClose={fecharSelecaoSessao}
+        title={sessionRecord ? `Selecionar sessão para ${sessionRecord.alunoNome}` : 'Selecionar sessão'}
+      >
+        <div className="space-y-4 text-sm text-bjj-gray-200/80">
+          <p>
+            Escolha o treino correspondente para registrar a presença de
+            <strong className="text-bjj-white"> {sessionRecord?.alunoNome}</strong> no dia{' '}
+            {sessionRecord
+              ? new Date(sessionRecord.data).toLocaleDateString('pt-BR')
+              : new Date().toLocaleDateString('pt-BR')}.
+          </p>
+          <label className="block text-sm font-medium text-bjj-white">Treino / sessão</label>
+          <select
+            className="input-field"
+            value={sessionTreinoId}
+            onChange={(event) => setSessionTreinoId(event.target.value)}
+          >
+            {treinos.map((treino) => (
+              <option key={treino.id} value={treino.id}>
+                {treino.nome} · {treino.hora}
+              </option>
+            ))}
+            {!treinos.length && <option value="">Sessão principal</option>}
+          </select>
+          <div className="flex flex-col gap-2 md:flex-row md:justify-end">
+            <button type="button" className="btn-secondary md:w-auto" onClick={fecharSelecaoSessao}>
+              Cancelar
+            </button>
+            <button type="button" className="btn-primary md:w-auto" onClick={handleSessionSubmit}>
+              Confirmar presença
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
