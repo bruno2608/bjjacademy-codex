@@ -13,37 +13,36 @@ export default function MobileNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-bjj-gray-800/80 bg-bjj-gray-900/95 backdrop-blur-sm lg:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-bjj-gray-800/80 bg-bjj-black/95 backdrop-blur-md lg:hidden"
       role="navigation"
     >
-      <ul className="grid grid-cols-4">
+      <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-3">
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const active = pathname.startsWith(item.href);
           return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 py-2.5 text-[11px] font-medium transition ${
-                  active ? 'text-bjj-red' : 'text-bjj-gray-200/70 hover:text-bjj-white'
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`group flex flex-1 flex-col items-center gap-1 text-[11px] font-medium transition ${
+                active ? 'text-bjj-white' : 'text-bjj-gray-200/70 hover:text-bjj-white'
+              }`}
+              aria-current={active ? 'page' : undefined}
+            >
+              <span
+                className={`flex h-10 w-10 items-center justify-center rounded-2xl border text-[12px] transition ${
+                  active
+                    ? 'border-bjj-red bg-bjj-red/20 text-bjj-white shadow-[0_12px_28px_rgba(225,6,0,0.22)]'
+                    : 'border-bjj-gray-800 bg-bjj-gray-900/60 text-bjj-gray-200/80 group-hover:border-bjj-gray-700 group-hover:bg-bjj-gray-800'
                 }`}
-                aria-current={active ? 'page' : undefined}
               >
-                <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl border ${
-                    active
-                      ? 'border-bjj-red/60 bg-bjj-red/10 text-bjj-red'
-                      : 'border-transparent bg-bjj-gray-900/60 text-bjj-gray-200/80'
-                  }`}
-                >
-                  <Icon size={16} />
-                </span>
-                {item.label}
-              </Link>
-            </li>
+                <Icon size={18} />
+              </span>
+              {item.label}
+            </Link>
           );
         })}
-      </ul>
+      </div>
     </nav>
   );
 }
