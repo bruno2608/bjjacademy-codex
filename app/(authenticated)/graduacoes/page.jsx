@@ -5,7 +5,6 @@
  * com possibilidade de atualizar status e agendar novas cerimônias.
  */
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import GraduationList from '../../../components/ui/GraduationList';
 import { getGraduacoes, scheduleGraduacao, updateGraduacao } from '../../../services/graduacoesService';
 import useUserStore from '../../../store/userStore';
@@ -13,8 +12,11 @@ import useUserStore from '../../../store/userStore';
 export default function GraduacoesPage() {
   const [graduacoes, setGraduacoes] = useState([]);
   const alunos = useUserStore((state) => state.alunos);
-  const { register, handleSubmit, reset } = useForm({
-    defaultValues: { alunoId: alunos[0]?.id || '', faixaAtual: '', proximaFaixa: '', previsao: '' }
+  const [form, setForm] = useState({
+    alunoId: '',
+    faixaAtual: '',
+    proximaFaixa: '',
+    previsao: ''
   });
 
   useEffect(() => {
@@ -22,20 +24,36 @@ export default function GraduacoesPage() {
   }, []);
 
   useEffect(() => {
-    reset({ alunoId: alunos[0]?.id || '', faixaAtual: '', proximaFaixa: '', previsao: '' });
-  }, [alunos, reset]);
+    if (!alunos.length) return;
+    setForm((prev) => {
+      if (prev.alunoId && alunos.some((aluno) => aluno.id === prev.alunoId)) {
+        return prev;
+      }
+      return { ...prev, alunoId: alunos[0].id };
+    });
+  }, [alunos]);
 
-  const onSubmit = handleSubmit(async (values) => {
-    const alunoSelecionado = alunos.find((aluno) => aluno.id === values.alunoId);
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!form.alunoId || !form.faixaAtual || !form.proximaFaixa || !form.previsao) {
+      return;
+    }
+
+    const alunoSelecionado = alunos.find((aluno) => aluno.id === form.alunoId);
     if (!alunoSelecionado) return;
     const novaGraduacao = await scheduleGraduacao({
-      ...values,
+      ...form,
       alunoNome: alunoSelecionado.nome,
       status: 'Planejado'
     });
     setGraduacoes((prev) => [...prev, novaGraduacao]);
-    reset({ alunoId: alunos[0]?.id || '', faixaAtual: '', proximaFaixa: '', previsao: '' });
-  });
+    setForm({ alunoId: alunos[0]?.id || '', faixaAtual: '', proximaFaixa: '', previsao: '' });
+  };
 
   const handleStatusChange = async (graduacao, novoStatus) => {
     const atualizado = await updateGraduacao(graduacao.id, { status: novoStatus });
@@ -52,10 +70,15 @@ export default function GraduacoesPage() {
       </header>
       <section className="card space-y-4">
         <h3 className="text-lg font-semibold">Agendar nova graduação</h3>
-        <form className="grid grid-cols-1 md:grid-cols-4 gap-4" onSubmit={onSubmit}>
+        <form className="grid grid-cols-1 md:grid-cols-4 gap-4" onSubmit={handleSubmit}>
           <div>
             <label className="block text-sm font-medium mb-2">Aluno</label>
-            <select {...register('alunoId')} className="input-field">
+            <select
+              name="alunoId"
+              value={form.alunoId}
+              onChange={handleChange}
+              className="input-field"
+            >
               {alunos.map((aluno) => (
                 <option key={aluno.id} value={aluno.id}>
                   {aluno.nome}
@@ -65,15 +88,36 @@ export default function GraduacoesPage() {
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Faixa atual</label>
-            <input {...register('faixaAtual', { required: true })} className="input-field" placeholder="Faixa atual" />
+            <input
+              name="faixaAtual"
+              value={form.faixaAtual}
+              onChange={handleChange}
+              className="input-field"
+              placeholder="Faixa atual"
+              required
+            />
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Próxima faixa</label>
-            <input {...register('proximaFaixa', { required: true })} className="input-field" placeholder="Faixa alvo" />
+            <input
+              name="proximaFaixa"
+              value={form.proximaFaixa}
+              onChange={handleChange}
+              className="input-field"
+              placeholder="Faixa alvo"
+              required
+            />
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Previsão</label>
-            <input type="date" {...register('previsao', { required: true })} className="input-field" />
+            <input
+              type="date"
+              name="previsao"
+              value={form.previsao}
+              onChange={handleChange}
+              className="input-field"
+              required
+            />
           </div>
           <div className="md:col-span-4 flex justify-end">
             <button type="submit" className="btn-primary">Salvar agenda</button>
