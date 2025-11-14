@@ -1,76 +1,56 @@
-# 🥋 **BJJ Academy -- PWA (Next.js + Tailwind)**
+# BJJ Academy PWA
 
-Bem-vindo ao repositório oficial da nova versão **PWA (Progressive Web
-App)** do **BJJ Academy**, o sistema de gestão para academias de
-Jiu-Jitsu focado em simplicidade, performance e experiência do usuário.
+Base inicial do Progressive Web App (PWA) da BJJ Academy construída com Next.js (App Router), React, Tailwind CSS e Zustand.
 
-Esta é a versão web moderna que substituirá o app mobile original,
-aplicando arquitetura limpa, responsividade e design minimalista (Zenko
-Focus).
+## Estrutura de pastas
+```
+app/
+  layout.jsx
+  page.jsx
+  (authenticated)/
+    layout.jsx
+    dashboard/
+      page.jsx
+    alunos/
+      page.jsx
+      novo/
+        page.jsx
+      [id]/
+        page.jsx
+  login/
+    page.jsx
+components/
+  ui/
+    Header.jsx
+    Sidebar.jsx
+    Card.jsx
+    Table.jsx
+    AlunoForm.jsx
+services/
+  api.js
+  alunosService.js
+store/
+  userStore.js
+public/
+  manifest.json
+  service-worker.js
+  icons/
+    icon-192x192.svg
+    icon-256x256.svg
+    icon-512x512.svg
+styles/
+  globals.css
+  tailwind.css
+```
 
-## 🚀 **Tecnologias Utilizadas**
+## Configuração
+1. Instale as dependências:
+   ```bash
+   npm install
+   ```
+2. Rode o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
 
--   **Next.js**
--   **React**
--   **Tailwind CSS**
--   **Zustand**
--   **Lucide React**
--   **PWA** (manifest, service worker, offline básico)
-
-## 🎯 **Objetivo do Projeto**
-
-Criar um aplicativo web progressivo capaz de substituir o app mobile
-existente, com: - Login/logout - Dashboard de métricas - Gestão de
-alunos - Layout responsivo - Suporte a instalação PWA - Cache offline
-básico
-
-## 🧱 **Estrutura Geral do Projeto**
-
-    /app ou /pages
-    /components
-    /services
-    /store
-    /public
-    /styles
-
-## 📌 Funcionalidades Implementadas
-
--   Configuração do Tailwind
--   Estrutura inicial de páginas
--   Layout com Header e Sidebar
--   Mock de autenticação e alunos
--   Zustand para estado global
--   Manifest.json e Service Worker
-
-## 🖥️ Como Rodar
-
-    npm install
-    npm run dev
-    http://localhost:3000
-
-## 📱 PWA
-
--   manifest.json completo
--   service worker para cache
--   ícones múltiplos
-
-## 🎨 Identidade Visual
-
--   Preto #000000
--   Branco #FFFFFF
--   Vermelho #E10600
--   Cinzas diversos
-
-## 🤝 Contribuições
-
-1.  `git checkout -b feature/nova-feature`
-2.  `git commit -m "feat: descrição"`
-3.  Abrir PR
-
-## 📄 Licença
-
-Projeto proprietário de **Bruno Alves França**.
-
-## 🥋 BJJ Academy -- Evolve Your Training
-
-Solução completa para academias de Jiu-Jitsu.
+O projeto já está configurado com suporte a PWA (manifest, icons, service worker), autenticação mock com Zustand, rotas protegidas e componentes reutilizáveis seguindo o estilo Zenko Focus.
