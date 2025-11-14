@@ -6,6 +6,11 @@
 import { create } from 'zustand';
 import { calculateNextStep, getMaxStripes, getNextBelt } from '../lib/graduationRules';
 
+const getCurrentTime = () =>
+  new Date()
+    .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    .padStart(5, '0');
+
 const normalizeAluno = (aluno) => ({
   ...aluno,
   graus: Number(aluno.graus ?? 0),
@@ -585,6 +590,7 @@ const mockPresencas = [
     faixa: 'Roxa',
     graus: 2,
     data: '2024-05-05',
+    hora: '07:55',
     status: 'Presente'
   },
   {
@@ -594,6 +600,7 @@ const mockPresencas = [
     faixa: 'Azul',
     graus: 3,
     data: '2024-05-05',
+    hora: null,
     status: 'Ausente'
   },
   {
@@ -603,6 +610,7 @@ const mockPresencas = [
     faixa: 'Marrom',
     graus: 1,
     data: '2024-05-04',
+    hora: '08:12',
     status: 'Presente'
   },
   {
@@ -612,6 +620,7 @@ const mockPresencas = [
     faixa: 'Azul',
     graus: 1,
     data: '2024-05-04',
+    hora: '08:05',
     status: 'Presente'
   },
   {
@@ -621,6 +630,7 @@ const mockPresencas = [
     faixa: 'Branca',
     graus: 0,
     data: '2024-05-03',
+    hora: '07:48',
     status: 'Presente'
   },
   {
@@ -630,6 +640,7 @@ const mockPresencas = [
     faixa: 'Roxa',
     graus: 3,
     data: '2024-05-03',
+    hora: '09:10',
     status: 'Presente'
   },
   {
@@ -639,6 +650,7 @@ const mockPresencas = [
     faixa: 'Marrom',
     graus: 2,
     data: '2024-05-02',
+    hora: null,
     status: 'Ausente'
   },
   {
@@ -648,6 +660,7 @@ const mockPresencas = [
     faixa: 'Azul',
     graus: 0,
     data: '2024-05-02',
+    hora: '08:22',
     status: 'Presente'
   },
   {
@@ -657,6 +670,7 @@ const mockPresencas = [
     faixa: 'Preta',
     graus: 1,
     data: '2024-05-01',
+    hora: '07:40',
     status: 'Presente'
   },
   {
@@ -666,6 +680,7 @@ const mockPresencas = [
     faixa: 'Roxa',
     graus: 0,
     data: '2024-05-01',
+    hora: '08:30',
     status: 'Presente'
   }
 ];
@@ -798,14 +813,30 @@ const useUserStore = create((set) => ({
       )
     })),
   addPresenca: (novaPresenca) =>
-    set((state) => ({ presencas: [...state.presencas, novaPresenca] })),
+    set((state) => ({
+      presencas: [
+        ...state.presencas,
+        {
+          ...novaPresenca,
+          hora: novaPresenca.hora ?? getCurrentTime()
+        }
+      ]
+    })),
   removePresenca: (id) =>
     set((state) => ({ presencas: state.presencas.filter((item) => item.id !== id) })),
+  updatePresenca: (id, payload) =>
+    set((state) => ({
+      presencas: state.presencas.map((item) => (item.id === id ? { ...item, ...payload } : item))
+    })),
   togglePresencaStatus: (id) =>
     set((state) => ({
       presencas: state.presencas.map((item) =>
         item.id === id
-          ? { ...item, status: item.status === 'Presente' ? 'Ausente' : 'Presente' }
+          ? {
+              ...item,
+              status: item.status === 'Presente' ? 'Ausente' : 'Presente',
+              hora: item.status === 'Presente' ? null : getCurrentTime()
+            }
           : item
       )
     })),
