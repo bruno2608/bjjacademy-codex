@@ -27,6 +27,7 @@ export default function AlunosPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -84,6 +85,14 @@ export default function AlunosPage() {
     setIsRefreshing(false);
   }, []);
 
+  const alunosFiltrados = useMemo(() => {
+    if (searchTerm.trim().length < 3) {
+      return alunos;
+    }
+    const termo = searchTerm.trim().toLowerCase();
+    return alunos.filter((aluno) => aluno.nome.toLowerCase().includes(termo));
+  }, [alunos, searchTerm]);
+
   const handleDelete = async (aluno) => {
     await deleteAluno(aluno.id);
     await refreshList();
@@ -137,11 +146,6 @@ export default function AlunosPage() {
         title="Mantenha a base organizada e pronta para a próxima graduação"
         subtitle="Visualize status, graduações e contatos em uma única visão. Cadastre ou edite sem sair da página."
         stats={heroStats}
-        actions={
-          <button type="button" className="btn-primary" onClick={() => setIsCreateOpen(true)}>
-            <UserPlus2 size={16} /> Novo aluno
-          </button>
-        }
       />
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-[3fr,2fr]">
@@ -167,9 +171,40 @@ export default function AlunosPage() {
                 Monitore faixa atual, tempo dedicado e status de cada membro da academia.
               </p>
             </header>
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <label className="relative w-full md:max-w-xs">
+                <span className="sr-only">Buscar aluno</span>
+                <input
+                  type="search"
+                  className="input-field pr-10 text-sm"
+                  placeholder="Buscar aluno (mínimo 3 letras)"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-bjj-gray-200/60"
+                  aria-hidden
+                >
+                  <path
+                    fill="currentColor"
+                    d="m19.53 21.12-4.8-4.79a7.5 7.5 0 1 1 1.59-1.59l4.8 4.79a1.12 1.12 0 0 1-1.59 1.59ZM5.75 10.5a4.75 4.75 0 1 0 4.75-4.75A4.75 4.75 0 0 0 5.75 10.5Z"
+                  />
+                </svg>
+                {searchTerm.trim().length > 0 && searchTerm.trim().length < 3 && (
+                  <span className="mt-1 block text-xs text-bjj-gray-200/60">
+                    Digite pelo menos 3 letras para filtrar.
+                  </span>
+                )}
+              </label>
+              <button type="button" className="btn-primary md:shrink-0" onClick={() => setIsCreateOpen(true)}>
+                <UserPlus2 size={16} /> Novo aluno
+              </button>
+            </div>
             <Table
-              headers={['Aluno', 'Graduação', 'Plano', 'Status', 'Contato', 'Ações']}
-              data={alunos}
+              headers={['Ações', 'Aluno', 'Graduação', 'Plano', 'Status', 'Contato']}
+              data={alunosFiltrados}
               onEdit={handleEdit}
               onDelete={handleDelete}
               isLoading={isRefreshing}
