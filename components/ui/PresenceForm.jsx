@@ -19,21 +19,23 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
   const treinos = useUserStore((state) => state.treinos);
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
   const isEditing = Boolean(initialData?.id);
+
   const normalizarDiaSemana = (valor) => {
     const referencia = valor ? new Date(valor) : new Date();
     if (Number.isNaN(referencia.getTime())) return null;
     return referencia.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
   };
+
   const sugerirTreino = (dataReferencia) => {
     const dia = normalizarDiaSemana(dataReferencia) || normalizarDiaSemana(hoje);
     const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
     return candidatos[0] || treinos[0] || null;
   };
+
   const [form, setForm] = useState({
     alunoId: initialData?.alunoId || '',
     data: initialData?.data || hoje,
     status: initialData?.status || statusOptions[0],
-    hora: initialData?.hora || obterHoraAtual(),
     treinoId:
       initialData?.treinoId ||
       (initialData ? sugerirTreino(initialData.data)?.id : sugerirTreino(hoje)?.id) ||
@@ -46,7 +48,6 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       alunoId: initialData.alunoId,
       data: initialData.data,
       status: initialData.status,
-      hora: initialData.hora || obterHoraAtual(),
       treinoId: initialData.treinoId || sugerirTreino(initialData.data)?.id || ''
     });
   }, [initialData, treinos]);
@@ -79,32 +80,31 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
     });
   };
 
-  const abrirSeletorNativo = (event) => {
-    if (typeof event.target.showPicker === 'function') {
-      event.target.showPicker();
-    }
-  };
-
   const handleSubmit = (event) => {
     event.preventDefault();
     const alunoSelecionado = alunos.find((aluno) => aluno.id === form.alunoId);
     if (!alunoSelecionado) return;
-    const treinoSelecionado = treinos.find((treino) => treino.id === form.treinoId) || sugerirTreino(form.data);
+
+    const treinoSelecionado =
+      treinos.find((treino) => treino.id === form.treinoId) || sugerirTreino(form.data);
+    const horaSessao = treinoSelecionado?.hora || initialData?.hora || obterHoraAtual();
+
     onSubmit({
       ...form,
+      hora: horaSessao,
       treinoId: treinoSelecionado?.id || form.treinoId || null,
       tipoTreino: treinoSelecionado?.nome || 'Sessão principal',
       alunoNome: alunoSelecionado.nome,
       faixa: alunoSelecionado.faixa,
       graus: alunoSelecionado.graus
     });
+
     if (!isEditing) {
       const sugestao = sugerirTreino(hoje);
       setForm({
         alunoId: alunos[0]?.id || '',
         data: hoje,
         status: statusOptions[0],
-        hora: obterHoraAtual(),
         treinoId: sugestao?.id || ''
       });
     }
@@ -137,8 +137,6 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
             className="input-field"
             value={form.data}
             onChange={handleChange}
-            onClick={abrirSeletorNativo}
-            onFocus={abrirSeletorNativo}
             disabled={isEditing}
             required
           />
@@ -166,19 +164,6 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
               <option key={status}>{status}</option>
             ))}
           </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Horário</label>
-          <input
-            name="hora"
-            type="time"
-            className="input-field"
-            value={form.hora}
-            onChange={handleChange}
-            onClick={abrirSeletorNativo}
-            onFocus={abrirSeletorNativo}
-            required
-          />
         </div>
       </div>
       <div className="flex flex-col gap-2 md:flex-row md:justify-end">
