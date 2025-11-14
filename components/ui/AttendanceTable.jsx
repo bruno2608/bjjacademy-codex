@@ -5,13 +5,14 @@
  * alternar status rapidamente, mantendo o novo visual gamificado e
  * preparado para mobile-first.
  */
-import { CheckCircle2, Circle, Loader2, Pencil, RotateCcw, Trash2 } from 'lucide-react';
+import { CheckCircle2, Circle, Loader2, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
 
 export default function AttendanceTable({
   records,
   onToggle,
   onDelete,
   onEdit,
+  onAddSession,
   onRequestSession,
   isLoading = false
 }) {
@@ -91,6 +92,15 @@ export default function AttendanceTable({
                           {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
                         </span>
                       </button>
+                      {!isPlaceholder && (
+                        <button
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
+                          onClick={() => onAddSession?.(record)}
+                        >
+                          <Plus size={16} />
+                          <span className="sr-only">Adicionar outra sessão</span>
+                        </button>
+                      )}
                       <button
                         className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
                         onClick={() => onDelete?.(record)}
@@ -151,6 +161,15 @@ export default function AttendanceTable({
                       {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
                     </span>
                   </button>
+                  {!isPlaceholder && (
+                    <button
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
+                      onClick={() => onAddSession?.(record)}
+                    >
+                      <Plus size={16} />
+                      <span className="sr-only">Adicionar outra sessão</span>
+                    </button>
+                  )}
                   {!isPlaceholder && (
                     <button
                       className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"

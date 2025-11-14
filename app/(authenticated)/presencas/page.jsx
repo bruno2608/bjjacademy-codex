@@ -35,6 +35,8 @@ export default function PresencasPage() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [sessionRecord, setSessionRecord] = useState(null);
   const [sessionTreinoId, setSessionTreinoId] = useState('');
+  const [sessionTakenTreinos, setSessionTakenTreinos] = useState([]);
+  const [sessionContext, setSessionContext] = useState('placeholder');
   const [searchTerm, setSearchTerm] = useState('');
   const alunos = useUserStore((state) => state.alunos);
   const treinos = useUserStore((state) => state.treinos);
@@ -167,23 +169,71 @@ export default function PresencasPage() {
     setIsEditOpen(false);
   };
 
-  const abrirSelecaoSessao = (registro) => {
-    const sugestao = registro.treinoId || sugerirTreino(registro.data)?.id || treinos[0]?.id || '';
-    setSessionTreinoId(sugestao);
-    setSessionRecord(registro);
+  const obterTreinosUtilizados = useCallback(
+    (alunoId, data, ignorarId) =>
+      presencas
+        .filter((item) => item.alunoId === alunoId && item.data === data && item.id !== ignorarId)
+        .map((item) => item.treinoId)
+        .filter(Boolean),
+    [presencas]
+  );
+
+  const obterSugestaoTreino = useCallback(
+    (alunoId, data, utilizados = []) => {
+      const dia = normalizarDiaSemana(data) || normalizarDiaSemana(hoje);
+      const porDiaDisponivel = treinos.find(
+        (treino) => treino.diaSemana === dia && !utilizados.includes(treino.id)
+      );
+      if (porDiaDisponivel) return porDiaDisponivel;
+
+      const qualquerDisponivel = treinos.find((treino) => !utilizados.includes(treino.id));
+      if (qualquerDisponivel) return qualquerDisponivel;
+
+      const porDia = treinos.find((treino) => treino.diaSemana === dia);
+      if (porDia) return porDia;
+
+      return treinos[0] || null;
+    },
+    [hoje, normalizarDiaSemana, treinos]
+  );
+
+  const abrirSelecaoSessao = (registro, contexto = 'placeholder') => {
+    const dataRegistro = registro.data || hoje;
+    const utilizados = obterTreinosUtilizados(registro.alunoId, dataRegistro, registro.id);
+    const sugestaoDireta =
+      registro.treinoId && !utilizados.includes(registro.treinoId)
+        ? treinos.find((treino) => treino.id === registro.treinoId)
+        : null;
+    const sugestao = sugestaoDireta || obterSugestaoTreino(registro.alunoId, dataRegistro, utilizados);
+
+    setSessionContext(contexto);
+    setSessionTakenTreinos(utilizados);
+    setSessionTreinoId(sugestao?.id || registro.treinoId || '');
+    setSessionRecord({
+      alunoId: registro.alunoId,
+      alunoNome: registro.alunoNome,
+      faixa: registro.faixa,
+      graus: registro.graus,
+      data: dataRegistro,
+      status: 'Presente',
+      tipoTreino: sugestao?.nome || registro.tipoTreino || 'Sessão principal'
+    });
     setIsSessionOpen(true);
   };
 
   const fecharSelecaoSessao = () => {
     setIsSessionOpen(false);
     setSessionRecord(null);
+    setSessionContext('placeholder');
+    setSessionTreinoId('');
+    setSessionTakenTreinos([]);
   };
 
   const handleSessionSubmit = async () => {
     if (!sessionRecord) return;
     const treinoSelecionado =
       treinos.find((treino) => treino.id === sessionTreinoId) ||
-      sugerirTreino(sessionRecord.data);
+      obterSugestaoTreino(sessionRecord.alunoId, sessionRecord.data, sessionTakenTreinos);
     await createPresenca({
       alunoId: sessionRecord.alunoId,
       alunoNome: sessionRecord.alunoNome,
@@ -197,6 +247,21 @@ export default function PresencasPage() {
     });
     fecharSelecaoSessao();
     await atualizarLista();
+  };
+
+  const abrirSessaoExtra = (registro) => {
+    abrirSelecaoSessao(
+      {
+        alunoId: registro.alunoId,
+        alunoNome: registro.alunoNome,
+        faixa: registro.faixa,
+        graus: registro.graus,
+        data: registro.data || hoje,
+        treinoId: null,
+        tipoTreino: registro.tipoTreino
+      },
+      'extra'
+    );
   };
 
   const handleEditSubmit = async (dados) => {
@@ -270,6 +335,7 @@ export default function PresencasPage() {
         onToggle={handleToggle}
         onDelete={handleDelete}
         onEdit={abrirEdicao}
+        onAddSession={abrirSessaoExtra}
         onRequestSession={abrirSelecaoSessao}
         isLoading={isRefreshing}
       />
@@ -307,10 +373,10 @@ export default function PresencasPage() {
           </div>
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Lista rápida</p>
-              <ul className="space-y-2.5">
-                {registrosDoDia.map((item) => (
-                  <li
-                  key={`${item.alunoId}-${item.treinoId || item.data}`}
+            <ul className="space-y-2.5">
+              {registrosDoDia.map((item) => (
+                <li
+                  key={item.id || `${item.alunoId}-${item.treinoId || item.data}`}
                   className="flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-3 py-2"
                 >
                   <div>
@@ -354,7 +420,13 @@ export default function PresencasPage() {
       <Modal
         isOpen={isSessionOpen}
         onClose={fecharSelecaoSessao}
-        title={sessionRecord ? `Selecionar sessão para ${sessionRecord.alunoNome}` : 'Selecionar sessão'}
+        title={
+          sessionRecord
+            ? sessionContext === 'extra'
+              ? `Adicionar nova sessão para ${sessionRecord.alunoNome}`
+              : `Selecionar sessão para ${sessionRecord.alunoNome}`
+            : 'Selecionar sessão'
+        }
       >
         <div className="space-y-4 text-sm text-bjj-gray-200/80">
           <p>
@@ -362,7 +434,8 @@ export default function PresencasPage() {
             <strong className="text-bjj-white"> {sessionRecord?.alunoNome}</strong> no dia{' '}
             {sessionRecord
               ? new Date(sessionRecord.data).toLocaleDateString('pt-BR')
-              : new Date().toLocaleDateString('pt-BR')}.
+              : new Date().toLocaleDateString('pt-BR')}. Você pode adicionar mais de uma sessão no mesmo dia,
+            como treinos de Gi e No-Gi.
           </p>
           <label className="block text-sm font-medium text-bjj-white">Treino / sessão</label>
           <select
@@ -373,6 +446,7 @@ export default function PresencasPage() {
             {treinos.map((treino) => (
               <option key={treino.id} value={treino.id}>
                 {treino.nome} · {treino.hora}
+                {sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id) ? ' (já registrado)' : ''}
               </option>
             ))}
             {!treinos.length && <option value="">Sessão principal</option>}
