@@ -39,7 +39,7 @@ export default function AlunosPage() {
         </Link>
       </div>
       <Table
-        headers={['Nome', 'Telefone', 'Plano', 'Status', 'Ações']}
+        headers={['Aluno', 'Graduação', 'Plano', 'Status', 'Contato', 'Ações']}
         data={alunos}
         onEdit={handleEdit}
         onDelete={handleDelete}

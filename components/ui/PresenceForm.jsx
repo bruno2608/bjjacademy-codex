@@ -4,14 +4,15 @@
  * PresenceForm permite registrar rapidamente uma nova presença,
  * exibindo os alunos disponíveis e definindo status inicial.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useUserStore from '../../store/userStore';
 
 const statusOptions = ['Presente', 'Ausente'];
 
 export default function PresenceForm({ onSubmit }) {
   const alunos = useUserStore((state) => state.alunos);
-  const [form, setForm] = useState({ alunoId: '', data: '', status: statusOptions[0] });
+  const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const [form, setForm] = useState({ alunoId: '', data: hoje, status: statusOptions[0] });
 
   useEffect(() => {
     if (alunos.length > 0 && !form.alunoId) {
@@ -30,9 +31,11 @@ export default function PresenceForm({ onSubmit }) {
     if (!alunoSelecionado) return;
     onSubmit({
       ...form,
-      alunoNome: alunoSelecionado.nome
+      alunoNome: alunoSelecionado.nome,
+      faixa: alunoSelecionado.faixa,
+      graus: alunoSelecionado.graus
     });
-    setForm({ alunoId: alunos[0]?.id || '', data: '', status: statusOptions[0] });
+    setForm({ alunoId: alunos[0]?.id || '', data: hoje, status: statusOptions[0] });
   };
 
   return (
@@ -42,7 +45,7 @@ export default function PresenceForm({ onSubmit }) {
         <select name="alunoId" className="input-field" value={form.alunoId} onChange={handleChange}>
           {alunos.map((aluno) => (
             <option key={aluno.id} value={aluno.id}>
-              {aluno.nome}
+              {aluno.nome} · {aluno.faixa} ({aluno.graus}º grau)
             </option>
           ))}
         </select>

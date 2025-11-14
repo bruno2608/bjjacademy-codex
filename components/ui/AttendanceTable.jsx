@@ -9,8 +9,8 @@ import { CheckCircle2, Circle, Trash2 } from 'lucide-react';
 export default function AttendanceTable({ records, onToggle, onDelete }) {
   return (
     <div className="overflow-hidden rounded-xl border border-bjj-gray-800 bg-bjj-gray-900">
-      <div className="hidden md:grid grid-cols-4 bg-bjj-gray-800 text-sm uppercase tracking-wide text-bjj-gray-200/80">
-        {['Aluno', 'Data', 'Status', 'Ações'].map((header) => (
+      <div className="hidden md:grid grid-cols-5 bg-bjj-gray-800 text-sm uppercase tracking-wide text-bjj-gray-200/80">
+        {['Aluno', 'Graduação', 'Data', 'Status', 'Ações'].map((header) => (
           <div key={header} className="px-4 py-3">
             {header}
           </div>
@@ -19,12 +19,21 @@ export default function AttendanceTable({ records, onToggle, onDelete }) {
       <div className="divide-y divide-bjj-gray-800">
         {records.map((record) => {
           const formattedDate = new Date(record.data).toLocaleDateString('pt-BR');
+          const faixa = record.faixa || 'Sem faixa';
+          const graus = Number.isFinite(Number(record.graus)) ? Number(record.graus) : 0;
           return (
-            <div key={record.id} className="grid grid-cols-1 md:grid-cols-4">
+            <div key={record.id} className="grid grid-cols-1 md:grid-cols-5">
               <div className="px-4 py-3">
                 <p className="font-semibold">{record.alunoNome}</p>
-                <p className="text-sm text-bjj-gray-200/70 md:hidden">{formattedDate}</p>
-                <p className="text-sm text-bjj-gray-200/70 md:hidden">Status: {record.status}</p>
+                <p className="text-xs text-bjj-gray-200/60 md:hidden">
+                  {faixa} · {graus}º grau
+                </p>
+                <p className="text-xs text-bjj-gray-200/60 md:hidden">{formattedDate}</p>
+                <p className="text-xs text-bjj-gray-200/60 md:hidden">Status: {record.status}</p>
+              </div>
+              <div className="hidden md:flex flex-col justify-center px-4 py-3 text-sm">
+                <span className="font-medium">{faixa}</span>
+                <span className="text-xs text-bjj-gray-200/70">{graus}º grau</span>
               </div>
               <div className="hidden md:flex items-center px-4 py-3 text-sm text-bjj-gray-200/80">
                 {formattedDate}

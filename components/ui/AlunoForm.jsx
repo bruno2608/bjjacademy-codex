@@ -4,33 +4,75 @@
  * Formulário reutilizável para criação e edição de alunos.
  * Encapsula validação simples e dispara callbacks fornecidos pelas páginas.
  */
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { BELT_ORDER, getMaxStripes } from '../../lib/graduationRules';
 
 const planos = ['Mensal', 'Trimestral', 'Anual'];
 const statusOptions = ['Ativo', 'Inativo'];
+const beltOptions = BELT_ORDER.filter((faixa) => faixa !== 'Vermelha');
 
 export default function AlunoForm({ initialData, onSubmit }) {
   const [formData, setFormData] = useState({
     nome: '',
     telefone: '',
     plano: planos[0],
-    status: statusOptions[0]
+    status: statusOptions[0],
+    faixa: 'Branca',
+    graus: 0,
+    mesesNaFaixa: 0,
+    dataUltimaGraduacao: ''
   });
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData({
+        nome: initialData.nome || '',
+        telefone: initialData.telefone || '',
+        plano: initialData.plano || planos[0],
+        status: initialData.status || statusOptions[0],
+        faixa: initialData.faixa || 'Branca',
+        graus: Number(initialData.graus ?? 0),
+        mesesNaFaixa: Number(initialData.mesesNaFaixa ?? 0),
+        dataUltimaGraduacao: initialData.dataUltimaGraduacao || ''
+      });
     }
   }, [initialData]);
 
+  useEffect(() => {
+    setFormData((prev) => {
+      const limite = getMaxStripes(prev.faixa);
+      if (limite === 0 && prev.graus !== 0) {
+        return { ...prev, graus: 0 };
+      }
+      if (limite > 0 && prev.graus > limite) {
+        return { ...prev, graus: limite };
+      }
+      return prev;
+    });
+  }, [formData.faixa]);
+
+  const grauOptions = useMemo(() => {
+    const limite = getMaxStripes(formData.faixa);
+    const max = limite > 0 ? limite : 0;
+    return Array.from({ length: max + 1 }, (_, index) => index);
+  }, [formData.faixa]);
+
   const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = event.target;
+    let parsed = value;
+    if (name === 'graus' || type === 'number') {
+      parsed = Number(value);
+    }
+    setFormData((prev) => ({ ...prev, [name]: parsed }));
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onSubmit(formData);
+    onSubmit({
+      ...formData,
+      graus: Number(formData.graus),
+      mesesNaFaixa: Number(formData.mesesNaFaixa)
+    });
   };
 
   return (
@@ -74,6 +116,49 @@ export default function AlunoForm({ initialData, onSubmit }) {
             ))}
           </select>
         </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">Faixa atual</label>
+          <select name="faixa" className="input-field" value={formData.faixa} onChange={handleChange}>
+            {beltOptions.map((faixa) => (
+              <option key={faixa}>{faixa}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Graus</label>
+          <select name="graus" className="input-field" value={formData.graus} onChange={handleChange}>
+            {grauOptions.map((grau) => (
+              <option key={grau} value={grau}>
+                {grau}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-bjj-gray-200/70 mt-1">Selecione a quantidade de graus já conquistados.</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Meses na faixa</label>
+          <input
+            name="mesesNaFaixa"
+            type="number"
+            min={0}
+            className="input-field"
+            value={formData.mesesNaFaixa}
+            onChange={handleChange}
+            placeholder="Meses dedicados na faixa atual"
+          />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-2">Última graduação</label>
+        <input
+          name="dataUltimaGraduacao"
+          type="date"
+          className="input-field"
+          value={formData.dataUltimaGraduacao || ''}
+          onChange={handleChange}
+        />
       </div>
       <button type="submit" className="btn-primary w-full md:w-auto">Salvar</button>
     </form>

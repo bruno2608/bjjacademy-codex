@@ -14,7 +14,6 @@ repositórios anteriores [`bjjacademyapp`](https://github.com/bruno2608/bjjacade
 - **Zustand** para estado global mockado
 - **Lucide React** para ícones
 - **next-pwa** com `manifest.json`, service worker custom e cache offline
-- **React Hook Form** para formulários dinâmicos
 
 ## 🎯 **O que já está pronto**
 
@@ -22,9 +21,9 @@ repositórios anteriores [`bjjacademyapp`](https://github.com/bruno2608/bjjacade
 | --- | --- |
 | Autenticação | Login mockado com persistência de token (localStorage) e guardas de rota. |
 | Dashboard | Cards dinâmicos com métricas de alunos, presenças semanais e graduações planejadas. |
-| Alunos | CRUD mockado (listar, criar, editar, remover) com formulário reutilizável. |
-| Presenças | Registro rápido por aluno/data, alternância de status e histórico responsivo. |
-| Graduações | Linha do tempo por atleta, agendamento de novas faixas e atualização de status. |
+| Alunos | CRUD mockado com formulário que coleta faixa, graus, tempo na faixa e data da última graduação. |
+| Presenças | Registro rápido por aluno/data com contexto de faixa/graus, alternância de status e histórico responsivo. |
+| Graduações | Linha do tempo por atleta, agendamento por **grau** ou **faixa** com regras de tempo da IBJJF e atualização de status. |
 | PWA | Manifesto completo, service worker com cache básico e ícones em múltiplos tamanhos. |
 
 ## 🧭 **Mapa da estrutura**
@@ -69,11 +68,10 @@ npm run dev
 
 1. **Login mockado:** `http://localhost:3000/login` aceita qualquer
    e-mail/senha e redireciona para o dashboard.
-2. **Presenças:** registre novas entradas, alterne status (presente ↔️
-   ausente) e remova registros.
-3. **Graduações:** agende uma próxima faixa com data prevista e ajuste o
-   status (Planejado, Em progresso, Concluído).
-4. **PWA:** instale pelo navegador ou teste o comportamento offline para
+2. **Cadastro de alunos:** inclua faixa, graus e meses na faixa para validar as recomendações automáticas.
+3. **Presenças:** registre novas entradas, conferindo a faixa/graus exibidos nas listagens.
+4. **Graduações:** agende um grau ou faixa usando as sugestões de tempo e ajuste o status (Planejado, Em progresso, Concluído).
+5. **PWA:** instale pelo navegador ou teste o comportamento offline para
    conferir o cache inicial de páginas.
 
 ## 🎨 **Diretrizes de UI**
