@@ -1,56 +1,81 @@
-# BJJ Academy PWA
+# 🥋 **BJJ Academy -- PWA (Next.js + Tailwind)**
 
-Base inicial do Progressive Web App (PWA) da BJJ Academy construída com Next.js (App Router), React, Tailwind CSS e Zustand.
+Bem-vindo ao repositório oficial da nova versão **PWA (Progressive Web App)** do **BJJ Academy**, o sistema de gestão para academias de Jiu-Jitsu focado em simplicidade, performance e experiência do usuário.
 
-## Estrutura de pastas
+Esta é a versão web moderna que substituirá o app mobile original, aplicando arquitetura limpa, responsividade e design minimalista (Zenko Focus).
+
+## 🚀 **Tecnologias Utilizadas**
+
+- **Next.js**
+- **React**
+- **Tailwind CSS**
+- **Zustand**
+- **Lucide React**
+- **PWA** (manifest, service worker, offline básico)
+
+## 🎯 **Objetivo do Projeto**
+
+Criar um aplicativo web progressivo capaz de substituir o app mobile existente, com:
+- Login/logout
+- Dashboard de métricas
+- Gestão de alunos
+- Layout responsivo
+- Suporte a instalação PWA
+- Cache offline básico
+
+## 🧱 **Estrutura Geral do Projeto**
+
 ```
-app/
-  layout.jsx
-  page.jsx
-  (authenticated)/
-    layout.jsx
-    dashboard/
-      page.jsx
-    alunos/
-      page.jsx
-      novo/
-        page.jsx
-      [id]/
-        page.jsx
-  login/
-    page.jsx
-components/
-  ui/
-    Header.jsx
-    Sidebar.jsx
-    Card.jsx
-    Table.jsx
-    AlunoForm.jsx
-services/
-  api.js
-  alunosService.js
-store/
-  userStore.js
-public/
-  manifest.json
-  service-worker.js
-  icons/
-    icon-192x192.svg
-    icon-256x256.svg
-    icon-512x512.svg
-styles/
-  globals.css
-  tailwind.css
+/app ou /pages
+/components
+/services
+/store
+/public
+/styles
 ```
 
-## Configuração
-1. Instale as dependências:
-   ```bash
-   npm install
-   ```
-2. Rode o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
+## 📌 **Funcionalidades Implementadas**
 
-O projeto já está configurado com suporte a PWA (manifest, icons, service worker), autenticação mock com Zustand, rotas protegidas e componentes reutilizáveis seguindo o estilo Zenko Focus.
+- Configuração do Tailwind
+- Estrutura inicial de páginas
+- Layout com Header e Sidebar
+- Mock de autenticação e alunos
+- Zustand para estado global
+- `manifest.json` e Service Worker
+
+## 🖥️ **Como Rodar**
+
+```bash
+npm install
+npm run dev
+# Abra http://localhost:3000
+```
+
+## 📱 **PWA**
+
+- `manifest.json` completo
+- Service worker para cache
+- Ícones múltiplos
+
+## 🎨 **Identidade Visual**
+
+- Preto `#000000`
+- Branco `#FFFFFF`
+- Vermelho `#E10600`
+- Cinzas diversos
+
+## 🤝 **Contribuições**
+
+1. `git checkout -b feature/nova-feature`
+2. `git commit -m "feat: descrição"`
+3. Abrir Pull Request
+
+## 📄 **Licença**
+
+Projeto proprietário de **Bruno Alves França**.
+
+---
+
+## 🥋 **BJJ Academy -- Evolve Your Training**
+
+Solução completa para academias de Jiu-Jitsu.
