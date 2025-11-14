@@ -1,0 +1,75 @@
+'use client';
+
+/**
+ * Sidebar component controla navegação principal para telas grandes.
+ * Em dispositivos móveis a navegação é suprida pelo MobileNav.
+ */
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import navigationItems from '../../lib/navigation';
+
+export default function Sidebar() {
+  const pathname = usePathname();
+
+  return (
+    <aside className="hidden min-h-screen w-72 flex-col border-r border-bjj-gray-800 bg-gradient-to-b from-bjj-gray-900 via-bjj-black to-bjj-black text-bjj-white lg:flex">
+      <div className="px-6 pb-6 pt-8">
+        <div className="rounded-3xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-5 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.65)]">
+          <span className="text-[11px] uppercase tracking-[0.22em] text-bjj-red/80">Zenko Focus</span>
+          <h1 className="mt-3 text-2xl font-semibold">BJJ Academy</h1>
+          <p className="mt-2 text-[12px] leading-relaxed text-bjj-gray-200/70">
+            Gerencie alunos, presenças e graduações em um único comando visual.
+          </p>
+        </div>
+      </div>
+      <nav className="flex-1 space-y-2 px-6">
+        {navigationItems.map((item) => {
+          const Icon = item.icon;
+          const active = pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3 transition-all ${
+                active
+                  ? 'border-bjj-red/70 bg-bjj-red/10 text-bjj-white shadow-[0_18px_45px_rgba(225,6,0,0.18)]'
+                  : 'border-transparent text-bjj-gray-200 hover:border-bjj-gray-700/70 hover:bg-bjj-gray-900/60 hover:text-bjj-white'
+              }`}
+              aria-current={active ? 'page' : undefined}
+            >
+              <span
+                className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+                  active
+                    ? 'bg-bjj-red text-bjj-white'
+                    : 'bg-bjj-gray-900/70 text-bjj-gray-200/80 group-hover:bg-bjj-gray-800 group-hover:text-bjj-white'
+                }`}
+              >
+                <Icon size={16} />
+              </span>
+              <div className="flex flex-col leading-tight">
+                <span className="text-sm font-medium">{item.label}</span>
+                {item.description && (
+                  <span className="text-[11px] text-bjj-gray-200/70">{item.description}</span>
+                )}
+              </div>
+              <span
+                aria-hidden="true"
+                className={`absolute left-0 top-1/2 h-8 -translate-y-1/2 rounded-r-full transition-all ${
+                  active ? 'w-1 bg-bjj-red' : 'w-0 bg-transparent group-hover:w-1 group-hover:bg-bjj-gray-700/80'
+                }`}
+              />
+            </Link>
+          );
+        })}
+      </nav>
+      <div className="px-6 pb-8 pt-4">
+        <div className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 p-4 text-[11px] leading-relaxed text-bjj-gray-200/70">
+          <p className="font-semibold text-bjj-white">Dica rápida</p>
+          <p className="mt-2">
+            Revise as presenças antes das 22h para manter os indicadores em tempo real e alinhar a equipe.
+          </p>
+        </div>
+      </div>
+    </aside>
+  );
+}
