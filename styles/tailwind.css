@@ -1,0 +1,45 @@
+/* Tailwind base, components, and utilities layers. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom layer para estilos reutilizáveis. */
+@layer components {
+  .card {
+    @apply relative overflow-hidden rounded-2xl border border-bjj-gray-800/60 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black p-5 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)];
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-bjj-red px-4 py-2.5 text-sm font-semibold text-bjj-white transition hover:bg-red-700;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-bjj-gray-700 bg-transparent px-4 py-2.5 text-sm font-semibold text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red;
+  }
+
+  .input-field {
+    @apply w-full rounded-lg border border-bjj-gray-700 bg-bjj-gray-900/70 px-3.5 py-2.5 text-sm text-bjj-white transition focus:border-bjj-red focus:outline-none focus:ring-1 focus:ring-bjj-red/40 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /*
+   * Os navegadores aplicam ícones próprios em campos de data e hora. Em temas
+   * escuros esses ícones costumam ficar pretos, prejudicando o contraste.
+   * A regra abaixo inverte a cor dos indicadores e também força o esquema de
+   * cor dark para manter o seletor nativo legível.
+   */
+  .input-field[type='date'],
+  .input-field[type='time'] {
+    color-scheme: dark;
+  }
+
+  .input-field::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.85;
+    transition: opacity 150ms ease;
+  }
+
+  .input-field:focus::-webkit-calendar-picker-indicator,
+  .input-field:hover::-webkit-calendar-picker-indicator {
+    opacity: 1;
+  }
+}
