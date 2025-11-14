@@ -1,16 +1,24 @@
 'use client';
 
 /**
- * Dashboard exibe métricas principais em cards e um resumo rápido
- * das áreas de alunos, presenças e graduações.
+ * Dashboard exibe métricas principais com o mesmo visual gamificado da
+ * tela de graduações, reforçando continuidade na experiência.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Users, Award, CalendarCheck, Medal } from 'lucide-react';
+import { Users, Award, CalendarCheck, Medal, Activity, Flame } from 'lucide-react';
 import Card from '../../../components/ui/Card';
+import PageHero from '../../../components/ui/PageHero';
 import { getAlunos } from '../../../services/alunosService';
 import { getPresencas } from '../../../services/presencasService';
 import { getGraduacoes } from '../../../services/graduacoesService';
 import { calculateNextStep } from '../../../lib/graduationRules';
+
+const formatDate = (value) => {
+  if (!value) return 'Sem data';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+};
 
 export default function DashboardPage() {
   const [alunos, setAlunos] = useState([]);
@@ -23,7 +31,11 @@ export default function DashboardPage() {
     getGraduacoes().then(setGraduacoes);
   }, []);
 
+  const totalAlunos = alunos.length || 1;
   const ativos = alunos.filter((aluno) => aluno.status === 'Ativo').length;
+  const inativos = alunos.filter((aluno) => aluno.status !== 'Ativo').length;
+  const taxaAtivos = Math.round((ativos / totalAlunos) * 100);
+
   const avaliacoes = Math.round(alunos.length * 0.5 + 5);
   const presencasSemana = presencas.filter((item) => {
     const data = new Date(item.data);
@@ -47,78 +59,143 @@ export default function DashboardPage() {
   const proximasCerimonias = graduacoes
     .filter((item) => item.status !== 'Concluído')
     .sort((a, b) => new Date(a.previsao) - new Date(b.previsao))
-    .slice(0, 3);
+    .slice(0, 4);
 
   const evolucoesEmDestaque = evolucoes.slice(0, 5);
 
+  const heroStats = [
+    {
+      label: 'Ativos na academia',
+      value: ativos,
+      helper: `${taxaAtivos}% da base (${inativos} em pausa)`
+    },
+    {
+      label: 'Presenças na semana',
+      value: presencasSemana,
+      helper: `${presencas.length} registros no mês`
+    },
+    {
+      label: 'Graduações a preparar',
+      value: graduacoesPlanejadas,
+      helper: `${faixasPendentes} faixas · ${grausPendentes} graus`
+    },
+    {
+      label: 'Avaliações concluídas',
+      value: avaliacoes,
+      helper: 'Histórico estimado com base nos alunos ativos'
+    }
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Card title="Alunos ativos" value={ativos} icon={Users} />
-        <Card title="Graus a revisar" value={grausPendentes} icon={Award} />
-        <Card title="Faixas em preparação" value={faixasPendentes} icon={Medal} />
-        <Card title="Presenças na semana" value={presencasSemana} icon={CalendarCheck} />
+    <div className="space-y-8">
+      <PageHero
+        badge="Visão geral"
+        title="Painel de performance da BJJ Academy"
+        subtitle="Acompanhe evolução de alunos, graduações e engajamento semanal sem sair desta tela."
+        stats={heroStats}
+      />
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Card
+          title="Alunos ativos"
+          value={ativos}
+          icon={Users}
+          description="Atualize cadastros e mantenha as informações de contato em dia."
+        />
+        <Card
+          title="Graus em revisão"
+          value={grausPendentes}
+          icon={Award}
+          description="Sugestões de graus pendentes com base no tempo mínimo de treino."
+        />
+        <Card
+          title="Faixas em preparação"
+          value={faixasPendentes}
+          icon={Medal}
+          description="Alunos com recomendação de troca de faixa nos próximos meses."
+        />
+        <Card
+          title="Presenças confirmadas"
+          value={presencasSemana}
+          icon={CalendarCheck}
+          description="Entradas registradas nos últimos 7 dias de treino."
+        />
       </div>
-      <div className="card space-y-3">
-        <h2 className="text-xl font-semibold">Resumo do time</h2>
-        <p className="text-bjj-gray-200/80 text-sm">
-          Mantenha suas métricas atualizadas para garantir a evolução dos alunos. Este painel fornece um
-          panorama rápido com foco no que importa.
-        </p>
-        <p className="text-bjj-gray-200/70 text-sm">
-          Já foram registradas <span className="text-bjj-red font-semibold">{presencas.length}</span> presenças
-          este mês, <span className="text-bjj-red font-semibold">{avaliacoes}</span> avaliações concluídas e
-          <span className="text-bjj-red font-semibold"> {graduacoesPlanejadas}</span> graduações planejadas.
-        </p>
-      </div>
-      <div className="card space-y-4">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Award size={20} className="text-bjj-red" /> Recomendações de graduação
-        </h2>
-        {evolucoesEmDestaque.length === 0 ? (
-          <p className="text-sm text-bjj-gray-200/70">Nenhuma recomendação pendente para as próximas semanas.</p>
-        ) : (
-          <ul className="space-y-3">
-            {evolucoesEmDestaque.map(({ aluno, recomendacao }) => (
-              <li key={aluno.id} className="flex items-center justify-between text-sm">
-                <div>
-                  <p className="font-semibold">{aluno.nome}</p>
-                  <span className="text-bjj-gray-200/70">{recomendacao.descricao}</span>
-                </div>
-                <span className="text-bjj-red font-semibold">
-                  {recomendacao.tipo === 'Grau'
-                    ? `${recomendacao.grauAlvo}º grau`
-                    : recomendacao.proximaFaixa}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <div className="card space-y-4">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Award size={20} className="text-bjj-red" /> Próximas graduações
-        </h2>
-        {proximasCerimonias.length === 0 ? (
-          <p className="text-sm text-bjj-gray-200/70">Nenhuma cerimônia planejada para os próximos meses.</p>
-        ) : (
-          <ul className="space-y-3">
-            {proximasCerimonias.map((item) => (
-              <li key={item.id} className="flex items-center justify-between text-sm">
-                <div>
-                  <p className="font-semibold">{item.alunoNome}</p>
-                  <span className="text-bjj-gray-200/70">
-                    {item.faixaAtual} → {item.proximaFaixa}
+
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr,1fr]">
+        <article className="card space-y-5">
+          <header className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold text-bjj-white">Radar de evolução</h2>
+              <p className="text-sm text-bjj-gray-200/70">
+                Priorize quem está pronto para avançar: acompanhe próximos graus e trocas de faixa sugeridas.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/70">
+              <Activity size={14} className="text-bjj-red" /> {evolucoes.length} recomendações
+            </span>
+          </header>
+          {evolucoesEmDestaque.length === 0 ? (
+            <p className="text-sm text-bjj-gray-200/70">
+              Nenhuma recomendação pendente para as próximas semanas.
+            </p>
+          ) : (
+            <ul className="space-y-4">
+              {evolucoesEmDestaque.map(({ aluno, recomendacao }) => (
+                <li
+                  key={aluno.id}
+                  className="flex flex-col gap-2 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-bjj-white">{aluno.nome}</p>
+                    <p className="text-xs text-bjj-gray-200/70">{recomendacao.descricao}</p>
+                  </div>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/80">
+                    {recomendacao.tipo === 'Grau' ? 'Próximo grau' : 'Próxima faixa'}
+                    <span className="text-bjj-red font-semibold">
+                      {recomendacao.tipo === 'Grau'
+                        ? `${recomendacao.grauAlvo}º`
+                        : recomendacao.proximaFaixa}
+                    </span>
                   </span>
-                </div>
-                <span className="text-bjj-red font-semibold">
-                  {new Date(item.previsao).toLocaleDateString('pt-BR')}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+
+        <aside className="card space-y-5">
+          <header className="space-y-2">
+            <h2 className="text-xl font-semibold text-bjj-white">Próximas cerimônias</h2>
+            <p className="text-sm text-bjj-gray-200/70">
+              Organize o cronograma e alinhe expectativa com alunos e responsáveis.
+            </p>
+          </header>
+          {proximasCerimonias.length === 0 ? (
+            <p className="text-sm text-bjj-gray-200/70">Nenhuma cerimônia planejada para os próximos meses.</p>
+          ) : (
+            <ul className="space-y-3">
+              {proximasCerimonias.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex flex-col gap-2 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-bjj-white">{item.alunoNome}</p>
+                    <span className="text-xs text-bjj-gray-200/60">{formatDate(item.previsao)}</span>
+                  </div>
+                  <p className="text-xs text-bjj-gray-200/70">
+                    {item.faixaAtual} → {item.proximaFaixa}
+                  </p>
+                  <span className="inline-flex items-center gap-2 text-xs text-bjj-gray-200/60">
+                    <Flame size={14} className="text-bjj-red" /> {item.status}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </aside>
+      </section>
     </div>
   );
 }

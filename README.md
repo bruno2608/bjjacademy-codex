@@ -1,11 +1,10 @@
 # 🥋 **BJJ Academy — PWA (Next.js + Tailwind)**
 
 Bem-vindo à base do novo **BJJ Academy PWA**, plataforma web progressiva
-focada na gestão completa de academias de Jiu-Jitsu. O projeto foi
-atualizado para incluir módulos de **controle de presenças** e
-**planejamento de graduações**, inspirados nas funcionalidades dos
-repositórios anteriores [`bjjacademyapp`](https://github.com/bruno2608/bjjacademyapp)
-(mobile) e [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
+focada na gestão completa de academias de Jiu-Jitsu. O projeto une a
+identidade "Zenko Focus" com uma camada visual gamificada inspirada nas
+versões mobile [`bjjacademyapp`](https://github.com/bruno2608/bjjacademyapp)
+e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
 
 ## 🚀 **Stack principal**
 
@@ -19,11 +18,11 @@ repositórios anteriores [`bjjacademyapp`](https://github.com/bruno2608/bjjacade
 
 | Área | Destaques |
 | --- | --- |
-| Autenticação | Login mockado com persistência de token (localStorage) e guardas de rota. |
-| Dashboard | Cards dinâmicos com métricas de alunos, presenças semanais e graduações planejadas. |
-| Alunos | CRUD mockado com formulário (modal inline) que coleta faixa, graus, tempo na faixa e data da última graduação. |
-| Presenças | Registro rápido por aluno/data com contexto de faixa/graus, alternância de status e histórico responsivo. |
-| Graduações | Tela gamificada com card de progresso, linha do tempo por atleta e agendamento por **grau** ou **faixa** respeitando as regras da IBJJF. |
+| Autenticação | Tela de login remodelada com hero informativo e mock de token persistido (localStorage). |
+| Dashboard | Hero `PageHero`, cards gradiente e radar de evolução com recomendações em tempo real. |
+| Alunos | CRUD mockado com formulário em modal, distribuição de faixas e destaques para próximos graduandos. |
+| Presenças | Registro rápido, ranking de engajamento e métricas de presença com o novo visual gamificado. |
+| Graduações | Tela inspirada no app com hero, cards progressivos, linha do tempo e agendamento por grau/faixa. |
 | PWA | Manifesto completo, service worker com cache básico e ícones em múltiplos tamanhos. |
 
 ## 🧭 **Mapa da estrutura**
@@ -55,6 +54,12 @@ styles/
   tailwind.css
 ```
 
+### Componentes compartilhados de UI
+
+- `PageHero`: cartão heroico reutilizado nas páginas do painel.
+- `Card`, `Table`, `AttendanceTable`, `Modal`, `PresenceForm`, `GraduationList`, `GraduationTimeline`.
+- Botões, inputs e cards seguem a mesma linguagem visual (bordas arredondadas, gradientes suaves, brilho vermelho).
+
 ## 🛠️ **Como executar localmente**
 
 ```bash
@@ -66,11 +71,12 @@ npm run dev
 ### Fluxo sugerido de validação
 
 1. **Login mockado:** `http://localhost:3000/login` aceita qualquer
-   e-mail/senha e redireciona para o dashboard.
-2. **Cadastro de alunos:** inclua faixa, graus e meses na faixa para validar as recomendações automáticas.
-3. **Presenças:** registre novas entradas, conferindo a faixa/graus exibidos nas listagens.
-4. **Graduações:** agende um grau ou faixa usando as sugestões de tempo e ajuste o status (Planejado, Em progresso, Concluído).
-5. **PWA:** instale pelo navegador ou teste o comportamento offline para
+   e-mail/senha e redireciona para o dashboard gamificado.
+2. **Dashboard:** confira o hero com métricas e o radar de evolução.
+3. **Cadastro de alunos:** use o modal “Novo aluno” para preencher faixa, graus e meses na faixa.
+4. **Presenças:** registre novas entradas e veja o ranking atualizar em tempo real.
+5. **Graduações:** agende um grau ou faixa usando as regras de tempo mínimas e ajuste o status.
+6. **PWA:** instale pelo navegador ou teste o comportamento offline para
    conferir o cache inicial de páginas.
 
 ## 🎨 **Diretrizes de UI**

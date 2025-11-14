@@ -1,12 +1,16 @@
 'use client';
 
 /**
- * Página de edição de aluno que carrega dados pelo id e reutiliza o AlunoForm.
+ * Página de edição de aluno com o mesmo visual das demais telas gamificadas.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { ArrowLeft, Crown, CalendarClock } from 'lucide-react';
 import AlunoForm from '../../../../components/ui/AlunoForm';
+import PageHero from '../../../../components/ui/PageHero';
+import Card from '../../../../components/ui/Card';
 import { getAlunos, updateAluno } from '../../../../services/alunosService';
+import { getMaxStripes, getRuleForBelt } from '../../../../lib/graduationRules';
 
 export default function EditarAlunoPage() {
   const router = useRouter();
@@ -22,6 +26,31 @@ export default function EditarAlunoPage() {
       setLoading(false);
     });
   }, [params.id]);
+
+  const heroStats = useMemo(() => {
+    if (!aluno) return [];
+    const regra = getRuleForBelt(aluno.faixa);
+    const maxGraus = getMaxStripes(aluno.faixa);
+    return [
+      {
+        label: 'Faixa atual',
+        value: aluno.faixa,
+        helper: `${aluno.graus} de ${maxGraus || 0} grau(s)`
+      },
+      {
+        label: 'Meses dedicados',
+        value: `${aluno.mesesNaFaixa || 0}`,
+        helper: 'Tempo aproximado na faixa em curso'
+      },
+      {
+        label: 'Última graduação',
+        value: aluno.dataUltimaGraduacao ? new Date(aluno.dataUltimaGraduacao).toLocaleDateString('pt-BR') : 'Sem registro',
+        helper: regra?.tempoMinimoMeses
+          ? `Próxima meta: ${regra.tempoMinimoMeses} meses`
+          : 'Regra personalizada conforme instrutor'
+      }
+    ];
+  }, [aluno]);
 
   const handleSubmit = async (data) => {
     if (!aluno) return;
@@ -40,12 +69,46 @@ export default function EditarAlunoPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">Editar aluno</h2>
-        <p className="text-sm text-bjj-gray-200/70">Atualize as informações para manter o histórico em dia.</p>
+    <div className="space-y-8">
+      <PageHero
+        badge="Edição de cadastro"
+        title={aluno.nome}
+        subtitle="Atualize graduações, contatos e status sem perder o contexto da jornada."
+        stats={heroStats}
+        actions={
+          <button type="button" className="btn-primary" onClick={() => router.push('/alunos')}>
+            <ArrowLeft size={16} /> Voltar para lista
+          </button>
+        }
+      />
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr,1fr]">
+        <section className="card space-y-4">
+          <header className="space-y-2">
+            <h2 className="text-xl font-semibold text-bjj-white">Informações gerais</h2>
+            <p className="text-sm text-bjj-gray-200/70">
+              Lembre-se de registrar data da última graduação para manter as recomendações atualizadas.
+            </p>
+          </header>
+          <AlunoForm initialData={aluno} onSubmit={handleSubmit} isSubmitting={saving} submitLabel="Atualizar" />
+          {saving && <p className="text-xs text-bjj-gray-200/70">Sincronizando dados...</p>}
+        </section>
+
+        <aside className="space-y-4">
+          <Card
+            title="Status na hierarquia"
+            value={`${aluno.faixa} · ${aluno.graus}º grau`}
+            icon={Crown}
+            description="Visualização rápida do nível atual do praticante."
+          />
+          <Card
+            title="Histórico recente"
+            value={aluno.historicoGraduacoes?.[0]?.data ? new Date(aluno.historicoGraduacoes[0].data).toLocaleDateString('pt-BR') : 'Sem histórico'}
+            icon={CalendarClock}
+            description="Último registro documentado na jornada do aluno."
+          />
+        </aside>
       </div>
-      <AlunoForm initialData={aluno} onSubmit={handleSubmit} isSubmitting={saving} submitLabel="Atualizar" />
     </div>
   );
 }
