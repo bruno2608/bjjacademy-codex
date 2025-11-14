@@ -19,9 +19,9 @@ e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
 | Área | Destaques |
 | --- | --- |
 | Autenticação | Tela de login remodelada com hero informativo e mock de token persistido (localStorage). |
-| Dashboard | Hero `PageHero`, cards gradiente e radar de evolução com recomendações em tempo real. |
+| Dashboard | Hero `PageHero`, cards gradiente e alternância entre visões **Geral · Presenças · Graduações**. |
 | Alunos | CRUD mockado com formulário em modal, distribuição de faixas e destaques para próximos graduandos. |
-| Presenças | Registro rápido, ranking de engajamento e métricas de presença com o novo visual gamificado. |
+| Presenças | Registro rápido focado no check-in do dia, resumo compacto e correção via modal dedicado. |
 | Graduações | Tela inspirada no app com hero, cards progressivos, linha do tempo e agendamento por grau/faixa. |
 | PWA | Manifesto completo, service worker com cache básico e ícones em múltiplos tamanhos. |
 
@@ -72,9 +72,9 @@ npm run dev
 
 1. **Login mockado:** `http://localhost:3000/login` aceita qualquer
    e-mail/senha e redireciona para o dashboard gamificado.
-2. **Dashboard:** confira o hero com métricas e o radar de evolução.
+2. **Dashboard:** explore o hero com métricas e alterne entre as visões Geral, Presenças e Graduações.
 3. **Cadastro de alunos:** use o modal “Novo aluno” para preencher faixa, graus e meses na faixa.
-4. **Presenças:** registre novas entradas e veja o ranking atualizar em tempo real.
+4. **Presenças:** registre novas entradas; a visão de Presenças no dashboard reflete os indicadores ao vivo.
 5. **Graduações:** agende um grau ou faixa usando as regras de tempo mínimas e ajuste o status.
 6. **PWA:** instale pelo navegador ou teste o comportamento offline para
    conferir o cache inicial de páginas.

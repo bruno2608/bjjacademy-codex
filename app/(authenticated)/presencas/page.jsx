@@ -5,11 +5,9 @@
  * do restante do painel. Registro e listagem permanecem em uma única página.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CalendarPlus, Trophy, Clock3, PieChart } from 'lucide-react';
+import { PieChart } from 'lucide-react';
 import AttendanceTable from '../../../components/ui/AttendanceTable';
 import PresenceForm from '../../../components/ui/PresenceForm';
-import PageHero from '../../../components/ui/PageHero';
-import Card from '../../../components/ui/Card';
 import LoadingState from '../../../components/ui/LoadingState';
 import Modal from '../../../components/ui/Modal';
 import useUserStore from '../../../store/userStore';
@@ -118,29 +116,6 @@ export default function PresencasPage() {
     return conjunto.size;
   }, [presencas]);
 
-  const ranking = useMemo(() => {
-    const mapa = new Map();
-    presencas.forEach((presenca) => {
-      const atual = mapa.get(presenca.alunoId) || {
-        id: presenca.alunoId,
-        nome: presenca.alunoNome,
-        faixa: presenca.faixa,
-        graus: presenca.graus,
-        presencas: 0,
-        faltas: 0
-      };
-      if (presenca.status === 'Presente') {
-        atual.presencas += 1;
-      } else {
-        atual.faltas += 1;
-      }
-      mapa.set(presenca.alunoId, atual);
-    });
-    return Array.from(mapa.values())
-      .sort((a, b) => b.presencas - a.presencas)
-      .slice(0, 4);
-  }, [presencas]);
-
   const handleCreate = async (payload) => {
     const novoRegistro = await createPresenca(payload);
     setPresencas((prev) => [...prev, novoRegistro]);
@@ -191,89 +166,59 @@ export default function PresencasPage() {
     fecharEdicao();
   };
 
-  const heroStats = [
-    {
-      label: 'Taxa de presença',
-      value: formatPercent(taxaPresenca),
-      helper: `${presentes} confirmações · ${ausentes} faltas`
-    },
-    {
-      label: 'Dias monitorados',
-      value: diasAtivos,
-      helper: 'Quantidade de dias com registros recentes'
-    },
-    {
-      label: 'Top presença',
-      value: ranking[0]?.nome || 'Sem ranking',
-      helper: ranking[0] ? `${ranking[0].presencas} presenças registradas` : 'Aguardando novos registros'
-    }
-  ];
-
   if (isLoading) {
     return <LoadingState title="Sincronizando presenças" message="Carregando histórico recente de treinos." />;
   }
 
   return (
-    <div className="space-y-6">
-      <PageHero
-        badge="Rotina diária"
-        title="Controle de presenças em tempo real"
-        subtitle="Cadastre, acompanhe e celebre o engajamento dos alunos em cada treino."
-        stats={heroStats}
-      />
-
-      <div className="flex flex-col gap-2 rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-bjj-white">Visão do dia {new Date(hoje).toLocaleDateString('pt-BR')}</h2>
-          <p className="text-sm text-bjj-gray-200/70">Todos os alunos ativos aparecem abaixo para agilizar o check-in do treino.</p>
+    <div className="space-y-5">
+      <header className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-base font-semibold text-bjj-white">Check-in do treino</h1>
+          <p className="text-sm text-bjj-gray-200/70">
+            Visualize todos os alunos ativos de hoje e registre presença com apenas um clique.
+          </p>
         </div>
         <button type="button" className="btn-secondary w-full md:w-auto" onClick={abrirResumo}>
           <PieChart size={16} /> Resumo do dia
         </button>
-      </div>
+      </header>
 
-      <div className="space-y-4">
-        <section className="space-y-3">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <Card
-              title="Presenças confirmadas"
-              value={presentesDia}
-              icon={CalendarPlus}
-              description="Confirmações registradas hoje, incluindo marcações rápidas."
-            />
-            <Card
-              title="Faltas registradas"
-              value={ausentesDia}
-              icon={Clock3}
-              description="Alunos ainda não marcados como presentes no treino de hoje."
-            />
-            <Card
-              title="Dias acompanhados"
-              value={diasAtivos}
-              icon={Trophy}
-              description="Período recente com monitoramento ativo."
-            />
-          </div>
+      <section className="grid grid-cols-1 gap-2 text-sm text-bjj-gray-200/80 md:grid-cols-3">
+        <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
+          <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Presenças</p>
+          <p className="mt-1 text-xl font-semibold text-bjj-white">{presentesDia}</p>
+          <p className="text-xs text-bjj-gray-200/60">{formatPercent(taxaPresenca)} dos registros do dia</p>
+        </div>
+        <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
+          <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Faltas</p>
+          <p className="mt-1 text-xl font-semibold text-bjj-white">{ausentesDia}</p>
+          <p className="text-xs text-bjj-gray-200/60">Total de alunos aguardando check-in</p>
+        </div>
+        <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
+          <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Dias monitorados</p>
+          <p className="mt-1 text-xl font-semibold text-bjj-white">{diasAtivos}</p>
+          <p className="text-xs text-bjj-gray-200/60">Histórico de treinos acompanhados</p>
+        </div>
+      </section>
 
-          <article className="card space-y-3">
-            <header>
-              <h2 className="text-lg font-semibold text-bjj-white">Registrar nova presença</h2>
-              <p className="text-sm text-bjj-gray-200/70">
-                Escolha o aluno, defina a data e marque presença ou falta em segundos.
-              </p>
-            </header>
-            <PresenceForm onSubmit={handleCreate} />
-          </article>
+      <article className="card space-y-3">
+        <header className="space-y-1">
+          <h2 className="text-base font-semibold text-bjj-white">Registrar presença manual</h2>
+          <p className="text-sm text-bjj-gray-200/70">
+            Use o formulário para ajustar registros específicos ou incluir treinos anteriores.
+          </p>
+        </header>
+        <PresenceForm onSubmit={handleCreate} />
+      </article>
 
-          <AttendanceTable
-            records={registrosDoDia}
-            onToggle={handleToggle}
-            onDelete={handleDelete}
-            onEdit={abrirEdicao}
-            isLoading={isRefreshing}
-          />
-        </section>
-      </div>
+      <AttendanceTable
+        records={registrosDoDia}
+        onToggle={handleToggle}
+        onDelete={handleDelete}
+        onEdit={abrirEdicao}
+        isLoading={isRefreshing}
+      />
 
       <Modal isOpen={isSummaryOpen} onClose={fecharResumo} title="Resumo do treino">
         <div className="space-y-4 text-sm text-bjj-gray-200/80">
