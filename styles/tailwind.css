@@ -1,0 +1,19 @@
+/* Tailwind base, components, and utilities layers. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom layer para estilos reutilizáveis. */
+@layer components {
+  .card {
+    @apply relative overflow-hidden rounded-2xl border border-bjj-gray-800/60 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black p-5 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)];
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-bjj-red px-4 py-2.5 text-sm font-semibold text-bjj-white transition hover:bg-red-700;
+  }
+
+  .input-field {
+    @apply w-full rounded-lg border border-bjj-gray-700 bg-bjj-gray-900/70 px-3.5 py-2.5 text-sm text-bjj-white transition focus:border-bjj-red focus:outline-none focus:ring-1 focus:ring-bjj-red/40;
+  }
+}
