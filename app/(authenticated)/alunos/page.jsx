@@ -14,6 +14,7 @@ import PageHero from '../../../components/ui/PageHero';
 import Card from '../../../components/ui/Card';
 import LoadingState from '../../../components/ui/LoadingState';
 import { getAlunos, deleteAluno, createAluno } from '../../../services/alunosService';
+import { getPresencas } from '../../../services/presencasService';
 import { calculateNextStep, BELT_ORDER } from '../../../lib/graduationRules';
 
 const orderByBelt = (a, b) => BELT_ORDER.indexOf(a) - BELT_ORDER.indexOf(b);
@@ -21,6 +22,7 @@ const orderByBelt = (a, b) => BELT_ORDER.indexOf(a) - BELT_ORDER.indexOf(b);
 export default function AlunosPage() {
   const router = useRouter();
   const [alunos, setAlunos] = useState([]);
+  const [presencas, setPresencas] = useState([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,9 +32,10 @@ export default function AlunosPage() {
     let active = true;
     async function inicializar() {
       try {
-        const lista = await getAlunos();
+        const [lista, registros] = await Promise.all([getAlunos(), getPresencas()]);
         if (!active) return;
         setAlunos(lista);
+        setPresencas(registros);
       } finally {
         if (active) {
           setIsLoading(false);
@@ -55,9 +58,9 @@ export default function AlunosPage() {
   const proximosPassos = useMemo(
     () =>
       alunos
-        .map((aluno) => ({ aluno, recomendacao: calculateNextStep(aluno) }))
+        .map((aluno) => ({ aluno, recomendacao: calculateNextStep(aluno, { presencas }) }))
         .filter((item) => Boolean(item.recomendacao)),
-    [alunos]
+    [alunos, presencas]
   );
 
   const proximosPassosTop = proximosPassos.slice(0, 4);
@@ -75,8 +78,9 @@ export default function AlunosPage() {
 
   const refreshList = useCallback(async () => {
     setIsRefreshing(true);
-    const lista = await getAlunos();
+    const [lista, registros] = await Promise.all([getAlunos(), getPresencas()]);
     setAlunos(lista);
+    setPresencas(registros);
     setIsRefreshing(false);
   }, []);
 

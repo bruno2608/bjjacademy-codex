@@ -24,6 +24,84 @@ const normalizeAluno = (aluno) => ({
     new Date().toISOString().split('T')[0]
 });
 
+const parseISODate = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const countAttendancesFrom = (registros, inicio) => {
+  if (!inicio) return registros.length;
+  const reference = inicio.getTime();
+  return registros.filter((item) => {
+    const data = parseISODate(item.data);
+    return data && data.getTime() >= reference;
+  }).length;
+};
+
+const getLatestHistoryRecord = (historico, predicate) => {
+  if (!Array.isArray(historico)) return null;
+  return historico
+    .filter((item) => predicate(item) && parseISODate(item.data))
+    .sort((a, b) => parseISODate(b.data) - parseISODate(a.data))[0] || null;
+};
+
+const buildAttendanceStatsForAluno = (aluno, presencas = []) => {
+  const registrosAluno = presencas.filter(
+    (item) => item.alunoId === aluno.id && item.status === 'Presente'
+  );
+
+  const historico = Array.isArray(aluno.historicoGraduacoes)
+    ? aluno.historicoGraduacoes
+    : [];
+  const faixaAtual = aluno.faixa;
+  const grauAtual = Number(aluno.graus || 0);
+
+  const ultimoRegistroFaixa = getLatestHistoryRecord(
+    historico,
+    (item) => item.tipo === 'Faixa' && item.faixa === faixaAtual
+  );
+  const inicioFaixa =
+    parseISODate(ultimoRegistroFaixa?.data) ||
+    parseISODate(aluno.dataUltimaGraduacao) ||
+    parseISODate(aluno.dataInicio);
+
+  const aulasDesdeFaixa = countAttendancesFrom(registrosAluno, inicioFaixa);
+
+  const ultimoRegistroGrau = getLatestHistoryRecord(
+    historico,
+    (item) => item.tipo === 'Grau' && item.faixa === faixaAtual && Number(item.grau) === grauAtual
+  );
+  const inicioGrau = grauAtual > 0 ? parseISODate(ultimoRegistroGrau?.data) || inicioFaixa : inicioFaixa;
+  const aulasNoGrauAtual = countAttendancesFrom(registrosAluno, inicioGrau);
+
+  return {
+    totalAulas: registrosAluno.length,
+    aulasDesdeUltimaFaixa: aulasDesdeFaixa,
+    aulasNoGrauAtual
+  };
+};
+
+const applyAttendanceStats = (alunos, presencas) =>
+  alunos.map((aluno) => {
+    const stats = buildAttendanceStatsForAluno(aluno, presencas);
+    return {
+      ...aluno,
+      aulasTotais: stats.totalAulas,
+      aulasDesdeUltimaFaixa: stats.aulasDesdeUltimaFaixa,
+      aulasNoGrauAtual: stats.aulasNoGrauAtual
+    };
+  });
+
+const mockTreinos = [
+  { id: 't1', nome: 'Manhã · Gi', tipo: 'Gi', diaSemana: 'segunda', hora: '07:30' },
+  { id: 't2', nome: 'Noite · No-Gi', tipo: 'No-Gi', diaSemana: 'segunda', hora: '19:30' },
+  { id: 't3', nome: 'Competição', tipo: 'Competição', diaSemana: 'quarta', hora: '20:00' },
+  { id: 't4', nome: 'Kids · Fundamental', tipo: 'Kids', diaSemana: 'terça', hora: '18:00' },
+  { id: 't5', nome: 'Open Mat', tipo: 'Livre', diaSemana: 'sábado', hora: '10:00' },
+  { id: 't6', nome: 'Tarde · Gi', tipo: 'Gi', diaSemana: 'quinta', hora: '16:00' }
+];
+
 // Dados iniciais de alunos para alimentar as telas de listagem e formulários.
 const mockAlunos = [
   normalizeAluno({
@@ -581,6 +659,15 @@ const mockAlunos = [
   })
 ];
 
+const getTreinoMeta = (treinoId) => {
+  const treino = mockTreinos.find((item) => item.id === treinoId);
+  return {
+    treinoId: treinoId || null,
+    tipoTreino: treino?.nome || 'Sessão principal',
+    treinoModalidade: treino?.tipo || 'Livre'
+  };
+};
+
 // Presenças simuladas com status mutável para demonstrar as interações do painel.
 const mockPresencas = [
   {
@@ -589,9 +676,21 @@ const mockPresencas = [
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
-    data: '2024-05-05',
+    data: '2024-05-06',
     hora: '07:55',
-    status: 'Presente'
+    status: 'Presente',
+    ...getTreinoMeta('t1')
+  },
+  {
+    id: 'p1b',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: '2024-05-06',
+    hora: '19:05',
+    status: 'Presente',
+    ...getTreinoMeta('t2')
   },
   {
     id: 'p2',
@@ -599,9 +698,10 @@ const mockPresencas = [
     alunoNome: 'Maria Souza',
     faixa: 'Azul',
     graus: 3,
-    data: '2024-05-05',
+    data: '2024-05-06',
     hora: null,
-    status: 'Ausente'
+    status: 'Ausente',
+    ...getTreinoMeta('t2')
   },
   {
     id: 'p3',
@@ -611,7 +711,8 @@ const mockPresencas = [
     graus: 1,
     data: '2024-05-04',
     hora: '08:12',
-    status: 'Presente'
+    status: 'Presente',
+    ...getTreinoMeta('t3')
   },
   {
     id: 'p4',
@@ -621,7 +722,8 @@ const mockPresencas = [
     graus: 1,
     data: '2024-05-04',
     hora: '08:05',
-    status: 'Presente'
+    status: 'Presente',
+    ...getTreinoMeta('t1')
   },
   {
     id: 'p5',
@@ -631,7 +733,8 @@ const mockPresencas = [
     graus: 0,
     data: '2024-05-03',
     hora: '07:48',
-    status: 'Presente'
+    status: 'Presente',
+    ...getTreinoMeta('t1')
   },
   {
     id: 'p6',
@@ -641,7 +744,8 @@ const mockPresencas = [
     graus: 3,
     data: '2024-05-03',
     hora: '09:10',
-    status: 'Presente'
+    status: 'Presente',
+    ...getTreinoMeta('t6')
   },
   {
     id: 'p7',
@@ -651,7 +755,8 @@ const mockPresencas = [
     graus: 2,
     data: '2024-05-02',
     hora: null,
-    status: 'Ausente'
+    status: 'Ausente',
+    ...getTreinoMeta('t2')
   },
   {
     id: 'p8',
@@ -661,7 +766,8 @@ const mockPresencas = [
     graus: 0,
     data: '2024-05-02',
     hora: '08:22',
-    status: 'Presente'
+    status: 'Presente',
+    ...getTreinoMeta('t1')
   },
   {
     id: 'p9',
@@ -671,7 +777,8 @@ const mockPresencas = [
     graus: 1,
     data: '2024-05-01',
     hora: '07:40',
-    status: 'Presente'
+    status: 'Presente',
+    ...getTreinoMeta('t3')
   },
   {
     id: 'p10',
@@ -681,9 +788,45 @@ const mockPresencas = [
     graus: 0,
     data: '2024-05-01',
     hora: '08:30',
-    status: 'Presente'
+    status: 'Presente',
+    ...getTreinoMeta('t6')
+  },
+  {
+    id: 'p11',
+    alunoId: '11',
+    alunoNome: 'Eduarda Faria',
+    faixa: 'Cinza',
+    graus: 1,
+    data: '2024-05-06',
+    hora: '18:05',
+    status: 'Presente',
+    ...getTreinoMeta('t4')
+  },
+  {
+    id: 'p12',
+    alunoId: '12',
+    alunoNome: 'Gabriel Torres',
+    faixa: 'Cinza',
+    graus: 0,
+    data: '2024-05-06',
+    hora: null,
+    status: 'Ausente',
+    ...getTreinoMeta('t4')
+  },
+  {
+    id: 'p13',
+    alunoId: '14',
+    alunoNome: 'Larissa Prado',
+    faixa: 'Amarela',
+    graus: 2,
+    data: '2024-05-04',
+    hora: '10:05',
+    status: 'Presente',
+    ...getTreinoMeta('t5')
   }
 ];
+
+const initialAlunos = applyAttendanceStats(mockAlunos, mockPresencas);
 
 // Graduações mock seguem a lógica de acompanhamento de graus e faixas.
 const mockGraduacoes = [
@@ -776,9 +919,10 @@ const mockGraduacoes = [
 const useUserStore = create((set) => ({
   user: null,
   token: null,
-  alunos: mockAlunos,
+  alunos: initialAlunos,
   presencas: mockPresencas,
   graduacoes: mockGraduacoes,
+  treinos: mockTreinos,
   login: ({ email }) => {
     const fakeToken = 'bjj-token-' + Date.now();
     localStorage.setItem('bjj_token', fakeToken);
@@ -791,17 +935,36 @@ const useUserStore = create((set) => ({
     localStorage.removeItem('bjj_token');
     set({ user: null, token: null });
   },
-  setAlunos: (alunos) => set({ alunos: alunos.map(normalizeAluno) }),
-  setPresencas: (presencas) => set({ presencas }),
+  setAlunos: (alunos) =>
+    set((state) => {
+      const normalizados = alunos.map(normalizeAluno);
+      return {
+        alunos: applyAttendanceStats(normalizados, state.presencas)
+      };
+    }),
+  setPresencas: (presencas) =>
+    set((state) => {
+      const lista = Array.isArray(presencas) ? presencas : [];
+      return {
+        presencas: lista,
+        alunos: applyAttendanceStats(state.alunos, lista)
+      };
+    }),
   setGraduacoes: (graduacoes) => set({ graduacoes }),
+  setTreinos: (treinos) => set({ treinos }),
   syncAlunoReferencias: (alunoAtualizado) =>
-    set((state) => ({
-      presencas: state.presencas.map((item) =>
+    set((state) => {
+      const presencasAtualizadas = state.presencas.map((item) =>
         item.alunoId === alunoAtualizado.id
-          ? { ...item, alunoNome: alunoAtualizado.nome, faixa: alunoAtualizado.faixa, graus: alunoAtualizado.graus }
+          ? {
+              ...item,
+              alunoNome: alunoAtualizado.nome,
+              faixa: alunoAtualizado.faixa,
+              graus: alunoAtualizado.graus
+            }
           : item
-      ),
-      graduacoes: state.graduacoes.map((item) =>
+      );
+      const graduacoesAtualizadas = state.graduacoes.map((item) =>
         item.alunoId === alunoAtualizado.id
           ? {
               ...item,
@@ -810,27 +973,59 @@ const useUserStore = create((set) => ({
               grauAtual: alunoAtualizado.graus
             }
           : item
-      )
-    })),
+      );
+      const alunosAtualizados = state.alunos.map((aluno) =>
+        aluno.id === alunoAtualizado.id ? { ...aluno, ...alunoAtualizado } : aluno
+      );
+      return {
+        presencas: presencasAtualizadas,
+        graduacoes: graduacoesAtualizadas,
+        alunos: applyAttendanceStats(alunosAtualizados, presencasAtualizadas)
+      };
+    }),
   addPresenca: (novaPresenca) =>
-    set((state) => ({
-      presencas: [
-        ...state.presencas,
-        {
-          ...novaPresenca,
-          hora: novaPresenca.hora ?? getCurrentTime()
-        }
-      ]
-    })),
+    set((state) => {
+      const lista = Array.isArray(state.presencas) ? state.presencas : [];
+      const payload = {
+        ...novaPresenca,
+        hora: novaPresenca.hora ?? getCurrentTime()
+      };
+      const existenteIndex = lista.findIndex(
+        (item) =>
+          item.alunoId === payload.alunoId &&
+          item.data === payload.data &&
+          item.treinoId === payload.treinoId
+      );
+      const atualizadas =
+        existenteIndex >= 0
+          ? lista.map((item, index) => (index === existenteIndex ? { ...item, ...payload } : item))
+          : [...lista, payload];
+      return {
+        presencas: atualizadas,
+        alunos: applyAttendanceStats(state.alunos, atualizadas)
+      };
+    }),
   removePresenca: (id) =>
-    set((state) => ({ presencas: state.presencas.filter((item) => item.id !== id) })),
+    set((state) => {
+      const atualizadas = state.presencas.filter((item) => item.id !== id);
+      return {
+        presencas: atualizadas,
+        alunos: applyAttendanceStats(state.alunos, atualizadas)
+      };
+    }),
   updatePresenca: (id, payload) =>
-    set((state) => ({
-      presencas: state.presencas.map((item) => (item.id === id ? { ...item, ...payload } : item))
-    })),
+    set((state) => {
+      const atualizadas = state.presencas.map((item) =>
+        item.id === id ? { ...item, ...payload } : item
+      );
+      return {
+        presencas: atualizadas,
+        alunos: applyAttendanceStats(state.alunos, atualizadas)
+      };
+    }),
   togglePresencaStatus: (id) =>
-    set((state) => ({
-      presencas: state.presencas.map((item) =>
+    set((state) => {
+      const atualizadas = state.presencas.map((item) =>
         item.id === id
           ? {
               ...item,
@@ -838,8 +1033,12 @@ const useUserStore = create((set) => ({
               hora: item.status === 'Presente' ? null : getCurrentTime()
             }
           : item
-      )
-    })),
+      );
+      return {
+        presencas: atualizadas,
+        alunos: applyAttendanceStats(state.alunos, atualizadas)
+      };
+    }),
   updateGraduacaoStatus: (id, payload) =>
     set((state) => ({
       graduacoes: state.graduacoes.map((item) => (item.id === id ? { ...item, ...payload } : item))
@@ -879,7 +1078,10 @@ const useUserStore = create((set) => ({
         }
         if (graduacao.tipo === 'Faixa') {
           const proximaFaixa = graduacao.proximaFaixa || getNextBelt(aluno.faixa) || aluno.faixa;
-          const recomendacao = calculateNextStep({ ...aluno, faixa: proximaFaixa, graus: 0, mesesNaFaixa: 0 });
+          const recomendacao = calculateNextStep(
+            { ...aluno, faixa: proximaFaixa, graus: 0, mesesNaFaixa: 0 },
+            { presencas: state.presencas }
+          );
           return {
             ...aluno,
             faixa: proximaFaixa,
@@ -895,7 +1097,9 @@ const useUserStore = create((set) => ({
           historicoGraduacoes: [...historicoAtual, registroHistorico]
         };
       });
-      return { alunos: alunosAtualizados };
+      return {
+        alunos: applyAttendanceStats(alunosAtualizados, state.presencas)
+      };
     })
 }));
 

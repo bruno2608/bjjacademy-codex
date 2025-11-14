@@ -14,8 +14,8 @@ export default function AttendanceTable({ records, onToggle, onDelete, onEdit, i
       aria-busy={isLoading}
     >
       <div className="absolute right-[-18%] top-[-18%] h-24 w-24 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-      <div className="hidden md:grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.05fr)_minmax(0,0.9fr)_minmax(0,0.55fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
-        {['Aluno', 'Graduação', 'Data/Hora', 'Status', 'Ações'].map((header) => (
+      <div className="hidden md:grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.55fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
+        {['Aluno', 'Graduação', 'Data / Treino', 'Status', 'Ações'].map((header) => (
           <div key={header} className="px-3 py-3">
             {header}
           </div>
@@ -27,10 +27,11 @@ export default function AttendanceTable({ records, onToggle, onDelete, onEdit, i
           const faixa = record.faixa || 'Sem faixa';
           const graus = Number.isFinite(Number(record.graus)) ? Number(record.graus) : 0;
           const hora = record.hora || '—';
+          const treinoLabel = record.tipoTreino || 'Sessão principal';
           const isPlaceholder = Boolean(record.isPlaceholder);
           return (
             <div
-              key={record.id || record.alunoId}
+              key={record.id || `${record.alunoId}-${record.treinoId || record.data}`}
               className="bg-gradient-to-br from-bjj-gray-900/40 via-bjj-black/40 to-bjj-black/60"
             >
               <div className="flex flex-col gap-2 border-b border-bjj-gray-800/60 p-3.5 md:hidden">
@@ -58,6 +59,10 @@ export default function AttendanceTable({ records, onToggle, onDelete, onEdit, i
                       {formattedDate}
                       <span className="ml-1 text-bjj-gray-200/60">{hora !== '—' ? `· ${hora}` : ''}</span>
                     </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-bjj-gray-200/90">Treino</p>
+                    <p>{treinoLabel}</p>
                   </div>
                   <div>
                     <p className="font-semibold text-bjj-gray-200/90">Ação rápida</p>
@@ -104,6 +109,9 @@ export default function AttendanceTable({ records, onToggle, onDelete, onEdit, i
                   <span className="block text-xs">{formattedDate}</span>
                   <span className="mt-1 block text-[11px] text-bjj-gray-200/60">
                     {hora !== '—' ? `Horário ${hora}` : 'Sem registro do horário'}
+                  </span>
+                  <span className="mt-1 block text-[11px] text-bjj-gray-200/50">
+                    {treinoLabel}
                   </span>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">

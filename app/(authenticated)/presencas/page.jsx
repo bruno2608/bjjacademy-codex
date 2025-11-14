@@ -33,7 +33,21 @@ export default function PresencasPage() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const alunos = useUserStore((state) => state.alunos);
+  const treinos = useUserStore((state) => state.treinos);
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const normalizarDiaSemana = useCallback((valor) => {
+    const referencia = valor ? new Date(valor) : new Date();
+    if (Number.isNaN(referencia.getTime())) return null;
+    return referencia.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+  }, []);
+  const sugerirTreino = useCallback(
+    (dataReferencia) => {
+      const dia = normalizarDiaSemana(dataReferencia) || normalizarDiaSemana(hoje);
+      const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
+      return candidatos[0] || treinos[0] || null;
+    },
+    [hoje, normalizarDiaSemana, treinos]
+  );
 
   useEffect(() => {
     let active = true;
@@ -74,35 +88,31 @@ export default function PresencasPage() {
 
   // Para o dia atual, combinamos registros reais com placeholders ausentes.
   const registrosDoDia = useMemo(() => {
-    const mapa = new Map();
-    presencas
+    const registros = presencas
       .filter((item) => item.data === hoje)
-      .forEach((item) => {
-        mapa.set(item.alunoId, { ...item, isPlaceholder: false });
+      .map((item) => ({ ...item, isPlaceholder: false }));
+    const alunosComRegistro = new Set(registros.map((item) => item.alunoId));
+    const placeholders = alunosAtivos
+      .filter((aluno) => !alunosComRegistro.has(aluno.id))
+      .map((aluno) => {
+        const treinoSugestao = sugerirTreino(hoje);
+        return {
+          id: `placeholder-${aluno.id}-${treinoSugestao?.id || 'principal'}`,
+          alunoId: aluno.id,
+          alunoNome: aluno.nome,
+          faixa: aluno.faixa,
+          graus: aluno.graus,
+          data: hoje,
+          status: 'Ausente',
+          hora: null,
+          treinoId: treinoSugestao?.id || null,
+          tipoTreino: treinoSugestao?.nome || 'Sessão principal',
+          isPlaceholder: true
+        };
       });
 
-    const placeholders = alunosAtivos.map((aluno) => {
-      const existente = mapa.get(aluno.id);
-      if (existente) {
-        return existente;
-      }
-      return {
-        id: null,
-        alunoId: aluno.id,
-        alunoNome: aluno.nome,
-        faixa: aluno.faixa,
-        graus: aluno.graus,
-        data: hoje,
-        status: 'Ausente',
-        hora: null,
-        isPlaceholder: true
-      };
-    });
-
-    return placeholders
-      .slice()
-      .sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
-  }, [alunosAtivos, hoje, presencas]);
+    return [...registros, ...placeholders].sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
+  }, [alunosAtivos, hoje, presencas, sugerirTreino]);
 
   const presentesDia = registrosDoDia.filter((item) => item.status === 'Presente').length;
   const ausentesDia = registrosDoDia.length - presentesDia;
@@ -130,7 +140,9 @@ export default function PresencasPage() {
         graus: registro.graus,
         data: hoje,
         status: 'Presente',
-        hora: formatTime()
+        hora: formatTime(),
+        treinoId: registro.treinoId,
+        tipoTreino: registro.tipoTreino
       });
       setPresencas((prev) => [...prev, novoRegistro]);
       return;
@@ -253,10 +265,10 @@ export default function PresencasPage() {
           </div>
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Lista rápida</p>
-            <ul className="space-y-2.5">
-              {registrosDoDia.map((item) => (
-                <li
-                  key={item.alunoId}
+              <ul className="space-y-2.5">
+                {registrosDoDia.map((item) => (
+                  <li
+                  key={`${item.alunoId}-${item.treinoId || item.data}`}
                   className="flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-3 py-2"
                 >
                   <div>
@@ -266,6 +278,7 @@ export default function PresencasPage() {
                         ? `Confirmado às ${item.hora || '—'}`
                         : 'Ainda não marcado'}
                     </p>
+                    <p className="text-[11px] text-bjj-gray-200/50">{item.tipoTreino || 'Sessão principal'}</p>
                   </div>
                   <span
                     className={`text-xs font-semibold ${

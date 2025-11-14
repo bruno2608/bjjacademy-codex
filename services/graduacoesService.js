@@ -87,7 +87,8 @@ export async function updateGraduacao(id, data) {
 }
 
 export function getGraduationRecommendation(aluno) {
-  const recomendacao = calculateNextStep(aluno);
+  const store = useUserStore.getState();
+  const recomendacao = calculateNextStep(aluno, { presencas: store.presencas });
   if (!recomendacao) return null;
   const previsao = estimateGraduationDate(aluno, recomendacao.mesesRestantes || 0);
   return { ...recomendacao, previsao };

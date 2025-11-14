@@ -107,20 +107,12 @@ export default function DashboardPage() {
   const alunosAtivos = useMemo(() => alunos.filter((aluno) => aluno.status === 'Ativo'), [alunos]);
 
   const registrosDoDia = useMemo(() => {
-    const mapa = new Map();
-    presencas
-      .filter((item) => item.data === hoje)
-      .forEach((item) => {
-        mapa.set(item.alunoId, item);
-      });
-
-    return alunosAtivos.map((aluno) => {
-      const existente = mapa.get(aluno.id);
-      if (existente) {
-        return existente;
-      }
-      return {
-        id: null,
+    const registros = presencas.filter((item) => item.data === hoje);
+    const alunosComRegistro = new Set(registros.map((item) => item.alunoId));
+    const placeholders = alunosAtivos
+      .filter((aluno) => !alunosComRegistro.has(aluno.id))
+      .map((aluno) => ({
+        id: `placeholder-${aluno.id}`,
         alunoId: aluno.id,
         alunoNome: aluno.nome,
         faixa: aluno.faixa,
@@ -128,8 +120,8 @@ export default function DashboardPage() {
         data: hoje,
         status: 'Ausente',
         hora: null
-      };
-    });
+      }));
+    return [...registros, ...placeholders];
   }, [alunosAtivos, hoje, presencas]);
 
   const presentesDia = registrosDoDia.filter((item) => item.status === 'Presente').length;
@@ -171,9 +163,9 @@ export default function DashboardPage() {
   const evolucoes = useMemo(
     () =>
       alunos
-        .map((aluno) => ({ aluno, recomendacao: calculateNextStep(aluno) }))
+        .map((aluno) => ({ aluno, recomendacao: calculateNextStep(aluno, { presencas }) }))
         .filter((item) => Boolean(item.recomendacao)),
-    [alunos]
+    [alunos, presencas]
   );
 
   const grausPendentes = evolucoes.filter((item) => item.recomendacao.tipo === 'Grau').length;
