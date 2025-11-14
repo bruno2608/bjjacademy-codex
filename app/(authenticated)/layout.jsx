@@ -40,7 +40,11 @@ export default function AuthenticatedLayout({ children }) {
       <Sidebar />
       <main className="flex flex-1 flex-col pb-24 lg:pb-0">
         <Header title={pageTitle} />
-        <section className="flex-1 bg-bjj-gray-900/40 p-5">{children}</section>
+        <section className="flex-1 bg-bjj-gray-900/40">
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 pb-10 pt-6 sm:px-6 lg:px-8">
+            {children}
+          </div>
+        </section>
       </main>
       <MobileNav />
     </div>

@@ -232,7 +232,7 @@ export default function PresencasPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-[2fr,1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
         <section className="space-y-3">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <Card
