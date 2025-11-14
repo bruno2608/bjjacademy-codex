@@ -76,12 +76,13 @@ export default function EditarAlunoPage() {
         title={aluno.nome}
         subtitle="Atualize graduações, contatos e status sem perder o contexto da jornada."
         stats={heroStats}
-        actions={
-          <button type="button" className="btn-primary" onClick={() => router.push('/alunos')}>
-            <ArrowLeft size={15} /> Voltar para lista
-          </button>
-        }
       />
+
+      <div className="flex justify-end">
+        <button type="button" className="btn-secondary" onClick={() => router.push('/alunos')}>
+          <ArrowLeft size={15} /> Voltar para lista
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[2fr,1fr]">
         <section className="card space-y-3">

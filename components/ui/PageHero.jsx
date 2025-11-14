@@ -4,8 +4,11 @@
  * PageHero replica a identidade gamificada introduzida na tela de graduações
  * para outras páginas do painel. Ele combina badge, título, descrição e
  * métricas rápidas em um único cartão com gradiente e layers de brilho.
+ *
+ * Após o feedback da equipe, removemos o slot de "ações" para impedir que
+ * atalhos herdados (como o antigo botão “Nova tarefa”) reapareçam neste bloco.
  */
-export default function PageHero({ title, subtitle, badge, actions, stats = [] }) {
+export default function PageHero({ title, subtitle, badge, stats = [] }) {
   return (
     <section className="relative overflow-hidden rounded-2xl border border-bjj-gray-800/60 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black p-6 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.55)]">
       <div className="absolute right-[-30%] top-[-40%] h-56 w-56 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
@@ -23,7 +26,6 @@ export default function PageHero({ title, subtitle, badge, actions, stats = [] }
               {subtitle && <p className="text-sm text-bjj-gray-200/80 md:text-base">{subtitle}</p>}
             </div>
           </div>
-          {actions ? <div className="flex flex-wrap items-center gap-2 md:justify-end">{actions}</div> : null}
         </header>
         {stats.length > 0 && (
           <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
