@@ -6,7 +6,6 @@
  */
 import { useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import Sidebar from '../../components/ui/Sidebar';
 import Header from '../../components/ui/Header';
 import TabletNav from '../../components/ui/TabletNav';
 import MobileNav from '../../components/ui/MobileNav';
@@ -37,18 +36,13 @@ export default function AuthenticatedLayout({ children }) {
   }, [pathname]);
 
   return (
-    <div className="flex min-h-screen bg-bjj-black">
-      <Sidebar />
-      <main className="flex flex-1 flex-col pb-24 md:pb-8 lg:pb-0">
-        <div className="sticky top-0 z-40 flex flex-col bg-bjj-black/95 backdrop-blur">
-          <Header title={pageTitle} />
-          <TabletNav />
-        </div>
-        <section className="flex-1 bg-bjj-gray-900/40">
-          <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 pb-10 pt-6 sm:px-6 lg:px-8">
-            {children}
-          </div>
-        </section>
+    <div className="flex min-h-screen flex-col bg-bjj-black">
+      <div className="sticky top-0 z-40 flex flex-col bg-bjj-black/95 backdrop-blur">
+        <Header title={pageTitle} />
+        <TabletNav />
+      </div>
+      <main className="flex-1 bg-bjj-gray-900/40 pb-24 md:pb-0">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 pb-10 pt-6 sm:px-6 lg:px-8">{children}</div>
       </main>
       <MobileNav />
     </div>
