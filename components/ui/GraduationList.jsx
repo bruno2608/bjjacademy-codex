@@ -66,7 +66,7 @@ export default function GraduationList({ graduacoes, onStatusChange, alunoLookup
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4">
+    <div className="grid grid-cols-1 gap-3">
       {graduacoes.map((graduacao) => {
         const progresso = calcularProgresso(graduacao, alunoLookup);
         const tempoRestanteLabel = formatTempoRestante(Number(graduacao.mesesRestantes));
@@ -77,25 +77,25 @@ export default function GraduationList({ graduacoes, onStatusChange, alunoLookup
         return (
           <article
             key={graduacao.id}
-            className="relative overflow-hidden rounded-3xl border border-bjj-gray-800/70 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black p-6 shadow-focus/40"
+            className="relative overflow-hidden rounded-2xl border border-bjj-gray-800/70 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black p-5 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.55)]"
           >
-            <div className="absolute right-0 top-0 h-28 w-28 -translate-y-10 translate-x-10 rounded-full bg-bjj-red/10 blur-2xl" />
+            <div className="absolute right-0 top-0 h-24 w-24 -translate-y-8 translate-x-8 rounded-full bg-bjj-red/10 blur-2xl" />
             <header className="relative flex flex-col gap-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/60">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-bjj-gray-200/60">
                 Próxima conquista
               </span>
-              <h3 className="text-xl font-semibold text-bjj-white">{graduacao.alunoNome}</h3>
+              <h3 className="text-lg font-semibold text-bjj-white">{graduacao.alunoNome}</h3>
               <div className="flex flex-wrap items-center gap-3 text-sm text-bjj-gray-200/80">
-                <span className="inline-flex items-center gap-2 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs">
-                  <Award size={14} className="text-bjj-red" /> {graduacao.tipo}
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-2.5 py-1 text-xs">
+                  <Award size={13} className="text-bjj-red" /> {graduacao.tipo}
                 </span>
-                <span className="inline-flex items-center gap-2 text-xs text-bjj-gray-200/70">
-                  <ArrowRight size={14} /> {alvoLabel}
+                <span className="inline-flex items-center gap-1.5 text-xs text-bjj-gray-200/70">
+                  <ArrowRight size={13} /> {alvoLabel}
                 </span>
               </div>
             </header>
 
-            <div className="relative mt-6 space-y-4">
+            <div className="relative mt-5 space-y-3.5">
               <div>
                 <div className="flex items-center justify-between text-xs text-bjj-gray-200/70">
                   <span>Progresso até a cerimônia</span>
@@ -108,37 +108,37 @@ export default function GraduationList({ graduacoes, onStatusChange, alunoLookup
                   />
                 </div>
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-bjj-gray-200/70">
-                <span className="inline-flex items-center gap-2">
-                  <CalendarClock size={14} />
+              <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs text-bjj-gray-200/70">
+                <span className="inline-flex items-center gap-1.5">
+                  <CalendarClock size={13} />
                   {formatDate(graduacao.previsao)}
                 </span>
                 {tempoRestanteLabel && (
-                  <span className="inline-flex items-center gap-2">
-                    <Timer size={14} />
+                  <span className="inline-flex items-center gap-1.5">
+                    <Timer size={13} />
                     {tempoRestanteLabel}
                   </span>
                 )}
               </div>
             </div>
 
-            <footer className="relative mt-6 flex flex-wrap items-center justify-between gap-3">
+            <footer className="relative mt-5 flex flex-wrap items-center justify-between gap-2.5">
               <span
-                className={`inline-flex items-center rounded-full px-4 py-1 text-xs font-semibold ${
+                className={`inline-flex items-center rounded-full px-3.5 py-1 text-xs font-semibold ${
                   statusStyles[graduacao.status] || 'bg-bjj-gray-800 text-bjj-gray-200 border border-bjj-gray-700'
                 }`}
               >
                 {graduacao.status}
               </span>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {['Planejado', 'Em progresso', 'Concluído'].map((status) => (
                   <button
                     key={status}
                     onClick={() => onStatusChange?.(graduacao, status)}
-                    className={`rounded-lg border px-3 py-1 text-xs transition ${
+                    className={`rounded-lg border px-2.5 py-1 text-xs transition ${
                       graduacao.status === status
                         ? 'border-bjj-red bg-bjj-red text-bjj-white'
-                        : 'border-bjj-gray-700 text-bjj-gray-200 hover:bg-bjj-gray-800'
+                        : 'border-bjj-gray-700 text-bjj-gray-200 hover:border-bjj-red hover:text-bjj-red'
                     }`}
                   >
                     {status}

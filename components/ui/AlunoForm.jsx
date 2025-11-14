@@ -91,9 +91,9 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
   const isLastStep = step === steps.length - 1;
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
+    <form className="space-y-5" onSubmit={handleSubmit}>
       <div className="md:hidden">
-        <nav className="flex items-center justify-between rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 p-3">
+        <nav className="flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 p-2.5">
           {steps.map((item, index) => {
             const active = index === step;
             return (
@@ -101,21 +101,21 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
                 key={item.id}
                 type="button"
                 onClick={() => setStep(index)}
-                className={`flex flex-1 flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs transition ${
+                className={`flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] transition ${
                   active ? 'bg-bjj-red/20 text-bjj-red' : 'text-bjj-gray-200/70'
                 }`}
               >
-                <span className="font-semibold uppercase tracking-[0.12em]">{item.label}</span>
-                <span className="text-[11px] text-bjj-gray-200/60">{item.description}</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.12em]">{item.label}</span>
+                <span className="text-[10px] text-bjj-gray-200/60">{item.description}</span>
               </button>
             );
           })}
         </nav>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-3">
         <section
-          className={`space-y-4 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-5 md:col-span-1 ${
+          className={`space-y-3.5 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 md:col-span-1 ${
             step === 0 ? 'block' : 'hidden md:block'
           }`}
         >
@@ -123,7 +123,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
             <h3 className="text-sm font-semibold text-bjj-white">Perfil</h3>
             <p className="text-xs text-bjj-gray-200/70">Dados básicos do aluno.</p>
           </header>
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-medium">Nome</label>
               <input
@@ -150,7 +150,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
         </section>
 
         <section
-          className={`space-y-4 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-5 md:col-span-1 ${
+          className={`space-y-3.5 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 md:col-span-1 ${
             step === 1 ? 'block' : 'hidden md:block'
           }`}
         >
@@ -158,7 +158,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
             <h3 className="text-sm font-semibold text-bjj-white">Plano e status</h3>
             <p className="text-xs text-bjj-gray-200/70">Controle de participação.</p>
           </header>
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-medium">Plano</label>
               <select name="plano" className="input-field" value={formData.plano} onChange={handleChange}>
@@ -179,7 +179,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
         </section>
 
         <section
-          className={`space-y-4 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-5 md:col-span-1 ${
+          className={`space-y-3.5 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 md:col-span-1 ${
             step === 2 ? 'block' : 'hidden md:block'
           }`}
         >
@@ -187,7 +187,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
             <h3 className="text-sm font-semibold text-bjj-white">Graduação</h3>
             <p className="text-xs text-bjj-gray-200/70">Histórico técnico do atleta.</p>
           </header>
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-medium">Faixa atual</label>
               <select name="faixa" className="input-field" value={formData.faixa} onChange={handleChange}>
@@ -205,7 +205,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
                   </option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-bjj-gray-200/70">Selecione a quantidade de graus já conquistados.</p>
+              <p className="mt-1 text-[11px] text-bjj-gray-200/70">Selecione a quantidade de graus já conquistados.</p>
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium">Meses na faixa</label>
@@ -233,8 +233,8 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
         </section>
       </div>
 
-      <div className="flex flex-col gap-3 md:hidden">
-        <div className="flex justify-between text-xs text-bjj-gray-200/70">
+      <div className="flex flex-col gap-2.5 md:hidden">
+        <div className="flex justify-between text-[11px] text-bjj-gray-200/70">
           <span>{steps[step].label}</span>
           <span>
             {step + 1} / {steps.length}
@@ -244,7 +244,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
           <button
             type="button"
             onClick={prevStep}
-            className="inline-flex items-center gap-1 rounded-xl border border-bjj-gray-800 px-4 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-lg border border-bjj-gray-800 px-3.5 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-50"
             disabled={step === 0}
           >
             <ChevronLeft size={14} /> Voltar
@@ -252,7 +252,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
           <button
             type={isLastStep ? 'submit' : 'button'}
             onClick={isLastStep ? undefined : nextStep}
-            className="inline-flex items-center gap-2 rounded-xl bg-bjj-red px-4 py-2 text-xs font-semibold text-bjj-white transition hover:bg-bjj-red/80 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-bjj-red px-3.5 py-2 text-xs font-semibold text-bjj-white transition hover:bg-bjj-red/80 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isSubmitting}
           >
             {isLastStep ? submitLabel : 'Avançar'}
@@ -261,7 +261,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
         </div>
       </div>
 
-      <div className="hidden md:flex items-center justify-between rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-6 py-4">
+      <div className="hidden md:flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-5 py-3.5">
         <div className="text-sm text-bjj-gray-200/70">
           <p>
             <span className="font-semibold text-bjj-white">{formData.nome || 'Aluno sem nome'}</span> ·{' '}

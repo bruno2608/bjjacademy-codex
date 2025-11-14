@@ -70,7 +70,7 @@ export default function EditarAlunoPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHero
         badge="Edição de cadastro"
         title={aluno.nome}
@@ -78,15 +78,15 @@ export default function EditarAlunoPage() {
         stats={heroStats}
         actions={
           <button type="button" className="btn-primary" onClick={() => router.push('/alunos')}>
-            <ArrowLeft size={16} /> Voltar para lista
+            <ArrowLeft size={15} /> Voltar para lista
           </button>
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr,1fr]">
-        <section className="card space-y-4">
-          <header className="space-y-2">
-            <h2 className="text-xl font-semibold text-bjj-white">Informações gerais</h2>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[2fr,1fr]">
+        <section className="card space-y-3">
+          <header className="space-y-1.5">
+            <h2 className="text-lg font-semibold text-bjj-white">Informações gerais</h2>
             <p className="text-sm text-bjj-gray-200/70">
               Lembre-se de registrar data da última graduação para manter as recomendações atualizadas.
             </p>
@@ -95,7 +95,7 @@ export default function EditarAlunoPage() {
           {saving && <p className="text-xs text-bjj-gray-200/70">Sincronizando dados...</p>}
         </section>
 
-        <aside className="space-y-4">
+        <aside className="space-y-3">
           <Card
             title="Status na hierarquia"
             value={`${aluno.faixa} · ${aluno.graus}º grau`}

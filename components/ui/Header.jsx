@@ -17,12 +17,12 @@ export default function Header({ title }) {
   };
 
   return (
-    <header className="flex justify-between items-center px-6 py-4 border-b border-bjj-gray-800 bg-bjj-gray-900/80 backdrop-blur">
-      <h1 className="text-2xl font-semibold">{title}</h1>
-      <div className="flex items-center gap-4">
+    <header className="flex items-center justify-between border-b border-bjj-gray-800 bg-bjj-gray-900/80 px-5 py-3 backdrop-blur">
+      <h1 className="text-xl font-semibold">{title}</h1>
+      <div className="flex items-center gap-3">
         <span className="text-sm text-bjj-gray-200/80">{user?.name || 'Instrutor'}</span>
-        <button onClick={handleLogout} className="flex items-center gap-2 btn-primary">
-          <LogOut size={16} />
+        <button onClick={handleLogout} className="flex items-center gap-1.5 btn-primary">
+          <LogOut size={15} />
           Sair
         </button>
       </div>

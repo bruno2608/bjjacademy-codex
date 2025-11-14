@@ -10,13 +10,13 @@ import { CheckCircle2, Circle, Loader2, Trash2 } from 'lucide-react';
 export default function AttendanceTable({ records, onToggle, onDelete, isLoading = false }) {
   return (
     <div
-      className="relative overflow-hidden rounded-3xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 shadow-[0_25px_50px_-20px_rgba(0,0,0,0.45)]"
+      className="relative overflow-hidden rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.45)]"
       aria-busy={isLoading}
     >
-      <div className="absolute right-[-20%] top-[-20%] h-32 w-32 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-      <div className="hidden md:grid grid-cols-5 bg-bjj-gray-900/60 text-sm uppercase tracking-[0.15em] text-bjj-gray-200/60">
+      <div className="absolute right-[-20%] top-[-20%] h-28 w-28 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
+      <div className="hidden md:grid grid-cols-5 bg-bjj-gray-900/60 text-xs uppercase tracking-[0.14em] text-bjj-gray-200/60">
         {['Aluno', 'Graduação', 'Data', 'Status', 'Ações'].map((header) => (
-          <div key={header} className="px-5 py-4">
+          <div key={header} className="px-4 py-3.5">
             {header}
           </div>
         ))}
@@ -28,16 +28,16 @@ export default function AttendanceTable({ records, onToggle, onDelete, isLoading
           const graus = Number.isFinite(Number(record.graus)) ? Number(record.graus) : 0;
           return (
             <div key={record.id} className="bg-gradient-to-br from-bjj-gray-900/40 via-bjj-black/40 to-bjj-black/60">
-              <div className="flex flex-col gap-3 border-b border-bjj-gray-800/60 p-5 md:hidden">
+              <div className="flex flex-col gap-2.5 border-b border-bjj-gray-800/60 p-4 md:hidden">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-base font-semibold text-bjj-white">{record.alunoNome}</p>
-                    <p className="text-xs text-bjj-gray-200/70">
+                    <p className="text-sm font-semibold text-bjj-white">{record.alunoNome}</p>
+                    <p className="text-[11px] text-bjj-gray-200/70">
                       {faixa} · {graus}º grau
                     </p>
                   </div>
                   <span
-                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                       record.status === 'Presente'
                         ? 'bg-bjj-red/20 text-bjj-red'
                         : 'bg-bjj-gray-800/80 text-bjj-gray-200'
@@ -46,7 +46,7 @@ export default function AttendanceTable({ records, onToggle, onDelete, isLoading
                     {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-xs text-bjj-gray-200/70">
+                <div className="grid grid-cols-2 gap-2.5 text-[11px] text-bjj-gray-200/70">
                   <div>
                     <p className="font-semibold text-bjj-gray-200/90">Data</p>
                     <p>{formattedDate}</p>
@@ -54,7 +54,7 @@ export default function AttendanceTable({ records, onToggle, onDelete, isLoading
                   <div>
                     <p className="font-semibold text-bjj-gray-200/90">Ação rápida</p>
                     <button
-                      className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-bjj-gray-700 px-3 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
+                      className="mt-1 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-bjj-gray-700 px-3 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
                       onClick={() => onToggle?.(record)}
                     >
                       {record.status === 'Presente' ? 'Marcar falta' : 'Confirmar presença'}
@@ -62,24 +62,24 @@ export default function AttendanceTable({ records, onToggle, onDelete, isLoading
                   </div>
                 </div>
                 <button
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-bjj-gray-700 px-3 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-bjj-gray-700 px-3 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
                   onClick={() => onDelete?.(record)}
                 >
-                  <Trash2 size={16} /> Remover
+                  <Trash2 size={15} /> Remover
                 </button>
               </div>
               <div className="hidden md:grid md:grid-cols-5">
-                <div className="border-b border-bjj-gray-800/60 px-5 py-4">
-                  <p className="font-semibold text-bjj-white">{record.alunoNome}</p>
+                <div className="border-b border-bjj-gray-800/60 px-4 py-3.5">
+                  <p className="text-sm font-semibold text-bjj-white">{record.alunoNome}</p>
                 </div>
-                <div className="border-b border-bjj-gray-800/60 px-5 py-4 text-sm">
+                <div className="border-b border-bjj-gray-800/60 px-4 py-3.5 text-xs">
                   <span className="font-medium text-bjj-white/90">{faixa}</span>
-                  <span className="block text-xs text-bjj-gray-200/70">{graus}º grau</span>
+                  <span className="block text-[11px] text-bjj-gray-200/70">{graus}º grau</span>
                 </div>
-                <div className="border-b border-bjj-gray-800/60 px-5 py-4 text-sm text-bjj-gray-200/80">{formattedDate}</div>
-                <div className="border-b border-bjj-gray-800/60 px-5 py-4 text-sm">
+                <div className="border-b border-bjj-gray-800/60 px-4 py-3.5 text-xs text-bjj-gray-200/80">{formattedDate}</div>
+                <div className="border-b border-bjj-gray-800/60 px-4 py-3.5 text-xs">
                   <span
-                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                       record.status === 'Presente'
                         ? 'bg-bjj-red/20 text-bjj-red'
                         : 'bg-bjj-gray-800/80 text-bjj-gray-200'
@@ -88,18 +88,18 @@ export default function AttendanceTable({ records, onToggle, onDelete, isLoading
                     {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 px-5 py-4">
+                <div className="flex items-center gap-2.5 px-4 py-3.5">
                   <button
-                    className="inline-flex items-center gap-2 rounded-lg border border-bjj-gray-700 px-3 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-bjj-gray-700 px-3 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
                     onClick={() => onToggle?.(record)}
                   >
                     {record.status === 'Presente' ? 'Marcar falta' : 'Confirmar presença'}
                   </button>
                   <button
-                    className="inline-flex items-center gap-2 rounded-lg border border-bjj-gray-700 px-3 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-bjj-gray-700 px-3 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
                     onClick={() => onDelete?.(record)}
                   >
-                    <Trash2 size={16} /> Remover
+                    <Trash2 size={15} /> Remover
                   </button>
                 </div>
               </div>
@@ -108,8 +108,8 @@ export default function AttendanceTable({ records, onToggle, onDelete, isLoading
         })}
       </div>
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-bjj-black/50">
-          <Loader2 className="h-6 w-6 animate-spin text-bjj-red" />
+        <div className="absolute inset-0 flex items-center justify-center bg-bjj-black/40">
+          <Loader2 className="h-5 w-5 animate-spin text-bjj-red" />
         </div>
       )}
     </div>

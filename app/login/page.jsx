@@ -45,13 +45,13 @@ export default function LoginPage() {
         <div className="absolute right-[-20%] top-[-10%] h-96 w-96 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
         <div className="absolute left-[-10%] bottom-[-20%] h-72 w-72 rounded-full bg-bjj-gray-800/40 blur-3xl" aria-hidden />
 
-        <section className="relative max-w-xl space-y-6">
-          <span className="inline-flex items-center gap-2 rounded-full border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-bjj-gray-200/70">
-            <ShieldCheck size={14} className="text-bjj-red" /> Portal do instrutor
+        <section className="relative max-w-xl space-y-5">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-bjj-gray-200/70">
+            <ShieldCheck size={13} className="text-bjj-red" /> Portal do instrutor
           </span>
-          <div className="space-y-4">
-            <h1 className="text-4xl font-semibold">BJJ Academy</h1>
-            <p className="text-base text-bjj-gray-200/80">
+          <div className="space-y-3.5">
+            <h1 className="text-3xl font-semibold">BJJ Academy</h1>
+            <p className="text-sm text-bjj-gray-200/80">
               Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
             </p>
           </div>
@@ -62,12 +62,12 @@ export default function LoginPage() {
           </ul>
         </section>
 
-        <section className="relative mt-10 w-full max-w-md rounded-3xl border border-bjj-gray-800/70 bg-bjj-gray-900/80 p-8 shadow-[0_25px_50px_-20px_rgba(0,0,0,0.45)] lg:mt-0">
-          <header className="mb-6 space-y-1 text-center">
-            <h2 className="text-2xl font-semibold">Entrar</h2>
+        <section className="relative mt-10 w-full max-w-md rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/80 p-6 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)] lg:mt-0">
+          <header className="mb-5 space-y-1 text-center">
+            <h2 className="text-xl font-semibold">Entrar</h2>
             <p className="text-sm text-bjj-gray-200/70">Use suas credenciais para acessar o painel.</p>
           </header>
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-3.5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/60">E-mail</label>
               <input
@@ -94,10 +94,10 @@ export default function LoginPage() {
             </div>
             {error && <p className="text-sm text-bjj-red">{error}</p>}
             <button type="submit" className="btn-primary w-full justify-center">
-              Acessar painel <ArrowRight size={16} />
+              Acessar painel <ArrowRight size={15} />
             </button>
           </form>
-          <p className="mt-6 text-center text-xs text-bjj-gray-200/60">
+          <p className="mt-5 text-center text-xs text-bjj-gray-200/60">
             Este ambiente usa autenticação mock para fins de prototipagem.
           </p>
         </section>

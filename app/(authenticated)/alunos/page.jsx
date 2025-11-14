@@ -127,7 +127,7 @@ export default function AlunosPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHero
         badge="Gestão de alunos"
         title="Mantenha a base organizada e pronta para a próxima graduação"
@@ -140,9 +140,9 @@ export default function AlunosPage() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[3fr,2fr]">
-        <section className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-[3fr,2fr]">
+        <section className="space-y-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <Card
               title="Alunos ativos"
               value={ativos}
@@ -156,9 +156,9 @@ export default function AlunosPage() {
               description="Quantidade de alunos com recomendação automática para graduação."
             />
           </div>
-          <div className="card space-y-4">
+          <div className="card space-y-3">
             <header>
-              <h2 className="text-xl font-semibold text-bjj-white">Lista de alunos</h2>
+              <h2 className="text-lg font-semibold text-bjj-white">Lista de alunos</h2>
               <p className="text-sm text-bjj-gray-200/70">
                 Monitore faixa atual, tempo dedicado e status de cada membro da academia.
               </p>
@@ -173,19 +173,19 @@ export default function AlunosPage() {
           </div>
         </section>
 
-        <aside className="card space-y-6">
-          <div className="space-y-3">
-            <h2 className="text-xl font-semibold text-bjj-white">Distribuição de faixas</h2>
+        <aside className="card space-y-4">
+          <div className="space-y-2.5">
+            <h2 className="text-lg font-semibold text-bjj-white">Distribuição de faixas</h2>
             <p className="text-sm text-bjj-gray-200/70">
               Tenha visibilidade de como está a pirâmide da academia e antecipe novas graduações.
             </p>
           </div>
-          <ul className="space-y-3">
+          <ul className="space-y-2.5">
             {beltDistribution.map((item) => (
-              <li key={item.faixa} className="space-y-1 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4">
+              <li key={item.faixa} className="space-y-1 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3.5">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-bjj-white">{item.faixa}</span>
-                  <span className="text-xs text-bjj-gray-200/60">{item.quantidade} aluno(s)</span>
+                  <span className="text-[11px] text-bjj-gray-200/60">{item.quantidade} aluno(s)</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-bjj-gray-800">
                   <div className="h-full rounded-full bg-bjj-red" style={{ width: `${item.percentual}%` }} />
@@ -195,8 +195,8 @@ export default function AlunosPage() {
             ))}
           </ul>
 
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-bjj-white">Próximos destaques</h3>
+          <div className="space-y-2.5">
+            <h3 className="text-base font-semibold text-bjj-white">Próximos destaques</h3>
             <p className="text-xs text-bjj-gray-200/70">
               Alunos com mais tempo dedicado na faixa atual ou recomendação imediata.
             </p>

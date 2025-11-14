@@ -319,16 +319,16 @@ export default function GraduacoesPage() {
   }
 
   return (
-    <div className="space-y-8" aria-busy={isRefreshing}>
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="space-y-6" aria-busy={isRefreshing}>
+      <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h2 className="text-3xl font-semibold">Jornada de graduações</h2>
+          <h2 className="text-2xl font-semibold">Jornada de graduações</h2>
           <p className="text-sm text-bjj-gray-200/70">
             Visualize a evolução completa dos atletas, acompanhe recomendações automáticas e
             conduza as cerimônias no tempo certo.
           </p>
         </div>
-        <div className="flex flex-col gap-2 text-sm">
+        <div className="flex flex-col gap-1.5 text-sm">
           <label htmlFor="alunoId" className="font-medium text-bjj-gray-200/80">
             Selecionar aluno
           </label>
@@ -353,17 +353,17 @@ export default function GraduacoesPage() {
         </div>
       </header>
 
-      <div className="grid gap-6 xl:grid-cols-[360px,1fr]">
-        <section className="relative overflow-hidden rounded-3xl border border-bjj-gray-800 bg-gradient-to-br from-bjj-black via-bjj-gray-900 to-bjj-black p-8 shadow-focus/40">
-          <div className="absolute right-0 top-0 h-40 w-40 -translate-y-12 translate-x-10 rounded-full bg-bjj-red/20 blur-3xl" />
-          <div className="relative flex flex-col gap-6">
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full border border-bjj-red/60 bg-bjj-gray-900 text-lg font-semibold text-bjj-white">
+      <div className="grid gap-4 xl:grid-cols-[340px,1fr]">
+        <section className="relative overflow-hidden rounded-2xl border border-bjj-gray-800 bg-gradient-to-br from-bjj-black via-bjj-gray-900 to-bjj-black p-6 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.55)]">
+          <div className="absolute right-0 top-0 h-36 w-36 -translate-y-10 translate-x-8 rounded-full bg-bjj-red/20 blur-3xl" />
+          <div className="relative flex flex-col gap-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-bjj-red/60 bg-bjj-gray-900 text-base font-semibold text-bjj-white">
                 {getInitials(alunoSelecionado?.nome)}
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-bjj-gray-200/60">Status atual</p>
-                <h3 className="text-2xl font-semibold text-bjj-white">
+                <p className="text-[11px] uppercase tracking-[0.26em] text-bjj-gray-200/60">Status atual</p>
+                <h3 className="text-xl font-semibold text-bjj-white">
                   {alunoSelecionado?.nome || 'Selecione um aluno'}
                 </h3>
                 <p className="text-xs text-bjj-gray-200/70">
@@ -372,8 +372,8 @@ export default function GraduacoesPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/60 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="rounded-xl border border-bjj-gray-800/80 bg-bjj-gray-900/60 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2.5">
                 <span className="text-sm font-medium text-bjj-gray-200/80">{alunoSelecionado?.faixa}</span>
                 <div className="flex items-center gap-1">
                   {stripes.map((preenchida, index) => (
@@ -386,7 +386,7 @@ export default function GraduacoesPage() {
                   ))}
                 </div>
               </div>
-              <div className="mt-4">
+              <div className="mt-3.5">
                 <div className="flex items-center justify-between text-xs text-bjj-gray-200/70">
                   <span>Próxima meta</span>
                   <span>{progressoPercentual}%</span>
@@ -397,7 +397,7 @@ export default function GraduacoesPage() {
                     style={{ width: `${progressoPercentual}%` }}
                   />
                 </div>
-                <p className="mt-3 text-xs text-bjj-gray-200/70">
+                <p className="mt-2.5 text-xs text-bjj-gray-200/70">
                   {recomendacao
                     ? `${recomendacao.descricao} · próxima janela ${formatDate(recomendacao.previsao)}`
                     : 'Defina uma recomendação para liberar a próxima graduação.'}
@@ -405,26 +405,26 @@ export default function GraduacoesPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 text-sm text-bjj-gray-200/80 sm:grid-cols-2">
-              <div className="rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Tempo na faixa</p>
-                <p className="mt-2 text-lg font-semibold text-bjj-white">{tempoNaFaixaLabel}</p>
+            <div className="grid grid-cols-1 gap-2.5 text-sm text-bjj-gray-200/80 sm:grid-cols-2">
+              <div className="rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-3.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-200/60">Tempo na faixa</p>
+                <p className="mt-1.5 text-lg font-semibold text-bjj-white">{tempoNaFaixaLabel}</p>
               </div>
-              <div className="rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Até a próxima</p>
-                <p className="mt-2 text-lg font-semibold text-bjj-white">
+              <div className="rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-3.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-200/60">Até a próxima</p>
+                <p className="mt-1.5 text-lg font-semibold text-bjj-white">
                   {tempoRestanteLabel || 'Sem restrições'}
                 </p>
               </div>
-              <div className="rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Última graduação</p>
-                <p className="mt-2 text-lg font-semibold text-bjj-white">
+              <div className="rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-3.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-200/60">Última graduação</p>
+                <p className="mt-1.5 text-lg font-semibold text-bjj-white">
                   {formatDate(alunoSelecionado?.dataUltimaGraduacao)}
                 </p>
               </div>
-              <div className="rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Média entre graduações</p>
-                <p className="mt-2 text-lg font-semibold text-bjj-white">
+              <div className="rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-3.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-200/60">Média entre graduações</p>
+                <p className="mt-1.5 text-lg font-semibold text-bjj-white">
                   {mediaEntreGraduacoes ? formatMonths(mediaEntreGraduacoes) : 'Ainda em formação'}
                 </p>
               </div>
@@ -432,10 +432,10 @@ export default function GraduacoesPage() {
           </div>
         </section>
 
-        <section className="space-y-6">
-          <div className="rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/60 p-6">
-            <header className="space-y-2">
-              <h3 className="text-lg font-semibold">Agendar nova graduação</h3>
+        <section className="space-y-4">
+          <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/60 p-5">
+            <header className="space-y-1.5">
+              <h3 className="text-base font-semibold">Agendar nova graduação</h3>
               {recomendacao ? (
                 <p className="text-xs text-bjj-gray-200/70">
                   Recomendação automática: <span className="font-semibold text-bjj-red">{recomendacao.descricao}</span> ·
@@ -448,7 +448,7 @@ export default function GraduacoesPage() {
               )}
             </header>
 
-            <form className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
+            <form className="mt-3.5 grid grid-cols-1 gap-3 md:grid-cols-2" onSubmit={handleSubmit}>
               <div>
                 <label className="block text-sm font-medium mb-2">Tipo</label>
                 <select name="tipo" value={form.tipo} onChange={handleChange} className="input-field">
@@ -538,14 +538,14 @@ export default function GraduacoesPage() {
             </form>
           </div>
 
-          <div className="rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/60 p-6">
-            <h3 className="text-lg font-semibold mb-4">Linha do tempo</h3>
+          <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/60 p-5">
+            <h3 className="mb-3 text-base font-semibold">Linha do tempo</h3>
             <GraduationTimeline itens={alunoSelecionado?.historicoGraduacoes || []} />
           </div>
         </section>
       </div>
 
-      <section className="space-y-4">
+      <section className="space-y-3.5">
         <div>
           <h3 className="text-lg font-semibold">Próximas graduações</h3>
           <p className="text-xs text-bjj-gray-200/70">

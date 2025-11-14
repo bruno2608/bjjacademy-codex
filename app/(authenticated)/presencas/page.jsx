@@ -122,7 +122,7 @@ export default function PresencasPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHero
         badge="Rotina diária"
         title="Controle de presenças em tempo real"
@@ -130,9 +130,9 @@ export default function PresencasPage() {
         stats={heroStats}
       />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr,1fr]">
-        <section className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-[2fr,1fr]">
+        <section className="space-y-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <Card
               title="Presenças confirmadas"
               value={presentes}
@@ -153,9 +153,9 @@ export default function PresencasPage() {
             />
           </div>
 
-          <article className="card space-y-4">
+          <article className="card space-y-3">
             <header>
-              <h2 className="text-xl font-semibold text-bjj-white">Registrar nova presença</h2>
+              <h2 className="text-lg font-semibold text-bjj-white">Registrar nova presença</h2>
               <p className="text-sm text-bjj-gray-200/70">
                 Escolha o aluno, defina a data e marque presença ou falta em segundos.
               </p>
@@ -171,9 +171,9 @@ export default function PresencasPage() {
           />
         </section>
 
-        <aside className="card space-y-5">
-          <header className="space-y-2">
-            <h2 className="text-xl font-semibold text-bjj-white">Ranking de engajamento</h2>
+        <aside className="card space-y-4">
+          <header className="space-y-1.5">
+            <h2 className="text-lg font-semibold text-bjj-white">Ranking de engajamento</h2>
             <p className="text-sm text-bjj-gray-200/70">
               Reconheça quem mais comparece e incentive quem está oscilando nas presenças.
             </p>
@@ -181,11 +181,11 @@ export default function PresencasPage() {
           {ranking.length === 0 ? (
             <p className="text-sm text-bjj-gray-200/70">Nenhum registro recente para exibir o ranking.</p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {ranking.map((item) => (
                 <li
                   key={item.id}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3.5"
                 >
                   <div>
                     <p className="text-sm font-semibold text-bjj-white">{item.nome}</p>

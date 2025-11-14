@@ -114,7 +114,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHero
         badge="Visão geral"
         title="Painel de performance da BJJ Academy"
@@ -122,7 +122,7 @@ export default function DashboardPage() {
         stats={heroStats}
       />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
         <Card
           title="Alunos ativos"
           value={ativos}
@@ -149,17 +149,17 @@ export default function DashboardPage() {
         />
       </div>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr,1fr]">
-        <article className="card space-y-5">
-          <header className="flex items-center justify-between gap-4">
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-[2fr,1fr]">
+        <article className="card space-y-4">
+          <header className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-semibold text-bjj-white">Radar de evolução</h2>
+              <h2 className="text-lg font-semibold text-bjj-white">Radar de evolução</h2>
               <p className="text-sm text-bjj-gray-200/70">
                 Priorize quem está pronto para avançar: acompanhe próximos graus e trocas de faixa sugeridas.
               </p>
             </div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/70">
-              <Activity size={14} className="text-bjj-red" /> {evolucoes.length} recomendações
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/70">
+              <Activity size={13} className="text-bjj-red" /> {evolucoes.length} recomendações
             </span>
           </header>
           {evolucoesEmDestaque.length === 0 ? (
@@ -167,17 +167,17 @@ export default function DashboardPage() {
               Nenhuma recomendação pendente para as próximas semanas.
             </p>
           ) : (
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {evolucoesEmDestaque.map(({ aluno, recomendacao }) => (
                 <li
                   key={aluno.id}
-                  className="flex flex-col gap-2 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between"
+                  className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3.5 md:flex-row md:items-center md:justify-between"
                 >
                   <div>
                     <p className="text-sm font-semibold text-bjj-white">{aluno.nome}</p>
                     <p className="text-xs text-bjj-gray-200/70">{recomendacao.descricao}</p>
                   </div>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/80">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/80">
                     {recomendacao.tipo === 'Grau' ? 'Próximo grau' : 'Próxima faixa'}
                     <span className="text-bjj-red font-semibold">
                       {recomendacao.tipo === 'Grau'
@@ -191,9 +191,9 @@ export default function DashboardPage() {
           )}
         </article>
 
-        <aside className="card space-y-5">
-          <header className="space-y-2">
-            <h2 className="text-xl font-semibold text-bjj-white">Próximas cerimônias</h2>
+        <aside className="card space-y-4">
+          <header className="space-y-1.5">
+            <h2 className="text-lg font-semibold text-bjj-white">Próximas cerimônias</h2>
             <p className="text-sm text-bjj-gray-200/70">
               Organize o cronograma e alinhe expectativa com alunos e responsáveis.
             </p>
@@ -201,21 +201,21 @@ export default function DashboardPage() {
           {proximasCerimonias.length === 0 ? (
             <p className="text-sm text-bjj-gray-200/70">Nenhuma cerimônia planejada para os próximos meses.</p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {proximasCerimonias.map((item) => (
                 <li
                   key={item.id}
-                  className="flex flex-col gap-2 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4"
+                  className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3.5"
                 >
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold text-bjj-white">{item.alunoNome}</p>
-                    <span className="text-xs text-bjj-gray-200/60">{formatDate(item.previsao)}</span>
+                    <span className="text-[11px] text-bjj-gray-200/60">{formatDate(item.previsao)}</span>
                   </div>
                   <p className="text-xs text-bjj-gray-200/70">
                     {item.faixaAtual} → {item.proximaFaixa}
                   </p>
-                  <span className="inline-flex items-center gap-2 text-xs text-bjj-gray-200/60">
-                    <Flame size={14} className="text-bjj-red" /> {item.status}
+                  <span className="inline-flex items-center gap-1.5 text-xs text-bjj-gray-200/60">
+                    <Flame size={13} className="text-bjj-red" /> {item.status}
                   </span>
                 </li>
               ))}
