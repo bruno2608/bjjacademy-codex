@@ -46,6 +46,12 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const abrirSeletorNativo = (event) => {
+    if (typeof event.target.showPicker === 'function') {
+      event.target.showPicker();
+    }
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const alunoSelecionado = alunos.find((aluno) => aluno.id === form.alunoId);
@@ -92,6 +98,8 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
           className="input-field"
           value={form.data}
           onChange={handleChange}
+          onClick={abrirSeletorNativo}
+          onFocus={abrirSeletorNativo}
           disabled={isEditing}
           required
         />
@@ -112,6 +120,8 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
           className="input-field"
           value={form.hora}
           onChange={handleChange}
+          onClick={abrirSeletorNativo}
+          onFocus={abrirSeletorNativo}
           required
         />
       </div>
