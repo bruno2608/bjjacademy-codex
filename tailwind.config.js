@@ -12,6 +12,7 @@ module.exports = {
         'bjj-red': '#E10600',
         'bjj-gray-900': '#1A1A1A',
         'bjj-gray-800': '#2E2E2E',
+        'bjj-gray-700': '#3A3A3A',
         'bjj-gray-200': '#D9D9D9'
       },
       fontFamily: {

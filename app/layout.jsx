@@ -7,7 +7,10 @@ import '../styles/globals.css';
 export const metadata = {
   title: 'BJJ Academy',
   description: 'PWA de gestão da BJJ Academy com foco em performance e simplicidade.',
-  manifest: '/manifest.json',
+  manifest: '/manifest.json'
+};
+
+export const viewport = {
   themeColor: '#000000'
 };
 

@@ -3,6 +3,10 @@
  * Service worker padrão responsável por cachear assets estáticos
  * e fornecer comportamento offline básico.
  */
+// A referência abaixo é necessária para o next-pwa injetar a lista de assets precacheados.
+// eslint-disable-next-line no-undef
+self.__WB_MANIFEST;
+
 const CACHE_NAME = 'bjj-academy-cache-v1';
 const OFFLINE_URLS = ['/', '/login', '/dashboard'];
 
