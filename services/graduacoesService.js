@@ -10,6 +10,7 @@ const buildGraduacaoPayload = (aluno, input) => {
   const regra = getRuleForBelt(aluno?.faixa);
   const proximaFaixaRegra = regra?.proximaFaixa || null;
   const tipo = input?.tipo || 'Faixa';
+  const instrutor = input?.instrutor || 'Equipe BJJ Academy';
 
   if (tipo === 'Grau') {
     const regraGrau = regra?.graus?.find((item) => item.numero === Number(input.grauAlvo));
@@ -29,6 +30,7 @@ const buildGraduacaoPayload = (aluno, input) => {
       criterioTempo,
       mesesRestantes,
       previsao: input.previsao || estimateGraduationDate(aluno, mesesRestantes),
+      instrutor,
       status: 'Planejado'
     };
   }
@@ -50,6 +52,7 @@ const buildGraduacaoPayload = (aluno, input) => {
     criterioTempo,
     mesesRestantes: mesesRestantesFaixa,
     previsao: input.previsao || estimateGraduationDate(aluno, mesesRestantesFaixa),
+    instrutor,
     status: 'Planejado'
   };
 };
@@ -64,7 +67,12 @@ export async function scheduleGraduacao(payload) {
   const aluno = store.alunos.find((item) => item.id === payload.alunoId);
   const dadosGraduacao = aluno ? buildGraduacaoPayload(aluno, payload) : payload;
   const novaGraduacao = { ...dadosGraduacao, id: `graduation-${Date.now()}` };
-  store.setGraduacoes([...store.graduacoes, novaGraduacao]);
+  const atualizadas = [...store.graduacoes, novaGraduacao].sort((a, b) => {
+    const dataA = new Date(a.previsao).getTime();
+    const dataB = new Date(b.previsao).getTime();
+    return dataA - dataB;
+  });
+  store.setGraduacoes(atualizadas);
   return mockRequest(novaGraduacao);
 }
 

@@ -21,9 +21,9 @@ repositórios anteriores [`bjjacademyapp`](https://github.com/bruno2608/bjjacade
 | --- | --- |
 | Autenticação | Login mockado com persistência de token (localStorage) e guardas de rota. |
 | Dashboard | Cards dinâmicos com métricas de alunos, presenças semanais e graduações planejadas. |
-| Alunos | CRUD mockado com formulário que coleta faixa, graus, tempo na faixa e data da última graduação. |
+| Alunos | CRUD mockado com formulário (modal inline) que coleta faixa, graus, tempo na faixa e data da última graduação. |
 | Presenças | Registro rápido por aluno/data com contexto de faixa/graus, alternância de status e histórico responsivo. |
-| Graduações | Linha do tempo por atleta, agendamento por **grau** ou **faixa** com regras de tempo da IBJJF e atualização de status. |
+| Graduações | Tela gamificada com card de progresso, linha do tempo por atleta e agendamento por **grau** ou **faixa** respeitando as regras da IBJJF. |
 | PWA | Manifesto completo, service worker com cache básico e ícones em múltiplos tamanhos. |
 
 ## 🧭 **Mapa da estrutura**
@@ -34,7 +34,6 @@ app/
     dashboard/
     alunos/
       [id]/
-      novo/
     presencas/
     graduacoes/
   login/
