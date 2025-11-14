@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Layout protegido engloba as rotas autenticadas (dashboard e alunos).
+ * Layout protegido engloba as rotas autenticadas (dashboard, alunos, presenças e graduações).
  * Verifica token no localStorage e garante navegação segura.
  */
 import { useEffect, useMemo } from 'react';
@@ -13,7 +13,8 @@ import useUserStore from '../../store/userStore';
 export default function AuthenticatedLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { token, login } = useUserStore();
+  const token = useUserStore((state) => state.token);
+  const login = useUserStore((state) => state.login);
 
   useEffect(() => {
     const storedToken = typeof window !== 'undefined' ? localStorage.getItem('bjj_token') : null;
@@ -29,6 +30,8 @@ export default function AuthenticatedLayout({ children }) {
     if (pathname.startsWith('/alunos/novo')) return 'Novo aluno';
     if (pathname.startsWith('/alunos/')) return 'Editar aluno';
     if (pathname.startsWith('/alunos')) return 'Alunos';
+    if (pathname.startsWith('/presencas')) return 'Presenças';
+    if (pathname.startsWith('/graduacoes')) return 'Graduações';
     return 'Dashboard';
   }, [pathname]);
 
