@@ -22,7 +22,7 @@ export default function AttendanceTable({
       aria-busy={isLoading}
     >
       <div className="absolute right-[-18%] top-[-18%] h-24 w-24 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-      <div className="hidden md:grid md:grid-cols-[minmax(0,0.58fr)_minmax(0,1.45fr)_minmax(0,0.95fr)_minmax(0,1.05fr)_minmax(0,0.85fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
+      <div className="hidden md:grid md:grid-cols-[minmax(0,0.55fr)_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
         {['Ações', 'Aluno', 'Graduação', 'Data / Treino', 'Status'].map((header) => (
           <div key={header} className="px-3 py-3">
             {header}
@@ -36,6 +36,8 @@ export default function AttendanceTable({
           const graus = Number.isFinite(Number(record.graus)) ? Number(record.graus) : 0;
           const hora = record.hora || '—';
           const treinoLabel = record.tipoTreino || 'Sessão principal';
+          const horarioLabel = hora !== '—' ? `${hora}h` : 'Sem horário';
+          const dataTreinoLabel = `${formattedDate} · ${horarioLabel} · ${treinoLabel}`;
           const isPlaceholder = Boolean(record.isPlaceholder);
           const handleToggle = () => {
             if (isPlaceholder) {
@@ -121,77 +123,70 @@ export default function AttendanceTable({
                     <span className="sr-only">Corrigir presença</span>
                   </button>
                 )}
-              </div>
-              <div className="hidden md:grid md:grid-cols-[minmax(0,0.58fr)_minmax(0,1.45fr)_minmax(0,0.95fr)_minmax(0,1.05fr)_minmax(0,0.85fr)]">
-                <div className="flex items-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
-                  <button
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={handleToggle}
-                    disabled={isPlaceholder && record.status === 'Presente'}
-                  >
-                    {record.status === 'Presente' ? <RotateCcw size={15} /> : <CheckCircle2 size={15} />}
-                    <span className="sr-only">
-                      {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
+                </div>
+                <div className="hidden md:grid md:grid-cols-[minmax(0,0.55fr)_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)]">
+                  <div className="flex items-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
+                    <button
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
+                      onClick={handleToggle}
+                      disabled={isPlaceholder && record.status === 'Presente'}
+                    >
+                      {record.status === 'Presente' ? <RotateCcw size={15} /> : <CheckCircle2 size={15} />}
+                      <span className="sr-only">
+                        {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
+                      </span>
+                    </button>
+                    {!isPlaceholder && (
+                      <button
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
+                        onClick={() => onAddSession?.(record)}
+                      >
+                        <Plus size={14} />
+                        <span className="sr-only">Adicionar outra sessão</span>
+                      </button>
+                    )}
+                    {!isPlaceholder && (
+                      <button
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
+                        onClick={() => onEdit?.(record)}
+                      >
+                        <Pencil size={14} />
+                        <span className="sr-only">Corrigir presença</span>
+                      </button>
+                    )}
+                    <button
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
+                      onClick={() => onDelete?.(record)}
+                      disabled={isPlaceholder}
+                    >
+                      <Trash2 size={14} />
+                      <span className="sr-only">Remover registro</span>
+                    </button>
+                  </div>
+                  <div className="border-b border-bjj-gray-800/60 px-3 py-3">
+                    <p className="text-sm font-semibold text-bjj-white">{record.alunoNome}</p>
+                  </div>
+                  <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
+                    <span className="font-medium text-bjj-white/90">{faixa}</span>
+                    <span className="block text-[11px] text-bjj-gray-200/70">{graus}º grau</span>
+                  </div>
+                  <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px] text-bjj-gray-200/80">
+                    <span className="block whitespace-nowrap text-[11px] text-bjj-gray-200/80" title={dataTreinoLabel}>
+                      {dataTreinoLabel}
                     </span>
-                  </button>
-                  {!isPlaceholder && (
-                    <button
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                      onClick={() => onAddSession?.(record)}
+                  </div>
+                  <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                        record.status === 'Presente'
+                          ? 'bg-bjj-red/20 text-bjj-red'
+                          : 'bg-bjj-gray-800/80 text-bjj-gray-200'
+                      }`}
                     >
-                      <Plus size={14} />
-                      <span className="sr-only">Adicionar outra sessão</span>
-                    </button>
-                  )}
-                  {!isPlaceholder && (
-                    <button
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                      onClick={() => onEdit?.(record)}
-                    >
-                      <Pencil size={14} />
-                      <span className="sr-only">Corrigir presença</span>
-                    </button>
-                  )}
-                  <button
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={() => onDelete?.(record)}
-                    disabled={isPlaceholder}
-                  >
-                    <Trash2 size={14} />
-                    <span className="sr-only">Remover registro</span>
-                  </button>
+                      {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
+                    </span>
+                  </div>
                 </div>
-                <div className="border-b border-bjj-gray-800/60 px-3 py-3">
-                  <p className="text-sm font-semibold text-bjj-white">{record.alunoNome}</p>
-                </div>
-                <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
-                  <span className="font-medium text-bjj-white/90">{faixa}</span>
-                  <span className="block text-[11px] text-bjj-gray-200/70">{graus}º grau</span>
-                </div>
-                <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px] text-bjj-gray-200/80">
-                  <p
-                    className="flex items-center gap-2 whitespace-nowrap overflow-hidden text-ellipsis text-[11px] text-bjj-gray-200/75"
-                    title={`${formattedDate} • ${hora !== '—' ? `Horário ${hora}` : 'Horário não informado'} • ${treinoLabel}`}
-                  >
-                    <span className="font-semibold text-bjj-white/85">{formattedDate}</span>
-                    <span className="text-bjj-gray-200/45">•</span>
-                    <span>{hora !== '—' ? `Horário ${hora}` : 'Horário não informado'}</span>
-                    <span className="text-bjj-gray-200/45">•</span>
-                    <span className="text-bjj-gray-200/65">{treinoLabel}</span>
-                  </p>
-                </div>
-                <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                      record.status === 'Presente'
-                        ? 'bg-bjj-red/20 text-bjj-red'
-                        : 'bg-bjj-gray-800/80 text-bjj-gray-200'
-                    }`}
-                  >
-                    {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
-                  </span>
-                </div>
-              </div>
             </div>
           );
         })}

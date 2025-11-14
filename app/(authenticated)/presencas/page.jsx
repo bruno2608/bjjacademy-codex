@@ -44,7 +44,8 @@ export default function PresencasPage() {
   const normalizarDiaSemana = useCallback((valor) => {
     const referencia = valor ? new Date(valor) : new Date();
     if (Number.isNaN(referencia.getTime())) return null;
-    return referencia.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+    const nome = referencia.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+    return nome.replace('-feira', '').trim();
   }, []);
   const sugerirTreino = useCallback(
     (dataReferencia) => {
@@ -80,11 +81,6 @@ export default function PresencasPage() {
     setPresencas(lista);
     setIsRefreshing(false);
   }, []);
-
-  const presentes = presencas.filter((item) => item.status === 'Presente').length;
-  const ausentes = presencas.filter((item) => item.status !== 'Presente').length;
-  const total = presencas.length || 1;
-  const taxaPresenca = (presentes / total) * 100;
 
   // Lista reativa de alunos ativos para preencher a visão diária.
   const alunosAtivos = useMemo(
@@ -134,11 +130,27 @@ export default function PresencasPage() {
     (item) => item.status === 'Presente' && item.hora && item.hora > '10:00'
   ).length;
   const totalDia = registrosDoDia.length || 1;
+  const taxaPresencaDia = (presentesDia / totalDia) * 100;
 
   const diasAtivos = useMemo(() => {
     const conjunto = new Set(presencas.map((item) => item.data));
     return conjunto.size;
   }, [presencas]);
+
+  const treinosDoDiaPadrao = useMemo(() => {
+    const dia = normalizarDiaSemana(hoje);
+    const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
+    return candidatos.length ? candidatos : treinos;
+  }, [hoje, normalizarDiaSemana, treinos]);
+
+  const treinosDisponiveisModal = useMemo(() => {
+    if (!sessionRecord) {
+      return treinosDoDiaPadrao;
+    }
+    const diaSessao = normalizarDiaSemana(sessionRecord.data);
+    const candidatos = treinos.filter((treino) => treino.diaSemana === diaSessao);
+    return candidatos.length ? candidatos : treinosDoDiaPadrao;
+  }, [normalizarDiaSemana, sessionRecord, treinos, treinosDoDiaPadrao]);
 
   const handleToggle = async (registro) => {
     if (!registro?.id) {
@@ -229,6 +241,14 @@ export default function PresencasPage() {
     setSessionTakenTreinos([]);
   };
 
+  useEffect(() => {
+    if (!sessionRecord) return;
+    const opcaoExiste = treinosDisponiveisModal.some((treino) => treino.id === sessionTreinoId);
+    if (!opcaoExiste) {
+      setSessionTreinoId(treinosDisponiveisModal[0]?.id || '');
+    }
+  }, [sessionRecord, sessionTreinoId, treinosDisponiveisModal]);
+
   const handleSessionSubmit = async () => {
     if (!sessionRecord) return;
     const treinoSelecionado =
@@ -293,7 +313,7 @@ export default function PresencasPage() {
         <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
           <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Presenças</p>
           <p className="mt-1 text-xl font-semibold text-bjj-white">{presentesDia}</p>
-          <p className="text-xs text-bjj-gray-200/60">{formatPercent(taxaPresenca)} dos registros do dia</p>
+          <p className="text-xs text-bjj-gray-200/60">{formatPercent(taxaPresencaDia)} dos registros do dia</p>
         </div>
         <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
           <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Faltas</p>
@@ -443,13 +463,13 @@ export default function PresencasPage() {
             value={sessionTreinoId}
             onChange={(event) => setSessionTreinoId(event.target.value)}
           >
-            {treinos.map((treino) => (
+            {treinosDisponiveisModal.map((treino) => (
               <option key={treino.id} value={treino.id}>
                 {treino.nome} · {treino.hora}
                 {sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id) ? ' (já registrado)' : ''}
               </option>
             ))}
-            {!treinos.length && <option value="">Sessão principal</option>}
+            {!treinosDisponiveisModal.length && <option value="">Sessão principal</option>}
           </select>
           <div className="flex flex-col gap-2 md:flex-row md:justify-end">
             <button type="button" className="btn-secondary md:w-auto" onClick={fecharSelecaoSessao}>

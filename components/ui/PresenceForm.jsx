@@ -23,7 +23,8 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
   const normalizarDiaSemana = (valor) => {
     const referencia = valor ? new Date(valor) : new Date();
     if (Number.isNaN(referencia.getTime())) return null;
-    return referencia.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+    const nome = referencia.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+    return nome.replace('-feira', '').trim();
   };
 
   const sugerirTreino = (dataReferencia) => {

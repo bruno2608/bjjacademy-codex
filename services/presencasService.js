@@ -14,7 +14,8 @@ const normalizarDia = (data) => {
   if (!data) return null;
   const parsed = new Date(data);
   if (Number.isNaN(parsed.getTime())) return null;
-  return parsed.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+  const nome = parsed.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+  return nome.replace('-feira', '').trim();
 };
 
 const resolverTreino = (data, treinoId) => {
