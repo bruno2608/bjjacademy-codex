@@ -22,8 +22,8 @@ export default function AttendanceTable({
       aria-busy={isLoading}
     >
       <div className="absolute right-[-18%] top-[-18%] h-24 w-24 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-      <div className="hidden md:grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.55fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
-        {['Aluno', 'Graduação', 'Data / Treino', 'Status', 'Ações'].map((header) => (
+      <div className="hidden md:grid md:grid-cols-[minmax(0,0.58fr)_minmax(0,1.45fr)_minmax(0,0.95fr)_minmax(0,1.05fr)_minmax(0,0.85fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
+        {['Ações', 'Aluno', 'Graduação', 'Data / Treino', 'Status'].map((header) => (
           <div key={header} className="px-3 py-3">
             {header}
           </div>
@@ -122,7 +122,45 @@ export default function AttendanceTable({
                   </button>
                 )}
               </div>
-              <div className="hidden md:grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.05fr)_minmax(0,0.9fr)_minmax(0,0.55fr)]">
+              <div className="hidden md:grid md:grid-cols-[minmax(0,0.58fr)_minmax(0,1.45fr)_minmax(0,0.95fr)_minmax(0,1.05fr)_minmax(0,0.85fr)]">
+                <div className="flex items-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
+                  <button
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={handleToggle}
+                    disabled={isPlaceholder && record.status === 'Presente'}
+                  >
+                    {record.status === 'Presente' ? <RotateCcw size={15} /> : <CheckCircle2 size={15} />}
+                    <span className="sr-only">
+                      {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
+                    </span>
+                  </button>
+                  {!isPlaceholder && (
+                    <button
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
+                      onClick={() => onAddSession?.(record)}
+                    >
+                      <Plus size={14} />
+                      <span className="sr-only">Adicionar outra sessão</span>
+                    </button>
+                  )}
+                  {!isPlaceholder && (
+                    <button
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
+                      onClick={() => onEdit?.(record)}
+                    >
+                      <Pencil size={14} />
+                      <span className="sr-only">Corrigir presença</span>
+                    </button>
+                  )}
+                  <button
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={() => onDelete?.(record)}
+                    disabled={isPlaceholder}
+                  >
+                    <Trash2 size={14} />
+                    <span className="sr-only">Remover registro</span>
+                  </button>
+                </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3">
                   <p className="text-sm font-semibold text-bjj-white">{record.alunoNome}</p>
                 </div>
@@ -131,13 +169,13 @@ export default function AttendanceTable({
                   <span className="block text-[11px] text-bjj-gray-200/70">{graus}º grau</span>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px] text-bjj-gray-200/80">
-                  <span className="block text-xs">{formattedDate}</span>
-                  <span className="mt-1 block text-[11px] text-bjj-gray-200/60">
-                    {hora !== '—' ? `Horário ${hora}` : 'Sem registro do horário'}
-                  </span>
-                  <span className="mt-1 block text-[11px] text-bjj-gray-200/50">
-                    {treinoLabel}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-semibold text-bjj-gray-200/90">{formattedDate}</span>
+                    <span className="text-[11px] text-bjj-gray-200/65">
+                      {hora !== '—' ? `Horário ${hora}` : 'Horário não informado'}
+                    </span>
+                    <span className="text-[11px] text-bjj-gray-200/55">{treinoLabel}</span>
+                  </div>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
                   <span
@@ -149,44 +187,6 @@ export default function AttendanceTable({
                   >
                     {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
                   </span>
-                </div>
-                <div className="flex items-center justify-end gap-2 px-3 py-2.5">
-                  <button
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={handleToggle}
-                    disabled={isPlaceholder && record.status === 'Presente'}
-                  >
-                    {record.status === 'Presente' ? <RotateCcw size={16} /> : <CheckCircle2 size={16} />}
-                    <span className="sr-only">
-                      {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
-                    </span>
-                  </button>
-                  {!isPlaceholder && (
-                    <button
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                      onClick={() => onAddSession?.(record)}
-                    >
-                      <Plus size={16} />
-                      <span className="sr-only">Adicionar outra sessão</span>
-                    </button>
-                  )}
-                  {!isPlaceholder && (
-                    <button
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                      onClick={() => onEdit?.(record)}
-                    >
-                      <Pencil size={15} />
-                      <span className="sr-only">Corrigir presença</span>
-                    </button>
-                  )}
-                  <button
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={() => onDelete?.(record)}
-                    disabled={isPlaceholder}
-                  >
-                    <Trash2 size={15} />
-                    <span className="sr-only">Remover registro</span>
-                  </button>
                 </div>
               </div>
             </div>
