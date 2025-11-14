@@ -8,6 +8,7 @@ import { useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Sidebar from '../../components/ui/Sidebar';
 import Header from '../../components/ui/Header';
+import TabletNav from '../../components/ui/TabletNav';
 import MobileNav from '../../components/ui/MobileNav';
 import useUserStore from '../../store/userStore';
 
@@ -38,8 +39,11 @@ export default function AuthenticatedLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-bjj-black">
       <Sidebar />
-      <main className="flex flex-1 flex-col pb-24 lg:pb-0">
-        <Header title={pageTitle} />
+      <main className="flex flex-1 flex-col pb-24 md:pb-8 lg:pb-0">
+        <div className="sticky top-0 z-40 flex flex-col bg-bjj-black/95 backdrop-blur">
+          <Header title={pageTitle} />
+          <TabletNav />
+        </div>
         <section className="flex-1 bg-bjj-gray-900/40">
           <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 pb-10 pt-6 sm:px-6 lg:px-8">
             {children}

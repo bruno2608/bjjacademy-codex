@@ -13,7 +13,7 @@ export default function MobileNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-bjj-gray-800/80 bg-bjj-black/95 backdrop-blur-md lg:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-bjj-gray-800/80 bg-bjj-black/95 backdrop-blur-md md:hidden"
       role="navigation"
     >
       <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-3">
