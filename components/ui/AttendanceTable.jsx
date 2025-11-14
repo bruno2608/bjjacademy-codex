@@ -169,13 +169,16 @@ export default function AttendanceTable({
                   <span className="block text-[11px] text-bjj-gray-200/70">{graus}º grau</span>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px] text-bjj-gray-200/80">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold text-bjj-gray-200/90">{formattedDate}</span>
-                    <span className="text-[11px] text-bjj-gray-200/65">
-                      {hora !== '—' ? `Horário ${hora}` : 'Horário não informado'}
-                    </span>
-                    <span className="text-[11px] text-bjj-gray-200/55">{treinoLabel}</span>
-                  </div>
+                  <p
+                    className="flex items-center gap-2 whitespace-nowrap overflow-hidden text-ellipsis text-[11px] text-bjj-gray-200/75"
+                    title={`${formattedDate} • ${hora !== '—' ? `Horário ${hora}` : 'Horário não informado'} • ${treinoLabel}`}
+                  >
+                    <span className="font-semibold text-bjj-white/85">{formattedDate}</span>
+                    <span className="text-bjj-gray-200/45">•</span>
+                    <span>{hora !== '—' ? `Horário ${hora}` : 'Horário não informado'}</span>
+                    <span className="text-bjj-gray-200/45">•</span>
+                    <span className="text-bjj-gray-200/65">{treinoLabel}</span>
+                  </p>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
                   <span
