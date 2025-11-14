@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Users, Award, CalendarCheck, Medal, Activity, Flame } from 'lucide-react';
 import Card from '../../../components/ui/Card';
 import PageHero from '../../../components/ui/PageHero';
+import LoadingState from '../../../components/ui/LoadingState';
 import { getAlunos } from '../../../services/alunosService';
 import { getPresencas } from '../../../services/presencasService';
 import { getGraduacoes } from '../../../services/graduacoesService';
@@ -24,11 +25,33 @@ export default function DashboardPage() {
   const [alunos, setAlunos] = useState([]);
   const [presencas, setPresencas] = useState([]);
   const [graduacoes, setGraduacoes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    getAlunos().then(setAlunos);
-    getPresencas().then(setPresencas);
-    getGraduacoes().then(setGraduacoes);
+    let active = true;
+    async function carregarDados() {
+      try {
+        const [listaAlunos, listaPresencas, listaGraduacoes] = await Promise.all([
+          getAlunos(),
+          getPresencas(),
+          getGraduacoes()
+        ]);
+        if (!active) {
+          return;
+        }
+        setAlunos(listaAlunos);
+        setPresencas(listaPresencas);
+        setGraduacoes(listaGraduacoes);
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+    carregarDados();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const totalAlunos = alunos.length || 1;
@@ -85,6 +108,10 @@ export default function DashboardPage() {
       helper: 'Histórico estimado com base nos alunos ativos'
     }
   ];
+
+  if (isLoading) {
+    return <LoadingState title="Carregando panorama" message="Conectando módulos de alunos, presenças e graduações." />;
+  }
 
   return (
     <div className="space-y-8">

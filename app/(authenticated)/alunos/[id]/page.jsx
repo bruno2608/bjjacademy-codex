@@ -9,6 +9,7 @@ import { ArrowLeft, Crown, CalendarClock } from 'lucide-react';
 import AlunoForm from '../../../../components/ui/AlunoForm';
 import PageHero from '../../../../components/ui/PageHero';
 import Card from '../../../../components/ui/Card';
+import LoadingState from '../../../../components/ui/LoadingState';
 import { getAlunos, updateAluno } from '../../../../services/alunosService';
 import { getMaxStripes, getRuleForBelt } from '../../../../lib/graduationRules';
 
@@ -61,7 +62,7 @@ export default function EditarAlunoPage() {
   };
 
   if (loading) {
-    return <p className="text-sm text-bjj-gray-200">Carregando aluno...</p>;
+    return <LoadingState title="Carregando cadastro" message="Sincronizando dados do aluno selecionado." />;
   }
 
   if (!aluno) {

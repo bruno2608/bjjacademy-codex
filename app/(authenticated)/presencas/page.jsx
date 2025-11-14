@@ -4,12 +4,13 @@
  * Tela de presenças com identidade visual alinhada à experiência gamificada
  * do restante do painel. Registro e listagem permanecem em uma única página.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CalendarPlus, Trophy, Clock3 } from 'lucide-react';
 import AttendanceTable from '../../../components/ui/AttendanceTable';
 import PresenceForm from '../../../components/ui/PresenceForm';
 import PageHero from '../../../components/ui/PageHero';
 import Card from '../../../components/ui/Card';
+import LoadingState from '../../../components/ui/LoadingState';
 import {
   createPresenca,
   deletePresenca,
@@ -21,9 +22,33 @@ const formatPercent = (value) => `${Math.round(value)}%`;
 
 export default function PresencasPage() {
   const [presencas, setPresencas] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    getPresencas().then(setPresencas);
+    let active = true;
+    async function carregar() {
+      try {
+        const lista = await getPresencas();
+        if (!active) return;
+        setPresencas(lista);
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+    carregar();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const atualizarLista = useCallback(async () => {
+    setIsRefreshing(true);
+    const lista = await getPresencas();
+    setPresencas(lista);
+    setIsRefreshing(false);
   }, []);
 
   const presentes = presencas.filter((item) => item.status === 'Presente').length;
@@ -71,7 +96,7 @@ export default function PresencasPage() {
 
   const handleDelete = async (registro) => {
     await deletePresenca(registro.id);
-    setPresencas((prev) => prev.filter((item) => item.id !== registro.id));
+    await atualizarLista();
   };
 
   const heroStats = [
@@ -91,6 +116,10 @@ export default function PresencasPage() {
       helper: ranking[0] ? `${ranking[0].presencas} presenças registradas` : 'Aguardando novos registros'
     }
   ];
+
+  if (isLoading) {
+    return <LoadingState title="Sincronizando presenças" message="Carregando histórico recente de treinos." />;
+  }
 
   return (
     <div className="space-y-8">
@@ -134,7 +163,12 @@ export default function PresencasPage() {
             <PresenceForm onSubmit={handleCreate} />
           </article>
 
-          <AttendanceTable records={presencas} onToggle={handleToggle} onDelete={handleDelete} />
+          <AttendanceTable
+            records={presencas}
+            onToggle={handleToggle}
+            onDelete={handleDelete}
+            isLoading={isRefreshing}
+          />
         </section>
 
         <aside className="card space-y-5">

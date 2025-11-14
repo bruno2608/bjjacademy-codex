@@ -12,6 +12,7 @@ import Modal from '../../../components/ui/Modal';
 import AlunoForm from '../../../components/ui/AlunoForm';
 import PageHero from '../../../components/ui/PageHero';
 import Card from '../../../components/ui/Card';
+import LoadingState from '../../../components/ui/LoadingState';
 import { getAlunos, deleteAluno, createAluno } from '../../../services/alunosService';
 import { calculateNextStep, BELT_ORDER } from '../../../lib/graduationRules';
 
@@ -22,15 +23,27 @@ export default function AlunosPage() {
   const [alunos, setAlunos] = useState([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const carregarAlunos = useCallback(async () => {
-    const lista = await getAlunos();
-    setAlunos(lista);
-  }, []);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    carregarAlunos();
-  }, [carregarAlunos]);
+    let active = true;
+    async function inicializar() {
+      try {
+        const lista = await getAlunos();
+        if (!active) return;
+        setAlunos(lista);
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+    inicializar();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const total = alunos.length;
   const ativos = alunos.filter((aluno) => aluno.status === 'Ativo').length;
@@ -60,9 +73,16 @@ export default function AlunosPage() {
       .map(([faixa, quantidade]) => ({ faixa, quantidade, percentual: Math.round((quantidade / (total || 1)) * 100) }));
   }, [alunos, total]);
 
+  const refreshList = useCallback(async () => {
+    setIsRefreshing(true);
+    const lista = await getAlunos();
+    setAlunos(lista);
+    setIsRefreshing(false);
+  }, []);
+
   const handleDelete = async (aluno) => {
     await deleteAluno(aluno.id);
-    await carregarAlunos();
+    await refreshList();
   };
 
   const handleEdit = (aluno) => {
@@ -72,7 +92,7 @@ export default function AlunosPage() {
   const handleCreate = async (data) => {
     setIsSaving(true);
     await createAluno(data);
-    await carregarAlunos();
+    await refreshList();
     setIsSaving(false);
     setIsCreateOpen(false);
   };
@@ -101,6 +121,10 @@ export default function AlunosPage() {
       helper: 'Estimativa baseada em status e contatos atualizados'
     }
   ];
+
+  if (isLoading) {
+    return <LoadingState title="Preparando cadastro" message="Buscando a lista de alunos cadastrados." />;
+  }
 
   return (
     <div className="space-y-8">
@@ -144,6 +168,7 @@ export default function AlunosPage() {
               data={alunos}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              isLoading={isRefreshing}
             />
           </div>
         </section>

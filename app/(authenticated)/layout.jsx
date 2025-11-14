@@ -8,6 +8,7 @@ import { useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Sidebar from '../../components/ui/Sidebar';
 import Header from '../../components/ui/Header';
+import MobileNav from '../../components/ui/MobileNav';
 import useUserStore from '../../store/userStore';
 
 export default function AuthenticatedLayout({ children }) {
@@ -35,12 +36,13 @@ export default function AuthenticatedLayout({ children }) {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-bjj-black flex">
+    <div className="flex min-h-screen bg-bjj-black">
       <Sidebar />
-      <main className="flex-1 flex flex-col">
+      <main className="flex flex-1 flex-col pb-24 lg:pb-0">
         <Header title={pageTitle} />
-        <section className="flex-1 p-6 bg-bjj-gray-900/40">{children}</section>
+        <section className="flex-1 bg-bjj-gray-900/40 p-6">{children}</section>
       </main>
+      <MobileNav />
     </div>
   );
 }

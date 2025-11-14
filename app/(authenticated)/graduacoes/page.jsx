@@ -6,6 +6,7 @@
  * permite agendar novas graduações sem sair da tela.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import GraduationList from '../../../components/ui/GraduationList';
 import GraduationTimeline from '../../../components/ui/GraduationTimeline';
 import {
@@ -16,6 +17,7 @@ import {
 } from '../../../services/graduacoesService';
 import useUserStore from '../../../store/userStore';
 import { estimateGraduationDate, getMaxStripes, getRuleForBelt } from '../../../lib/graduationRules';
+import LoadingState from '../../../components/ui/LoadingState';
 
 const initialForm = {
   alunoId: '',
@@ -88,11 +90,28 @@ export default function GraduacoesPage() {
   const [form, setForm] = useState(initialForm);
   const [recomendacao, setRecomendacao] = useState(null);
   const [salvando, setSalvando] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const alunos = useUserStore((state) => state.alunos);
 
   useEffect(() => {
-    getGraduacoes().then(setGraduacoes);
+    let active = true;
+    async function carregarGraduacoes() {
+      try {
+        const lista = await getGraduacoes();
+        if (!active) return;
+        setGraduacoes(lista);
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+    carregarGraduacoes();
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -231,25 +250,35 @@ export default function GraduacoesPage() {
     }
 
     setSalvando(true);
-    await scheduleGraduacao({
-      alunoId: alunoSelecionado.id,
-      tipo: form.tipo,
-      proximaFaixa: form.tipo === 'Faixa' ? form.proximaFaixa : alunoSelecionado.faixa,
-      grauAlvo: form.tipo === 'Grau' ? Number(form.grauAlvo) : null,
-      previsao: form.previsao,
-      criterioTempo: form.criterioTempo,
-      mesesRestantes: form.mesesRestantes,
-      instrutor: form.instrutor
-    });
-    const atualizadas = await getGraduacoes();
-    setGraduacoes(atualizadas);
-    setSalvando(false);
+    setIsRefreshing(true);
+    try {
+      await scheduleGraduacao({
+        alunoId: alunoSelecionado.id,
+        tipo: form.tipo,
+        proximaFaixa: form.tipo === 'Faixa' ? form.proximaFaixa : alunoSelecionado.faixa,
+        grauAlvo: form.tipo === 'Grau' ? Number(form.grauAlvo) : null,
+        previsao: form.previsao,
+        criterioTempo: form.criterioTempo,
+        mesesRestantes: form.mesesRestantes,
+        instrutor: form.instrutor
+      });
+      const atualizadas = await getGraduacoes();
+      setGraduacoes(atualizadas);
+    } finally {
+      setSalvando(false);
+      setIsRefreshing(false);
+    }
   };
 
   const handleStatusChange = async (graduacao, novoStatus) => {
-    const atualizado = await updateGraduacao(graduacao.id, { status: novoStatus });
-    const atualizadas = graduacoes.map((item) => (item.id === graduacao.id ? atualizado : item));
-    setGraduacoes(atualizadas);
+    setIsRefreshing(true);
+    try {
+      const atualizado = await updateGraduacao(graduacao.id, { status: novoStatus });
+      const atualizadas = graduacoes.map((item) => (item.id === graduacao.id ? atualizado : item));
+      setGraduacoes(atualizadas);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const tipoDisponivel = {
@@ -285,8 +314,12 @@ export default function GraduacoesPage() {
     [graduacoes, form.alunoId]
   );
 
+  if (isLoading) {
+    return <LoadingState title="Mapeando graduações" message="Buscando histórico e recomendações dos atletas." />;
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" aria-busy={isRefreshing}>
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h2 className="text-3xl font-semibold">Jornada de graduações</h2>
@@ -312,6 +345,11 @@ export default function GraduacoesPage() {
               </option>
             ))}
           </select>
+          {isRefreshing && (
+            <span className="inline-flex items-center gap-2 text-xs text-bjj-gray-200/70">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-bjj-red" /> Sincronizando atualizações
+            </span>
+          )}
         </div>
       </header>
 
