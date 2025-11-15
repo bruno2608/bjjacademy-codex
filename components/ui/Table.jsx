@@ -42,7 +42,7 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
                       <p className="text-[11px] text-bjj-gray-200/60">{mesesNaFaixa} meses na faixa</p>
                     )}
                   </div>
-                  <Badge variant={row.status === 'Ativo' ? 'accent' : 'muted'}>{row.status}</Badge>
+                  <Badge variant={row.status === 'Ativo' ? 'success' : 'neutral'}>{row.status}</Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-2.5 text-[11px] text-bjj-gray-200/70">
                   <div>
@@ -100,7 +100,7 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3 text-[11px] text-bjj-gray-200/80">{row.plano}</div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3 text-[11px]">
-                  <Badge variant={row.status === 'Ativo' ? 'accent' : 'muted'}>{row.status}</Badge>
+                  <Badge variant={row.status === 'Ativo' ? 'success' : 'neutral'}>{row.status}</Badge>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3 text-[11px] text-bjj-gray-200/80">{row.telefone}</div>
               </div>

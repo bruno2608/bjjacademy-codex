@@ -61,7 +61,7 @@ export default function AttendanceTable({
                       {faixa} · {graus}º grau
                     </p>
                   </div>
-                  <Badge variant={record.status === 'Presente' ? 'accent' : 'muted'}>
+                  <Badge variant={record.status === 'Presente' ? 'success' : 'neutral'}>
                     {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
                   </Badge>
                 </div>
@@ -171,7 +171,7 @@ export default function AttendanceTable({
                     </span>
                   </div>
                   <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
-                    <Badge variant={record.status === 'Presente' ? 'accent' : 'muted'}>
+                    <Badge variant={record.status === 'Presente' ? 'success' : 'neutral'}>
                       {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
                     </Badge>
                   </div>

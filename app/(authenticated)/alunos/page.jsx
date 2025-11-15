@@ -201,7 +201,7 @@ export default function AlunosPage() {
             </p>
           </header>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Nome</label>
               <Input
                 type="search"
@@ -220,6 +220,7 @@ export default function AlunosPage() {
               onChange={(lista) => setFilterFaixas(normalizarSelecao(lista, faixasDisponiveis.length))}
               allLabel="Todas as faixas"
               placeholder="Selecionar faixas"
+              className="h-full"
             />
             <MultiSelectDropdown
               label="Status"
@@ -228,6 +229,7 @@ export default function AlunosPage() {
               onChange={(lista) => setFilterStatuses(normalizarSelecao(lista, STATUS_FILTER_VALUES.length))}
               allLabel="Todos os status"
               placeholder="Selecionar status"
+              className="h-full"
             />
             <MultiSelectDropdown
               label="Treino"
@@ -238,6 +240,7 @@ export default function AlunosPage() {
               allLabel="Todos"
               placeholder={opcoesTreinos.length ? 'Selecionar treinos' : 'Nenhum treino cadastrado'}
               disabled={!opcoesTreinos.length}
+              className="h-full"
             />
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

@@ -32,7 +32,7 @@ export default function Modal({ isOpen, title, onClose, children }) {
 
   return (
     <div
-      className="modal modal-open z-50"
+      className="modal modal-open modal-middle z-50"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"

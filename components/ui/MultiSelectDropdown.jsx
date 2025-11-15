@@ -19,7 +19,8 @@ export default function MultiSelectDropdown({
   allValue = 'all',
   allLabel = 'Todos',
   placeholder = 'Selecionar',
-  disabled = false
+  disabled = false,
+  className = ''
 }) {
   const containerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -120,17 +121,20 @@ export default function MultiSelectDropdown({
   };
 
   return (
-    <div className="relative space-y-1" ref={containerRef}>
+    <div
+      className={`relative flex flex-col gap-1 ${className}`.trim()}
+      ref={containerRef}
+    >
       {label && (
         <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">{label}</label>
       )}
       <button
         type="button"
         onClick={toggleOpen}
-        className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/60 ${
+        className={`select select-bordered flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-bjj-gray-700 bg-bjj-gray-900/70 px-3.5 text-left text-sm font-medium text-bjj-white transition focus:border-bjj-red focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/60 ${
           disabled
-            ? 'cursor-not-allowed border-bjj-gray-800/50 bg-bjj-gray-900/40 text-bjj-gray-200/40'
-            : 'border-bjj-gray-800/80 bg-bjj-gray-900/60 text-bjj-gray-200 hover:border-bjj-red/60'
+            ? 'cursor-not-allowed text-bjj-gray-300/50'
+            : 'hover:border-bjj-red'
         }`}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -152,7 +156,7 @@ export default function MultiSelectDropdown({
               className="flex-1 bg-transparent text-xs text-bjj-white placeholder:text-bjj-gray-200/50 focus:outline-none"
             />
           </div>
-          <div className="mt-2 max-h-52 space-y-1 overflow-y-auto pr-1 text-xs">
+          <div className="scrollbar-dark mt-2 max-h-52 space-y-1 overflow-y-auto pr-1 text-xs">
             <button
               type="button"
               onClick={handleToggleAll}
