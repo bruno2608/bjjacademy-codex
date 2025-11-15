@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GRADUATION_RULES } from '../lib/graduationRules';
+import { GRADUATION_RULES } from '../config/graduationRules';
 
 /**
  * Store que permite ajustar as regras de graduação de forma mockada

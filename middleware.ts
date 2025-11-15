@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import type { UserRole } from './config/userRoles';
 import { flattenSiteMap, siteMap } from './config/siteMap';
 
 /**
@@ -15,12 +16,12 @@ const siteMapFlat = flattenSiteMap(siteMap);
 const matchSiteMap = (pathname: string) =>
   siteMapFlat.find((item) => pathname === item.path || pathname.startsWith(`${item.path}/`));
 
-const parseRoles = (raw: string | undefined) => {
-  if (!raw) return [] as string[];
+const parseRoles = (raw: string | undefined): UserRole[] => {
+  if (!raw) return [] as UserRole[];
   return raw
     .split(',')
     .map((role) => role.trim())
-    .filter(Boolean);
+    .filter((value): value is UserRole => Boolean(value));
 };
 
 export function middleware(request: NextRequest) {

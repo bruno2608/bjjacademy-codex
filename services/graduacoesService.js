@@ -3,7 +3,9 @@
  * rumo à próxima faixa. Permite atualizar status e agendar novas graduações.
  */
 import { mockRequest } from './api';
-import useUserStore from '../store/userStore';
+import { useAlunosStore } from '../store/alunosStore';
+import { useGraduacoesStore } from '../store/graduacoesStore';
+import { usePresencasStore } from '../store/presencasStore';
 import { calculateNextStep, estimateGraduationDate, getRuleForBelt } from '../lib/graduationRules';
 
 const buildGraduacaoPayload = (aluno, input) => {
@@ -58,37 +60,38 @@ const buildGraduacaoPayload = (aluno, input) => {
 };
 
 export async function getGraduacoes() {
-  const { graduacoes } = useUserStore.getState();
+  const { graduacoes } = useGraduacoesStore.getState();
   return mockRequest(graduacoes);
 }
 
 export async function scheduleGraduacao(payload) {
-  const store = useUserStore.getState();
-  const aluno = store.alunos.find((item) => item.id === payload.alunoId);
+  const alunosStore = useAlunosStore.getState();
+  const graduacoesStore = useGraduacoesStore.getState();
+  const aluno = alunosStore.alunos.find((item) => item.id === payload.alunoId);
   const dadosGraduacao = aluno ? buildGraduacaoPayload(aluno, payload) : payload;
   const novaGraduacao = { ...dadosGraduacao, id: `graduation-${Date.now()}` };
-  const atualizadas = [...store.graduacoes, novaGraduacao].sort((a, b) => {
+  const atualizadas = [...graduacoesStore.graduacoes, novaGraduacao].sort((a, b) => {
     const dataA = new Date(a.previsao).getTime();
     const dataB = new Date(b.previsao).getTime();
     return dataA - dataB;
   });
-  store.setGraduacoes(atualizadas);
+  graduacoesStore.setGraduacoes(atualizadas);
   return mockRequest(novaGraduacao);
 }
 
 export async function updateGraduacao(id, data) {
-  const store = useUserStore.getState();
-  store.updateGraduacaoStatus(id, data);
-  const atualizada = store.graduacoes.find((item) => item.id === id);
+  const graduacoesStore = useGraduacoesStore.getState();
+  graduacoesStore.updateGraduacaoStatus(id, data);
+  const atualizada = graduacoesStore.graduacoes.find((item) => item.id === id);
   if (data.status === 'Concluído' && atualizada) {
-    store.applyGraduacaoConclusao(atualizada);
+    graduacoesStore.applyGraduacaoConclusao(atualizada);
   }
   return mockRequest(atualizada);
 }
 
 export function getGraduationRecommendation(aluno) {
-  const store = useUserStore.getState();
-  const recomendacao = calculateNextStep(aluno, { presencas: store.presencas });
+  const presencas = usePresencasStore.getState().presencas;
+  const recomendacao = calculateNextStep(aluno, { presencas });
   if (!recomendacao) return null;
   const previsao = estimateGraduationDate(aluno, recomendacao.mesesRestantes || 0);
   return { ...recomendacao, previsao };

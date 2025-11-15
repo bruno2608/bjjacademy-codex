@@ -10,8 +10,8 @@ import {
   ListChecks,
   UserCircle2
 } from 'lucide-react';
-
-export type UserRole = 'TI' | 'ADMIN' | 'PROFESSOR' | 'INSTRUTOR' | 'ALUNO';
+import type { UserRole } from './userRoles';
+import { ALL_ROLES, STAFF_ROLES } from './userRoles';
 
 export type SiteMapItem = {
   title: string;
@@ -25,9 +25,6 @@ export type SiteMapItem = {
    */
   showInMainNav?: boolean;
 };
-
-const ALL_STAFF_ROLES: UserRole[] = ['TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR'];
-const ALL_ROLES: UserRole[] = ['TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR', 'ALUNO'];
 
 /**
  * Mapa central de rotas do painel autenticado.
@@ -44,25 +41,25 @@ export const siteMap: SiteMapItem[] = [
     title: 'Alunos',
     path: '/alunos',
     icon: Users,
-    roles: ALL_STAFF_ROLES
+    roles: STAFF_ROLES
   },
   {
     title: 'Presenças',
     path: '/presencas',
     icon: CalendarCheck,
-    roles: ALL_STAFF_ROLES
+    roles: STAFF_ROLES
   },
   {
     title: 'Graduações',
     path: '/graduacoes',
     icon: Medal,
-    roles: ALL_STAFF_ROLES
+    roles: STAFF_ROLES
   },
   {
     title: 'Relatórios',
     path: '/relatorios',
     icon: BarChart3,
-    roles: ALL_STAFF_ROLES,
+    roles: STAFF_ROLES,
     showInMainNav: false
   },
   {

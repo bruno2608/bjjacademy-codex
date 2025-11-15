@@ -6,12 +6,12 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PieChart } from 'lucide-react';
-import AttendanceTable from '../../../components/ui/AttendanceTable';
-import PresenceForm from '../../../components/ui/PresenceForm';
+import AttendanceTable from '../../../components/presencas/AttendanceTable';
+import PresenceForm from '../../../components/presencas/PresenceForm';
 import LoadingState from '../../../components/ui/LoadingState';
 import Modal from '../../../components/ui/Modal';
 import MultiSelectDropdown from '../../../components/ui/MultiSelectDropdown';
-import useUserStore from '../../../store/userStore';
+import { useAlunosStore } from '../../../store/alunosStore';
 import { useTreinosStore } from '../../../store/treinosStore';
 import {
   createPresenca,
@@ -51,7 +51,7 @@ export default function PresencasPage() {
   const [filterFaixas, setFilterFaixas] = useState([]);
   const [filterStatuses, setFilterStatuses] = useState([]);
   const [filterTreinos, setFilterTreinos] = useState([]);
-  const alunos = useUserStore((state) => state.alunos);
+  const alunos = useAlunosStore((state) => state.alunos);
   // Treinos ativos são carregados do store dedicado para alimentar dropdowns e sugestões.
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);

@@ -7,15 +7,15 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import GraduationList from '../../../components/ui/GraduationList';
-import GraduationTimeline from '../../../components/ui/GraduationTimeline';
+import GraduationList from '../../../components/graduacoes/GraduationList';
+import GraduationTimeline from '../../../components/graduacoes/GraduationTimeline';
 import {
   getGraduacoes,
   scheduleGraduacao,
   updateGraduacao,
   getGraduationRecommendation
 } from '../../../services/graduacoesService';
-import useUserStore from '../../../store/userStore';
+import { useAlunosStore } from '../../../store/alunosStore';
 import { estimateGraduationDate, getMaxStripes, getRuleForBelt } from '../../../lib/graduationRules';
 import LoadingState from '../../../components/ui/LoadingState';
 
@@ -93,7 +93,7 @@ export default function GraduacoesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const alunos = useUserStore((state) => state.alunos);
+  const alunos = useAlunosStore((state) => state.alunos);
 
   useEffect(() => {
     let active = true;

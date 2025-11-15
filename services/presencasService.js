@@ -3,7 +3,7 @@
  * Todas as operações utilizam o store global e retornam Promises mockadas.
  */
 import { mockRequest } from './api';
-import useUserStore from '../store/userStore';
+import { usePresencasStore } from '../store/presencasStore';
 import { useTreinosStore } from '../store/treinosStore';
 
 const horaAtual = () =>
@@ -36,7 +36,7 @@ const resolverTreino = (data, treinoId) => {
 };
 
 export async function getPresencas() {
-  const { presencas } = useUserStore.getState();
+  const { presencas } = usePresencasStore.getState();
   return mockRequest(presencas);
 }
 
@@ -48,24 +48,23 @@ export async function createPresenca(payload) {
     ...treino,
     hora: payload.hora ?? horaAtual()
   };
-  useUserStore.getState().addPresenca(novaPresenca);
+  usePresencasStore.getState().addPresenca(novaPresenca);
   return mockRequest(novaPresenca);
 }
 
 export async function togglePresenca(id) {
-  useUserStore.getState().togglePresencaStatus(id);
-  const atualizadas = useUserStore.getState().presencas;
-  return mockRequest(atualizadas.find((item) => item.id === id));
+  const atualizado = usePresencasStore.getState().togglePresencaStatus(id);
+  return mockRequest(atualizado);
 }
 
 export async function deletePresenca(id) {
-  useUserStore.getState().removePresenca(id);
+  usePresencasStore.getState().removePresenca(id);
   return mockRequest({ success: true });
 }
 
 export async function updatePresenca(id, payload) {
   const treino = resolverTreino(payload.data, payload.treinoId);
-  useUserStore.getState().updatePresenca(id, { ...payload, ...treino });
-  const registro = useUserStore.getState().presencas.find((item) => item.id === id);
+  usePresencasStore.getState().updatePresenca(id, { ...payload, ...treino });
+  const registro = usePresencasStore.getState().presencas.find((item) => item.id === id);
   return mockRequest(registro);
 }

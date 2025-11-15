@@ -1,18 +1,11 @@
 import { create } from 'zustand';
 
+import type { Treino } from '../types/treino';
+
 /**
  * Store responsável por orquestrar a grade de treinos da academia.
  * É utilizado na tela de presenças e na área de configurações para cadastrar sessões mockadas.
  */
-
-export type Treino = {
-  id: string;
-  nome: string;
-  diaSemana: string;
-  hora: string;
-  tipo: string;
-  ativo: boolean;
-};
 
 const STORAGE_KEY = 'bjjacademy_treinos';
 

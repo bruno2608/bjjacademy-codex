@@ -3,41 +3,50 @@
  * Em uma futura integração basta substituir as chamadas pelo fetch real.
  */
 import { mockRequest } from './api';
-import useUserStore from '../store/userStore';
-
-const normalizeAluno = (aluno) => ({
-  ...aluno,
-  faixa: aluno.faixa || 'Branca',
-  graus: Number(aluno.graus ?? 0),
-  mesesNaFaixa: Number(aluno.mesesNaFaixa ?? 0),
-  dataUltimaGraduacao: aluno.dataUltimaGraduacao || null
-});
+import { useAlunosStore } from '../store/alunosStore';
+import { useGraduacoesStore } from '../store/graduacoesStore';
+import { usePresencasStore } from '../store/presencasStore';
 
 export async function getAlunos() {
-  const { alunos } = useUserStore.getState();
+  const { alunos } = useAlunosStore.getState();
   return mockRequest(alunos);
 }
 
 export async function createAluno(aluno) {
-  const { alunos, setAlunos } = useUserStore.getState();
-  const novoAluno = { ...normalizeAluno(aluno), id: String(Date.now()) };
-  setAlunos([...alunos, novoAluno]);
+  const alunosStore = useAlunosStore.getState();
+  const presencas = usePresencasStore.getState().presencas;
+  const novoAluno = alunosStore.addAluno(aluno, presencas);
   return mockRequest(novoAluno);
 }
 
 export async function updateAluno(id, aluno) {
-  const { alunos, setAlunos, syncAlunoReferencias } = useUserStore.getState();
-  const dadosNormalizados = normalizeAluno(aluno);
-  const atualizados = alunos.map((item) => (item.id === id ? { ...item, ...dadosNormalizados } : item));
-  setAlunos(atualizados);
-  const alunoAtualizado = { ...dadosNormalizados, id };
-  syncAlunoReferencias(alunoAtualizado);
+  const alunosStore = useAlunosStore.getState();
+  const presencasStore = usePresencasStore.getState();
+  const graduacoesStore = useGraduacoesStore.getState();
+
+  const alunoAtualizado = alunosStore.updateAluno(id, aluno, presencasStore.presencas);
+
+  if (alunoAtualizado) {
+    const presencasAtualizadas = presencasStore.presencas.map((item) =>
+      item.alunoId === id
+        ? { ...item, alunoNome: alunoAtualizado.nome, faixa: alunoAtualizado.faixa, graus: alunoAtualizado.graus }
+        : item
+    );
+    presencasStore.setPresencas(presencasAtualizadas);
+
+    const graduacoesAtualizadas = graduacoesStore.graduacoes.map((item) =>
+      item.alunoId === id
+        ? { ...item, alunoNome: alunoAtualizado.nome, faixaAtual: alunoAtualizado.faixa }
+        : item
+    );
+    graduacoesStore.setGraduacoes(graduacoesAtualizadas);
+  }
+
   return mockRequest(alunoAtualizado);
 }
 
 export async function deleteAluno(id) {
-  const { alunos, setAlunos } = useUserStore.getState();
-  const filtrados = alunos.filter((aluno) => aluno.id !== id);
-  setAlunos(filtrados);
+  const alunosStore = useAlunosStore.getState();
+  alunosStore.removeAluno(id);
   return mockRequest({ success: true });
 }

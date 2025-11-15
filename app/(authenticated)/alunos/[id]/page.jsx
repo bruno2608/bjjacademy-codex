@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Crown, CalendarClock } from 'lucide-react';
-import AlunoForm from '../../../../components/ui/AlunoForm';
+import AlunoForm from '../../../../components/alunos/AlunoForm';
 import PageHero from '../../../../components/ui/PageHero';
 import Card from '../../../../components/ui/Card';
 import LoadingState from '../../../../components/ui/LoadingState';

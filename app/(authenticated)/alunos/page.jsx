@@ -10,11 +10,11 @@ import { Filter, UserPlus2 } from 'lucide-react';
 import MultiSelectDropdown from '../../../components/ui/MultiSelectDropdown';
 import Table from '../../../components/ui/Table';
 import Modal from '../../../components/ui/Modal';
-import AlunoForm from '../../../components/ui/AlunoForm';
+import AlunoForm from '../../../components/alunos/AlunoForm';
 import PageHero from '../../../components/ui/PageHero';
 import LoadingState from '../../../components/ui/LoadingState';
 import { getAlunos, deleteAluno, createAluno } from '../../../services/alunosService';
-import useUserStore from '../../../store/userStore';
+import { usePresencasStore } from '../../../store/presencasStore';
 import { useTreinosStore } from '../../../store/treinosStore';
 
 const TODOS_TREINOS = 'all';
@@ -36,7 +36,7 @@ export default function AlunosPage() {
   const [filterFaixas, setFilterFaixas] = useState([]);
   const [filterStatuses, setFilterStatuses] = useState([]);
   const [filterTreinos, setFilterTreinos] = useState([]);
-  const presencas = useUserStore((state) => state.presencas);
+  const presencas = usePresencasStore((state) => state.presencas);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
 
   useEffect(() => {
