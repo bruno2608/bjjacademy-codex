@@ -1,0 +1,58 @@
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { flattenSiteMap, siteMap } from './config/siteMap';
+
+/**
+ * Middleware responsável por validar permissões de acesso em tempo real.
+ * Baseia-se no site map central e nos papéis salvos em cookie/localStorage.
+ */
+
+const PUBLIC_ROUTES = ['/login', '/unauthorized', '/manifest.json'];
+const STATIC_PREFIXES = ['/_next', '/icons', '/service-worker.js', '/sw.js'];
+
+const siteMapFlat = flattenSiteMap(siteMap);
+
+const matchSiteMap = (pathname: string) =>
+  siteMapFlat.find((item) => pathname === item.path || pathname.startsWith(`${item.path}/`));
+
+const parseRoles = (raw: string | undefined) => {
+  if (!raw) return [] as string[];
+  return raw
+    .split(',')
+    .map((role) => role.trim())
+    .filter(Boolean);
+};
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (PUBLIC_ROUTES.includes(pathname) || STATIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+    return NextResponse.next();
+  }
+
+  const matchedRoute = matchSiteMap(pathname);
+  if (!matchedRoute) {
+    return NextResponse.next();
+  }
+
+  const cookieRoles = request.cookies.get('bjj_roles')?.value;
+  const roles = parseRoles(cookieRoles);
+
+  if (!roles.length) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  const hasPermission = matchedRoute.roles.some((role) => roles.includes(role));
+  if (!hasPermission) {
+    const unauthorizedUrl = new URL('/unauthorized', request.url);
+    return NextResponse.redirect(unauthorizedUrl);
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)']
+};
