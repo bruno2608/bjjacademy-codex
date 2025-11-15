@@ -6,6 +6,7 @@
  * preparado para mobile-first.
  */
 import { CheckCircle2, Circle, Loader2, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import Badge from '../ui/Badge';
 
 export default function AttendanceTable({
   records,
@@ -60,15 +61,9 @@ export default function AttendanceTable({
                       {faixa} · {graus}º grau
                     </p>
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                      record.status === 'Presente'
-                        ? 'bg-bjj-red/20 text-bjj-red'
-                        : 'bg-bjj-gray-800/80 text-bjj-gray-200'
-                    }`}
-                  >
+                  <Badge variant={record.status === 'Presente' ? 'accent' : 'muted'}>
                     {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
-                  </span>
+                  </Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[11px] text-bjj-gray-200/70">
                   <div>
@@ -176,15 +171,9 @@ export default function AttendanceTable({
                     </span>
                   </div>
                   <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
-                    <span
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                        record.status === 'Presente'
-                          ? 'bg-bjj-red/20 text-bjj-red'
-                          : 'bg-bjj-gray-800/80 text-bjj-gray-200'
-                      }`}
-                    >
+                    <Badge variant={record.status === 'Presente' ? 'accent' : 'muted'}>
                       {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
             </div>

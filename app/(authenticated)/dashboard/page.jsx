@@ -23,6 +23,7 @@ import {
 import Card from '../../../components/ui/Card';
 import PageHero from '../../../components/ui/PageHero';
 import LoadingState from '../../../components/ui/LoadingState';
+import ToggleTag from '../../../components/ui/ToggleTag';
 import { getAlunos } from '../../../services/alunosService';
 import { getPresencas } from '../../../services/presencasService';
 import { getGraduacoes } from '../../../services/graduacoesService';
@@ -416,19 +417,10 @@ export default function DashboardPage() {
         {VIEW_OPTIONS.map((option) => {
           const isActive = option.id === activeView;
           return (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => setActiveView(option.id)}
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition ${
-                isActive
-                  ? 'border-bjj-red bg-bjj-red text-bjj-white shadow-focus'
-                  : 'border-bjj-gray-800/80 bg-bjj-gray-900/60 text-bjj-gray-200 hover:border-bjj-red/50'
-              }`}
-            >
+            <ToggleTag key={option.id} active={isActive} onClick={() => setActiveView(option.id)}>
               {option.label}
               <span className="hidden text-[11px] text-bjj-gray-200/70 md:inline">{option.helper}</span>
-            </button>
+            </ToggleTag>
           );
         })}
       </div>

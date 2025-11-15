@@ -1,11 +1,12 @@
 /**
- * Card componente reutilizável para métricas rápidas. A aparência foi
- * atualizada para refletir o mesmo visual gamificado das graduações,
- * com gradiente, brilho e destaque para o valor principal.
+ * Card componente reutilizável para métricas rápidas.
+ * Utiliza a classe utilitária `.card` para manter consistência visual.
  */
-export default function Card({ title, value, icon: Icon, description }) {
+export default function Card({ title, value, icon: Icon, description, className = '' }) {
+  const classes = className ? `card ${className}` : 'card';
+
   return (
-    <article className="relative overflow-hidden rounded-2xl border border-bjj-gray-800/60 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black p-5">
+    <article className={classes}>
       <div className="absolute right-0 top-0 h-20 w-20 -translate-y-8 translate-x-8 rounded-full bg-bjj-red/10 blur-2xl" aria-hidden />
       <header className="relative flex items-start justify-between">
         <div className="space-y-2">

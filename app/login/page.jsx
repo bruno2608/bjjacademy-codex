@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
 import useUserStore from '../../store/userStore';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
 
 const AVAILABLE_ROLES = ['TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR', 'ALUNO'];
 
@@ -102,25 +104,25 @@ export default function LoginPage() {
           <form className="space-y-3.5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/60">E-mail</label>
-              <input
+              <Input
                 name="email"
                 type="email"
                 placeholder="voce@bjj.academy"
                 value={form.email}
                 onChange={handleChange}
-                className="input-field mt-2"
+                className="mt-2"
                 required
               />
             </div>
             <div>
               <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/60">Senha</label>
-              <input
+              <Input
                 name="password"
                 type="password"
                 placeholder="••••••••"
                 value={form.password}
                 onChange={handleChange}
-                className="input-field mt-2"
+                className="mt-2"
                 required
               />
             </div>
@@ -156,9 +158,9 @@ export default function LoginPage() {
                 })}
               </div>
             </fieldset>
-            <button type="submit" className="btn-primary w-full justify-center">
+            <Button type="submit" className="w-full justify-center">
               Acessar painel <ArrowRight size={15} />
-            </button>
+            </Button>
           </form>
           <p className="mt-5 text-center text-xs text-bjj-gray-200/60">
             Este ambiente usa autenticação mock para fins de prototipagem.

@@ -18,6 +18,9 @@ import {
 import { useAlunosStore } from '../../../store/alunosStore';
 import { estimateGraduationDate, getMaxStripes, getRuleForBelt } from '../../../lib/graduationRules';
 import LoadingState from '../../../components/ui/LoadingState';
+import Input from '../../../components/ui/Input';
+import Select from '../../../components/ui/Select';
+import Button from '../../../components/ui/Button';
 
 const initialForm = {
   alunoId: '',
@@ -332,19 +335,19 @@ export default function GraduacoesPage() {
           <label htmlFor="alunoId" className="font-medium text-bjj-gray-200/80">
             Selecionar aluno
           </label>
-          <select
+          <Select
             id="alunoId"
             name="alunoId"
             value={form.alunoId}
             onChange={handleChange}
-            className="input-field min-w-[220px]"
+            className="min-w-[220px]"
           >
             {alunos.map((aluno) => (
               <option key={aluno.id} value={aluno.id}>
                 {aluno.nome} · {aluno.faixa} ({aluno.graus}º grau)
               </option>
             ))}
-          </select>
+          </Select>
           {isRefreshing && (
             <span className="inline-flex items-center gap-2 text-xs text-bjj-gray-200/70">
               <Loader2 className="h-3.5 w-3.5 animate-spin text-bjj-red" /> Sincronizando atualizações
@@ -451,27 +454,26 @@ export default function GraduacoesPage() {
             <form className="mt-3.5 grid grid-cols-1 gap-3 md:grid-cols-2" onSubmit={handleSubmit}>
               <div>
                 <label className="block text-sm font-medium mb-2">Tipo</label>
-                <select name="tipo" value={form.tipo} onChange={handleChange} className="input-field">
+                <Select name="tipo" value={form.tipo} onChange={handleChange}>
                   <option value="Grau" disabled={!tipoDisponivel.Grau}>
                     Grau
                   </option>
                   <option value="Faixa" disabled={!tipoDisponivel.Faixa}>
                     Faixa
                   </option>
-                </select>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Faixa atual</label>
-                <input className="input-field" value={alunoSelecionado?.faixa || ''} disabled />
+                <Input value={alunoSelecionado?.faixa || ''} disabled readOnly />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Meta</label>
                 {form.tipo === 'Grau' ? (
-                  <select
+                  <Select
                     name="grauAlvo"
                     value={form.grauAlvo}
                     onChange={handleChange}
-                    className="input-field"
                     disabled={!tipoDisponivel.Grau}
                   >
                     {proximosGrausDisponiveis.length === 0 && <option value="">Sem graus disponíveis</option>}
@@ -480,13 +482,12 @@ export default function GraduacoesPage() {
                         {grau}º grau
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 ) : (
-                  <select
+                  <Select
                     name="proximaFaixa"
                     value={form.proximaFaixa}
                     onChange={handleChange}
-                    className="input-field"
                     disabled={!tipoDisponivel.Faixa}
                   >
                     {proximasFaixasDisponiveis.length === 0 && <option value="">Sem faixa cadastrada</option>}
@@ -495,30 +496,28 @@ export default function GraduacoesPage() {
                         {faixa}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 )}
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Previsão</label>
-                <input type="date" name="previsao" value={form.previsao} onChange={handleChange} className="input-field" />
+                <Input type="date" name="previsao" value={form.previsao} onChange={handleChange} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Instrutor responsável</label>
-                <input
+                <Input
                   name="instrutor"
                   value={form.instrutor}
                   onChange={handleChange}
                   placeholder="Profissional que conduzirá a cerimônia"
-                  className="input-field"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Critério de liberação</label>
-                <input
+                <Input
                   name="criterioTempo"
                   value={form.criterioTempo}
                   onChange={handleChange}
-                  className="input-field"
                   placeholder="Tempo mínimo, performance ou feedback do professor"
                 />
               </div>
@@ -527,13 +526,9 @@ export default function GraduacoesPage() {
                   Meses restantes estimados:{' '}
                   <strong className="text-bjj-red">{form.mesesRestantes}</strong>
                 </span>
-                <button
-                  type="submit"
-                  className="btn-primary md:self-start"
-                  disabled={!podeSalvar || salvando}
-                >
+                <Button type="submit" className="md:self-start" disabled={!podeSalvar || salvando}>
                   {salvando ? 'Salvando...' : 'Agendar graduação'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

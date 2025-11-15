@@ -5,11 +5,13 @@
  * destacando progresso, próxima meta e facilitando a alteração de status.
  */
 import { ArrowRight, CalendarClock, Award, Timer } from 'lucide-react';
+import Badge from '../ui/Badge';
+import ToggleTag from '../ui/ToggleTag';
 
-const statusStyles = {
-  'Em progresso': 'bg-bjj-red/20 text-bjj-red border border-bjj-red/40',
-  Planejado: 'bg-bjj-gray-900/80 text-bjj-gray-200 border border-bjj-gray-800/70',
-  Concluído: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+const statusBadgeVariant = {
+  'Em progresso': 'accent',
+  Planejado: 'muted',
+  Concluído: 'success'
 };
 
 const formatDate = (value) => {
@@ -123,26 +125,19 @@ export default function GraduationList({ graduacoes, onStatusChange, alunoLookup
             </div>
 
             <footer className="relative mt-5 flex flex-wrap items-center justify-between gap-2.5">
-              <span
-                className={`inline-flex items-center rounded-full px-3.5 py-1 text-xs font-semibold ${
-                  statusStyles[graduacao.status] || 'bg-bjj-gray-800 text-bjj-gray-200 border border-bjj-gray-700'
-                }`}
-              >
+              <Badge variant={statusBadgeVariant[graduacao.status] || 'muted'} className="px-3.5">
                 {graduacao.status}
-              </span>
+              </Badge>
               <div className="flex flex-wrap gap-1.5">
                 {['Planejado', 'Em progresso', 'Concluído'].map((status) => (
-                  <button
+                  <ToggleTag
                     key={status}
+                    active={graduacao.status === status}
+                    className="normal-case tracking-normal text-[11px]"
                     onClick={() => onStatusChange?.(graduacao, status)}
-                    className={`rounded-lg border px-2.5 py-1 text-xs transition ${
-                      graduacao.status === status
-                        ? 'border-bjj-red bg-bjj-red text-bjj-white'
-                        : 'border-bjj-gray-700 text-bjj-gray-200 hover:border-bjj-red hover:text-bjj-red'
-                    }`}
                   >
                     {status}
-                  </button>
+                  </ToggleTag>
                 ))}
               </div>
             </footer>

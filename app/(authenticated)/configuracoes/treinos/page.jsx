@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import Modal from '../../../../components/ui/Modal';
+import Input from '../../../../components/ui/Input';
+import Select from '../../../../components/ui/Select';
+import Button from '../../../../components/ui/Button';
 import { useTreinosStore } from '../../../../store/treinosStore';
 import { useTiposTreinoStore } from '../../../../store/tiposTreinoStore';
 
@@ -73,9 +76,9 @@ export default function TreinosPage() {
               Organize as sessões semanais da academia. Os treinos ativos aparecem na tela de presenças para agilizar o check-in.
             </p>
           </div>
-          <button type="button" className="btn-primary w-full md:w-auto" onClick={() => openModal(null)}>
+          <Button type="button" className="w-full md:w-auto" onClick={() => openModal(null)}>
             Cadastrar treino
-          </button>
+          </Button>
         </div>
       </header>
 
@@ -95,23 +98,30 @@ export default function TreinosPage() {
               <span className={`rounded-full px-3 py-1 ${treino.ativo ? 'bg-bjj-red/20 text-bjj-white' : 'bg-bjj-gray-800/60'}`}>
                 {treino.ativo ? 'Ativo' : 'Inativo'}
               </span>
-              <button type="button" className="btn-secondary px-3 py-1" onClick={() => openModal(treino)}>
-                Editar
-              </button>
-              <button
+              <Button
                 type="button"
-                className="rounded-full border border-bjj-gray-800 px-3 py-1 transition hover:border-bjj-red/70 hover:text-bjj-white"
+                variant="secondary"
+                className="rounded-full px-3 py-1"
+                onClick={() => openModal(treino)}
+              >
+                Editar
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                className="rounded-full px-3 py-1"
                 onClick={() => toggleTreinoStatus(treino.id)}
               >
                 {treino.ativo ? 'Desativar' : 'Ativar'}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className="rounded-full border border-bjj-gray-800 px-3 py-1 text-bjj-red transition hover:border-bjj-red/70 hover:bg-bjj-red/10"
+                variant="secondary"
+                className="rounded-full px-3 py-1 border-bjj-red/70 text-bjj-red hover:border-bjj-red hover:text-bjj-red hover:bg-bjj-red/10"
                 onClick={() => removeTreino(treino.id)}
               >
                 Remover
-              </button>
+              </Button>
             </div>
           </article>
         ))}
@@ -126,8 +136,7 @@ export default function TreinosPage() {
         <form className="space-y-4 text-sm text-bjj-gray-200/80" onSubmit={handleSubmit}>
           <label className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Nome</span>
-            <input
-              className="input-field"
+            <Input
               value={form.nome}
               onChange={(event) => setForm((prev) => ({ ...prev, nome: event.target.value }))}
               placeholder="Treino avançado · Noite"
@@ -137,36 +146,33 @@ export default function TreinosPage() {
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <label className="flex flex-col gap-1">
               <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Dia da semana</span>
-              <select
-                className="input-field"
+              <Select
                 value={form.diaSemana}
                 onChange={(event) => setForm((prev) => ({ ...prev, diaSemana: event.target.value }))}
               >
                 {DIAS_SEMANA.map((dia) => (
                   <option key={dia}>{dia}</option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Horário</span>
-              <input
+              <Input
                 type="time"
-                className="input-field"
                 value={form.hora}
                 onChange={(event) => setForm((prev) => ({ ...prev, hora: event.target.value }))}
               />
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Tipo</span>
-              <select
-                className="input-field"
+              <Select
                 value={form.tipo}
                 onChange={(event) => setForm((prev) => ({ ...prev, tipo: event.target.value }))}
               >
                 {(tipos.length ? tipos : ['Gi']).map((tipo) => (
                   <option key={tipo}>{tipo}</option>
                 ))}
-              </select>
+              </Select>
             </label>
           </div>
           <label className="flex items-center gap-2 text-xs">
@@ -179,12 +185,10 @@ export default function TreinosPage() {
             Treino ativo
           </label>
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn-secondary" onClick={closeModal}>
+            <Button type="button" variant="secondary" onClick={closeModal}>
               Cancelar
-            </button>
-            <button type="submit" className="btn-primary">
-              Salvar
-            </button>
+            </Button>
+            <Button type="submit">Salvar</Button>
           </div>
         </form>
       </Modal>

@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import Modal from '../../../../components/ui/Modal';
+import Input from '../../../../components/ui/Input';
+import Select from '../../../../components/ui/Select';
+import Button from '../../../../components/ui/Button';
 import { useGraduationRulesStore } from '../../../../store/graduationRulesStore';
 
 /**
@@ -125,45 +128,38 @@ export default function RegrasGraduacaoPage() {
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               <label className="flex flex-col gap-1">
                 <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Tempo mínimo (meses)</span>
-                <input
+                <Input
                   type="number"
                   min="0"
                   value={form.tempoMinimoMeses}
                   onChange={(event) => updateField('tempoMinimoMeses', event.target.value)}
-                  className="input-field"
                 />
               </label>
               <label className="flex flex-col gap-1">
                 <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Idade mínima</span>
-                <input
+                <Input
                   type="number"
                   min="0"
                   value={form.idadeMinima}
                   onChange={(event) => updateField('idadeMinima', event.target.value)}
-                  className="input-field"
                 />
               </label>
               <label className="flex flex-col gap-1">
                 <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Aulas mínimas (faixa)</span>
-                <input
+                <Input
                   type="number"
                   min="0"
                   value={form.aulasMinimasFaixa}
                   onChange={(event) => updateField('aulasMinimasFaixa', event.target.value)}
-                  className="input-field"
                 />
               </label>
             </div>
             <label className="flex flex-col gap-1">
               <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Método de graus</span>
-              <select
-                className="input-field"
-                value={form.metodoGraus}
-                onChange={(event) => updateField('metodoGraus', event.target.value)}
-              >
+              <Select value={form.metodoGraus} onChange={(event) => updateField('metodoGraus', event.target.value)}>
                 <option value="manual">Manual</option>
                 <option value="mensal">Mensal</option>
-              </select>
+              </Select>
             </label>
             {form.graus.length ? (
               <div className="space-y-2">
@@ -174,22 +170,20 @@ export default function RegrasGraduacaoPage() {
                       <div className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">{grau.numero}º grau</div>
                       <label className="flex flex-col gap-1 text-xs md:col-span-1">
                         <span>Tempo mínimo</span>
-                        <input
+                        <Input
                           type="number"
                           min="0"
                           value={grau.tempoMinimoMeses}
                           onChange={(event) => updateStripeField(index, 'tempoMinimoMeses', event.target.value)}
-                          className="input-field"
                         />
                       </label>
                       <label className="flex flex-col gap-1 text-xs md:col-span-1">
                         <span>Aulas mínimas</span>
-                        <input
+                        <Input
                           type="number"
                           min="0"
                           value={grau.aulasMinimas}
                           onChange={(event) => updateStripeField(index, 'aulasMinimas', event.target.value)}
-                          className="input-field"
                         />
                       </label>
                     </div>
@@ -198,12 +192,10 @@ export default function RegrasGraduacaoPage() {
               </div>
             ) : null}
             <div className="flex justify-end gap-2">
-              <button type="button" className="btn-secondary" onClick={closeModal}>
+              <Button type="button" variant="secondary" onClick={closeModal}>
                 Cancelar
-              </button>
-              <button type="submit" className="btn-primary">
-                Salvar alterações
-              </button>
+              </Button>
+              <Button type="submit">Salvar alterações</Button>
             </div>
           </form>
         )}

@@ -7,6 +7,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { BELT_ORDER, getMaxStripes } from '../../lib/graduationRules';
+import Input from '../ui/Input';
+import Select from '../ui/Select';
+import Button from '../ui/Button';
 
 const planos = ['Mensal', 'Trimestral', 'Anual'];
 const statusOptions = ['Ativo', 'Inativo'];
@@ -126,9 +129,8 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
           <div className="space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-medium">Nome</label>
-              <input
+              <Input
                 name="nome"
-                className="input-field"
                 value={formData.nome}
                 onChange={handleChange}
                 placeholder="Nome completo"
@@ -137,9 +139,8 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium">Telefone</label>
-              <input
+              <Input
                 name="telefone"
-                className="input-field"
                 value={formData.telefone}
                 onChange={handleChange}
                 placeholder="(11) 99999-9999"
@@ -161,19 +162,19 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
           <div className="space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-medium">Plano</label>
-              <select name="plano" className="input-field" value={formData.plano} onChange={handleChange}>
+              <Select name="plano" value={formData.plano} onChange={handleChange}>
                 {planos.map((plano) => (
                   <option key={plano}>{plano}</option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium">Status</label>
-              <select name="status" className="input-field" value={formData.status} onChange={handleChange}>
+              <Select name="status" value={formData.status} onChange={handleChange}>
                 {statusOptions.map((status) => (
                   <option key={status}>{status}</option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         </section>
@@ -190,30 +191,29 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
           <div className="space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-medium">Faixa atual</label>
-              <select name="faixa" className="input-field" value={formData.faixa} onChange={handleChange}>
+              <Select name="faixa" value={formData.faixa} onChange={handleChange}>
                 {beltOptions.map((faixa) => (
                   <option key={faixa}>{faixa}</option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium">Graus</label>
-              <select name="graus" className="input-field" value={formData.graus} onChange={handleChange}>
+              <Select name="graus" value={formData.graus} onChange={handleChange}>
                 {grauOptions.map((grau) => (
                   <option key={grau} value={grau}>
                     {grau}
                   </option>
                 ))}
-              </select>
+              </Select>
               <p className="mt-1 text-[11px] text-bjj-gray-200/70">Selecione a quantidade de graus já conquistados.</p>
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium">Meses na faixa</label>
-              <input
+              <Input
                 name="mesesNaFaixa"
                 type="number"
                 min={0}
-                className="input-field"
                 value={formData.mesesNaFaixa}
                 onChange={handleChange}
                 placeholder="Meses dedicados na faixa atual"
@@ -221,10 +221,9 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium">Última graduação</label>
-              <input
+              <Input
                 name="dataUltimaGraduacao"
                 type="date"
-                className="input-field"
                 value={formData.dataUltimaGraduacao || ''}
                 onChange={handleChange}
               />
@@ -269,24 +268,24 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
           </p>
           <p>Plano {formData.plano} · {formData.status}</p>
         </div>
-        <button
+        <Button
           type="submit"
-          className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
+          className="disabled:cursor-not-allowed disabled:opacity-60"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Salvando...' : submitLabel}
-        </button>
+        </Button>
       </div>
 
       {isLastStep && (
         <div className="md:hidden">
-          <button
+          <Button
             type="submit"
-            className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Salvando...' : submitLabel}
-          </button>
+          </Button>
         </div>
       )}
     </form>

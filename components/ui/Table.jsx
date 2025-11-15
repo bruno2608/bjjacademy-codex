@@ -6,6 +6,7 @@
  * coerência com a linguagem gamificada do painel.
  */
 import { Loader2, Pencil, Trash2 } from 'lucide-react';
+import Badge from './Badge';
 
 export default function Table({ headers, data, onEdit, onDelete, isLoading = false }) {
   const tableHeaders = headers || ['Ações', 'Aluno', 'Graduação', 'Plano', 'Status', 'Contato'];
@@ -41,15 +42,7 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
                       <p className="text-[11px] text-bjj-gray-200/60">{mesesNaFaixa} meses na faixa</p>
                     )}
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                      row.status === 'Ativo'
-                        ? 'bg-bjj-red/20 text-bjj-red'
-                        : 'bg-bjj-gray-800/80 text-bjj-gray-200'
-                    }`}
-                  >
-                    {row.status}
-                  </span>
+                  <Badge variant={row.status === 'Ativo' ? 'accent' : 'muted'}>{row.status}</Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-2.5 text-[11px] text-bjj-gray-200/70">
                   <div>
@@ -107,15 +100,7 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3 text-[11px] text-bjj-gray-200/80">{row.plano}</div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3 text-[11px]">
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                      row.status === 'Ativo'
-                        ? 'bg-bjj-red/20 text-bjj-red'
-                        : 'bg-bjj-gray-800/80 text-bjj-gray-200'
-                    }`}
-                  >
-                    {row.status}
-                  </span>
+                  <Badge variant={row.status === 'Ativo' ? 'accent' : 'muted'}>{row.status}</Badge>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3 text-[11px] text-bjj-gray-200/80">{row.telefone}</div>
               </div>

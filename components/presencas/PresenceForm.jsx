@@ -7,6 +7,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
+import Input from '../ui/Input';
+import Select from '../ui/Select';
+import Button from '../ui/Button';
 
 const statusOptions = ['Presente', 'Ausente'];
 
@@ -132,26 +135,19 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         <div className="lg:col-span-2">
           <label className="block text-sm font-medium mb-2">Aluno</label>
-          <select
-            name="alunoId"
-            className="input-field"
-            value={form.alunoId}
-            onChange={handleChange}
-            disabled={isEditing}
-          >
+          <Select name="alunoId" value={form.alunoId} onChange={handleChange} disabled={isEditing}>
             {alunos.map((aluno) => (
               <option key={aluno.id} value={aluno.id}>
                 {aluno.nome} · {aluno.faixa} ({aluno.graus}º grau)
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Data</label>
-          <input
+          <Input
             name="data"
             type="date"
-            className="input-field"
             value={form.data}
             onChange={handleChange}
             disabled={isEditing}
@@ -160,38 +156,33 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Treino / sessão</label>
-          <select
-            name="treinoId"
-            className="input-field"
-            value={form.treinoId}
-            onChange={handleChange}
-          >
+          <Select name="treinoId" value={form.treinoId} onChange={handleChange}>
             {treinosDisponiveis.map((treino) => (
               <option key={treino.id} value={treino.id}>
                 {treino.nome} · {treino.hora}
               </option>
             ))}
             {!treinosDisponiveis.length && <option value="">Sessão principal</option>}
-          </select>
+          </Select>
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Status</label>
-          <select name="status" className="input-field" value={form.status} onChange={handleChange}>
+          <Select name="status" value={form.status} onChange={handleChange}>
             {statusOptions.map((status) => (
               <option key={status}>{status}</option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
       <div className="flex flex-col gap-2 md:flex-row md:justify-end">
         {onCancel && (
-          <button type="button" onClick={onCancel} className="btn-secondary md:w-auto">
+          <Button type="button" variant="secondary" onClick={onCancel} className="md:w-auto">
             Cancelar
-          </button>
+          </Button>
         )}
-        <button type="submit" className="btn-primary md:w-auto">
+        <Button type="submit" className="md:w-auto">
           {submitLabel || (isEditing ? 'Salvar alterações' : 'Registrar presença')}
-        </button>
+        </Button>
       </div>
     </form>
   );

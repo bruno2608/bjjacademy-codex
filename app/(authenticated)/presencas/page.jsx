@@ -11,6 +11,9 @@ import PresenceForm from '../../../components/presencas/PresenceForm';
 import LoadingState from '../../../components/ui/LoadingState';
 import Modal from '../../../components/ui/Modal';
 import MultiSelectDropdown from '../../../components/ui/MultiSelectDropdown';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import Select from '../../../components/ui/Select';
 import { useAlunosStore } from '../../../store/alunosStore';
 import { useTreinosStore } from '../../../store/treinosStore';
 import {
@@ -445,9 +448,9 @@ export default function PresencasPage() {
               Visualize todos os alunos ativos de hoje e registre presença com apenas um clique.
             </p>
           </div>
-          <button type="button" className="btn-secondary w-full md:w-auto" onClick={abrirResumo}>
+          <Button type="button" variant="secondary" className="w-full md:w-auto" onClick={abrirResumo}>
             <PieChart size={16} /> Resumo do dia
-          </button>
+          </Button>
         </div>
         {!treinos.length && (
           <p className="rounded-xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 text-xs text-bjj-gray-200/70">
@@ -485,9 +488,8 @@ export default function PresencasPage() {
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Nome</label>
-            <input
+            <Input
               type="search"
-              className="input-field"
               placeholder="Buscar por nome do aluno"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
@@ -642,11 +644,7 @@ export default function PresencasPage() {
             como treinos de Gi e No-Gi.
           </p>
           <label className="block text-sm font-medium text-bjj-white">Treino / sessão</label>
-          <select
-            className="input-field"
-            value={sessionTreinoId}
-            onChange={(event) => setSessionTreinoId(event.target.value)}
-          >
+          <Select value={sessionTreinoId} onChange={(event) => setSessionTreinoId(event.target.value)}>
             {treinosDisponiveisModal.map((treino) => (
               <option key={treino.id} value={treino.id}>
                 {treino.nome} · {treino.hora}
@@ -654,14 +652,14 @@ export default function PresencasPage() {
               </option>
             ))}
             {!treinosDisponiveisModal.length && <option value="">Sessão principal</option>}
-          </select>
+          </Select>
           <div className="flex flex-col gap-2 md:flex-row md:justify-end">
-            <button type="button" className="btn-secondary md:w-auto" onClick={fecharSelecaoSessao}>
+            <Button type="button" variant="secondary" className="md:w-auto" onClick={fecharSelecaoSessao}>
               Cancelar
-            </button>
-            <button type="button" className="btn-primary md:w-auto" onClick={handleSessionSubmit}>
+            </Button>
+            <Button type="button" className="md:w-auto" onClick={handleSessionSubmit}>
               Confirmar presença
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>

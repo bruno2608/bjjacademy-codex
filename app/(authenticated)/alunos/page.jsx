@@ -13,6 +13,8 @@ import Modal from '../../../components/ui/Modal';
 import AlunoForm from '../../../components/alunos/AlunoForm';
 import PageHero from '../../../components/ui/PageHero';
 import LoadingState from '../../../components/ui/LoadingState';
+import Input from '../../../components/ui/Input';
+import Button from '../../../components/ui/Button';
 import { getAlunos, deleteAluno, createAluno } from '../../../services/alunosService';
 import { usePresencasStore } from '../../../store/presencasStore';
 import { useTreinosStore } from '../../../store/treinosStore';
@@ -201,9 +203,8 @@ export default function AlunosPage() {
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-1">
               <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Nome</label>
-              <input
+              <Input
                 type="search"
-                className="input-field"
                 placeholder="Buscar por nome do aluno"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
@@ -257,9 +258,9 @@ export default function AlunosPage() {
             <p className="text-sm text-bjj-gray-200/70">Monitore faixa atual, tempo dedicado e status de cada membro da academia.</p>
           </header>
           <div className="flex justify-end">
-            <button type="button" className="btn-primary" onClick={() => setIsCreateOpen(true)}>
+            <Button type="button" onClick={() => setIsCreateOpen(true)}>
               <UserPlus2 size={16} /> Novo aluno
-            </button>
+            </Button>
           </div>
           <Table
             headers={['Ações', 'Aluno', 'Graduação', 'Plano', 'Status', 'Contato']}

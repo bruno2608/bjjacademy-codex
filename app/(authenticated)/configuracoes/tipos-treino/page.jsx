@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useTiposTreinoStore } from '../../../../store/tiposTreinoStore';
+import Input from '../../../../components/ui/Input';
+import Button from '../../../../components/ui/Button';
 
 /**
  * Mantém o catálogo de modalidades que alimenta cadastros de treino e presenças.
@@ -47,15 +49,14 @@ export default function TiposTreinoPage() {
         <label className="flex flex-col gap-2 text-sm text-bjj-gray-200/80 md:flex-row md:items-center">
           <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Novo tipo</span>
           <div className="flex w-full flex-col gap-2 md:flex-row md:items-center">
-            <input
-              className="input-field"
+            <Input
               placeholder="Ex.: Competição"
               value={novoTipo}
               onChange={(event) => setNovoTipo(event.target.value)}
             />
-            <button type="submit" className="btn-primary md:w-auto">
+            <Button type="submit" className="md:w-auto">
               Adicionar
-            </button>
+            </Button>
           </div>
         </label>
       </form>
@@ -68,35 +69,40 @@ export default function TiposTreinoPage() {
           >
             {editIndex === index ? (
               <form className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3" onSubmit={handleEdit}>
-                <input
-                  className="input-field"
+                <Input
                   value={editValue}
                   onChange={(event) => setEditValue(event.target.value)}
                   autoFocus
                 />
                 <div className="flex gap-2 text-xs">
-                  <button type="submit" className="btn-primary px-3 py-1">
+                  <Button type="submit" className="px-3 py-1">
                     Salvar
-                  </button>
-                  <button type="button" className="btn-secondary px-3 py-1" onClick={() => setEditIndex(null)}>
+                  </Button>
+                  <Button type="button" variant="secondary" className="px-3 py-1" onClick={() => setEditIndex(null)}>
                     Cancelar
-                  </button>
+                  </Button>
                 </div>
               </form>
             ) : (
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
                 <span className="text-sm font-medium text-bjj-white">{tipo}</span>
                 <div className="flex gap-2 text-xs text-bjj-gray-200/70">
-                  <button type="button" className="btn-secondary px-3 py-1" onClick={() => startEdit(index, tipo)}>
-                    Renomear
-                  </button>
-                  <button
+                  <Button
                     type="button"
-                    className="rounded-full border border-bjj-gray-800 px-3 py-1 text-bjj-red transition hover:border-bjj-red/70 hover:bg-bjj-red/10"
+                    variant="secondary"
+                    className="px-3 py-1"
+                    onClick={() => startEdit(index, tipo)}
+                  >
+                    Renomear
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="rounded-full px-3 py-1 border-bjj-red/70 text-bjj-red hover:border-bjj-red hover:text-bjj-red hover:bg-bjj-red/10"
                     onClick={() => removeTipo(index)}
                   >
                     Remover
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
