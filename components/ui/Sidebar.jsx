@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getNavigationItemsForRoles } from '../../lib/navigation';
 import useUserStore from '../../store/userStore';
-import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -101,15 +101,6 @@ export default function Sidebar() {
             );
           }
 
-          const childLinks = [
-            {
-              ...item,
-              title: 'Visão geral',
-              isParentLink: true
-            },
-            ...item.children
-          ];
-
           return (
             <div key={item.path}>
               <button
@@ -152,11 +143,11 @@ export default function Sidebar() {
               </button>
               {isOpen ? (
                 <ul className="mt-2 space-y-1 pl-4 text-[12px] text-bjj-gray-200/70">
-                  {childLinks.map((child) => {
+                  {item.children.map((child) => {
                     const childActive = pathname === child.path || pathname.startsWith(`${child.path}/`);
                     const ChildIcon = child.icon;
                     return (
-                      <li key={`${child.path}-${child.isParentLink ? 'overview' : 'child'}`}>
+                      <li key={child.path}>
                         <Link
                           href={child.path}
                           className={`flex items-center gap-2 rounded-xl px-3 py-2 transition ${
@@ -166,12 +157,9 @@ export default function Sidebar() {
                           }`}
                         >
                           <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-bjj-gray-900/70 text-bjj-gray-200/80">
-                            {child.isParentLink ? <ExternalLink size={12} /> : ChildIcon ? <ChildIcon size={12} /> : null}
+                            {ChildIcon ? <ChildIcon size={12} /> : <ChevronRight size={12} className="text-bjj-gray-400" />}
                           </span>
-                          {child.isParentLink ? 'Visão geral' : child.title}
-                          {child.isParentLink ? (
-                            <ChevronRight size={12} className="ml-auto text-bjj-gray-400" />
-                          ) : null}
+                          {child.title}
                         </Link>
                       </li>
                     );

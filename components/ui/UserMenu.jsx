@@ -166,18 +166,6 @@ export default function UserMenu() {
                 </button>
                 {configOpen && (
                   <ul className="border-t border-bjj-gray-800/70 px-3 py-2 text-sm">
-                    <li>
-                      <Link
-                        href="/configuracoes"
-                        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-bjj-gray-200/80 transition hover:bg-bjj-gray-900/70 hover:text-bjj-white"
-                        onClick={() => {
-                          setOpen(false);
-                          setConfigOpen(false);
-                        }}
-                      >
-                        <ChevronRight size={14} className="text-bjj-gray-500" /> Visão geral
-                      </Link>
-                    </li>
                     {configChildren.map((child) => (
                       <li key={child.path}>
                         <Link
