@@ -6,13 +6,22 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserPlus2 } from 'lucide-react';
+import { Filter, UserPlus2 } from 'lucide-react';
 import Table from '../../../components/ui/Table';
 import Modal from '../../../components/ui/Modal';
 import AlunoForm from '../../../components/ui/AlunoForm';
 import PageHero from '../../../components/ui/PageHero';
 import LoadingState from '../../../components/ui/LoadingState';
 import { getAlunos, deleteAluno, createAluno } from '../../../services/alunosService';
+import useUserStore from '../../../store/userStore';
+import { useTreinosStore } from '../../../store/treinosStore';
+
+const TODOS_TREINOS = 'all';
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'Todos os status' },
+  { value: 'Ativo', label: 'Ativo' },
+  { value: 'Inativo', label: 'Inativo' }
+];
 
 export default function AlunosPage() {
   const router = useRouter();
@@ -22,6 +31,11 @@ export default function AlunosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterFaixa, setFilterFaixa] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterTreinoId, setFilterTreinoId] = useState(TODOS_TREINOS);
+  const presencas = useUserStore((state) => state.presencas);
+  const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
 
   useEffect(() => {
     let active = true;
@@ -49,13 +63,58 @@ export default function AlunosPage() {
     setIsRefreshing(false);
   }, []);
 
+  const faixasDisponiveis = useMemo(() => {
+    const conjunto = new Set(
+      alunos
+        .map((aluno) => aluno.faixa)
+        .filter((faixa) => typeof faixa === 'string' && faixa.trim().length > 0)
+    );
+    return Array.from(conjunto).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  }, [alunos]);
+
+  const treinosPorAluno = useMemo(() => {
+    const mapa = new Map();
+    presencas.forEach((registro) => {
+      if (!registro || !registro.alunoId || !registro.treinoId) {
+        return;
+      }
+      const conjuntoAtual = mapa.get(registro.alunoId) || new Set();
+      conjuntoAtual.add(registro.treinoId);
+      mapa.set(registro.alunoId, conjuntoAtual);
+    });
+    return mapa;
+  }, [presencas]);
+
   const alunosFiltrados = useMemo(() => {
-    if (searchTerm.trim().length < 3) {
-      return alunos;
-    }
     const termo = searchTerm.trim().toLowerCase();
-    return alunos.filter((aluno) => aluno.nome.toLowerCase().includes(termo));
-  }, [alunos, searchTerm]);
+    return alunos.filter((aluno) => {
+      if (termo.length >= 3 && !aluno.nome.toLowerCase().includes(termo)) {
+        return false;
+      }
+      if (filterFaixa !== 'all' && aluno.faixa !== filterFaixa) {
+        return false;
+      }
+      if (filterStatus !== 'all' && aluno.status !== filterStatus) {
+        return false;
+      }
+      if (filterTreinoId !== TODOS_TREINOS) {
+        const conjunto = treinosPorAluno.get(aluno.id);
+        if (!conjunto || !conjunto.has(filterTreinoId)) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [alunos, filterFaixa, filterStatus, filterTreinoId, searchTerm, treinosPorAluno]);
+
+  const totalFiltrado = alunosFiltrados.length;
+
+  const limparFiltros = () => {
+    setSearchTerm('');
+    setFilterFaixa('all');
+    setFilterStatus('all');
+    setFilterTreinoId(TODOS_TREINOS);
+  };
 
   const handleDelete = async (aluno) => {
     await deleteAluno(aluno.id);
@@ -87,41 +146,84 @@ export default function AlunosPage() {
       />
 
       <section className="space-y-3">
-        <div className="card space-y-3">
-          <header>
-            <h2 className="text-lg font-semibold text-bjj-white">Lista de alunos</h2>
+        <article className="card space-y-4">
+          <header className="flex flex-col gap-1">
+            <h2 className="text-base font-semibold text-bjj-white">Filtros inteligentes</h2>
             <p className="text-sm text-bjj-gray-200/70">
-              Monitore faixa atual, tempo dedicado e status de cada membro da academia.
+              Combine os filtros abaixo para localizar alunos por faixa, status ou treinos frequentes. A busca por nome é
+              habilitada a partir de três letras.
             </p>
           </header>
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <label className="relative w-full md:max-w-xs">
-              <span className="sr-only">Buscar aluno</span>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Nome</label>
               <input
                 type="search"
-                  className="input-field pr-10 text-sm"
-                  placeholder="Buscar aluno (mínimo 3 letras)"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-bjj-gray-200/60"
-                  aria-hidden
-                >
-                  <path
-                    fill="currentColor"
-                    d="m19.53 21.12-4.8-4.79a7.5 7.5 0 1 1 1.59-1.59l4.8 4.79a1.12 1.12 0 0 1-1.59 1.59ZM5.75 10.5a4.75 4.75 0 1 0 4.75-4.75A4.75 4.75 0 0 0 5.75 10.5Z"
-                  />
-                </svg>
-                {searchTerm.trim().length > 0 && searchTerm.trim().length < 3 && (
-                  <span className="mt-1 block text-xs text-bjj-gray-200/60">
-                    Digite pelo menos 3 letras para filtrar.
-                  </span>
-                )}
-              </label>
-            <button type="button" className="btn-primary md:shrink-0" onClick={() => setIsCreateOpen(true)}>
+                className="input-field"
+                placeholder="Buscar por nome do aluno"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+              {searchTerm.trim().length > 0 && searchTerm.trim().length < 3 && (
+                <span className="text-[10px] text-bjj-gray-200/60">Digite pelo menos 3 letras para aplicar a busca.</span>
+              )}
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Faixa</label>
+              <select className="input-field" value={filterFaixa} onChange={(event) => setFilterFaixa(event.target.value)}>
+                <option value="all">Todas as faixas</option>
+                {faixasDisponiveis.map((faixa) => (
+                  <option key={faixa} value={faixa}>
+                    {faixa}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Status</label>
+              <select className="input-field" value={filterStatus} onChange={(event) => setFilterStatus(event.target.value)}>
+                {STATUS_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Treino</label>
+              <select
+                className="input-field"
+                value={filterTreinoId}
+                onChange={(event) => setFilterTreinoId(event.target.value)}
+              >
+                <option value={TODOS_TREINOS}>Todos os treinos</option>
+                {treinos.map((treino) => (
+                  <option key={treino.id} value={treino.id}>
+                    {treino.nome} · {treino.hora}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-bjj-gray-200/60">Exibindo {totalFiltrado} de {alunos.length} aluno(s) cadastrados.</p>
+            <button
+              type="button"
+              onClick={limparFiltros}
+              className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/70 transition hover:text-bjj-red"
+            >
+              <Filter size={12} /> Limpar filtros
+            </button>
+          </div>
+        </article>
+
+        <article className="card space-y-3">
+          <header className="flex flex-col gap-1">
+            <h2 className="text-base font-semibold text-bjj-white">Lista de alunos</h2>
+            <p className="text-sm text-bjj-gray-200/70">Monitore faixa atual, tempo dedicado e status de cada membro da academia.</p>
+          </header>
+          <div className="flex justify-end">
+            <button type="button" className="btn-primary" onClick={() => setIsCreateOpen(true)}>
               <UserPlus2 size={16} /> Novo aluno
             </button>
           </div>
@@ -132,7 +234,7 @@ export default function AlunosPage() {
             onDelete={handleDelete}
             isLoading={isRefreshing}
           />
-        </div>
+        </article>
       </section>
 
       <Modal isOpen={isCreateOpen} title="Cadastrar novo aluno" onClose={() => setIsCreateOpen(false)}>
