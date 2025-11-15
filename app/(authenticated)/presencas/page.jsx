@@ -10,6 +10,7 @@ import AttendanceTable from '../../../components/ui/AttendanceTable';
 import PresenceForm from '../../../components/ui/PresenceForm';
 import LoadingState from '../../../components/ui/LoadingState';
 import Modal from '../../../components/ui/Modal';
+import MultiSelectDropdown from '../../../components/ui/MultiSelectDropdown';
 import useUserStore from '../../../store/userStore';
 import { useTreinosStore } from '../../../store/treinosStore';
 import {
@@ -80,7 +81,7 @@ export default function PresencasPage() {
       return;
     }
 
-    if (filterTreinos.includes(TODOS_TREINOS)) {
+    if (filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0) {
       return;
     }
 
@@ -146,7 +147,8 @@ export default function PresencasPage() {
     const placeholders = alunosAtivos
       .filter((aluno) => !alunosComRegistro.has(aluno.id))
       .map((aluno) => {
-        const preferencia = filterTreinos.includes(TODOS_TREINOS) ? null : filterTreinos[0];
+        const preferencia =
+          filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0 ? null : filterTreinos[0];
         const treinoSugestao = sugerirTreino(hoje, preferencia);
         return {
           id: `placeholder-${aluno.id}-${treinoSugestao?.id || 'principal'}`,
@@ -169,9 +171,10 @@ export default function PresencasPage() {
 
   const registrosFiltrados = useMemo(() => {
     const termo = searchTerm.trim().toLowerCase();
-    const faixasAtivas = filterFaixas.includes('all') ? [] : filterFaixas;
-    const statusAtivos = filterStatuses.includes('all') ? [] : filterStatuses;
-    const treinosAtivos = filterTreinos.includes(TODOS_TREINOS) ? [] : filterTreinos;
+    const faixasAtivas = filterFaixas.includes('all') || filterFaixas.length === 0 ? [] : filterFaixas;
+    const statusAtivos = filterStatuses.includes('all') || filterStatuses.length === 0 ? [] : filterStatuses;
+    const treinosAtivos =
+      filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0 ? [] : filterTreinos;
 
     return registrosDoDia.filter((item) => {
       if (termo.length >= 3 && !item.alunoNome.toLowerCase().includes(termo)) {
@@ -223,6 +226,23 @@ export default function PresencasPage() {
     return Array.from(conjunto).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   }, [alunosAtivos]);
 
+  const opcoesFaixa = useMemo(
+    () => faixasDisponiveis.map((faixa) => ({ value: faixa, label: faixa })),
+    [faixasDisponiveis]
+  );
+  const opcoesStatus = useMemo(
+    () => STATUS_FILTER_VALUES.map((option) => ({ value: option.value, label: option.label })),
+    []
+  );
+  const opcoesTreinos = useMemo(
+    () =>
+      treinosDoDiaPadrao.map((treino) => ({
+        value: treino.id,
+        label: `${treino.nome} · ${treino.hora}`
+      })),
+    [treinosDoDiaPadrao]
+  );
+
   const treinosDisponiveisModal = useMemo(() => {
     if (!sessionRecord) {
       return treinosDoDiaPadrao;
@@ -258,28 +278,18 @@ export default function PresencasPage() {
     setFilterTreinos([TODOS_TREINOS]);
   };
 
-  const toggleSelection = (valor, selecionados, setter, valorTodos, totalDisponivel = 0) => {
-    if (valor === valorTodos) {
-      setter([valorTodos]);
-      return;
+  const normalizarSelecao = useCallback((lista, totalDisponivel, valorTodos = 'all') => {
+    if (!Array.isArray(lista) || !lista.length) {
+      return [valorTodos];
     }
-
-    const semTodos = selecionados.filter((item) => item !== valorTodos);
-    const existe = semTodos.includes(valor);
-    const proximo = existe ? semTodos.filter((item) => item !== valor) : [...semTodos, valor];
-
-    if (!proximo.length) {
-      setter([valorTodos]);
-      return;
+    if (lista.includes(valorTodos)) {
+      return [valorTodos];
     }
-
-    if (totalDisponivel > 0 && proximo.length >= totalDisponivel) {
-      setter([valorTodos]);
-      return;
+    if (totalDisponivel > 0 && lista.length >= totalDisponivel) {
+      return [valorTodos];
     }
-
-    setter(proximo);
-  };
+    return lista;
+  }, []);
 
   const abrirEdicao = (registro) => {
     setSelectedRecord(registro);
@@ -303,7 +313,8 @@ export default function PresencasPage() {
   const obterSugestaoTreino = useCallback(
     (alunoId, data, utilizados = []) => {
       const dia = normalizarDiaSemana(data) || normalizarDiaSemana(hoje);
-      const preferencia = filterTreinos.includes(TODOS_TREINOS) ? null : filterTreinos[0];
+      const preferencia =
+        filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0 ? null : filterTreinos[0];
       if (preferencia && !utilizados.includes(preferencia)) {
         const preferido = treinos.find((treino) => treino.id === preferencia);
         if (preferido) return preferido;
@@ -382,7 +393,7 @@ export default function PresencasPage() {
     });
     if (
       novaPresenca.treinoId &&
-      !filterTreinos.includes(TODOS_TREINOS) &&
+      !(filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0) &&
       !filterTreinos.includes(novaPresenca.treinoId)
     ) {
       setFilterTreinos([TODOS_TREINOS]);
@@ -475,132 +486,32 @@ export default function PresencasPage() {
               onChange={(event) => setSearchTerm(event.target.value)}
             />
           </div>
-          <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Faixa</label>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  toggleSelection('all', filterFaixas, setFilterFaixas, 'all', faixasDisponiveis.length)
-                }
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
-                  filterFaixas.includes('all')
-                    ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
-                    : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
-                }`}
-              >
-                Todas
-              </button>
-              {faixasDisponiveis.map((faixa) => {
-                const ativo = !filterFaixas.includes('all') && filterFaixas.includes(faixa);
-                return (
-                  <button
-                    key={faixa}
-                    type="button"
-                    onClick={() =>
-                      toggleSelection(faixa, filterFaixas, setFilterFaixas, 'all', faixasDisponiveis.length)
-                    }
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
-                      ativo
-                        ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
-                        : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
-                    }`}
-                  >
-                    {faixa}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Status</label>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  toggleSelection('all', filterStatuses, setFilterStatuses, 'all', STATUS_FILTER_VALUES.length)
-                }
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
-                  filterStatuses.includes('all')
-                    ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
-                    : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
-                }`}
-              >
-                Todos
-              </button>
-              {STATUS_FILTER_VALUES.map((option) => {
-                const ativo = !filterStatuses.includes('all') && filterStatuses.includes(option.value);
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() =>
-                      toggleSelection(
-                        option.value,
-                        filterStatuses,
-                        setFilterStatuses,
-                        'all',
-                        STATUS_FILTER_VALUES.length
-                      )
-                    }
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
-                      ativo
-                        ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
-                        : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Treino</label>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => toggleSelection(TODOS_TREINOS, filterTreinos, setFilterTreinos, TODOS_TREINOS, treinosDoDiaPadrao.length)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
-                  filterTreinos.includes(TODOS_TREINOS)
-                    ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
-                    : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
-                }`}
-              >
-                Todos do dia
-              </button>
-              {treinosDoDiaPadrao.map((treino) => {
-                const ativo = !filterTreinos.includes(TODOS_TREINOS) && filterTreinos.includes(treino.id);
-                return (
-                  <button
-                    key={treino.id}
-                    type="button"
-                    onClick={() =>
-                      toggleSelection(
-                        treino.id,
-                        filterTreinos,
-                        setFilterTreinos,
-                        TODOS_TREINOS,
-                        treinosDoDiaPadrao.length
-                      )
-                    }
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
-                      ativo
-                        ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
-                        : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
-                    }`}
-                  >
-                    {treino.nome} · {treino.hora}
-                  </button>
-                );
-              })}
-              {!treinosDoDiaPadrao.length && (
-                <span className="rounded-full border border-dashed border-bjj-gray-800/70 px-3 py-1.5 text-xs text-bjj-gray-200/70">
-                  Sessão principal
-                </span>
-              )}
-            </div>
-          </div>
+          <MultiSelectDropdown
+            label="Faixa"
+            options={opcoesFaixa}
+            value={filterFaixas}
+            onChange={(lista) => setFilterFaixas(normalizarSelecao(lista, faixasDisponiveis.length))}
+            allLabel="Todas as faixas"
+            placeholder="Selecionar faixas"
+          />
+          <MultiSelectDropdown
+            label="Status"
+            options={opcoesStatus}
+            value={filterStatuses}
+            onChange={(lista) => setFilterStatuses(normalizarSelecao(lista, STATUS_FILTER_VALUES.length))}
+            allLabel="Todos os status"
+            placeholder="Selecionar status"
+          />
+          <MultiSelectDropdown
+            label="Treino"
+            options={opcoesTreinos}
+            value={filterTreinos}
+            onChange={(lista) => setFilterTreinos(normalizarSelecao(lista, opcoesTreinos.length, TODOS_TREINOS))}
+            allValue={TODOS_TREINOS}
+            allLabel="Todos do dia"
+            placeholder={opcoesTreinos.length ? 'Selecionar treinos' : 'Nenhum treino cadastrado'}
+            disabled={!opcoesTreinos.length}
+          />
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-bjj-gray-200/60">
