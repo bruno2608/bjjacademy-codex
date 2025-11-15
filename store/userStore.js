@@ -5,6 +5,45 @@
  */
 import { create } from 'zustand';
 import { calculateNextStep, getMaxStripes, getNextBelt } from '../lib/graduationRules';
+import { DEFAULT_TREINOS, useTreinosStore } from './treinosStore';
+
+const ROLE_ORDER = ['TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR', 'ALUNO'];
+
+const sanitizeRoles = (roles) => {
+  if (!Array.isArray(roles)) return [];
+  const unique = new Set();
+  roles.forEach((role) => {
+    if (ROLE_ORDER.includes(role)) unique.add(role);
+  });
+  return Array.from(unique);
+};
+
+const deriveRolesFromEmail = (email) => {
+  const normalized = (email || '').toLowerCase();
+  const baseRoles = new Set(['PROFESSOR', 'INSTRUTOR']);
+  if (normalized.includes('admin')) baseRoles.add('ADMIN');
+  if (normalized.includes('ti')) baseRoles.add('TI');
+  if (normalized.includes('aluno')) baseRoles.add('ALUNO');
+  return Array.from(baseRoles);
+};
+
+const persistRoles = (roles) => {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem('bjj_roles', JSON.stringify(roles));
+  }
+  if (typeof document !== 'undefined') {
+    document.cookie = `bjj_roles=${roles.join(',')}; path=/; max-age=${60 * 60 * 24 * 30}`;
+  }
+};
+
+const clearPersistedRoles = () => {
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem('bjj_roles');
+  }
+  if (typeof document !== 'undefined') {
+    document.cookie = 'bjj_roles=; path=/; max-age=0';
+  }
+};
 
 const getCurrentTime = () =>
   new Date()
@@ -93,14 +132,7 @@ const applyAttendanceStats = (alunos, presencas) =>
     };
   });
 
-const mockTreinos = [
-  { id: 't1', nome: 'Manhã · Gi', tipo: 'Gi', diaSemana: 'segunda', hora: '07:30' },
-  { id: 't2', nome: 'Noite · No-Gi', tipo: 'No-Gi', diaSemana: 'segunda', hora: '19:30' },
-  { id: 't3', nome: 'Competição', tipo: 'Competição', diaSemana: 'quarta', hora: '20:00' },
-  { id: 't4', nome: 'Kids · Fundamental', tipo: 'Kids', diaSemana: 'terça', hora: '18:00' },
-  { id: 't5', nome: 'Open Mat', tipo: 'Livre', diaSemana: 'sábado', hora: '10:00' },
-  { id: 't6', nome: 'Tarde · Gi', tipo: 'Gi', diaSemana: 'quinta', hora: '16:00' }
-];
+const mockTreinos = DEFAULT_TREINOS.map((treino) => ({ ...treino }));
 
 // Dados iniciais de alunos para alimentar as telas de listagem e formulários.
 const mockAlunos = [
@@ -923,16 +955,24 @@ const useUserStore = create((set) => ({
   presencas: mockPresencas,
   graduacoes: mockGraduacoes,
   treinos: mockTreinos,
-  login: ({ email }) => {
+  login: ({ email, roles }) => {
     const fakeToken = 'bjj-token-' + Date.now();
     localStorage.setItem('bjj_token', fakeToken);
+    const resolvedRoles = sanitizeRoles(roles);
+    const finalRoles = resolvedRoles.length ? resolvedRoles : deriveRolesFromEmail(email);
+    persistRoles(finalRoles);
     set({
-      user: { name: email.split('@')[0] || 'Instrutor' },
+      user: {
+        name: email.split('@')[0] || 'Instrutor',
+        email,
+        roles: finalRoles
+      },
       token: fakeToken
     });
   },
   logout: () => {
     localStorage.removeItem('bjj_token');
+    clearPersistedRoles();
     set({ user: null, token: null });
   },
   setAlunos: (alunos) =>
@@ -951,7 +991,6 @@ const useUserStore = create((set) => ({
       };
     }),
   setGraduacoes: (graduacoes) => set({ graduacoes }),
-  setTreinos: (treinos) => set({ treinos }),
   syncAlunoReferencias: (alunoAtualizado) =>
     set((state) => {
       const presencasAtualizadas = state.presencas.map((item) =>
@@ -1102,5 +1141,11 @@ const useUserStore = create((set) => ({
       };
     })
 }));
+
+if (typeof window !== 'undefined') {
+  useTreinosStore.subscribe((state) => {
+    useUserStore.setState({ treinos: state.treinos });
+  });
+}
 
 export default useUserStore;

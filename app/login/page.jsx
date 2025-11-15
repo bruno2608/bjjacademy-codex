@@ -8,19 +8,51 @@ import { useRouter } from 'next/navigation';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 
+const AVAILABLE_ROLES = ['TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR', 'ALUNO'];
+
 export default function LoginPage() {
   const router = useRouter();
   const { login, token } = useUserStore();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [selectedRoles, setSelectedRoles] = useState(['PROFESSOR', 'INSTRUTOR']);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('bjj_token');
+    if (typeof window === 'undefined') return;
+    let rolesParaLogin = selectedRoles;
+    try {
+      const storedRoles = window.localStorage.getItem('bjj_roles');
+      if (storedRoles) {
+        const parsed = JSON.parse(storedRoles);
+        if (Array.isArray(parsed) && parsed.length) {
+          rolesParaLogin = parsed;
+          setSelectedRoles((prev) => {
+            const sameLength = prev.length === parsed.length;
+            const sameValues = sameLength && prev.every((role) => parsed.includes(role));
+            return sameValues ? prev : parsed;
+          });
+        }
+      }
+    } catch (error) {
+      console.warn('Não foi possível carregar os papéis salvos.', error);
+    }
+
+    const savedToken = window.localStorage.getItem('bjj_token');
     if (savedToken && !token) {
-      login({ email: 'instrutor@bjj.academy' });
+      login({ email: 'instrutor@bjj.academy', roles: rolesParaLogin });
       router.replace('/dashboard');
     }
-  }, [login, router, token]);
+  }, [login, router, selectedRoles, token]);
+
+  const toggleRole = (role) => {
+    setSelectedRoles((current) => {
+      if (current.includes(role)) {
+        const filtered = current.filter((item) => item !== role);
+        return filtered.length ? filtered : current;
+      }
+      return [...current, role];
+    });
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -34,7 +66,7 @@ export default function LoginPage() {
       return;
     }
     setError('');
-    login({ email: form.email });
+    login({ email: form.email, roles: selectedRoles });
     router.push('/dashboard');
   };
 
@@ -93,6 +125,37 @@ export default function LoginPage() {
               />
             </div>
             {error && <p className="text-sm text-bjj-red">{error}</p>}
+            <fieldset className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 text-xs text-bjj-gray-200/70">
+              <legend className="px-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-200/60">
+                Perfis de acesso (mock)
+              </legend>
+              <p className="mb-2 text-[11px] text-bjj-gray-200/60">
+                Marque ao menos um papel para simular as permissões do usuário.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {AVAILABLE_ROLES.map((role) => {
+                  const checked = selectedRoles.includes(role);
+                  return (
+                    <label
+                      key={role}
+                      className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 text-[11px] transition ${
+                        checked
+                          ? 'border-bjj-red/70 bg-bjj-red/20 text-bjj-white'
+                          : 'border-bjj-gray-800 bg-bjj-gray-900/60 hover:border-bjj-gray-700 hover:text-bjj-white'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="h-3 w-3 accent-bjj-red"
+                        checked={checked}
+                        onChange={() => toggleRole(role)}
+                      />
+                      {role}
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
             <button type="submit" className="btn-primary w-full justify-center">
               Acessar painel <ArrowRight size={15} />
             </button>

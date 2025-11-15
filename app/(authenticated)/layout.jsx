@@ -22,7 +22,21 @@ export default function AuthenticatedLayout({ children }) {
       router.replace('/login');
     }
     if (storedToken && !token) {
-      login({ email: 'instrutor@bjj.academy' });
+      let roles = [];
+      if (typeof window !== 'undefined') {
+        try {
+          const storedRoles = window.localStorage.getItem('bjj_roles');
+          if (storedRoles) {
+            const parsed = JSON.parse(storedRoles);
+            if (Array.isArray(parsed)) {
+              roles = parsed;
+            }
+          }
+        } catch (error) {
+          console.warn('Não foi possível carregar os papéis salvos.', error);
+        }
+      }
+      login({ email: 'instrutor@bjj.academy', roles });
     }
   }, [login, router, token]);
 

@@ -4,6 +4,7 @@
  */
 import { mockRequest } from './api';
 import useUserStore from '../store/userStore';
+import { useTreinosStore } from '../store/treinosStore';
 
 const horaAtual = () =>
   new Date()
@@ -19,12 +20,12 @@ const normalizarDia = (data) => {
 };
 
 const resolverTreino = (data, treinoId) => {
-  const store = useUserStore.getState();
-  const { treinos = [] } = store;
+  const treinos = useTreinosStore.getState().treinos;
   const diaSemana = normalizarDia(data) || normalizarDia(new Date().toISOString().split('T')[0]);
   const treinoEncontrado =
     treinos.find((item) => item.id === treinoId) ||
-    treinos.find((item) => item.diaSemana === diaSemana) ||
+    treinos.find((item) => item.diaSemana === diaSemana && item.ativo) ||
+    treinos.find((item) => item.ativo) ||
     treinos[0];
 
   if (!treinoEncontrado) {

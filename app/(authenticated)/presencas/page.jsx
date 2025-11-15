@@ -11,6 +11,7 @@ import PresenceForm from '../../../components/ui/PresenceForm';
 import LoadingState from '../../../components/ui/LoadingState';
 import Modal from '../../../components/ui/Modal';
 import useUserStore from '../../../store/userStore';
+import { useTreinosStore } from '../../../store/treinosStore';
 import {
   createPresenca,
   deletePresenca,
@@ -39,7 +40,9 @@ export default function PresencasPage() {
   const [sessionContext, setSessionContext] = useState('placeholder');
   const [searchTerm, setSearchTerm] = useState('');
   const alunos = useUserStore((state) => state.alunos);
-  const treinos = useUserStore((state) => state.treinos);
+  // Treinos ativos são carregados do store dedicado para alimentar dropdowns e sugestões.
+  const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
+  const [selectedTreinoId, setSelectedTreinoId] = useState('');
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
   const normalizarDiaSemana = useCallback((valor) => {
     const referencia = valor ? new Date(valor) : new Date();
@@ -48,13 +51,31 @@ export default function PresencasPage() {
     return nome.replace('-feira', '').trim();
   }, []);
   const sugerirTreino = useCallback(
-    (dataReferencia) => {
+    (dataReferencia, preferenciaId) => {
       const dia = normalizarDiaSemana(dataReferencia) || normalizarDiaSemana(hoje);
+      if (preferenciaId) {
+        const preferido = treinos.find((treino) => treino.id === preferenciaId);
+        if (preferido) return preferido;
+      }
       const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
       return candidatos[0] || treinos[0] || null;
     },
     [hoje, normalizarDiaSemana, treinos]
   );
+
+  useEffect(() => {
+    if (!treinos.length) {
+      setSelectedTreinoId('');
+      return;
+    }
+    if (selectedTreinoId && treinos.some((treino) => treino.id === selectedTreinoId)) {
+      return;
+    }
+    const dia = normalizarDiaSemana(hoje);
+    const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
+    const sugestao = (candidatos[0] || treinos[0])?.id || '';
+    setSelectedTreinoId(sugestao);
+  }, [hoje, normalizarDiaSemana, selectedTreinoId, treinos]);
 
   useEffect(() => {
     let active = true;
@@ -93,11 +114,14 @@ export default function PresencasPage() {
     const registros = presencas
       .filter((item) => item.data === hoje)
       .map((item) => ({ ...item, isPlaceholder: false }));
-    const alunosComRegistro = new Set(registros.map((item) => item.alunoId));
+    const registrosFiltrados = selectedTreinoId
+      ? registros.filter((item) => item.treinoId === selectedTreinoId)
+      : registros;
+    const alunosComRegistro = new Set(registrosFiltrados.map((item) => item.alunoId));
     const placeholders = alunosAtivos
       .filter((aluno) => !alunosComRegistro.has(aluno.id))
       .map((aluno) => {
-        const treinoSugestao = sugerirTreino(hoje);
+        const treinoSugestao = sugerirTreino(hoje, selectedTreinoId);
         return {
           id: `placeholder-${aluno.id}-${treinoSugestao?.id || 'principal'}`,
           alunoId: aluno.id,
@@ -113,8 +137,9 @@ export default function PresencasPage() {
         };
       });
 
-    return [...registros, ...placeholders].sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
-  }, [alunosAtivos, hoje, presencas, sugerirTreino]);
+    const combinados = [...registrosFiltrados, ...placeholders];
+    return combinados.sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
+  }, [alunosAtivos, hoje, presencas, selectedTreinoId, sugerirTreino]);
 
   const registrosFiltrados = useMemo(() => {
     if (searchTerm.trim().length < 3) {
@@ -193,6 +218,10 @@ export default function PresencasPage() {
   const obterSugestaoTreino = useCallback(
     (alunoId, data, utilizados = []) => {
       const dia = normalizarDiaSemana(data) || normalizarDiaSemana(hoje);
+      if (selectedTreinoId && !utilizados.includes(selectedTreinoId)) {
+        const preferido = treinos.find((treino) => treino.id === selectedTreinoId);
+        if (preferido) return preferido;
+      }
       const porDiaDisponivel = treinos.find(
         (treino) => treino.diaSemana === dia && !utilizados.includes(treino.id)
       );
@@ -206,7 +235,7 @@ export default function PresencasPage() {
 
       return treinos[0] || null;
     },
-    [hoje, normalizarDiaSemana, treinos]
+    [hoje, normalizarDiaSemana, selectedTreinoId, treinos]
   );
 
   const abrirSelecaoSessao = (registro, contexto = 'placeholder') => {
@@ -297,16 +326,40 @@ export default function PresencasPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-base font-semibold text-bjj-white">Check-in do treino</h1>
-          <p className="text-sm text-bjj-gray-200/70">
-            Visualize todos os alunos ativos de hoje e registre presença com apenas um clique.
-          </p>
+      <header className="space-y-3 rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-base font-semibold text-bjj-white">Check-in do treino</h1>
+            <p className="text-sm text-bjj-gray-200/70">
+              Visualize todos os alunos ativos de hoje e registre presença com apenas um clique.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <label className="flex flex-col text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">
+              Treino do dia
+              <select
+                className="input-field mt-1 min-w-[220px] text-sm normal-case"
+                value={selectedTreinoId}
+                onChange={(event) => setSelectedTreinoId(event.target.value)}
+              >
+                {treinosDoDiaPadrao.map((treino) => (
+                  <option key={treino.id} value={treino.id}>
+                    {treino.nome} · {treino.hora}
+                  </option>
+                ))}
+                {!treinosDoDiaPadrao.length && <option value="">Sessão principal</option>}
+              </select>
+            </label>
+            <button type="button" className="btn-secondary w-full md:w-auto" onClick={abrirResumo}>
+              <PieChart size={16} /> Resumo do dia
+            </button>
+          </div>
         </div>
-        <button type="button" className="btn-secondary w-full md:w-auto" onClick={abrirResumo}>
-          <PieChart size={16} /> Resumo do dia
-        </button>
+        {!treinos.length && (
+          <p className="rounded-xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 text-xs text-bjj-gray-200/70">
+            Nenhum horário de treino cadastrado para hoje. Cadastre sessões na aba Configurações para agilizar o check-in.
+          </p>
+        )}
       </header>
 
       <section className="grid grid-cols-1 gap-2 text-sm text-bjj-gray-200/80 md:grid-cols-3">

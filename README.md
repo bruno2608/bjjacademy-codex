@@ -18,11 +18,13 @@ e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
 
 | Área | Destaques |
 | --- | --- |
-| Autenticação | Tela de login remodelada com hero informativo e mock de token persistido (localStorage). |
+| Autenticação | Tela de login remodelada com hero informativo, seleção de papéis mock e token persistido (localStorage). |
 | Dashboard | Hero `PageHero`, cards gradiente e alternância entre visões **Geral · Presenças · Graduações**. |
 | Alunos | CRUD mockado com formulário em modal, distribuição de faixas e destaques para próximos graduandos. |
-| Presenças | Registro rápido focado no check-in do dia, resumo compacto e correção via modal dedicado. |
+| Presenças | Registro rápido focado no check-in do dia, dropdown de sessão do dia, múltiplos treinos e correção via modal dedicado. |
 | Graduações | Tela inspirada no app com hero, cards progressivos, linha do tempo e agendamento por grau/faixa. |
+| Configurações | Hub com Regras de Graduação editáveis, Horários de Treino com persistência local e Tipos de Treino customizáveis. |
+| Permissões | Site map centralizado, middleware de RBAC e navegação (sidebar/mobile/tablet) filtrada pelos papéis do usuário. |
 | PWA | Manifesto completo, service worker com cache básico e ícones em múltiplos tamanhos. |
 
 ## 🧭 **Mapa da estrutura**
@@ -35,6 +37,12 @@ app/
       [id]/
     presencas/
     graduacoes/
+    configuracoes/
+      graduacao/
+      treinos/
+      tipos-treino/
+    historico/
+    perfil/
   login/
 components/
   ui/
@@ -45,6 +53,9 @@ services/
   graduacoesService.js
 store/
   userStore.js
+  treinosStore.ts
+  tiposTreinoStore.ts
+  graduationRulesStore.ts
 public/
   icons/
   manifest.json

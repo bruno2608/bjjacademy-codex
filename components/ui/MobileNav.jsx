@@ -2,14 +2,26 @@
 
 /**
  * MobileNav replica a experiência do app mobile com uma barra inferior
- * fixa contendo as rotas principais da área autenticada.
+ * fixa contendo as rotas principais da área autenticada filtradas por papel.
  */
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import navigationItems from '../../lib/navigation';
+import { getNavigationItemsForRoles } from '../../lib/navigation';
+import useUserStore from '../../store/userStore';
 
 export default function MobileNav() {
   const pathname = usePathname();
+  const roles = useUserStore((state) => state.user?.roles || []);
+
+  const navigationItems = useMemo(
+    () => getNavigationItemsForRoles(roles),
+    [roles]
+  );
+
+  if (!navigationItems.length) {
+    return null;
+  }
 
   return (
     <nav
@@ -18,12 +30,12 @@ export default function MobileNav() {
     >
       <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-3">
         {navigationItems.map((item) => {
+          const active = pathname === item.path || pathname.startsWith(`${item.path}/`);
           const Icon = item.icon;
-          const active = pathname.startsWith(item.href);
           return (
             <Link
-              key={item.href}
-              href={item.href}
+              key={item.path}
+              href={item.path}
               className={`group flex flex-1 flex-col items-center gap-1 text-[11px] font-medium transition ${
                 active ? 'text-bjj-white' : 'text-bjj-gray-200/70 hover:text-bjj-white'
               }`}
@@ -36,9 +48,9 @@ export default function MobileNav() {
                     : 'border-bjj-gray-800 bg-bjj-gray-900/60 text-bjj-gray-200/80 group-hover:border-bjj-gray-700 group-hover:bg-bjj-gray-800'
                 }`}
               >
-                <Icon size={18} />
+                {Icon ? <Icon size={18} /> : null}
               </span>
-              {item.label}
+              {item.title}
             </Link>
           );
         })}

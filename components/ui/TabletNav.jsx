@@ -1,13 +1,14 @@
 'use client';
 
 /**
- * Navegação superior inspirada no Zenko Focus para telas médias e grandes.
- * Exibe pílulas compactas alinhadas ao cabeçalho para evitar altura excessiva.
+ * Navegação superior inspirada no Zenko Focus para telas médias e grandes,
+ * filtrando opções conforme os papéis do usuário atual.
  */
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
-import navigationItems from '../../lib/navigation';
+import { getNavigationItemsForRoles } from '../../lib/navigation';
 import useUserStore from '../../store/userStore';
 
 export default function TabletNav() {
@@ -15,11 +16,21 @@ export default function TabletNav() {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
   const logout = useUserStore((state) => state.logout);
+  const roles = user?.roles || [];
+
+  const navigationItems = useMemo(
+    () => getNavigationItemsForRoles(roles),
+    [roles]
+  );
 
   const handleLogout = () => {
     logout();
     router.push('/login');
   };
+
+  if (!navigationItems.length) {
+    return null;
+  }
 
   return (
     <nav
@@ -30,13 +41,13 @@ export default function TabletNav() {
       <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex flex-1 items-center gap-2 overflow-x-auto">
           {navigationItems.map((item) => {
+            const active = pathname === item.path || pathname.startsWith(`${item.path}/`);
             const Icon = item.icon;
-            const active = pathname.startsWith(item.href);
 
             return (
               <Link
-                key={item.href}
-                href={item.href}
+                key={item.path}
+                href={item.path}
                 className={`group inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
                   active
                     ? 'border-bjj-red/80 bg-bjj-red/20 text-bjj-white shadow-[0_12px_35px_rgba(225,6,0,0.18)]'
@@ -51,9 +62,9 @@ export default function TabletNav() {
                       : 'border-bjj-gray-800 bg-bjj-gray-900/60 text-bjj-gray-200/80 group-hover:border-bjj-gray-700 group-hover:bg-bjj-gray-800'
                   }`}
                 >
-                  <Icon size={16} />
+                  {Icon ? <Icon size={16} /> : null}
                 </span>
-                <span className="font-medium leading-none">{item.label}</span>
+                <span className="font-medium leading-none">{item.title}</span>
               </Link>
             );
           })}

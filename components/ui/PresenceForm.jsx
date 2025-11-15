@@ -6,6 +6,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import useUserStore from '../../store/userStore';
+import { useTreinosStore } from '../../store/treinosStore';
 
 const statusOptions = ['Presente', 'Ausente'];
 
@@ -16,7 +17,7 @@ const obterHoraAtual = () =>
 
 export default function PresenceForm({ onSubmit, initialData = null, onCancel, submitLabel }) {
   const alunos = useUserStore((state) => state.alunos);
-  const treinos = useUserStore((state) => state.treinos);
+  const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
   const isEditing = Boolean(initialData?.id);
 
@@ -26,6 +27,21 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
     const nome = referencia.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
     return nome.replace('-feira', '').trim();
   };
+
+  const treinosDisponiveis = useMemo(() => {
+    if (initialData?.treinoId && !treinos.some((treino) => treino.id === initialData.treinoId)) {
+      return [
+        ...treinos,
+        {
+          id: initialData.treinoId,
+          nome: initialData.tipoTreino || 'Sessão principal',
+          hora: initialData.hora || '--:--',
+          diaSemana: normalizarDiaSemana(initialData.data) || ''
+        }
+      ];
+    }
+    return treinos;
+  }, [initialData, normalizarDiaSemana, treinos]);
 
   const sugerirTreino = (dataReferencia) => {
     const dia = normalizarDiaSemana(dataReferencia) || normalizarDiaSemana(hoje);
@@ -87,7 +103,7 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
     if (!alunoSelecionado) return;
 
     const treinoSelecionado =
-      treinos.find((treino) => treino.id === form.treinoId) || sugerirTreino(form.data);
+      treinosDisponiveis.find((treino) => treino.id === form.treinoId) || sugerirTreino(form.data);
     const horaSessao = treinoSelecionado?.hora || initialData?.hora || obterHoraAtual();
 
     onSubmit({
@@ -150,12 +166,12 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
             value={form.treinoId}
             onChange={handleChange}
           >
-            {treinos.map((treino) => (
+            {treinosDisponiveis.map((treino) => (
               <option key={treino.id} value={treino.id}>
                 {treino.nome} · {treino.hora}
               </option>
             ))}
-            {!treinos.length && <option value="">Sessão principal</option>}
+            {!treinosDisponiveis.length && <option value="">Sessão principal</option>}
           </select>
         </div>
         <div>
