@@ -26,6 +26,7 @@ const STATUS_OPTIONS = [
   { value: 'Presente', label: 'Presente' },
   { value: 'Ausente', label: 'Ausente' }
 ];
+const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
 
 const formatPercent = (value) => `${Math.round(value)}%`;
 const formatTime = () =>
@@ -46,9 +47,9 @@ export default function PresencasPage() {
   const [sessionTakenTreinos, setSessionTakenTreinos] = useState([]);
   const [sessionContext, setSessionContext] = useState('placeholder');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterFaixa, setFilterFaixa] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterTreinoId, setFilterTreinoId] = useState(TODOS_TREINOS);
+  const [filterFaixas, setFilterFaixas] = useState(['all']);
+  const [filterStatuses, setFilterStatuses] = useState(['all']);
+  const [filterTreinos, setFilterTreinos] = useState([TODOS_TREINOS]);
   const alunos = useUserStore((state) => state.alunos);
   // Treinos ativos são carregados do store dedicado para alimentar dropdowns e sugestões.
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
@@ -75,20 +76,34 @@ export default function PresencasPage() {
 
   useEffect(() => {
     if (!treinos.length) {
-      setFilterTreinoId(TODOS_TREINOS);
+      setFilterTreinos([TODOS_TREINOS]);
       return;
     }
-    if (filterTreinoId === TODOS_TREINOS) {
+
+    if (filterTreinos.includes(TODOS_TREINOS)) {
       return;
     }
-    if (treinos.some((treino) => treino.id === filterTreinoId)) {
+
+    const idsValidos = treinos.map((treino) => treino.id);
+    const filtrados = filterTreinos.filter((id) => idsValidos.includes(id));
+
+    if (!filtrados.length) {
+      const dia = normalizarDiaSemana(hoje);
+      const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
+      const sugestao = (candidatos[0] || treinos[0])?.id || TODOS_TREINOS;
+      setFilterTreinos([sugestao]);
       return;
     }
-    const dia = normalizarDiaSemana(hoje);
-    const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
-    const sugestao = (candidatos[0] || treinos[0])?.id || TODOS_TREINOS;
-    setFilterTreinoId(sugestao);
-  }, [filterTreinoId, hoje, normalizarDiaSemana, treinos]);
+
+    if (filtrados.length === idsValidos.length) {
+      setFilterTreinos([TODOS_TREINOS]);
+      return;
+    }
+
+    if (filtrados.length !== filterTreinos.length) {
+      setFilterTreinos(filtrados);
+    }
+  }, [filterTreinos, hoje, normalizarDiaSemana, treinos]);
 
   useEffect(() => {
     let active = true;
@@ -131,7 +146,7 @@ export default function PresencasPage() {
     const placeholders = alunosAtivos
       .filter((aluno) => !alunosComRegistro.has(aluno.id))
       .map((aluno) => {
-        const preferencia = filterTreinoId === TODOS_TREINOS ? null : filterTreinoId;
+        const preferencia = filterTreinos.includes(TODOS_TREINOS) ? null : filterTreinos[0];
         const treinoSugestao = sugerirTreino(hoje, preferencia);
         return {
           id: `placeholder-${aluno.id}-${treinoSugestao?.id || 'principal'}`,
@@ -150,26 +165,33 @@ export default function PresencasPage() {
 
     const combinados = [...registros, ...placeholders];
     return combinados.sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
-  }, [alunosAtivos, filterTreinoId, hoje, presencas, sugerirTreino]);
+  }, [alunosAtivos, filterTreinos, hoje, presencas, sugerirTreino]);
 
   const registrosFiltrados = useMemo(() => {
     const termo = searchTerm.trim().toLowerCase();
+    const faixasAtivas = filterFaixas.includes('all') ? [] : filterFaixas;
+    const statusAtivos = filterStatuses.includes('all') ? [] : filterStatuses;
+    const treinosAtivos = filterTreinos.includes(TODOS_TREINOS) ? [] : filterTreinos;
+
     return registrosDoDia.filter((item) => {
       if (termo.length >= 3 && !item.alunoNome.toLowerCase().includes(termo)) {
         return false;
       }
-      if (filterFaixa !== 'all' && item.faixa !== filterFaixa) {
+      if (faixasAtivas.length && !faixasAtivas.includes(item.faixa)) {
         return false;
       }
-      if (filterStatus !== 'all' && item.status !== filterStatus) {
+      if (statusAtivos.length && !statusAtivos.includes(item.status)) {
         return false;
       }
-      if (filterTreinoId !== TODOS_TREINOS && item.treinoId !== filterTreinoId) {
-        return false;
+      if (treinosAtivos.length) {
+        const valorTreino = item.treinoId || 'sem-treino';
+        if (!treinosAtivos.includes(valorTreino)) {
+          return false;
+        }
       }
       return true;
     });
-  }, [filterFaixa, filterStatus, filterTreinoId, registrosDoDia, searchTerm]);
+  }, [filterFaixas, filterStatuses, filterTreinos, registrosDoDia, searchTerm]);
 
   const totalFiltrado = registrosFiltrados.length;
 
@@ -231,9 +253,32 @@ export default function PresencasPage() {
 
   const limparFiltros = () => {
     setSearchTerm('');
-    setFilterFaixa('all');
-    setFilterStatus('all');
-    setFilterTreinoId(TODOS_TREINOS);
+    setFilterFaixas(['all']);
+    setFilterStatuses(['all']);
+    setFilterTreinos([TODOS_TREINOS]);
+  };
+
+  const toggleSelection = (valor, selecionados, setter, valorTodos, totalDisponivel = 0) => {
+    if (valor === valorTodos) {
+      setter([valorTodos]);
+      return;
+    }
+
+    const semTodos = selecionados.filter((item) => item !== valorTodos);
+    const existe = semTodos.includes(valor);
+    const proximo = existe ? semTodos.filter((item) => item !== valor) : [...semTodos, valor];
+
+    if (!proximo.length) {
+      setter([valorTodos]);
+      return;
+    }
+
+    if (totalDisponivel > 0 && proximo.length >= totalDisponivel) {
+      setter([valorTodos]);
+      return;
+    }
+
+    setter(proximo);
   };
 
   const abrirEdicao = (registro) => {
@@ -258,7 +303,7 @@ export default function PresencasPage() {
   const obterSugestaoTreino = useCallback(
     (alunoId, data, utilizados = []) => {
       const dia = normalizarDiaSemana(data) || normalizarDiaSemana(hoje);
-      const preferencia = filterTreinoId === TODOS_TREINOS ? null : filterTreinoId;
+      const preferencia = filterTreinos.includes(TODOS_TREINOS) ? null : filterTreinos[0];
       if (preferencia && !utilizados.includes(preferencia)) {
         const preferido = treinos.find((treino) => treino.id === preferencia);
         if (preferido) return preferido;
@@ -276,7 +321,7 @@ export default function PresencasPage() {
 
       return treinos[0] || null;
     },
-    [filterTreinoId, hoje, normalizarDiaSemana, treinos]
+    [filterTreinos, hoje, normalizarDiaSemana, treinos]
   );
 
   const abrirSelecaoSessao = (registro, contexto = 'placeholder') => {
@@ -337,10 +382,10 @@ export default function PresencasPage() {
     });
     if (
       novaPresenca.treinoId &&
-      filterTreinoId !== TODOS_TREINOS &&
-      novaPresenca.treinoId !== filterTreinoId
+      !filterTreinos.includes(TODOS_TREINOS) &&
+      !filterTreinos.includes(novaPresenca.treinoId)
     ) {
-      setFilterTreinoId(TODOS_TREINOS);
+      setFilterTreinos([TODOS_TREINOS]);
     }
     fecharSelecaoSessao();
     await atualizarLista();
@@ -432,48 +477,129 @@ export default function PresencasPage() {
           </div>
           <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Faixa</label>
-            <select
-              className="input-field"
-              value={filterFaixa}
-              onChange={(event) => setFilterFaixa(event.target.value)}
-            >
-              <option value="all">Todas as faixas</option>
-              {faixasDisponiveis.map((faixa) => (
-                <option key={faixa} value={faixa}>
-                  {faixa}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  toggleSelection('all', filterFaixas, setFilterFaixas, 'all', faixasDisponiveis.length)
+                }
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
+                  filterFaixas.includes('all')
+                    ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
+                    : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
+                }`}
+              >
+                Todas
+              </button>
+              {faixasDisponiveis.map((faixa) => {
+                const ativo = !filterFaixas.includes('all') && filterFaixas.includes(faixa);
+                return (
+                  <button
+                    key={faixa}
+                    type="button"
+                    onClick={() =>
+                      toggleSelection(faixa, filterFaixas, setFilterFaixas, 'all', faixasDisponiveis.length)
+                    }
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
+                      ativo
+                        ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
+                        : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
+                    }`}
+                  >
+                    {faixa}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Status</label>
-            <select
-              className="input-field"
-              value={filterStatus}
-              onChange={(event) => setFilterStatus(event.target.value)}
-            >
-              {STATUS_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  toggleSelection('all', filterStatuses, setFilterStatuses, 'all', STATUS_FILTER_VALUES.length)
+                }
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
+                  filterStatuses.includes('all')
+                    ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
+                    : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
+                }`}
+              >
+                Todos
+              </button>
+              {STATUS_FILTER_VALUES.map((option) => {
+                const ativo = !filterStatuses.includes('all') && filterStatuses.includes(option.value);
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      toggleSelection(
+                        option.value,
+                        filterStatuses,
+                        setFilterStatuses,
+                        'all',
+                        STATUS_FILTER_VALUES.length
+                      )
+                    }
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
+                      ativo
+                        ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
+                        : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Treino</label>
-            <select
-              className="input-field"
-              value={filterTreinoId}
-              onChange={(event) => setFilterTreinoId(event.target.value)}
-            >
-              <option value={TODOS_TREINOS}>Todos os treinos do dia</option>
-              {treinosDoDiaPadrao.map((treino) => (
-                <option key={treino.id} value={treino.id}>
-                  {treino.nome} · {treino.hora}
-                </option>
-              ))}
-              {!treinosDoDiaPadrao.length && <option value="">Sessão principal</option>}
-            </select>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => toggleSelection(TODOS_TREINOS, filterTreinos, setFilterTreinos, TODOS_TREINOS, treinosDoDiaPadrao.length)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
+                  filterTreinos.includes(TODOS_TREINOS)
+                    ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
+                    : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
+                }`}
+              >
+                Todos do dia
+              </button>
+              {treinosDoDiaPadrao.map((treino) => {
+                const ativo = !filterTreinos.includes(TODOS_TREINOS) && filterTreinos.includes(treino.id);
+                return (
+                  <button
+                    key={treino.id}
+                    type="button"
+                    onClick={() =>
+                      toggleSelection(
+                        treino.id,
+                        filterTreinos,
+                        setFilterTreinos,
+                        TODOS_TREINOS,
+                        treinosDoDiaPadrao.length
+                      )
+                    }
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/70 ${
+                      ativo
+                        ? 'border-transparent bg-bjj-red text-bjj-white shadow-focus'
+                        : 'border-bjj-gray-800/80 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
+                    }`}
+                  >
+                    {treino.nome} · {treino.hora}
+                  </button>
+                );
+              })}
+              {!treinosDoDiaPadrao.length && (
+                <span className="rounded-full border border-dashed border-bjj-gray-800/70 px-3 py-1.5 text-xs text-bjj-gray-200/70">
+                  Sessão principal
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
