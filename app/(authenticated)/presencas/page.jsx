@@ -346,11 +346,11 @@ export default function PresencasPage() {
               Visualize todos os alunos ativos de hoje e registre presença com apenas um clique.
             </p>
           </div>
-          <div className="flex flex-col gap-2 md:flex-row md:items-center">
-            <label className="flex flex-col text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">
-              Treino do dia
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Treino</span>
               <select
-                className="input-field mt-1 min-w-[220px] text-sm normal-case"
+                className="input-field min-w-[220px] text-sm normal-case"
                 value={selectedTreinoId}
                 onChange={(event) => setSelectedTreinoId(event.target.value)}
               >
@@ -362,7 +362,7 @@ export default function PresencasPage() {
                 ))}
                 {!treinosDoDiaPadrao.length && <option value="">Sessão principal</option>}
               </select>
-            </label>
+            </div>
             <button type="button" className="btn-secondary w-full md:w-auto" onClick={abrirResumo}>
               <PieChart size={16} /> Resumo do dia
             </button>
