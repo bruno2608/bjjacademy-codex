@@ -21,6 +21,11 @@ import {
 } from '../../../services/presencasService';
 
 const TODOS_TREINOS = 'all';
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'Todos os status' },
+  { value: 'Presente', label: 'Presente' },
+  { value: 'Ausente', label: 'Ausente' }
+];
 
 const formatPercent = (value) => `${Math.round(value)}%`;
 const formatTime = () =>
@@ -41,10 +46,12 @@ export default function PresencasPage() {
   const [sessionTakenTreinos, setSessionTakenTreinos] = useState([]);
   const [sessionContext, setSessionContext] = useState('placeholder');
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterFaixa, setFilterFaixa] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterTreinoId, setFilterTreinoId] = useState(TODOS_TREINOS);
   const alunos = useUserStore((state) => state.alunos);
   // Treinos ativos são carregados do store dedicado para alimentar dropdowns e sugestões.
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
-  const [selectedTreinoId, setSelectedTreinoId] = useState(TODOS_TREINOS);
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
   const normalizarDiaSemana = useCallback((valor) => {
     const referencia = valor ? new Date(valor) : new Date();
@@ -68,20 +75,20 @@ export default function PresencasPage() {
 
   useEffect(() => {
     if (!treinos.length) {
-      setSelectedTreinoId(TODOS_TREINOS);
+      setFilterTreinoId(TODOS_TREINOS);
       return;
     }
-    if (selectedTreinoId === TODOS_TREINOS) {
+    if (filterTreinoId === TODOS_TREINOS) {
       return;
     }
-    if (treinos.some((treino) => treino.id === selectedTreinoId)) {
+    if (treinos.some((treino) => treino.id === filterTreinoId)) {
       return;
     }
     const dia = normalizarDiaSemana(hoje);
     const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
     const sugestao = (candidatos[0] || treinos[0])?.id || TODOS_TREINOS;
-    setSelectedTreinoId(sugestao);
-  }, [hoje, normalizarDiaSemana, selectedTreinoId, treinos]);
+    setFilterTreinoId(sugestao);
+  }, [filterTreinoId, hoje, normalizarDiaSemana, treinos]);
 
   useEffect(() => {
     let active = true;
@@ -120,15 +127,11 @@ export default function PresencasPage() {
     const registros = presencas
       .filter((item) => item.data === hoje)
       .map((item) => ({ ...item, isPlaceholder: false }));
-    const filtroTodos = !selectedTreinoId || selectedTreinoId === TODOS_TREINOS;
-    const registrosFiltrados = filtroTodos
-      ? registros
-      : registros.filter((item) => item.treinoId === selectedTreinoId);
-    const alunosComRegistro = new Set(registrosFiltrados.map((item) => item.alunoId));
+    const alunosComRegistro = new Set(registros.map((item) => item.alunoId));
     const placeholders = alunosAtivos
       .filter((aluno) => !alunosComRegistro.has(aluno.id))
       .map((aluno) => {
-        const preferencia = selectedTreinoId === TODOS_TREINOS ? null : selectedTreinoId;
+        const preferencia = filterTreinoId === TODOS_TREINOS ? null : filterTreinoId;
         const treinoSugestao = sugerirTreino(hoje, preferencia);
         return {
           id: `placeholder-${aluno.id}-${treinoSugestao?.id || 'principal'}`,
@@ -145,17 +148,30 @@ export default function PresencasPage() {
         };
       });
 
-    const combinados = [...registrosFiltrados, ...placeholders];
+    const combinados = [...registros, ...placeholders];
     return combinados.sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
-  }, [alunosAtivos, hoje, presencas, selectedTreinoId, sugerirTreino]);
+  }, [alunosAtivos, filterTreinoId, hoje, presencas, sugerirTreino]);
 
   const registrosFiltrados = useMemo(() => {
-    if (searchTerm.trim().length < 3) {
-      return registrosDoDia;
-    }
-    const termo = searchTerm.toLowerCase();
-    return registrosDoDia.filter((item) => item.alunoNome.toLowerCase().includes(termo));
-  }, [registrosDoDia, searchTerm]);
+    const termo = searchTerm.trim().toLowerCase();
+    return registrosDoDia.filter((item) => {
+      if (termo.length >= 3 && !item.alunoNome.toLowerCase().includes(termo)) {
+        return false;
+      }
+      if (filterFaixa !== 'all' && item.faixa !== filterFaixa) {
+        return false;
+      }
+      if (filterStatus !== 'all' && item.status !== filterStatus) {
+        return false;
+      }
+      if (filterTreinoId !== TODOS_TREINOS && item.treinoId !== filterTreinoId) {
+        return false;
+      }
+      return true;
+    });
+  }, [filterFaixa, filterStatus, filterTreinoId, registrosDoDia, searchTerm]);
+
+  const totalFiltrado = registrosFiltrados.length;
 
   const presentesDia = registrosDoDia.filter((item) => item.status === 'Presente').length;
   const ausentesDia = registrosDoDia.length - presentesDia;
@@ -175,6 +191,15 @@ export default function PresencasPage() {
     const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
     return candidatos.length ? candidatos : treinos;
   }, [hoje, normalizarDiaSemana, treinos]);
+
+  const faixasDisponiveis = useMemo(() => {
+    const conjunto = new Set(
+      alunosAtivos
+        .map((aluno) => aluno.faixa)
+        .filter((faixa) => typeof faixa === 'string' && faixa.trim().length > 0)
+    );
+    return Array.from(conjunto).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  }, [alunosAtivos]);
 
   const treinosDisponiveisModal = useMemo(() => {
     if (!sessionRecord) {
@@ -204,6 +229,13 @@ export default function PresencasPage() {
   const abrirResumo = () => setIsSummaryOpen(true);
   const fecharResumo = () => setIsSummaryOpen(false);
 
+  const limparFiltros = () => {
+    setSearchTerm('');
+    setFilterFaixa('all');
+    setFilterStatus('all');
+    setFilterTreinoId(TODOS_TREINOS);
+  };
+
   const abrirEdicao = (registro) => {
     setSelectedRecord(registro);
     setIsEditOpen(true);
@@ -226,7 +258,7 @@ export default function PresencasPage() {
   const obterSugestaoTreino = useCallback(
     (alunoId, data, utilizados = []) => {
       const dia = normalizarDiaSemana(data) || normalizarDiaSemana(hoje);
-      const preferencia = selectedTreinoId === TODOS_TREINOS ? null : selectedTreinoId;
+      const preferencia = filterTreinoId === TODOS_TREINOS ? null : filterTreinoId;
       if (preferencia && !utilizados.includes(preferencia)) {
         const preferido = treinos.find((treino) => treino.id === preferencia);
         if (preferido) return preferido;
@@ -244,7 +276,7 @@ export default function PresencasPage() {
 
       return treinos[0] || null;
     },
-    [hoje, normalizarDiaSemana, selectedTreinoId, treinos]
+    [filterTreinoId, hoje, normalizarDiaSemana, treinos]
   );
 
   const abrirSelecaoSessao = (registro, contexto = 'placeholder') => {
@@ -303,8 +335,12 @@ export default function PresencasPage() {
       tipoTreino: treinoSelecionado?.nome || sessionRecord.tipoTreino || 'Sessão principal',
       hora: treinoSelecionado?.hora || formatTime()
     });
-    if (novaPresenca.treinoId && selectedTreinoId !== TODOS_TREINOS && novaPresenca.treinoId !== selectedTreinoId) {
-      setSelectedTreinoId(TODOS_TREINOS);
+    if (
+      novaPresenca.treinoId &&
+      filterTreinoId !== TODOS_TREINOS &&
+      novaPresenca.treinoId !== filterTreinoId
+    ) {
+      setFilterTreinoId(TODOS_TREINOS);
     }
     fecharSelecaoSessao();
     await atualizarLista();
@@ -346,27 +382,9 @@ export default function PresencasPage() {
               Visualize todos os alunos ativos de hoje e registre presença com apenas um clique.
             </p>
           </div>
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Treino</span>
-              <select
-                className="input-field min-w-[220px] text-sm normal-case"
-                value={selectedTreinoId}
-                onChange={(event) => setSelectedTreinoId(event.target.value)}
-              >
-                <option value={TODOS_TREINOS}>Todos os treinos do dia</option>
-                {treinosDoDiaPadrao.map((treino) => (
-                  <option key={treino.id} value={treino.id}>
-                    {treino.nome} · {treino.hora}
-                  </option>
-                ))}
-                {!treinosDoDiaPadrao.length && <option value="">Sessão principal</option>}
-              </select>
-            </div>
-            <button type="button" className="btn-secondary w-full md:w-auto" onClick={abrirResumo}>
-              <PieChart size={16} /> Resumo do dia
-            </button>
-          </div>
+          <button type="button" className="btn-secondary w-full md:w-auto" onClick={abrirResumo}>
+            <PieChart size={16} /> Resumo do dia
+          </button>
         </div>
         {!treinos.length && (
           <p className="rounded-xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 text-xs text-bjj-gray-200/70">
@@ -393,26 +411,82 @@ export default function PresencasPage() {
         </div>
       </section>
 
-      <article className="card space-y-3">
+      <article className="card space-y-4">
         <header className="space-y-1">
-          <h2 className="text-base font-semibold text-bjj-white">Filtrar alunos</h2>
+          <h2 className="text-base font-semibold text-bjj-white">Filtros inteligentes</h2>
           <p className="text-sm text-bjj-gray-200/70">
-            Digite pelo menos três letras para localizar rapidamente um aluno e registrar a presença.
+            Combine os filtros abaixo para focar em faixas, status ou treinos específicos. A busca por nome é habilitada a partir de
+            três letras.
           </p>
         </header>
-        <div className="grid gap-3 md:grid-cols-[minmax(0,320px)_auto] md:items-center">
-          <input
-            type="search"
-            className="input-field"
-            placeholder="Buscar por nome do aluno"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Nome</label>
+            <input
+              type="search"
+              className="input-field"
+              placeholder="Buscar por nome do aluno"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Faixa</label>
+            <select
+              className="input-field"
+              value={filterFaixa}
+              onChange={(event) => setFilterFaixa(event.target.value)}
+            >
+              <option value="all">Todas as faixas</option>
+              {faixasDisponiveis.map((faixa) => (
+                <option key={faixa} value={faixa}>
+                  {faixa}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Status</label>
+            <select
+              className="input-field"
+              value={filterStatus}
+              onChange={(event) => setFilterStatus(event.target.value)}
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Treino</label>
+            <select
+              className="input-field"
+              value={filterTreinoId}
+              onChange={(event) => setFilterTreinoId(event.target.value)}
+            >
+              <option value={TODOS_TREINOS}>Todos os treinos do dia</option>
+              {treinosDoDiaPadrao.map((treino) => (
+                <option key={treino.id} value={treino.id}>
+                  {treino.nome} · {treino.hora}
+                </option>
+              ))}
+              {!treinosDoDiaPadrao.length && <option value="">Sessão principal</option>}
+            </select>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-bjj-gray-200/60">
-            {searchTerm.trim().length >= 3
-              ? `${registrosFiltrados.length} aluno(s) encontrados.`
-              : 'Mostrando todos os alunos ativos do dia.'}
+            Exibindo {totalFiltrado} de {registrosDoDia.length} aluno(s) ativos hoje.
           </p>
+          <button
+            type="button"
+            onClick={limparFiltros}
+            className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/70 transition hover:text-bjj-red"
+          >
+            Limpar filtros
+          </button>
         </div>
       </article>
 
