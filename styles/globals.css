@@ -1,0 +1,21 @@
+/*
+ * Global CSS imports Tailwind's base and resets, and declares
+ * default typography/background styles for the entire app.
+ */
+@import './tailwind.css';
+
+html,
+body {
+  background-color: #0e0e0e;
+  color: #FFFFFF;
+  min-height: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
