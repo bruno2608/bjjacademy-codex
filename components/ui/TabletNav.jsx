@@ -6,27 +6,20 @@
  */
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { LogOut } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { getNavigationItemsForRoles } from '../../lib/navigation';
 import useUserStore from '../../store/userStore';
+import UserMenu from './UserMenu';
 
 export default function TabletNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const user = useUserStore((state) => state.user);
-  const logout = useUserStore((state) => state.logout);
   const roles = user?.roles || [];
 
   const navigationItems = useMemo(
     () => getNavigationItemsForRoles(roles),
     [roles]
   );
-
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  };
 
   if (!navigationItems.length) {
     return null;
@@ -69,17 +62,8 @@ export default function TabletNav() {
             );
           })}
         </div>
-        <div className="hidden shrink-0 items-center gap-3 md:flex">
-          <span className="text-xs font-medium uppercase tracking-wide text-bjj-gray-300/80">
-            {user?.name || 'Instrutor'}
-          </span>
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-800 px-3 py-1.5 text-xs font-semibold text-bjj-gray-200 transition hover:border-bjj-red/70 hover:bg-bjj-red/20 hover:text-bjj-white"
-          >
-            <LogOut size={14} />
-            Sair
-          </button>
+        <div className="hidden shrink-0 items-center md:flex">
+          <UserMenu />
         </div>
       </div>
     </nav>

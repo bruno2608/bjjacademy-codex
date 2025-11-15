@@ -14,7 +14,11 @@ import {
   Activity,
   Flame,
   Clock3,
-  CalendarPlus
+  CalendarPlus,
+  UserPlus,
+  UserMinus,
+  Layers,
+  PieChart
 } from 'lucide-react';
 import Card from '../../../components/ui/Card';
 import PageHero from '../../../components/ui/PageHero';
@@ -26,6 +30,7 @@ import { calculateNextStep } from '../../../lib/graduationRules';
 
 const VIEW_OPTIONS = [
   { id: 'geral', label: 'Visão geral', helper: 'Panorama da academia' },
+  { id: 'alunos', label: 'Alunos', helper: 'Cadastros e atenção' },
   { id: 'presencas', label: 'Presenças', helper: 'Engajamento diário' },
   { id: 'graduacoes', label: 'Graduações', helper: 'Planejamento e evolução' }
 ];
@@ -52,6 +57,15 @@ const calcularMediaEntreGraduacoes = (historico = []) => {
   }
   if (contagem === 0) return null;
   return acumulado / contagem;
+};
+
+const differenceInDays = (value) => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const hoje = new Date();
+  const diffMs = hoje.getTime() - parsed.getTime();
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
 };
 
 export default function DashboardPage() {
@@ -177,6 +191,68 @@ export default function DashboardPage() {
 
   const evolucoesEmDestaque = evolucoes.slice(0, 5);
 
+  const novos30Dias = useMemo(
+    () =>
+      alunos
+        .map((aluno) => ({ aluno, diasDesdeEntrada: differenceInDays(aluno.dataInicio) }))
+        .filter((item) => item.diasDesdeEntrada !== null && item.diasDesdeEntrada <= 30)
+        .sort((a, b) => a.diasDesdeEntrada - b.diasDesdeEntrada),
+    [alunos]
+  );
+
+  const presencasUltimoMes = useMemo(() => {
+    const corte = new Date();
+    corte.setDate(corte.getDate() - 30);
+    return presencas.filter((item) => {
+      const data = new Date(item.data);
+      return !Number.isNaN(data.getTime()) && data >= corte;
+    });
+  }, [presencas]);
+
+  const frequenciaUltimoMes = useMemo(() => {
+    const mapa = new Map();
+    presencasUltimoMes.forEach((item) => {
+      if (item.status !== 'Presente') return;
+      mapa.set(item.alunoId, (mapa.get(item.alunoId) || 0) + 1);
+    });
+    return mapa;
+  }, [presencasUltimoMes]);
+
+  const alunosEmAtencao = useMemo(
+    () =>
+      alunosAtivos
+        .map((aluno) => ({ aluno, presencasNoPeriodo: frequenciaUltimoMes.get(aluno.id) || 0 }))
+        .filter((item) => item.presencasNoPeriodo <= 2)
+        .sort((a, b) => a.presencasNoPeriodo - b.presencasNoPeriodo || a.aluno.nome.localeCompare(b.aluno.nome, 'pt-BR'))
+        .slice(0, 6),
+    [alunosAtivos, frequenciaUltimoMes]
+  );
+
+  const distribuicaoFaixas = useMemo(() => {
+    const mapa = new Map();
+    alunos.forEach((aluno) => {
+      const faixa = aluno.faixa || 'Sem faixa';
+      mapa.set(faixa, (mapa.get(faixa) || 0) + 1);
+    });
+    return Array.from(mapa.entries())
+      .map(([label, total]) => ({ label, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [alunos]);
+
+  const distribuicaoPlanos = useMemo(() => {
+    const mapa = new Map();
+    alunos.forEach((aluno) => {
+      const plano = aluno.plano || 'Sem plano';
+      mapa.set(plano, (mapa.get(plano) || 0) + 1);
+    });
+    return Array.from(mapa.entries())
+      .map(([label, total]) => ({ label, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [alunos]);
+
+  const faixaMaisPopular = distribuicaoFaixas[0];
+  const planoPopular = distribuicaoPlanos[0];
+
   const mediaGraduacoesGeral = useMemo(() => {
     const medias = alunos
       .map((aluno) => calcularMediaEntreGraduacoes(aluno.historicoGraduacoes))
@@ -187,6 +263,36 @@ export default function DashboardPage() {
   }, [alunos]);
 
   const heroContent = useMemo(() => {
+    if (activeView === 'alunos') {
+      return {
+        badge: 'Cadastros',
+        title: 'Panorama de alunos',
+        subtitle: 'Identifique novos cadastros, planos populares e quem precisa de atenção.',
+        stats: [
+          {
+            label: 'Alunos ativos',
+            value: ativos,
+            helper: `${novos30Dias.length} novos · ${alunosEmAtencao.length} em atenção`
+          },
+          {
+            label: 'Novos (30 dias)',
+            value: novos30Dias.length,
+            helper: 'Revise fichas de integração recentes'
+          },
+          {
+            label: 'Plano favorito',
+            value: planoPopular ? planoPopular.label : 'Sem dados',
+            helper: `${planoPopular ? planoPopular.total : 0} aluno(s)`
+          },
+          {
+            label: 'Faixa predominante',
+            value: faixaMaisPopular ? faixaMaisPopular.label : 'Sem registros',
+            helper: `${faixaMaisPopular ? faixaMaisPopular.total : 0} atleta(s)`
+          }
+        ]
+      };
+    }
+
     if (activeView === 'presencas') {
       return {
         badge: 'Engajamento',
@@ -286,7 +392,11 @@ export default function DashboardPage() {
     rankingPresenca,
     evolucoes.length,
     proximasCerimonias.length,
-    mediaGraduacoesGeral
+    mediaGraduacoesGeral,
+    novos30Dias.length,
+    alunosEmAtencao.length,
+    planoPopular?.label,
+    faixaMaisPopular?.label
   ]);
 
   if (isLoading) {
@@ -413,6 +523,136 @@ export default function DashboardPage() {
             </aside>
           </section>
         </>
+      )}
+
+      {activeView === 'alunos' && (
+        <section className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <Card
+              title="Novos no mês"
+              value={novos30Dias.length}
+              icon={UserPlus}
+              description="Cadastros realizados nos últimos 30 dias."
+            />
+            <Card
+              title="Em atenção"
+              value={alunosEmAtencao.length}
+              icon={UserMinus}
+              description="Alunos com até duas presenças no período recente."
+            />
+            <Card
+              title="Plano destaque"
+              value={planoPopular ? planoPopular.label : 'Sem dados'}
+              icon={Layers}
+              description={planoPopular ? `${planoPopular.total} participante(s)` : 'Cadastre planos para acompanhar.'}
+            />
+            <Card
+              title="Faixa líder"
+              value={faixaMaisPopular ? faixaMaisPopular.label : 'N/A'}
+              icon={PieChart}
+              description={faixaMaisPopular ? `${faixaMaisPopular.total} atleta(s)` : 'Atualize faixas dos cadastros.'}
+            />
+          </div>
+
+          <section className="grid grid-cols-1 gap-3 xl:grid-cols-[2fr,1fr]">
+            <article className="card space-y-4">
+              <header className="space-y-1.5">
+                <h2 className="text-lg font-semibold text-bjj-white">Integração recente</h2>
+                <p className="text-sm text-bjj-gray-200/70">
+                  Cadastros concluídos nas últimas semanas para organizar apresentações, kits e contratos.
+                </p>
+              </header>
+              {novos30Dias.length === 0 ? (
+                <p className="text-sm text-bjj-gray-200/70">Nenhum aluno novo nos últimos 30 dias.</p>
+              ) : (
+                <ul className="space-y-2.5">
+                  {novos30Dias.slice(0, 6).map(({ aluno, diasDesdeEntrada }) => (
+                    <li
+                      key={aluno.id}
+                      className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-bjj-white">{aluno.nome}</p>
+                        <p className="text-xs text-bjj-gray-200/70">
+                          {aluno.faixa} · {aluno.graus}º grau · Plano {aluno.plano}
+                        </p>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/80">
+                        {diasDesdeEntrada === 0
+                          ? 'Hoje'
+                          : `Há ${diasDesdeEntrada} dia${diasDesdeEntrada > 1 ? 's' : ''}`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+
+            <aside className="card space-y-4">
+              <header className="space-y-1.5">
+                <h2 className="text-lg font-semibold text-bjj-white">Distribuição por faixa</h2>
+                <p className="text-sm text-bjj-gray-200/70">Entenda a composição atual para planejar turmas e graduações.</p>
+              </header>
+              {distribuicaoFaixas.length === 0 ? (
+                <p className="text-sm text-bjj-gray-200/70">Atualize a faixa dos alunos para visualizar a distribuição.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {distribuicaoFaixas.map((item) => (
+                    <li key={item.label} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-bjj-gray-200/70">
+                        <span className="font-semibold text-bjj-white">{item.label}</span>
+                        <span>{item.total} aluno(s)</span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-bjj-gray-800">
+                        <div
+                          className="h-full rounded-full bg-bjj-red"
+                          style={{ width: `${Math.max(8, Math.round((item.total / (totalAlunos || 1)) * 100))}%` }}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </aside>
+          </section>
+
+          <section className="card space-y-4">
+            <header className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-semibold text-bjj-white">Frequência em atenção</h2>
+                <p className="text-sm text-bjj-gray-200/70">
+                  Alunos com participação baixa nas últimas quatro semanas para contato proativo.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/70">
+                {presencasUltimoMes.length} registro(s) analisado(s)
+              </span>
+            </header>
+            {alunosEmAtencao.length === 0 ? (
+              <p className="text-sm text-bjj-gray-200/70">Sem alunos em atenção neste período.</p>
+            ) : (
+              <ul className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                {alunosEmAtencao.map(({ aluno, presencasNoPeriodo }) => (
+                  <li
+                    key={aluno.id}
+                    className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-bjj-white">{aluno.nome}</p>
+                      <p className="text-xs text-bjj-gray-200/70">
+                        {aluno.faixa} · {aluno.plano}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-bjj-gray-200/70">
+                      <span className="font-semibold text-bjj-white">{presencasNoPeriodo} presença(s)</span>
+                      <span>Meta: 4+</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </section>
       )}
 
       {activeView === 'presencas' && (

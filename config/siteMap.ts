@@ -4,7 +4,7 @@ import {
   Users,
   CalendarCheck,
   Medal,
-  History,
+  BarChart3,
   Settings2,
   Clock3,
   ListChecks,
@@ -54,9 +54,9 @@ export const siteMap: SiteMapItem[] = [
     roles: ALL_STAFF_ROLES
   },
   {
-    title: 'Histórico',
-    path: '/historico',
-    icon: History,
+    title: 'Relatórios',
+    path: '/relatorios',
+    icon: BarChart3,
     roles: ALL_STAFF_ROLES
   },
   {

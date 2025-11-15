@@ -41,7 +41,7 @@ app/
       graduacao/
       treinos/
       tipos-treino/
-    historico/
+    relatorios/
     perfil/
   login/
 components/
