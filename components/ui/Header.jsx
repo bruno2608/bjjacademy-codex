@@ -4,10 +4,10 @@
  * Header compacto para telas menores.
  * Usa menu hamburguer para abrir as rotas permitidas e mantém ação de logout.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LogOut, Menu, X, Settings2, ChevronRight, BarChart3, UserCircle2 } from 'lucide-react';
+import { LogOut, Menu, X, Settings2, ChevronRight, ChevronDown, BarChart3, UserCircle2 } from 'lucide-react';
 import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
 import useUserStore from '../../store/userStore';
 
@@ -29,6 +29,13 @@ export default function Header() {
     [fullNavigation]
   );
   const configChildren = configItem?.children ?? [];
+  const isConfigPath = useMemo(() => pathname.startsWith('/configuracoes'), [pathname]);
+  const [configOpen, setConfigOpen] = useState(isConfigPath);
+
+  useEffect(() => {
+    // Mantém o dropdown alinhado à rota atual para evitar que fique sempre aberto.
+    setConfigOpen(isConfigPath);
+  }, [isConfigPath]);
 
   const initials = useMemo(() => {
     const source = user?.name || user?.email || 'Instrutor';
@@ -156,23 +163,48 @@ export default function Header() {
                 )}
 
                 {configChildren.length > 0 && (
-                  <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/50 px-3 py-2">
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-300/70">
-                      <Settings2 size={14} /> Configurações
-                    </div>
-                    <ul className="mt-2 space-y-1 text-sm">
-                      {configChildren.map((child) => (
-                        <li key={child.path}>
+                  <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/50">
+                    <button
+                      type="button"
+                      onClick={() => setConfigOpen((state) => !state)}
+                      className="flex w-full items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-300/70 transition hover:text-bjj-white"
+                      aria-expanded={configOpen}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <Settings2 size={14} /> Configurações
+                      </span>
+                      <ChevronDown size={14} className={`transition ${configOpen ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-500'}`} />
+                    </button>
+                    {configOpen && (
+                      <ul className="border-t border-bjj-gray-800/70 px-3 py-2 text-sm">
+                        <li>
                           <Link
-                            href={child.path}
+                            href="/configuracoes"
                             className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-bjj-gray-200/80 transition hover:bg-bjj-gray-900/70 hover:text-bjj-white"
-                            onClick={() => setOpen(false)}
+                            onClick={() => {
+                              setOpen(false);
+                              setConfigOpen(false);
+                            }}
                           >
-                            <ChevronRight size={14} className="text-bjj-gray-500" /> {child.title}
+                            <ChevronRight size={14} className="text-bjj-gray-500" /> Visão geral
                           </Link>
                         </li>
-                      ))}
-                    </ul>
+                        {configChildren.map((child) => (
+                          <li key={child.path}>
+                            <Link
+                              href={child.path}
+                              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-bjj-gray-200/80 transition hover:bg-bjj-gray-900/70 hover:text-bjj-white"
+                              onClick={() => {
+                                setOpen(false);
+                                setConfigOpen(false);
+                              }}
+                            >
+                              <ChevronRight size={14} className="text-bjj-gray-500" /> {child.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 )}
               </div>
