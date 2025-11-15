@@ -8,7 +8,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ChevronDown, ChevronRight, LogOut, Settings2, UserCircle2, BarChart3 } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
@@ -24,9 +24,11 @@ const buildInitials = (name = '', email = '') => {
 
 export default function UserMenu() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, logout } = useUserStore();
   const roles = user?.roles || [];
   const [open, setOpen] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
   const menuRef = useRef(null);
 
   const navigationItems = useMemo(
@@ -40,6 +42,10 @@ export default function UserMenu() {
     [navigationItems]
   );
   const configChildren = configItem?.children ?? [];
+  const isConfigPath = useMemo(
+    () => Boolean(pathname && pathname.startsWith('/configuracoes')),
+    [pathname]
+  );
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -59,6 +65,12 @@ export default function UserMenu() {
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [open]);
+
+  useEffect(() => {
+    if (isConfigPath) {
+      setConfigOpen(true);
+    }
+  }, [isConfigPath]);
 
   const handleLogout = () => {
     logout();
@@ -137,23 +149,51 @@ export default function UserMenu() {
             )}
 
             {configChildren.length > 0 && (
-              <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-3 py-2">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-300/70">
-                  <Settings2 size={14} /> Configurações
-                </div>
-                <ul className="mt-2 space-y-1 text-sm">
-                  {configChildren.map((child) => (
-                    <li key={child.path}>
+              <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60">
+                <button
+                  type="button"
+                  onClick={() => setConfigOpen((state) => !state)}
+                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-300/70 transition hover:text-bjj-white"
+                  aria-expanded={configOpen}
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Settings2 size={14} /> Configurações
+                  </span>
+                  <ChevronDown
+                    size={14}
+                    className={`transition ${configOpen ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-500'}`}
+                  />
+                </button>
+                {configOpen && (
+                  <ul className="border-t border-bjj-gray-800/70 px-3 py-2 text-sm">
+                    <li>
                       <Link
-                        href={child.path}
+                        href="/configuracoes"
                         className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-bjj-gray-200/80 transition hover:bg-bjj-gray-900/70 hover:text-bjj-white"
-                        onClick={() => setOpen(false)}
+                        onClick={() => {
+                          setOpen(false);
+                          setConfigOpen(false);
+                        }}
                       >
-                        <ChevronRight size={14} className="text-bjj-gray-500" /> {child.title}
+                        <ChevronRight size={14} className="text-bjj-gray-500" /> Visão geral
                       </Link>
                     </li>
-                  ))}
-                </ul>
+                    {configChildren.map((child) => (
+                      <li key={child.path}>
+                        <Link
+                          href={child.path}
+                          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-bjj-gray-200/80 transition hover:bg-bjj-gray-900/70 hover:text-bjj-white"
+                          onClick={() => {
+                            setOpen(false);
+                            setConfigOpen(false);
+                          }}
+                        >
+                          <ChevronRight size={14} className="text-bjj-gray-500" /> {child.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
           </nav>

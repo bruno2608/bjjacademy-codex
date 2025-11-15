@@ -20,6 +20,8 @@ import {
   updatePresenca
 } from '../../../services/presencasService';
 
+const TODOS_TREINOS = 'all';
+
 const formatPercent = (value) => `${Math.round(value)}%`;
 const formatTime = () =>
   new Date()
@@ -42,7 +44,7 @@ export default function PresencasPage() {
   const alunos = useUserStore((state) => state.alunos);
   // Treinos ativos são carregados do store dedicado para alimentar dropdowns e sugestões.
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
-  const [selectedTreinoId, setSelectedTreinoId] = useState('');
+  const [selectedTreinoId, setSelectedTreinoId] = useState(TODOS_TREINOS);
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
   const normalizarDiaSemana = useCallback((valor) => {
     const referencia = valor ? new Date(valor) : new Date();
@@ -53,8 +55,9 @@ export default function PresencasPage() {
   const sugerirTreino = useCallback(
     (dataReferencia, preferenciaId) => {
       const dia = normalizarDiaSemana(dataReferencia) || normalizarDiaSemana(hoje);
-      if (preferenciaId) {
-        const preferido = treinos.find((treino) => treino.id === preferenciaId);
+      const preferenciaValida = preferenciaId && preferenciaId !== TODOS_TREINOS ? preferenciaId : null;
+      if (preferenciaValida) {
+        const preferido = treinos.find((treino) => treino.id === preferenciaValida);
         if (preferido) return preferido;
       }
       const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
@@ -65,15 +68,18 @@ export default function PresencasPage() {
 
   useEffect(() => {
     if (!treinos.length) {
-      setSelectedTreinoId('');
+      setSelectedTreinoId(TODOS_TREINOS);
       return;
     }
-    if (selectedTreinoId && treinos.some((treino) => treino.id === selectedTreinoId)) {
+    if (selectedTreinoId === TODOS_TREINOS) {
+      return;
+    }
+    if (treinos.some((treino) => treino.id === selectedTreinoId)) {
       return;
     }
     const dia = normalizarDiaSemana(hoje);
     const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
-    const sugestao = (candidatos[0] || treinos[0])?.id || '';
+    const sugestao = (candidatos[0] || treinos[0])?.id || TODOS_TREINOS;
     setSelectedTreinoId(sugestao);
   }, [hoje, normalizarDiaSemana, selectedTreinoId, treinos]);
 
@@ -114,14 +120,16 @@ export default function PresencasPage() {
     const registros = presencas
       .filter((item) => item.data === hoje)
       .map((item) => ({ ...item, isPlaceholder: false }));
-    const registrosFiltrados = selectedTreinoId
-      ? registros.filter((item) => item.treinoId === selectedTreinoId)
-      : registros;
+    const filtroTodos = !selectedTreinoId || selectedTreinoId === TODOS_TREINOS;
+    const registrosFiltrados = filtroTodos
+      ? registros
+      : registros.filter((item) => item.treinoId === selectedTreinoId);
     const alunosComRegistro = new Set(registrosFiltrados.map((item) => item.alunoId));
     const placeholders = alunosAtivos
       .filter((aluno) => !alunosComRegistro.has(aluno.id))
       .map((aluno) => {
-        const treinoSugestao = sugerirTreino(hoje, selectedTreinoId);
+        const preferencia = selectedTreinoId === TODOS_TREINOS ? null : selectedTreinoId;
+        const treinoSugestao = sugerirTreino(hoje, preferencia);
         return {
           id: `placeholder-${aluno.id}-${treinoSugestao?.id || 'principal'}`,
           alunoId: aluno.id,
@@ -218,8 +226,9 @@ export default function PresencasPage() {
   const obterSugestaoTreino = useCallback(
     (alunoId, data, utilizados = []) => {
       const dia = normalizarDiaSemana(data) || normalizarDiaSemana(hoje);
-      if (selectedTreinoId && !utilizados.includes(selectedTreinoId)) {
-        const preferido = treinos.find((treino) => treino.id === selectedTreinoId);
+      const preferencia = selectedTreinoId === TODOS_TREINOS ? null : selectedTreinoId;
+      if (preferencia && !utilizados.includes(preferencia)) {
+        const preferido = treinos.find((treino) => treino.id === preferencia);
         if (preferido) return preferido;
       }
       const porDiaDisponivel = treinos.find(
@@ -283,7 +292,7 @@ export default function PresencasPage() {
     const treinoSelecionado =
       treinos.find((treino) => treino.id === sessionTreinoId) ||
       obterSugestaoTreino(sessionRecord.alunoId, sessionRecord.data, sessionTakenTreinos);
-    await createPresenca({
+    const novaPresenca = await createPresenca({
       alunoId: sessionRecord.alunoId,
       alunoNome: sessionRecord.alunoNome,
       faixa: sessionRecord.faixa,
@@ -294,6 +303,9 @@ export default function PresencasPage() {
       tipoTreino: treinoSelecionado?.nome || sessionRecord.tipoTreino || 'Sessão principal',
       hora: treinoSelecionado?.hora || formatTime()
     });
+    if (novaPresenca.treinoId && selectedTreinoId !== TODOS_TREINOS && novaPresenca.treinoId !== selectedTreinoId) {
+      setSelectedTreinoId(TODOS_TREINOS);
+    }
     fecharSelecaoSessao();
     await atualizarLista();
   };
@@ -342,6 +354,7 @@ export default function PresencasPage() {
                 value={selectedTreinoId}
                 onChange={(event) => setSelectedTreinoId(event.target.value)}
               >
+                <option value={TODOS_TREINOS}>Todos os treinos do dia</option>
                 {treinosDoDiaPadrao.map((treino) => (
                   <option key={treino.id} value={treino.id}>
                     {treino.nome} · {treino.hora}
