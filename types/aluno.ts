@@ -13,6 +13,7 @@ export type Aluno = {
   graus: number;
   mesesNaFaixa: number;
   dataInicio: string;
+  dataNascimento?: string | null;
   dataUltimaGraduacao?: string | null;
   historicoGraduacoes: GraduationHistoryEntry[];
   aulasTotais?: number;

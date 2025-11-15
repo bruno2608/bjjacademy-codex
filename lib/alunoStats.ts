@@ -24,6 +24,7 @@ export const normalizeAluno = (aluno: Partial<Aluno>): Aluno => ({
   graus: Number(aluno.graus ?? 0),
   mesesNaFaixa: Number(aluno.mesesNaFaixa ?? 0),
   dataInicio: aluno.dataInicio ?? getCurrentDateISO(),
+  dataNascimento: aluno.dataNascimento ?? null,
   dataUltimaGraduacao: aluno.dataUltimaGraduacao ?? null,
   historicoGraduacoes: normalizeHistorico(aluno.historicoGraduacoes),
   aulasTotais: Number(aluno.aulasTotais ?? 0),

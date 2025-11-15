@@ -18,12 +18,14 @@ import {
   UserPlus,
   UserMinus,
   Layers,
-  PieChart
+  PieChart,
+  Cake
 } from 'lucide-react';
 import Card from '../../../components/ui/Card';
 import PageHero from '../../../components/ui/PageHero';
 import LoadingState from '../../../components/ui/LoadingState';
 import ToggleTag from '../../../components/ui/ToggleTag';
+import Badge from '../../../components/ui/Badge';
 import { getAlunos } from '../../../services/alunosService';
 import { getPresencas } from '../../../services/presencasService';
 import { getGraduacoes } from '../../../services/graduacoesService';
@@ -104,6 +106,10 @@ export default function DashboardPage() {
   }, []);
 
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const mesAtualLabel = useMemo(() => {
+    const label = new Date().toLocaleString('pt-BR', { month: 'long' });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }, []);
 
   const totalAlunos = alunos.length || 1;
   const ativos = alunos.filter((aluno) => aluno.status === 'Ativo').length;
@@ -120,6 +126,35 @@ export default function DashboardPage() {
   const graduacoesPlanejadas = graduacoes.filter((item) => item.status !== 'Concluído').length;
 
   const alunosAtivos = useMemo(() => alunos.filter((aluno) => aluno.status === 'Ativo'), [alunos]);
+
+  const aniversariantesDoMes = useMemo(() => {
+    const hojeData = new Date();
+    const mesAtual = hojeData.getMonth();
+    const anoAtual = hojeData.getFullYear();
+
+    return alunos
+      .map((aluno) => {
+        if (!aluno.dataNascimento) return null;
+        const nascimento = new Date(aluno.dataNascimento);
+        if (Number.isNaN(nascimento.getTime()) || nascimento.getMonth() !== mesAtual) return null;
+        const dia = nascimento.getDate();
+        const proximoAniversario = new Date(anoAtual, mesAtual, dia);
+        return {
+          id: aluno.id,
+          nome: aluno.nome,
+          faixa: aluno.faixa,
+          graus: aluno.graus,
+          status: aluno.status,
+          dataLabel: proximoAniversario.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+          idade: Math.max(anoAtual - nascimento.getFullYear(), 0),
+          dia
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.dia - b.dia);
+  }, [alunos]);
+  const aniversariantesDestaque = useMemo(() => aniversariantesDoMes.slice(0, 6), [aniversariantesDoMes]);
+  const totalAniversariantesMes = aniversariantesDoMes.length;
 
   const registrosDoDia = useMemo(() => {
     const registros = presencas.filter((item) => item.data === hoje);
@@ -440,19 +475,25 @@ export default function DashboardPage() {
               icon={Award}
               description="Sugestões de próximos graus com base nas regras oficiais."
             />
-            <Card
-              title="Faixas em preparação"
-              value={faixasPendentes}
-              icon={Medal}
-              description="Alunos prontos para avançar de faixa nos próximos meses."
-            />
-            <Card
-              title="Presenças confirmadas"
-              value={presencasSemana}
-              icon={CalendarCheck}
-              description="Entradas registradas nos últimos 7 dias de treino."
-            />
-          </div>
+          <Card
+            title="Faixas em preparação"
+            value={faixasPendentes}
+            icon={Medal}
+            description="Alunos prontos para avançar de faixa nos próximos meses."
+          />
+          <Card
+            title="Presenças confirmadas"
+            value={presencasSemana}
+            icon={CalendarCheck}
+            description="Entradas registradas nos últimos 7 dias de treino."
+          />
+          <Card
+            title={`Aniversários (${mesAtualLabel})`}
+            value={totalAniversariantesMes}
+            icon={Cake}
+            description="Planeje ações personalizadas para os aniversariantes do mês."
+          />
+        </div>
 
           <section className="grid grid-cols-1 gap-3 xl:grid-cols-[2fr,1fr]">
             <article className="card space-y-4">
@@ -513,6 +554,47 @@ export default function DashboardPage() {
                 </ul>
               )}
             </aside>
+          </section>
+
+          <section className="card space-y-4">
+            <header className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-bjj-white">Aniversariantes de {mesAtualLabel}</h2>
+                <p className="text-sm text-bjj-gray-200/70">
+                  Antecipe mensagens e ações especiais para quem celebra o próximo ciclo este mês.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/70">
+                <Cake size={13} className="text-bjj-red" /> {totalAniversariantesMes || 0} no mês
+              </span>
+            </header>
+
+            {aniversariantesDestaque.length === 0 ? (
+              <p className="text-sm text-bjj-gray-200/70">Nenhum aniversário neste mês. Aproveite para revisar cadastros.</p>
+            ) : (
+              <ul className="space-y-2">
+                {aniversariantesDestaque.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 md:flex-row md:items-center md:justify-between"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold text-bjj-white">{item.nome}</p>
+                        <Badge variant={item.status === 'Ativo' ? 'success' : 'neutral'}>{item.status}</Badge>
+                      </div>
+                      <p className="text-xs text-bjj-gray-200/70">
+                        {item.faixa} · {item.graus}º grau
+                      </p>
+                    </div>
+                    <div className="text-sm text-bjj-gray-200/80 md:text-right">
+                      <p className="font-semibold text-bjj-white">{item.dataLabel}</p>
+                      <p className="text-xs text-bjj-gray-200/70">Completa {item.idade} anos</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
         </>
       )}

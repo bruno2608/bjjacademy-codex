@@ -1,7 +1,30 @@
 import type { Aluno } from '../types';
 import { normalizeAluno } from '../lib/alunoStats';
 
-export const MOCK_ALUNOS: Aluno[] = [
+const BIRTHDAYS_BY_ID: Record<string, string> = {
+  '1': '1990-01-05',
+  '2': '1992-02-14',
+  '3': '1991-03-08',
+  '4': '1988-04-22',
+  '5': '1993-05-17',
+  '6': '1990-06-11',
+  '7': '1992-07-09',
+  '8': '1989-08-27',
+  '9': '1994-09-03',
+  '10': '1987-10-30',
+  '11': '1996-11-12',
+  '12': '1992-12-19',
+  '13': '1990-01-21',
+  '14': '1993-02-27',
+  '15': '1995-03-25',
+  '16': '1991-04-05',
+  '17': '1995-05-28',
+  '18': '1991-06-29',
+  '19': '1992-07-24',
+  '20': '1990-08-15'
+};
+
+const BASE_MOCK_ALUNOS: Aluno[] = [
   normalizeAluno({
     id: '1',
     nome: 'João Silva',
@@ -556,3 +579,8 @@ export const MOCK_ALUNOS: Aluno[] = [
     ]
   })
 ];
+
+export const MOCK_ALUNOS: Aluno[] = BASE_MOCK_ALUNOS.map((aluno) => ({
+  ...aluno,
+  dataNascimento: aluno.dataNascimento ?? BIRTHDAYS_BY_ID[aluno.id] ?? null
+}));
