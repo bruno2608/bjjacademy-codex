@@ -79,7 +79,7 @@ export default function EditarAlunoPage() {
       />
 
       <div className="flex justify-end">
-        <button type="button" className="btn-secondary" onClick={() => router.push('/alunos')}>
+        <button type="button" className="btn btn-secondary btn-sm" onClick={() => router.push('/alunos')}>
           <ArrowLeft size={15} /> Voltar para lista
         </button>
       </div>

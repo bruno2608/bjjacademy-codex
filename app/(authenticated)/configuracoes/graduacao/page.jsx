@@ -73,7 +73,7 @@ export default function RegrasGraduacaoPage() {
 
   return (
     <div className="space-y-6">
-      <header className="rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-6">
+      <header className="card space-y-3">
         <p className="text-xs uppercase tracking-[0.3em] text-bjj-gray-200/60">Regras oficiais</p>
         <h1 className="mt-2 text-xl font-semibold text-bjj-white">Regras de Graduação</h1>
         <p className="mt-2 max-w-2xl text-sm text-bjj-gray-200/70">
@@ -85,7 +85,7 @@ export default function RegrasGraduacaoPage() {
         {belts.map(([belt, rule]) => (
           <article
             key={belt}
-            className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-5"
+            className="card space-y-4"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -95,7 +95,7 @@ export default function RegrasGraduacaoPage() {
               <button
                 type="button"
                 onClick={() => openModal(belt, rule)}
-                className="btn-secondary px-3 py-1 text-xs"
+                className="btn btn-secondary btn-sm"
               >
                 Editar
               </button>

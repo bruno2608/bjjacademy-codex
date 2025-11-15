@@ -12,10 +12,7 @@ export default function UnauthorizedPage() {
           Entre com um usuário que tenha os papéis corretos ou solicite habilitação ao administrador da academia.
         </p>
       </div>
-      <a
-        href="/login"
-        className="btn-primary inline-flex items-center justify-center px-6 py-2 text-sm"
-      >
+      <a href="/login" className="btn btn-primary px-6 text-sm">
         Voltar para o login
       </a>
     </div>

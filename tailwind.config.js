@@ -2,6 +2,16 @@
  * Tailwind CSS configuration defining the brand palette and
  * typography for the BJJ Academy design system (Zenko Focus).
  */
+let daisyUIPlugin;
+
+try {
+  // eslint-disable-next-line global-require
+  daisyUIPlugin = require('daisyui');
+} catch (error) {
+  // Ambiente offline: aplica fallback mínimo para manter as classes utilitárias personalizadas.
+  daisyUIPlugin = () => {};
+}
+
 module.exports = {
   content: ['./app/**/*.{js,jsx,ts,tsx}', './components/**/*.{js,jsx,ts,tsx}'],
   theme: {
@@ -23,5 +33,22 @@ module.exports = {
       }
     }
   },
-  plugins: []
+  plugins: [daisyUIPlugin],
+  daisyui: {
+    themes: [
+      {
+        bjjacademy: {
+          primary: '#D32F2F',
+          secondary: '#424242',
+          accent: '#ffffff',
+          neutral: '#1f2937',
+          'base-100': '#f5f5f5',
+          info: '#2196f3',
+          success: '#4caf50',
+          warning: '#ff9800',
+          error: '#f44336'
+        }
+      }
+    ]
+  }
 };

@@ -21,8 +21,8 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className = '', variant = 'primary', type = 'button', ...props }, ref) => {
-    const baseClass = VARIANT_CLASSES[variant];
-    const classes = className ? `${baseClass} ${className}` : baseClass;
+    const variantClass = VARIANT_CLASSES[variant];
+    const classes = className ? `btn ${variantClass} ${className}` : `btn ${variantClass}`;
     return <button ref={ref} type={type} className={classes} {...props} />;
   }
 );

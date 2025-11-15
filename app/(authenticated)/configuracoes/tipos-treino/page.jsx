@@ -37,7 +37,7 @@ export default function TiposTreinoPage() {
 
   return (
     <div className="space-y-6">
-      <header className="rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-6">
+      <header className="card space-y-3">
         <p className="text-xs uppercase tracking-[0.3em] text-bjj-gray-200/60">Catálogo de sessões</p>
         <h1 className="mt-2 text-xl font-semibold text-bjj-white">Tipos de Treino</h1>
         <p className="mt-2 max-w-2xl text-sm text-bjj-gray-200/70">
@@ -45,7 +45,7 @@ export default function TiposTreinoPage() {
         </p>
       </header>
 
-      <form className="rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-5" onSubmit={handleAdd}>
+      <form className="card" onSubmit={handleAdd}>
         <label className="flex flex-col gap-2 text-sm text-bjj-gray-200/80 md:flex-row md:items-center">
           <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Novo tipo</span>
           <div className="flex w-full flex-col gap-2 md:flex-row md:items-center">
@@ -54,7 +54,7 @@ export default function TiposTreinoPage() {
               value={novoTipo}
               onChange={(event) => setNovoTipo(event.target.value)}
             />
-            <Button type="submit" className="md:w-auto">
+            <Button type="submit" className="btn-sm md:btn-md md:w-auto">
               Adicionar
             </Button>
           </div>
@@ -65,7 +65,7 @@ export default function TiposTreinoPage() {
         {tipos.map((tipo, index) => (
           <article
             key={`${tipo}-${index}`}
-            className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between"
+            className="card flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
           >
             {editIndex === index ? (
               <form className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3" onSubmit={handleEdit}>
@@ -75,10 +75,10 @@ export default function TiposTreinoPage() {
                   autoFocus
                 />
                 <div className="flex gap-2 text-xs">
-                  <Button type="submit" className="px-3 py-1">
+                  <Button type="submit" className="btn-sm">
                     Salvar
                   </Button>
-                  <Button type="button" variant="secondary" className="px-3 py-1" onClick={() => setEditIndex(null)}>
+                  <Button type="button" variant="secondary" className="btn-sm" onClick={() => setEditIndex(null)}>
                     Cancelar
                   </Button>
                 </div>
@@ -90,7 +90,7 @@ export default function TiposTreinoPage() {
                   <Button
                     type="button"
                     variant="secondary"
-                    className="px-3 py-1"
+                    className="btn-sm"
                     onClick={() => startEdit(index, tipo)}
                   >
                     Renomear
@@ -98,7 +98,7 @@ export default function TiposTreinoPage() {
                   <Button
                     type="button"
                     variant="secondary"
-                    className="rounded-full px-3 py-1 border-bjj-red/70 text-bjj-red hover:border-bjj-red hover:text-bjj-red hover:bg-bjj-red/10"
+                    className="btn-sm border-bjj-red/70 text-bjj-red hover:border-bjj-red hover:text-bjj-red hover:bg-bjj-red/10"
                     onClick={() => removeTipo(index)}
                   >
                     Remover
@@ -109,7 +109,7 @@ export default function TiposTreinoPage() {
           </article>
         ))}
         {!tipos.length && (
-          <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-6 text-sm text-bjj-gray-200/70">
+          <p className="card border-dashed text-sm text-bjj-gray-200/70">
             Nenhum tipo cadastrado. Adicione pelo menos um para vincular às sessões de treino.
           </p>
         )}

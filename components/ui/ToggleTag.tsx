@@ -13,10 +13,10 @@ export interface ToggleTagProps extends ButtonHTMLAttributes<HTMLButtonElement> 
 
 const ToggleTag = ({ active = false, className = '', leftIcon, children, ...props }: ToggleTagProps) => {
   const baseClasses =
-    'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-wide transition';
+    'btn btn-sm btn-outline border-bjj-gray-700 bg-transparent text-xs font-semibold uppercase tracking-wide text-bjj-gray-200';
   const stateClasses = active
-    ? 'border-bjj-red bg-bjj-red text-bjj-white shadow-[0_8px_24px_-12px_rgba(225,6,0,0.45)]'
-    : 'border-bjj-gray-800/80 bg-bjj-gray-900/60 text-bjj-gray-200 hover:border-bjj-red/50';
+    ? 'btn-primary text-bjj-white border-transparent shadow-[0_8px_24px_-12px_rgba(225,6,0,0.45)]'
+    : 'hover:border-bjj-red/50 hover:text-bjj-white';
   const classes = `${baseClasses} ${stateClasses}${className ? ` ${className}` : ''}`;
 
   return (

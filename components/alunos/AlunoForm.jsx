@@ -10,6 +10,7 @@ import { BELT_ORDER, getMaxStripes } from '../../lib/graduationRules';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
+import FormSection from '../ui/FormSection';
 
 const planos = ['Mensal', 'Trimestral', 'Anual'];
 const statusOptions = ['Ativo', 'Inativo'];
@@ -117,15 +118,11 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        <section
-          className={`space-y-3.5 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 md:col-span-1 ${
-            step === 0 ? 'block' : 'hidden md:block'
-          }`}
+        <FormSection
+          title="Perfil"
+          description="Dados básicos do aluno."
+          className={`md:col-span-1 ${step === 0 ? 'block' : 'hidden md:block'}`}
         >
-          <header className="space-y-1">
-            <h3 className="text-sm font-semibold text-bjj-white">Perfil</h3>
-            <p className="text-xs text-bjj-gray-200/70">Dados básicos do aluno.</p>
-          </header>
           <div className="space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-medium">Nome</label>
@@ -148,17 +145,13 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
               />
             </div>
           </div>
-        </section>
+        </FormSection>
 
-        <section
-          className={`space-y-3.5 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 md:col-span-1 ${
-            step === 1 ? 'block' : 'hidden md:block'
-          }`}
+        <FormSection
+          title="Plano e status"
+          description="Controle de participação."
+          className={`md:col-span-1 ${step === 1 ? 'block' : 'hidden md:block'}`}
         >
-          <header className="space-y-1">
-            <h3 className="text-sm font-semibold text-bjj-white">Plano e status</h3>
-            <p className="text-xs text-bjj-gray-200/70">Controle de participação.</p>
-          </header>
           <div className="space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-medium">Plano</label>
@@ -177,17 +170,13 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
               </Select>
             </div>
           </div>
-        </section>
+        </FormSection>
 
-        <section
-          className={`space-y-3.5 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 md:col-span-1 ${
-            step === 2 ? 'block' : 'hidden md:block'
-          }`}
+        <FormSection
+          title="Graduação"
+          description="Histórico técnico do atleta."
+          className={`md:col-span-1 ${step === 2 ? 'block' : 'hidden md:block'}`}
         >
-          <header className="space-y-1">
-            <h3 className="text-sm font-semibold text-bjj-white">Graduação</h3>
-            <p className="text-xs text-bjj-gray-200/70">Histórico técnico do atleta.</p>
-          </header>
           <div className="space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-medium">Faixa atual</label>
@@ -229,7 +218,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
               />
             </div>
           </div>
-        </section>
+        </FormSection>
       </div>
 
       <div className="flex flex-col gap-2.5 md:hidden">
@@ -240,23 +229,24 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            className="btn-sm"
             onClick={prevStep}
-            className="inline-flex items-center gap-1 rounded-lg border border-bjj-gray-800 px-3.5 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-50"
             disabled={step === 0}
           >
             <ChevronLeft size={14} /> Voltar
-          </button>
-          <button
+          </Button>
+          <Button
             type={isLastStep ? 'submit' : 'button'}
+            className="btn-sm"
             onClick={isLastStep ? undefined : nextStep}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-bjj-red px-3.5 py-2 text-xs font-semibold text-bjj-white transition hover:bg-bjj-red/80 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isSubmitting}
           >
             {isLastStep ? submitLabel : 'Avançar'}
             {!isLastStep && <ChevronRight size={14} />}
-          </button>
+          </Button>
         </div>
       </div>
 

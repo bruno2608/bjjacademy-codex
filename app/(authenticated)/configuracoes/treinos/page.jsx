@@ -67,7 +67,7 @@ export default function TreinosPage() {
 
   return (
     <div className="space-y-6">
-      <header className="rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-6">
+      <header className="card space-y-3">
         <p className="text-xs uppercase tracking-[0.3em] text-bjj-gray-200/60">Agenda da academia</p>
         <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
@@ -76,7 +76,7 @@ export default function TreinosPage() {
               Organize as sessões semanais da academia. Os treinos ativos aparecem na tela de presenças para agilizar o check-in.
             </p>
           </div>
-          <Button type="button" className="w-full md:w-auto" onClick={() => openModal(null)}>
+          <Button type="button" className="btn-sm md:btn-md w-full md:w-auto" onClick={() => openModal(null)}>
             Cadastrar treino
           </Button>
         </div>
@@ -86,7 +86,7 @@ export default function TreinosPage() {
         {sortedTreinos.map((treino) => (
           <article
             key={treino.id}
-            className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between"
+            className="card flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
           >
             <div>
               <h2 className="text-base font-semibold text-bjj-white">{treino.nome}</h2>
@@ -95,13 +95,13 @@ export default function TreinosPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-bjj-gray-200/70">
-              <span className={`rounded-full px-3 py-1 ${treino.ativo ? 'bg-bjj-red/20 text-bjj-white' : 'bg-bjj-gray-800/60'}`}>
+              <span className={`badge badge-sm ${treino.ativo ? 'badge-success text-bjj-white' : 'badge-outline border-bjj-gray-700 text-bjj-gray-200'}`}>
                 {treino.ativo ? 'Ativo' : 'Inativo'}
               </span>
               <Button
                 type="button"
                 variant="secondary"
-                className="rounded-full px-3 py-1"
+                className="btn-sm"
                 onClick={() => openModal(treino)}
               >
                 Editar
@@ -109,7 +109,7 @@ export default function TreinosPage() {
               <Button
                 type="button"
                 variant="secondary"
-                className="rounded-full px-3 py-1"
+                className="btn-sm"
                 onClick={() => toggleTreinoStatus(treino.id)}
               >
                 {treino.ativo ? 'Desativar' : 'Ativar'}
@@ -117,7 +117,7 @@ export default function TreinosPage() {
               <Button
                 type="button"
                 variant="secondary"
-                className="rounded-full px-3 py-1 border-bjj-red/70 text-bjj-red hover:border-bjj-red hover:text-bjj-red hover:bg-bjj-red/10"
+                className="btn-sm border-bjj-red/70 text-bjj-red hover:border-bjj-red hover:text-bjj-red hover:bg-bjj-red/10"
                 onClick={() => removeTreino(treino.id)}
               >
                 Remover
@@ -126,7 +126,7 @@ export default function TreinosPage() {
           </article>
         ))}
         {!sortedTreinos.length && (
-          <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-6 text-sm text-bjj-gray-200/70">
+          <p className="card border-dashed text-sm text-bjj-gray-200/70">
             Nenhum treino cadastrado até o momento. Cadastre a grade semanal para habilitar a marcação de presenças por sessão.
           </p>
         )}
