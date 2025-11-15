@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Navegação superior inspirada no Zenko Focus para telas médias e grandes,
+ * Navegação superior inspirada no Zenko Focus para telas grandes,
  * filtrando opções conforme os papéis do usuário atual.
  */
 import { useMemo } from 'react';
@@ -34,11 +34,11 @@ export default function TabletNav() {
 
   return (
     <nav
-      className="hidden border-b border-bjj-gray-800/70 bg-bjj-black/95 backdrop-blur md:block"
+      className="hidden border-b border-bjj-gray-800/70 bg-bjj-black/95 backdrop-blur lg:block"
       role="navigation"
       aria-label="Navegação principal"
     >
-      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-6 py-3">
         <div className="flex flex-1 items-center gap-2 overflow-x-auto">
           {navigationItems.map((item) => {
             const active = pathname === item.path || pathname.startsWith(`${item.path}/`);

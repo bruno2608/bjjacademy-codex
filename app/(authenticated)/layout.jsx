@@ -8,7 +8,6 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/ui/Header';
 import TabletNav from '../../components/ui/TabletNav';
-import MobileNav from '../../components/ui/MobileNav';
 import useUserStore from '../../store/userStore';
 
 export default function AuthenticatedLayout({ children }) {
@@ -46,10 +45,9 @@ export default function AuthenticatedLayout({ children }) {
         <Header />
         <TabletNav />
       </div>
-      <main className="flex-1 bg-bjj-gray-900/40 pb-24 md:pb-0">
+      <main className="flex-1 bg-bjj-gray-900/40">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 pb-10 pt-6 sm:px-6 lg:px-8">{children}</div>
       </main>
-      <MobileNav />
     </div>
   );
 }
