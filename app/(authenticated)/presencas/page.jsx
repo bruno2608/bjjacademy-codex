@@ -48,9 +48,9 @@ export default function PresencasPage() {
   const [sessionTakenTreinos, setSessionTakenTreinos] = useState([]);
   const [sessionContext, setSessionContext] = useState('placeholder');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterFaixas, setFilterFaixas] = useState(['all']);
-  const [filterStatuses, setFilterStatuses] = useState(['all']);
-  const [filterTreinos, setFilterTreinos] = useState([TODOS_TREINOS]);
+  const [filterFaixas, setFilterFaixas] = useState([]);
+  const [filterStatuses, setFilterStatuses] = useState([]);
+  const [filterTreinos, setFilterTreinos] = useState([]);
   const alunos = useUserStore((state) => state.alunos);
   // Treinos ativos são carregados do store dedicado para alimentar dropdowns e sugestões.
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
@@ -77,7 +77,7 @@ export default function PresencasPage() {
 
   useEffect(() => {
     if (!treinos.length) {
-      setFilterTreinos([TODOS_TREINOS]);
+      setFilterTreinos([]);
       return;
     }
 
@@ -92,7 +92,7 @@ export default function PresencasPage() {
       const dia = normalizarDiaSemana(hoje);
       const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
       const sugestao = (candidatos[0] || treinos[0])?.id || TODOS_TREINOS;
-      setFilterTreinos([sugestao]);
+      setFilterTreinos(sugestao ? [sugestao] : []);
       return;
     }
 
@@ -169,12 +169,18 @@ export default function PresencasPage() {
     return combinados.sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
   }, [alunosAtivos, filterTreinos, hoje, presencas, sugerirTreino]);
 
+  const limparSelecao = useCallback((lista, valorTodos = 'all') => {
+    if (!Array.isArray(lista) || lista.length === 0 || lista.includes(valorTodos)) {
+      return [];
+    }
+    return lista;
+  }, []);
+
   const registrosFiltrados = useMemo(() => {
     const termo = searchTerm.trim().toLowerCase();
-    const faixasAtivas = filterFaixas.includes('all') || filterFaixas.length === 0 ? [] : filterFaixas;
-    const statusAtivos = filterStatuses.includes('all') || filterStatuses.length === 0 ? [] : filterStatuses;
-    const treinosAtivos =
-      filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0 ? [] : filterTreinos;
+    const faixasAtivas = limparSelecao(filterFaixas);
+    const statusAtivos = limparSelecao(filterStatuses);
+    const treinosAtivos = limparSelecao(filterTreinos, TODOS_TREINOS);
 
     return registrosDoDia.filter((item) => {
       if (termo.length >= 3 && !item.alunoNome.toLowerCase().includes(termo)) {
@@ -194,7 +200,7 @@ export default function PresencasPage() {
       }
       return true;
     });
-  }, [filterFaixas, filterStatuses, filterTreinos, registrosDoDia, searchTerm]);
+  }, [filterFaixas, filterStatuses, filterTreinos, limparSelecao, registrosDoDia, searchTerm]);
 
   const totalFiltrado = registrosFiltrados.length;
 
@@ -273,22 +279,23 @@ export default function PresencasPage() {
 
   const limparFiltros = () => {
     setSearchTerm('');
-    setFilterFaixas(['all']);
-    setFilterStatuses(['all']);
-    setFilterTreinos([TODOS_TREINOS]);
+    setFilterFaixas([]);
+    setFilterStatuses([]);
+    setFilterTreinos([]);
   };
 
   const normalizarSelecao = useCallback((lista, totalDisponivel, valorTodos = 'all') => {
     if (!Array.isArray(lista) || !lista.length) {
-      return [valorTodos];
+      return [];
     }
     if (lista.includes(valorTodos)) {
       return [valorTodos];
     }
-    if (totalDisponivel > 0 && lista.length >= totalDisponivel) {
+    const valoresLimpos = lista.filter(Boolean);
+    if (totalDisponivel > 0 && valoresLimpos.length >= totalDisponivel) {
       return [valorTodos];
     }
-    return lista;
+    return valoresLimpos;
   }, []);
 
   const abrirEdicao = (registro) => {

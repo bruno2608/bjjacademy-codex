@@ -51,11 +51,14 @@ export default function MultiSelectDropdown({
 
   const summaryLabel = useMemo(() => {
     if (!options.length) return 'Nenhuma opção';
-    if (allSelected || selectedLabels.length === options.length) return `${allLabel}`;
+    if (safeValue.length === 0) return allLabel;
+    if (allSelected || safeValue.includes(allValue) || selectedLabels.length === options.length) {
+      return allLabel;
+    }
     if (!selectedLabels.length) return placeholder;
     if (selectedLabels.length <= 2) return selectedLabels.join(', ');
     return `${selectedLabels.slice(0, 2).join(', ')} +${selectedLabels.length - 2}`;
-  }, [allLabel, allSelected, options.length, placeholder, selectedLabels]);
+  }, [allLabel, allSelected, allValue, options.length, placeholder, safeValue.length, selectedLabels]);
 
   const filteredOptions = useMemo(() => {
     const termo = query.trim().toLowerCase();
@@ -116,7 +119,7 @@ export default function MultiSelectDropdown({
   };
 
   return (
-    <div className="space-y-1" ref={containerRef}>
+    <div className="relative space-y-1" ref={containerRef}>
       {label && (
         <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">{label}</label>
       )}

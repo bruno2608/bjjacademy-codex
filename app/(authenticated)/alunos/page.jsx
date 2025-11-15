@@ -33,9 +33,9 @@ export default function AlunosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterFaixas, setFilterFaixas] = useState(['all']);
-  const [filterStatuses, setFilterStatuses] = useState(['all']);
-  const [filterTreinos, setFilterTreinos] = useState([TODOS_TREINOS]);
+  const [filterFaixas, setFilterFaixas] = useState([]);
+  const [filterStatuses, setFilterStatuses] = useState([]);
+  const [filterTreinos, setFilterTreinos] = useState([]);
   const presencas = useUserStore((state) => state.presencas);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
 
@@ -104,12 +104,18 @@ export default function AlunosPage() {
     return mapa;
   }, [presencas]);
 
+  const limparSelecao = useCallback((lista, valorTodos = 'all') => {
+    if (!Array.isArray(lista) || lista.length === 0 || lista.includes(valorTodos)) {
+      return [];
+    }
+    return lista;
+  }, []);
+
   const alunosFiltrados = useMemo(() => {
     const termo = searchTerm.trim().toLowerCase();
-    const faixasAtivas = filterFaixas.includes('all') || filterFaixas.length === 0 ? [] : filterFaixas;
-    const statusAtivos = filterStatuses.includes('all') || filterStatuses.length === 0 ? [] : filterStatuses;
-    const treinosAtivos =
-      filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0 ? [] : filterTreinos;
+    const faixasAtivas = limparSelecao(filterFaixas);
+    const statusAtivos = limparSelecao(filterStatuses);
+    const treinosAtivos = limparSelecao(filterTreinos, TODOS_TREINOS);
 
     return alunos.filter((aluno) => {
       if (termo.length >= 3 && !aluno.nome.toLowerCase().includes(termo)) {
@@ -129,28 +135,29 @@ export default function AlunosPage() {
       }
       return true;
     });
-  }, [alunos, filterFaixas, filterStatuses, filterTreinos, searchTerm, treinosPorAluno]);
+  }, [alunos, filterFaixas, filterStatuses, filterTreinos, limparSelecao, searchTerm, treinosPorAluno]);
 
   const totalFiltrado = alunosFiltrados.length;
 
   const limparFiltros = () => {
     setSearchTerm('');
-    setFilterFaixas(['all']);
-    setFilterStatuses(['all']);
-    setFilterTreinos([TODOS_TREINOS]);
+    setFilterFaixas([]);
+    setFilterStatuses([]);
+    setFilterTreinos([]);
   };
 
   const normalizarSelecao = useCallback((lista, totalDisponivel, valorTodos = 'all') => {
     if (!Array.isArray(lista) || !lista.length) {
-      return [valorTodos];
+      return [];
     }
     if (lista.includes(valorTodos)) {
       return [valorTodos];
     }
-    if (totalDisponivel > 0 && lista.length >= totalDisponivel) {
+    const valoresLimpos = lista.filter(Boolean);
+    if (totalDisponivel > 0 && valoresLimpos.length >= totalDisponivel) {
       return [valorTodos];
     }
-    return lista;
+    return valoresLimpos;
   }, []);
 
   const handleDelete = async (aluno) => {
