@@ -19,10 +19,14 @@ export default function Header() {
   const roles = user?.roles || [];
 
   const navigationItems = useMemo(() => getNavigationItemsForRoles(roles), [roles]);
-  const flattenedItems = useMemo(() => flattenNavigation(navigationItems), [navigationItems]);
+  const fullNavigation = useMemo(
+    () => getNavigationItemsForRoles(roles, { includeHidden: true }),
+    [roles]
+  );
+  const flattenedItems = useMemo(() => flattenNavigation(fullNavigation), [fullNavigation]);
   const configItem = useMemo(
-    () => navigationItems.find((item) => item.path === '/configuracoes'),
-    [navigationItems]
+    () => fullNavigation.find((item) => item.path === '/configuracoes'),
+    [fullNavigation]
   );
   const configChildren = configItem?.children ?? [];
 
@@ -43,7 +47,7 @@ export default function Header() {
   const canAccess = (path) => flattenedItems.some((item) => item.path === path);
 
   return (
-    <header className="flex items-center justify-between border-b border-bjj-gray-800 bg-bjj-gray-900/80 px-4 py-3 backdrop-blur lg:hidden">
+    <header className="flex items-center justify-between border-b border-bjj-gray-800 bg-bjj-gray-900/80 px-4 py-3 backdrop-blur xl:hidden">
       <button
         type="button"
         onClick={() => setOpen(true)}

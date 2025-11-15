@@ -29,7 +29,10 @@ export default function UserMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
-  const navigationItems = useMemo(() => getNavigationItemsForRoles(roles), [roles]);
+  const navigationItems = useMemo(
+    () => getNavigationItemsForRoles(roles, { includeHidden: true }),
+    [roles]
+  );
   const flattenedPaths = useMemo(() => new Set(flattenNavigation(navigationItems).map((item) => item.path)), [navigationItems]);
 
   const configItem = useMemo(

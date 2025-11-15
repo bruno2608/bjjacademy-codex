@@ -27,7 +27,7 @@ export default function TabletNav() {
 
   return (
     <nav
-      className="hidden border-b border-bjj-gray-800/70 bg-bjj-black/95 backdrop-blur lg:block"
+      className="hidden border-b border-bjj-gray-800/70 bg-bjj-black/95 backdrop-blur xl:block"
       role="navigation"
       aria-label="Navegação principal"
     >

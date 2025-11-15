@@ -19,6 +19,11 @@ export type SiteMapItem = {
   icon?: LucideIcon;
   roles: UserRole[];
   children?: SiteMapItem[];
+  /**
+   * Define se o item deve aparecer na navegação principal.
+   * Permanece acessível via menu do usuário mesmo quando oculto.
+   */
+  showInMainNav?: boolean;
 };
 
 const ALL_STAFF_ROLES: UserRole[] = ['TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR'];
@@ -57,19 +62,22 @@ export const siteMap: SiteMapItem[] = [
     title: 'Relatórios',
     path: '/relatorios',
     icon: BarChart3,
-    roles: ALL_STAFF_ROLES
+    roles: ALL_STAFF_ROLES,
+    showInMainNav: false
   },
   {
     title: 'Meu Perfil',
     path: '/perfil',
     icon: UserCircle2,
-    roles: ALL_ROLES
+    roles: ALL_ROLES,
+    showInMainNav: false
   },
   {
     title: 'Configurações da Academia',
     path: '/configuracoes',
     icon: Settings2,
     roles: ['TI', 'ADMIN', 'PROFESSOR'],
+    showInMainNav: false,
     children: [
       {
         title: 'Regras de Graduação',
