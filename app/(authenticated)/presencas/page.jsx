@@ -474,7 +474,7 @@ export default function PresencasPage() {
         </div>
       </section>
 
-      <article className="card space-y-4">
+      <article className="card space-y-4 overflow-visible">
         <header className="space-y-1">
           <h2 className="text-base font-semibold text-bjj-white">Filtros inteligentes</h2>
           <p className="text-sm text-bjj-gray-200/70">
