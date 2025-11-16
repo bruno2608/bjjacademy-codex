@@ -6,50 +6,70 @@ interface FaixaVisualProps {
   corLinha: string;
   corPonteira: string;
   graus: number;
-  nomeFaixa: string;
+  categoria?: 'Infantil' | 'Adulto';
+  className?: string;
 }
 
 export default function FaixaVisual({
-  corBase = "#FFEB3B",
-  corLinha = "#FFFFFF",
-  corPonteira = "#000000",
+  corBase = '#FFEB3B',
+  corLinha = '#FFFFFF',
+  corPonteira = '#000000',
   graus = 0,
-  nomeFaixa = "Amarela e Branca",
+  categoria,
+  className
 }: FaixaVisualProps) {
-  const renderGraus = () => {
+  const isInfantil = categoria === 'Infantil';
+  const bodyLayers = isInfantil
+    ? [corBase, corLinha, corBase]
+    : [corBase, corBase, corBase];
+
+  const stripeAreaColor = isInfantil ? corPonteira : corLinha;
+  const stripeAreaWidth = isInfantil ? 52 : 40;
+  const ponteiraWidth = isInfantil ? 0 : 18;
+
+  const renderGraus = (backgroundColor: string) => {
+    if (graus <= 0) return null;
     const stripes = [];
+
     for (let i = 0; i < graus; i++) {
       stripes.push(
-        <React.Fragment key={i}>
-          <div className="w-[8px] h-full bg-white" />
-          <div className="w-[8px] h-full" style={{ backgroundColor: corPonteira }} />
+        <React.Fragment key={`grau-${i}`}>
+          <div className="h-full w-[6px] rounded-[1px] bg-white" />
+          {i < graus - 1 && (
+            <div className="h-full w-[4px]" style={{ backgroundColor }} />
+          )}
         </React.Fragment>
       );
     }
-    if (graus > 0) {
-      stripes.push(<div key="fim" className="w-[8px] h-full" style={{ backgroundColor: corPonteira }} />);
-    }
-    return stripes;
+
+    return <div className="flex h-full items-center justify-center px-[4px] py-[2px]">{stripes}</div>;
   };
 
+  const containerClasses = ['relative flex flex-col w-full overflow-hidden rounded-sm'];
+  if (className) containerClasses.push(className);
+
   return (
-    <div className="max-w-sm w-full p-4 bg-zinc-800 text-white rounded-lg border border-zinc-700 shadow-md">
-      <div className="text-sm text-gray-400 uppercase mb-2 text-center">
-        Faixa {nomeFaixa} com {graus} grau{graus !== 1 ? "s" : ""}
-      </div>
-      <div className="flex flex-col w-full overflow-hidden rounded border border-zinc-700">
-        {[corBase, corLinha, corBase].map((cor, idx) => (
-          <div key={idx} className="flex h-3 w-full">
-            <div className="flex-[2]" style={{ backgroundColor: cor }} />
-            <div className="flex-[1] relative" style={{ backgroundColor: corPonteira }}>
-              <div className="absolute inset-0 flex items-center justify-center gap-[1px] px-[2px]">
-                {renderGraus()}
-              </div>
-            </div>
-            <div className="flex-[0.5]" style={{ backgroundColor: cor }} />
-          </div>
-        ))}
-      </div>
+    <div className={containerClasses.join(' ')}>
+      {bodyLayers.map((cor, idx) => (
+        <div key={`${cor}-${idx}`} className="flex h-3 w-full overflow-hidden">
+          <div className="flex-1" style={{ backgroundColor: cor }} />
+          <div
+            className={`${isInfantil ? 'w-[52px]' : 'w-[40px]'} relative flex-shrink-0`}
+            style={{ backgroundColor: stripeAreaColor }}
+          />
+          {!isInfantil && (
+            <div className="flex-shrink-0 w-[18px]" style={{ backgroundColor: corPonteira }} />
+          )}
+        </div>
+      ))}
+      {graus > 0 && (
+        <div
+          className="pointer-events-none absolute inset-y-0"
+          style={{ right: ponteiraWidth, width: stripeAreaWidth }}
+        >
+          {renderGraus(stripeAreaColor)}
+        </div>
+      )}
     </div>
   );
 }
