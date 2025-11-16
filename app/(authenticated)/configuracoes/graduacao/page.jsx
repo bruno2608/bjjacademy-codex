@@ -6,6 +6,7 @@ import Modal from '../../../../components/ui/Modal';
 import Input from '../../../../components/ui/Input';
 import Select from '../../../../components/ui/Select';
 import Button from '../../../../components/ui/Button';
+import FaixaVisual from '../../../../components/graduacoes/FaixaVisual';
 import { useGraduationRulesStore } from '../../../../store/graduationRulesStore';
 import { BELT_ORDER } from '../../../../config/graduationRules';
 
@@ -63,29 +64,6 @@ const buildFormFromRule = (nome, rule) => ({
       }))
     : []
 });
-
-const BeltPreview = ({ corFaixa, corBarra, corPonteira, stripes = 0 }) => {
-  const totalStripes = stripes > 0 ? stripes : 4;
-  const isPlaceholder = stripes === 0;
-  return (
-    <div className="belt-widget">
-      <span className="belt-widget__strap" style={{ backgroundColor: corFaixa }} />
-      <span className="belt-widget__center" style={{ backgroundColor: corBarra }} />
-      <span className="belt-widget__tip" style={{ backgroundColor: corPonteira }}>
-        <span className="belt-widget__stripes">
-          {Array.from({ length: totalStripes }).map((_, index) => (
-            <span
-              // eslint-disable-next-line react/no-array-index-key
-              key={index}
-              className={`belt-widget__stripe${isPlaceholder ? ' belt-widget__stripe--placeholder' : ''}`}
-            />
-          ))}
-        </span>
-        <span className="belt-widget__pointer" style={{ backgroundColor: corPonteira }} aria-hidden="true" />
-      </span>
-    </div>
-  );
-};
 
 export default function RegrasGraduacaoPage() {
   const { rules, updateRule, addRule, removeRule } = useGraduationRulesStore();
@@ -227,7 +205,7 @@ export default function RegrasGraduacaoPage() {
                   <p className="font-semibold text-bjj-white">{belt}</p>
                 </td>
                 <td>
-                  <BeltPreview
+                  <FaixaVisual
                     corFaixa={rule.corFaixa}
                     corBarra={rule.corBarra}
                     corPonteira={rule.corPonteira}
@@ -373,7 +351,7 @@ export default function RegrasGraduacaoPage() {
               </label>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
               <label className="flex flex-col gap-1 text-xs">
                 <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Cor da faixa</span>
                 <input
@@ -401,6 +379,16 @@ export default function RegrasGraduacaoPage() {
                   onChange={(event) => updateField('corPonteira', event.target.value)}
                 />
               </label>
+              <div className="flex flex-col gap-1 text-xs">
+                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Pré-visualização</span>
+                <FaixaVisual
+                  corFaixa={form.corFaixa}
+                  corBarra={form.corBarra}
+                  corPonteira={form.corPonteira}
+                  stripes={form.graus.length}
+                  className="w-full max-w-[7rem]"
+                />
+              </div>
             </div>
 
             <div className="space-y-3">
