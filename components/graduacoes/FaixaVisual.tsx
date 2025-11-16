@@ -24,9 +24,9 @@ export default function FaixaVisual({
     : [corBase, corBase, corBase];
 
   const stripeAreaColor = corPonteira;
-  const ponteiraWidth = isInfantil ? 0 : 52;
-  const tailWidth = 12;
-  const stripeAreaWidth = isInfantil ? 52 : ponteiraWidth;
+  const ponteiraWidth = isInfantil ? 0 : 'clamp(44px, 14vw, 52px)';
+  const tailWidth = 'clamp(10px, 4vw, 12px)';
+  const stripeAreaWidth = isInfantil ? 'clamp(42px, 13vw, 52px)' : ponteiraWidth;
 
   const renderGraus = (backgroundColor: string) => {
     if (graus <= 0) return null;

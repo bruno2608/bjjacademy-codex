@@ -189,7 +189,7 @@ export default function RegrasGraduacaoPage() {
       </div>
 
       <section className="card overflow-x-auto p-0">
-        <table className="table table-compact table-fixed w-full text-sm">
+        <table className="table table-compact table-fixed min-w-[760px] text-sm md:min-w-full">
           <thead>
             <tr className="text-[0.65rem] uppercase tracking-[0.25em] text-bjj-gray-200/70">
               <th className="w-[22%] px-4 py-3 font-semibold">Faixa</th>
@@ -211,7 +211,7 @@ export default function RegrasGraduacaoPage() {
                     corPonteira={rule.corPonteira}
                     graus={rule.graus?.length ?? 0}
                     categoria={rule.categoria}
-                    className="w-full max-w-[11rem]"
+                    className="w-full min-w-[8.5rem] max-w-[12rem]"
                   />
                 </td>
                 <td className="px-4 py-4 align-middle">
