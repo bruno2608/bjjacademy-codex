@@ -26,23 +26,42 @@ const FaixaVisual: FC<FaixaVisualProps> = ({
   const grauCount = Math.min(4, Math.max(0, quantidadeGraus));
 
   const containerClasses = [
-    'flex w-36 flex-col overflow-hidden rounded border border-bjj-gray-800 bg-bjj-gray-900/40 shadow-sm',
+    'w-full max-w-[15rem] flex-col overflow-hidden rounded-md border border-bjj-gray-800 bg-bjj-gray-900/60 p-2 shadow-inner',
     className
   ]
     .filter(Boolean)
     .join(' ');
 
+  const renderGraus = () => {
+    if (!exibirGraus || grauCount <= 0) return null;
+
+    const stripes = Array.from({ length: grauCount * 2 - 1 }).map((_, idx) => {
+      const isGrau = idx % 2 === 0;
+      return (
+        <span
+          key={`stripe-${idx}`}
+          className={
+            isGrau
+              ? 'h-[85%] w-[6px] rounded-[1px] bg-white shadow-[0_0_4px_rgba(255,255,255,0.65)]'
+              : 'h-[60%] w-[3px] rounded-[1px]'
+          }
+          style={{ backgroundColor: isGrau ? undefined : corPonteira }}
+        />
+      );
+    });
+
+    return (
+      <div className="absolute inset-0 flex items-center justify-center gap-[2px] px-[3px]">
+        {stripes}
+      </div>
+    );
+  };
+
   const renderLinha = (corSegmento: string, index: number) => (
-    <div key={`${corSegmento}-${index}`} className="flex h-3 w-full">
-      <div className="flex-[6]" style={{ backgroundColor: corSegmento }} />
+    <div key={`${corSegmento}-${index}`} className="flex h-3.5 w-full overflow-hidden rounded-sm">
+      <div className="flex-[8]" style={{ backgroundColor: corSegmento }} />
       <div className="relative flex-[4]" style={{ backgroundColor: corPonteira }}>
-        {exibirGraus && grauCount > 0 && (
-          <div className="absolute inset-0 flex items-center justify-center gap-[3px] px-[2px]">
-            {Array.from({ length: grauCount }).map((_, idx) => (
-              <span key={idx} className="h-[70%] w-[3px] rounded-full bg-white/95" />
-            ))}
-          </div>
-        )}
+        {renderGraus()}
       </div>
       <div className="flex-[3]" style={{ backgroundColor: corSegmento }} />
     </div>
@@ -50,7 +69,9 @@ const FaixaVisual: FC<FaixaVisualProps> = ({
 
   return (
     <div className={containerClasses} aria-label="Visual da faixa">
-      {linhas.map((cor, index) => renderLinha(cor, index))}
+      <div className="flex flex-col gap-1.5">
+        {linhas.map((cor, index) => renderLinha(cor, index))}
+      </div>
     </div>
   );
 };
