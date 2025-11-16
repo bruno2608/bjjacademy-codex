@@ -25,6 +25,7 @@ export default function FaixaVisual({
 
   const stripeAreaColor = corPonteira;
   const ponteiraWidth = isInfantil ? 0 : 52;
+  const tailWidth = isInfantil ? 0 : 12;
   const stripeAreaWidth = isInfantil ? 52 : ponteiraWidth;
 
   const renderGraus = (backgroundColor: string) => {
@@ -59,17 +60,20 @@ export default function FaixaVisual({
               style={{ backgroundColor: stripeAreaColor, width: stripeAreaWidth }}
             />
           ) : (
-            <div
-              className="flex-shrink-0"
-              style={{ backgroundColor: corPonteira, width: ponteiraWidth }}
-            />
+            <>
+              <div
+                className="flex-shrink-0"
+                style={{ backgroundColor: corPonteira, width: ponteiraWidth }}
+              />
+              <div className="flex-shrink-0" style={{ backgroundColor: cor, width: tailWidth }} />
+            </>
           )}
         </div>
       ))}
       {graus > 0 && (
         <div
           className="pointer-events-none absolute inset-y-0"
-          style={{ right: 0, width: stripeAreaWidth }}
+          style={{ right: tailWidth, width: stripeAreaWidth }}
         >
           {renderGraus(stripeAreaColor)}
         </div>
