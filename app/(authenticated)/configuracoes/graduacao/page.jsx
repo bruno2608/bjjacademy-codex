@@ -189,47 +189,18 @@ export default function RegrasGraduacaoPage() {
       </div>
 
       <section className="card overflow-x-auto p-0">
-        <table className="table table-compact table-fixed w-full text-sm">
+        <table className="table table-compact table-fixed min-w-[760px] text-sm md:min-w-full">
           <thead>
             <tr className="text-[0.65rem] uppercase tracking-[0.25em] text-bjj-gray-200/70">
+              <th className="w-[12%] px-4 py-3 text-center font-semibold">Ações</th>
               <th className="w-[22%] px-4 py-3 font-semibold">Faixa</th>
               <th className="w-[28%] px-4 py-3 font-semibold">Visual</th>
               <th className="w-[38%] px-4 py-3 font-semibold">Requisitos</th>
-              <th className="w-[12%] px-4 py-3 text-center font-semibold">Ações</th>
             </tr>
           </thead>
           <tbody>
             {belts.map(([belt, rule]) => (
               <tr key={belt} className="align-middle text-sm text-bjj-gray-200">
-                <td className="px-4 py-4 align-middle">
-                  <p className="text-base font-semibold text-bjj-white">{belt}</p>
-                </td>
-                <td className="px-4 py-4 align-middle">
-                  <FaixaVisual
-                    corBase={rule.corFaixa}
-                    corLinha={rule.corBarra}
-                    corPonteira={rule.corPonteira}
-                    graus={rule.graus?.length ?? 0}
-                    categoria={rule.categoria}
-                    className="w-full max-w-[11rem]"
-                  />
-                </td>
-                <td className="px-4 py-4 align-middle">
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs md:text-sm">
-                    <p>
-                      <span className="font-semibold text-bjj-white">Tempo:</span> {rule.tempoFaixaMeses} meses
-                    </p>
-                    <p>
-                      <span className="font-semibold text-bjj-white">Aulas mínimas:</span> {rule.aulasMinimasFaixa}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-bjj-white">Graus:</span> {rule.graus?.length ?? 0}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-bjj-white">Próxima faixa:</span> {rule.proximaFaixa || '—'}
-                    </p>
-                  </div>
-                </td>
                 <td className="px-4 py-4">
                   <div className="flex items-center justify-center gap-2">
                     <Button
@@ -248,6 +219,35 @@ export default function RegrasGraduacaoPage() {
                     >
                       <Trash2 size={14} />
                     </Button>
+                  </div>
+                </td>
+                <td className="px-4 py-4 align-middle">
+                  <p className="text-base font-semibold text-bjj-white">{belt}</p>
+                </td>
+                <td className="px-4 py-4 align-middle">
+                  <FaixaVisual
+                    corBase={rule.corFaixa}
+                    corLinha={rule.corBarra}
+                    corPonteira={rule.corPonteira}
+                    graus={rule.graus?.length ?? 0}
+                    categoria={rule.categoria}
+                    className="w-full min-w-[8.5rem] max-w-[12rem]"
+                  />
+                </td>
+                <td className="px-4 py-4 align-middle">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs md:text-sm">
+                    <p>
+                      <span className="font-semibold text-bjj-white">Tempo:</span> {rule.tempoFaixaMeses} meses
+                    </p>
+                    <p>
+                      <span className="font-semibold text-bjj-white">Aulas mínimas:</span> {rule.aulasMinimasFaixa}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-bjj-white">Graus:</span> {rule.graus?.length ?? 0}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-bjj-white">Próxima faixa:</span> {rule.proximaFaixa || '—'}
+                    </p>
                   </div>
                 </td>
               </tr>
