@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#000000" />
+  <rect x="40" y="40" width="432" height="432" fill="none" stroke="#E10600" stroke-width="28" />
+  <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="180" font-weight="700">BJJ</text>
+</svg>
