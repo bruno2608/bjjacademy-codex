@@ -189,31 +189,32 @@ export default function RegrasGraduacaoPage() {
       </div>
 
       <section className="card overflow-x-auto p-0">
-        <table className="table w-full">
+        <table className="table table-compact w-full text-sm">
           <thead>
-            <tr className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/70">
-              <th>Faixa</th>
-              <th className="w-48">Visual</th>
-              <th className="w-1/3">Requisitos</th>
-              <th className="w-24 text-center">Ações</th>
+            <tr className="text-[0.65rem] uppercase tracking-[0.25em] text-bjj-gray-200/70">
+              <th className="px-4 py-3 font-semibold">Faixa</th>
+              <th className="w-44 px-4 py-3 font-semibold">Visual</th>
+              <th className="w-2/5 px-4 py-3 font-semibold">Requisitos</th>
+              <th className="w-24 px-4 py-3 text-center font-semibold">Ações</th>
             </tr>
           </thead>
           <tbody>
             {belts.map(([belt, rule]) => (
-              <tr key={belt} className="align-middle text-sm">
-                <td className="py-4">
-                  <p className="font-semibold text-bjj-white">{belt}</p>
+              <tr key={belt} className="align-middle text-xs text-bjj-gray-200">
+                <td className="px-4 py-3">
+                  <p className="font-semibold text-sm text-bjj-white">{belt}</p>
                 </td>
-                <td>
+                <td className="px-4 py-3">
                   <FaixaVisual
                     corFaixa={rule.corFaixa}
                     corBarra={rule.corBarra}
                     corPonteira={rule.corPonteira}
                     stripes={rule.graus?.length ?? 0}
+                    className="w-24"
                   />
                 </td>
-                <td className="text-xs text-bjj-gray-200/80">
-                  <ul className="space-y-1">
+                <td className="px-4 py-3">
+                  <ul className="space-y-1.5">
                     <li>
                       <span className="font-semibold text-bjj-white">Tempo:</span> {rule.tempoFaixaMeses} meses
                     </li>
@@ -228,7 +229,7 @@ export default function RegrasGraduacaoPage() {
                     </li>
                   </ul>
                 </td>
-                <td>
+                <td className="px-4 py-3">
                   <div className="flex items-center justify-center gap-2">
                     <Button
                       type="button"
