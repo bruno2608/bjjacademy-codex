@@ -189,47 +189,48 @@ export default function RegrasGraduacaoPage() {
       </div>
 
       <section className="card overflow-x-auto p-0">
-        <table className="table table-compact w-full text-sm">
+        <table className="table table-compact table-fixed w-full text-sm">
           <thead>
             <tr className="text-[0.65rem] uppercase tracking-[0.25em] text-bjj-gray-200/70">
-              <th className="px-4 py-3 font-semibold">Faixa</th>
-              <th className="w-44 px-4 py-3 font-semibold">Visual</th>
-              <th className="w-2/5 px-4 py-3 font-semibold">Requisitos</th>
-              <th className="w-24 px-4 py-3 text-center font-semibold">Ações</th>
+              <th className="w-[22%] px-4 py-3 font-semibold">Faixa</th>
+              <th className="w-[28%] px-4 py-3 font-semibold">Visual</th>
+              <th className="w-[38%] px-4 py-3 font-semibold">Requisitos</th>
+              <th className="w-[12%] px-4 py-3 text-center font-semibold">Ações</th>
             </tr>
           </thead>
           <tbody>
             {belts.map(([belt, rule]) => (
-              <tr key={belt} className="align-middle text-xs text-bjj-gray-200">
-                <td className="px-4 py-3">
-                  <p className="font-semibold text-sm text-bjj-white">{belt}</p>
+              <tr key={belt} className="align-middle text-sm text-bjj-gray-200">
+                <td className="px-4 py-4 align-middle">
+                  <p className="text-base font-semibold text-bjj-white">{belt}</p>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-4 align-middle">
                   <FaixaVisual
                     corFaixa={rule.corFaixa}
                     corBarra={rule.corBarra}
                     corPonteira={rule.corPonteira}
-                    stripes={rule.graus?.length ?? 0}
-                    className="w-24"
+                    quantidadeGraus={rule.graus?.length ?? 0}
+                    exibirGraus
+                    className="w-full max-w-[11rem]"
                   />
                 </td>
-                <td className="px-4 py-3">
-                  <ul className="space-y-1.5">
-                    <li>
+                <td className="px-4 py-4 align-middle">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs md:text-sm">
+                    <p>
                       <span className="font-semibold text-bjj-white">Tempo:</span> {rule.tempoFaixaMeses} meses
-                    </li>
-                    <li>
+                    </p>
+                    <p>
                       <span className="font-semibold text-bjj-white">Aulas mínimas:</span> {rule.aulasMinimasFaixa}
-                    </li>
-                    <li>
+                    </p>
+                    <p>
                       <span className="font-semibold text-bjj-white">Graus:</span> {rule.graus?.length ?? 0}
-                    </li>
-                    <li>
+                    </p>
+                    <p>
                       <span className="font-semibold text-bjj-white">Próxima faixa:</span> {rule.proximaFaixa || '—'}
-                    </li>
-                  </ul>
+                    </p>
+                  </div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-4">
                   <div className="flex items-center justify-center gap-2">
                     <Button
                       type="button"
@@ -386,8 +387,9 @@ export default function RegrasGraduacaoPage() {
                   corFaixa={form.corFaixa}
                   corBarra={form.corBarra}
                   corPonteira={form.corPonteira}
-                  stripes={form.graus.length}
-                  className="w-full max-w-[7rem]"
+                  quantidadeGraus={form.graus.length}
+                  exibirGraus
+                  className="w-full max-w-[11rem]"
                 />
               </div>
             </div>
