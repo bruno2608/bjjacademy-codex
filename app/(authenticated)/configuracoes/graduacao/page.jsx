@@ -211,7 +211,7 @@ export default function RegrasGraduacaoPage() {
                     corPonteira={rule.corPonteira}
                     graus={rule.graus?.length ?? 0}
                     categoria={rule.categoria}
-                    className="w-full max-w-[11rem]"
+                    className="w-full max-w-[12rem]"
                   />
                 </td>
                 <td className="px-4 py-4 align-middle">
@@ -389,7 +389,7 @@ export default function RegrasGraduacaoPage() {
                   corPonteira={form.corPonteira}
                   graus={form.graus.length}
                   categoria={form.categoria}
-                  className="w-full max-w-[11rem]"
+                  className="w-full max-w-[12rem]"
                 />
               </div>
             </div>
