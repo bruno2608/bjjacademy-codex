@@ -23,9 +23,10 @@ export default function FaixaVisual({
     ? [corBase, corLinha, corBase]
     : [corBase, corBase, corBase];
 
-  const stripeAreaColor = isInfantil ? corPonteira : corLinha;
-  const stripeAreaWidth = isInfantil ? 52 : 40;
-  const ponteiraWidth = isInfantil ? 0 : 18;
+  const stripeAreaColor = corPonteira;
+  const ponteiraWidth = isInfantil ? 0 : 52;
+  const tailWidth = 12;
+  const stripeAreaWidth = isInfantil ? 52 : ponteiraWidth;
 
   const renderGraus = (backgroundColor: string) => {
     if (graus <= 0) return null;
@@ -53,19 +54,29 @@ export default function FaixaVisual({
       {bodyLayers.map((cor, idx) => (
         <div key={`${cor}-${idx}`} className="flex h-3 w-full overflow-hidden">
           <div className="flex-1" style={{ backgroundColor: cor }} />
-          <div
-            className={`${isInfantil ? 'w-[52px]' : 'w-[40px]'} relative flex-shrink-0`}
-            style={{ backgroundColor: stripeAreaColor }}
-          />
-          {!isInfantil && (
-            <div className="flex-shrink-0 w-[18px]" style={{ backgroundColor: corPonteira }} />
+          {isInfantil ? (
+            <>
+              <div
+                className="flex-shrink-0"
+                style={{ backgroundColor: stripeAreaColor, width: stripeAreaWidth }}
+              />
+              <div className="flex-shrink-0" style={{ backgroundColor: cor, width: tailWidth }} />
+            </>
+          ) : (
+            <>
+              <div
+                className="flex-shrink-0"
+                style={{ backgroundColor: corPonteira, width: ponteiraWidth }}
+              />
+              <div className="flex-shrink-0" style={{ backgroundColor: cor, width: tailWidth }} />
+            </>
           )}
         </div>
       ))}
       {graus > 0 && (
         <div
           className="pointer-events-none absolute inset-y-0"
-          style={{ right: ponteiraWidth, width: stripeAreaWidth }}
+          style={{ right: tailWidth, width: stripeAreaWidth }}
         >
           {renderGraus(stripeAreaColor)}
         </div>
