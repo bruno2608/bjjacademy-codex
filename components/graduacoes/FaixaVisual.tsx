@@ -9,10 +9,11 @@ export type FaixaVisualProps = {
   className?: string;
 };
 
+const MAX_GRAUS = 4;
+
 /**
- * Renderiza a faixa no mesmo padrão visual usado pelo sistema antigo (IBJJF),
- * com três listras horizontais e ponteira à direita. Os graus são exibidos como
- * pequenas listras verticais dentro da ponteira.
+ * Reproduz o visual tradicional das faixas IBJJF usado no sistema antigo,
+ * com três listras horizontais e uma ponteira à direita onde os graus são exibidos.
  */
 const FaixaVisual: FC<FaixaVisualProps> = ({
   corFaixa,
@@ -23,43 +24,43 @@ const FaixaVisual: FC<FaixaVisualProps> = ({
   className = ''
 }) => {
   const linhas = [corFaixa, corBarra || corFaixa, corFaixa];
-  const grauCount = Math.min(4, Math.max(0, quantidadeGraus));
+  const grauCount = Math.min(MAX_GRAUS, Math.max(0, quantidadeGraus));
 
   const containerClasses = [
-    'w-full max-w-[22rem] flex flex-col gap-1 overflow-hidden rounded-lg border border-zinc-700 bg-gradient-to-r from-bjj-gray-900 via-bjj-gray-800 to-bjj-gray-900 p-2 shadow-lg',
+    'w-full max-w-[24rem] flex flex-col gap-1 overflow-hidden rounded-lg bg-gradient-to-r from-bjj-gray-900 via-bjj-gray-800 to-bjj-gray-900 p-2 shadow-lg',
     className
   ]
     .filter(Boolean)
     .join(' ');
 
   const renderGraus = () => {
-    if (!exibirGraus || grauCount <= 0) return null;
+    if (!exibirGraus || grauCount === 0) return null;
 
-    const stripes = Array.from({ length: grauCount * 2 }).map((_, idx) => {
-      const isGrau = idx % 2 === 0;
+    const stripes = Array.from({ length: grauCount * 2 }).map((_, index) => {
+      const isWhite = index % 2 === 0;
       return (
         <span
-          key={`stripe-${idx}`}
-          className={`h-[90%] w-[6px] ${isGrau ? 'bg-white shadow-[0_0_6px_rgba(255,255,255,0.7)]' : ''}`}
-          style={{ backgroundColor: isGrau ? undefined : corPonteira }}
+          key={`grau-${index}`}
+          className={`h-full w-[8px] ${isWhite ? 'bg-white' : ''}`}
+          style={{ backgroundColor: isWhite ? undefined : corPonteira }}
         />
       );
     });
 
     return (
-      <div className="absolute inset-0 flex items-center justify-center gap-[2px] px-[2px]">
+      <div className="absolute inset-0 flex items-center justify-center gap-[1px] px-[2px]">
         {stripes}
       </div>
     );
   };
 
   const renderLinha = (corSegmento: string, index: number) => (
-    <div key={`${corSegmento}-${index}`} className="flex h-3.5 w-full overflow-hidden">
-      <div className="flex-[9]" style={{ backgroundColor: corSegmento }} />
-      <div className="relative flex-[5]" style={{ backgroundColor: corPonteira }}>
+    <div key={`${corSegmento}-${index}`} className="flex h-3 w-full overflow-hidden">
+      <div className="flex-[2]" style={{ backgroundColor: corSegmento }} />
+      <div className="relative flex-[1]" style={{ backgroundColor: corPonteira }}>
         {renderGraus()}
       </div>
-      <div className="flex-[3]" style={{ backgroundColor: corSegmento }} />
+      <div className="flex-[0.5]" style={{ backgroundColor: corSegmento }} />
     </div>
   );
 
