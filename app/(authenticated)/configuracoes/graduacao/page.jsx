@@ -65,27 +65,26 @@ const buildFormFromRule = (nome, rule) => ({
 });
 
 const BeltPreview = ({ corFaixa, corBarra, corPonteira, stripes = 0 }) => {
-  const divisores = stripes + 1;
+  const totalStripes = stripes > 0 ? stripes : 1;
+  const isPlaceholder = stripes === 0;
   return (
-    <div className="flex w-48 items-center gap-2">
-      <div className="flex h-5 flex-1 overflow-hidden rounded-full border border-bjj-gray-800">
-        <span style={{ backgroundColor: corFaixa }} className="flex-1" />
-        <span style={{ backgroundColor: corBarra }} className="relative w-10">
-          {stripes > 0 &&
-            Array.from({ length: stripes }).map((_, index) => (
-              <span
-                // eslint-disable-next-line react/no-array-index-key
-                key={index}
-                className="absolute top-1 bottom-1 w-0.5 rounded-full"
-                style={{
-                  left: `${((index + 1) / divisores) * 100}%`,
-                  backgroundColor: corPonteira
-                }}
-              />
-            ))}
-        </span>
-        <span style={{ backgroundColor: corPonteira }} className="w-3" />
-      </div>
+    <div className="belt-widget" style={{ backgroundColor: corFaixa }}>
+      <span className="belt-widget__strap" style={{ backgroundColor: corFaixa }} />
+      <span className="belt-widget__center" style={{ backgroundColor: corBarra }} />
+      <span className="belt-widget__stripe-block" style={{ backgroundColor: corPonteira }}>
+        {Array.from({ length: totalStripes }).map((_, index) => (
+          <span
+            // eslint-disable-next-line react/no-array-index-key
+            key={index}
+            className={`belt-widget__stripe${isPlaceholder ? ' belt-widget__stripe--placeholder' : ''}`}
+          />
+        ))}
+      </span>
+      <span
+        className="belt-widget__pointer"
+        style={{ borderLeftColor: corPonteira }}
+        aria-hidden="true"
+      />
     </div>
   );
 };
@@ -217,18 +216,51 @@ export default function RegrasGraduacaoPage() {
         <table className="table w-full">
           <thead>
             <tr className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/70">
-              <th className="w-24">Ações</th>
               <th>Faixa</th>
-              <th>Visual</th>
-              <th>Categoria</th>
-              <th className="w-1/3">Requisitos</th>
+              <th className="w-48">Visual</th>
+              <th className="hidden lg:table-cell">Descrição</th>
+              <th className="hidden xl:table-cell w-1/3">Requisitos básicos</th>
+              <th className="w-24 text-center">Ações</th>
             </tr>
           </thead>
           <tbody>
             {belts.map(([belt, rule]) => (
-              <tr key={belt} className="align-top text-sm">
+              <tr key={belt} className="align-middle text-sm">
+                <td className="py-4">
+                  <p className="font-semibold text-bjj-white">{belt}</p>
+                  <p className="text-[11px] uppercase tracking-[0.3em] text-bjj-gray-200/60">
+                    {rule.categoria}
+                  </p>
+                </td>
                 <td>
-                  <div className="flex gap-2">
+                  <BeltPreview
+                    corFaixa={rule.corFaixa}
+                    corBarra={rule.corBarra}
+                    corPonteira={rule.corPonteira}
+                    stripes={rule.graus?.length ?? 0}
+                  />
+                </td>
+                <td className="hidden lg:table-cell text-sm text-bjj-gray-200/80">
+                  {rule.descricao || 'Descrição não informada.'}
+                </td>
+                <td className="hidden xl:table-cell text-xs text-bjj-gray-200/80">
+                  <ul className="space-y-1">
+                    <li>
+                      <span className="font-semibold text-bjj-white">Tempo:</span> {rule.tempoFaixaMeses} meses
+                    </li>
+                    <li>
+                      <span className="font-semibold text-bjj-white">Aulas mínimas:</span> {rule.aulasMinimasFaixa}
+                    </li>
+                    <li>
+                      <span className="font-semibold text-bjj-white">Graus:</span> {rule.graus?.length ?? 0}
+                    </li>
+                    <li>
+                      <span className="font-semibold text-bjj-white">Próxima faixa:</span> {rule.proximaFaixa || '—'}
+                    </li>
+                  </ul>
+                </td>
+                <td>
+                  <div className="flex items-center justify-center gap-2">
                     <Button
                       type="button"
                       variant="secondary"
@@ -246,54 +278,6 @@ export default function RegrasGraduacaoPage() {
                       <Trash2 size={14} />
                     </Button>
                   </div>
-                </td>
-                <td>
-                  <div className="space-y-1">
-                    <p className="font-semibold text-bjj-white">{belt}</p>
-                    {rule.descricao && (
-                      <p className="text-xs text-bjj-gray-200/70">{rule.descricao}</p>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <BeltPreview
-                    corFaixa={rule.corFaixa}
-                    corBarra={rule.corBarra}
-                    corPonteira={rule.corPonteira}
-                    stripes={rule.graus?.length ?? 0}
-                  />
-                </td>
-                <td>
-                  <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/70">{rule.categoria}</p>
-                  <p className="text-xs text-bjj-gray-200/70">Método {rule.metodoGraus}</p>
-                </td>
-                <td>
-                  <dl className="grid grid-cols-2 gap-2 text-xs text-bjj-gray-200/80">
-                    <div>
-                      <dt className="uppercase text-bjj-gray-500">Tempo faixa</dt>
-                      <dd className="text-bjj-white">{rule.tempoFaixaMeses} meses</dd>
-                    </div>
-                    <div>
-                      <dt className="uppercase text-bjj-gray-500">Tempo mínimo</dt>
-                      <dd className="text-bjj-white">{rule.tempoMinimoMeses} meses</dd>
-                    </div>
-                    <div>
-                      <dt className="uppercase text-bjj-gray-500">Idade mínima</dt>
-                      <dd className="text-bjj-white">{rule.idadeMinima} anos</dd>
-                    </div>
-                    <div>
-                      <dt className="uppercase text-bjj-gray-500">Aulas faixa</dt>
-                      <dd className="text-bjj-white">{rule.aulasMinimasFaixa} aulas</dd>
-                    </div>
-                    <div>
-                      <dt className="uppercase text-bjj-gray-500">Graus</dt>
-                      <dd className="text-bjj-white">{rule.graus?.length ?? 0}</dd>
-                    </div>
-                    <div>
-                      <dt className="uppercase text-bjj-gray-500">Próxima faixa</dt>
-                      <dd className="text-bjj-white">{rule.proximaFaixa || '—'}</dd>
-                    </div>
-                  </dl>
                 </td>
               </tr>
             ))}

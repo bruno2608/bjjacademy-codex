@@ -14,7 +14,6 @@ import {
   Activity,
   Flame,
   Clock3,
-  CalendarPlus,
   UserPlus,
   UserMinus,
   Layers,
@@ -482,12 +481,6 @@ export default function DashboardPage() {
             description="Alunos prontos para avançar de faixa nos próximos meses."
           />
           <Card
-            title="Presenças confirmadas"
-            value={presencasSemana}
-            icon={CalendarCheck}
-            description="Entradas registradas nos últimos 7 dias de treino."
-          />
-          <Card
             title={`Aniversários (${mesAtualLabel})`}
             value={totalAniversariantesMes}
             icon={Cake}
@@ -731,12 +724,12 @@ export default function DashboardPage() {
 
       {activeView === 'presencas' && (
         <section className="space-y-4">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             <Card
-              title="Presenças confirmadas"
-              value={presentesDia}
-              icon={CalendarPlus}
-              description="Confirmações registradas hoje, incluindo marcações rápidas."
+              title="Taxa de presença (dia)"
+              value={`${taxaDia}%`}
+              icon={Activity}
+              description="Percentual de confirmações registradas hoje."
             />
             <Card
               title="Faltas registradas"

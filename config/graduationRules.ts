@@ -22,91 +22,237 @@ export type GraduationRule = {
 
 export type GraduationRules = Record<string, GraduationRule>;
 
+const cloneStripes = (template: StripeRule[]): StripeRule[] =>
+  template.map((stripe) => ({ ...stripe }));
+
+const STRIPES_48: StripeRule[] = [
+  { numero: 1, tempoMinimoMeses: 3, aulasMinimas: 12 },
+  { numero: 2, tempoMinimoMeses: 6, aulasMinimas: 24 },
+  { numero: 3, tempoMinimoMeses: 9, aulasMinimas: 36 },
+  { numero: 4, tempoMinimoMeses: 12, aulasMinimas: 48 }
+];
+
+const STRIPES_60: StripeRule[] = [
+  { numero: 1, tempoMinimoMeses: 3, aulasMinimas: 15 },
+  { numero: 2, tempoMinimoMeses: 6, aulasMinimas: 30 },
+  { numero: 3, tempoMinimoMeses: 9, aulasMinimas: 45 },
+  { numero: 4, tempoMinimoMeses: 12, aulasMinimas: 60 }
+];
+
+const STRIPES_72: StripeRule[] = [
+  { numero: 1, tempoMinimoMeses: 4, aulasMinimas: 18 },
+  { numero: 2, tempoMinimoMeses: 8, aulasMinimas: 36 },
+  { numero: 3, tempoMinimoMeses: 12, aulasMinimas: 54 },
+  { numero: 4, tempoMinimoMeses: 18, aulasMinimas: 72 }
+];
+
+const STRIPES_84: StripeRule[] = [
+  { numero: 1, tempoMinimoMeses: 6, aulasMinimas: 21 },
+  { numero: 2, tempoMinimoMeses: 12, aulasMinimas: 42 },
+  { numero: 3, tempoMinimoMeses: 18, aulasMinimas: 63 },
+  { numero: 4, tempoMinimoMeses: 24, aulasMinimas: 84 }
+];
+
 /**
  * Matriz de regras de graduação baseada em referências públicas da IBJJF e
  * ajustes internos da BJJ Academy. Cada faixa contém requisitos de tempo,
  * idade mínima e uma estimativa de aulas necessárias para evolução.
  */
 export const GRADUATION_RULES: GraduationRules = {
+  'Branca Infantil': {
+    categoria: 'Infantil',
+    metodoGraus: 'manual',
+    proximaFaixa: 'Cinza e Branca',
+    tempoFaixaMeses: 12,
+    tempoMinimoMeses: 12,
+    idadeMinima: 4,
+    aulasMinimasFaixa: 48,
+    descricao: 'Iniciação infantil com foco em disciplina e coordenação motora.',
+    corFaixa: '#FFFFFF',
+    corBarra: '#FFFFFF',
+    corPonteira: '#000000',
+    infantil: true,
+    graus: cloneStripes(STRIPES_48)
+  },
+  'Cinza e Branca': {
+    categoria: 'Infantil',
+    metodoGraus: 'manual',
+    proximaFaixa: 'Cinza',
+    tempoFaixaMeses: 12,
+    tempoMinimoMeses: 12,
+    idadeMinima: 5,
+    aulasMinimasFaixa: 48,
+    descricao: 'Transição entre a faixa branca infantil e o primeiro ciclo cinza.',
+    corFaixa: '#BDBDBD',
+    corBarra: '#FFFFFF',
+    corPonteira: '#000000',
+    infantil: true,
+    graus: cloneStripes(STRIPES_48)
+  },
   Cinza: {
+    categoria: 'Infantil',
+    metodoGraus: 'manual',
+    proximaFaixa: 'Cinza e Preta',
+    tempoFaixaMeses: 12,
+    tempoMinimoMeses: 12,
+    idadeMinima: 6,
+    aulasMinimasFaixa: 48,
+    descricao: 'Faixa infantil de entrada com foco em disciplina básica e coordenação motora.',
+    corFaixa: '#BFBFBF',
+    corBarra: '#BFBFBF',
+    corPonteira: '#000000',
+    infantil: true,
+    graus: cloneStripes(STRIPES_48)
+  },
+  'Cinza e Preta': {
+    categoria: 'Infantil',
+    metodoGraus: 'manual',
+    proximaFaixa: 'Amarela e Branca',
+    tempoFaixaMeses: 12,
+    tempoMinimoMeses: 12,
+    idadeMinima: 6,
+    aulasMinimasFaixa: 48,
+    descricao: 'Consolidação infantil com foco em atenção e postura em aula.',
+    corFaixa: '#BDBDBD',
+    corBarra: '#000000',
+    corPonteira: '#000000',
+    infantil: true,
+    graus: cloneStripes(STRIPES_48)
+  },
+  'Amarela e Branca': {
     categoria: 'Infantil',
     metodoGraus: 'manual',
     proximaFaixa: 'Amarela',
     tempoFaixaMeses: 12,
     tempoMinimoMeses: 12,
-    idadeMinima: 4,
-    aulasMinimasFaixa: 48,
-    descricao: 'Faixa infantil de entrada com foco em disciplina básica e coordenação motora.',
-    corFaixa: '#BFBFBF',
+    idadeMinima: 7,
+    aulasMinimasFaixa: 60,
+    descricao: 'Preparação para o ciclo amarelo com foco em agilidade.',
+    corFaixa: '#FFEB3B',
     corBarra: '#FFFFFF',
     corPonteira: '#000000',
     infantil: true,
-    graus: [
-      { numero: 1, tempoMinimoMeses: 3, aulasMinimas: 12 },
-      { numero: 2, tempoMinimoMeses: 6, aulasMinimas: 24 },
-      { numero: 3, tempoMinimoMeses: 9, aulasMinimas: 36 },
-      { numero: 4, tempoMinimoMeses: 12, aulasMinimas: 48 }
-    ]
+    graus: cloneStripes(STRIPES_60)
   },
   Amarela: {
     categoria: 'Infantil',
     metodoGraus: 'manual',
-    proximaFaixa: 'Laranja',
+    proximaFaixa: 'Amarela e Preta',
     tempoFaixaMeses: 12,
     tempoMinimoMeses: 12,
     idadeMinima: 7,
     aulasMinimasFaixa: 60,
     descricao: 'Fase de consolidação de fundamentos com foco em agilidade e disciplina.',
     corFaixa: '#FFD900',
+    corBarra: '#FFD900',
+    corPonteira: '#000000',
+    infantil: true,
+    graus: cloneStripes(STRIPES_60)
+  },
+  'Amarela e Preta': {
+    categoria: 'Infantil',
+    metodoGraus: 'manual',
+    proximaFaixa: 'Laranja e Branca',
+    tempoFaixaMeses: 12,
+    tempoMinimoMeses: 12,
+    idadeMinima: 8,
+    aulasMinimasFaixa: 60,
+    descricao: 'Encerramento do ciclo amarelo com ênfase em reação e foco.',
+    corFaixa: '#FFEB3B',
+    corBarra: '#000000',
+    corPonteira: '#000000',
+    infantil: true,
+    graus: cloneStripes(STRIPES_60)
+  },
+  'Laranja e Branca': {
+    categoria: 'Infantil',
+    metodoGraus: 'manual',
+    proximaFaixa: 'Laranja',
+    tempoFaixaMeses: 18,
+    tempoMinimoMeses: 18,
+    idadeMinima: 9,
+    aulasMinimasFaixa: 72,
+    descricao: 'Introdução ao ciclo laranja com foco em transições.',
+    corFaixa: '#FF9800',
     corBarra: '#FFFFFF',
     corPonteira: '#000000',
     infantil: true,
-    graus: [
-      { numero: 1, tempoMinimoMeses: 3, aulasMinimas: 15 },
-      { numero: 2, tempoMinimoMeses: 6, aulasMinimas: 30 },
-      { numero: 3, tempoMinimoMeses: 9, aulasMinimas: 45 },
-      { numero: 4, tempoMinimoMeses: 12, aulasMinimas: 60 }
-    ]
+    graus: cloneStripes(STRIPES_72)
   },
   Laranja: {
     categoria: 'Infantil',
     metodoGraus: 'manual',
-    proximaFaixa: 'Verde',
+    proximaFaixa: 'Laranja e Preta',
     tempoFaixaMeses: 18,
     tempoMinimoMeses: 18,
     idadeMinima: 10,
     aulasMinimasFaixa: 72,
     descricao: 'Estágio intermediário infantil com foco em transições e defesa.',
     corFaixa: '#FF7A00',
-    corBarra: '#FFFFFF',
+    corBarra: '#FF7A00',
     corPonteira: '#000000',
     infantil: true,
-    graus: [
-      { numero: 1, tempoMinimoMeses: 4, aulasMinimas: 18 },
-      { numero: 2, tempoMinimoMeses: 8, aulasMinimas: 36 },
-      { numero: 3, tempoMinimoMeses: 12, aulasMinimas: 54 },
-      { numero: 4, tempoMinimoMeses: 18, aulasMinimas: 72 }
-    ]
+    graus: cloneStripes(STRIPES_72)
   },
-  Verde: {
+  'Laranja e Preta': {
     categoria: 'Infantil',
     metodoGraus: 'manual',
-    proximaFaixa: 'Azul',
+    proximaFaixa: 'Verde e Branca',
+    tempoFaixaMeses: 18,
+    tempoMinimoMeses: 18,
+    idadeMinima: 11,
+    aulasMinimasFaixa: 72,
+    descricao: 'Fechamento do ciclo laranja com foco em ritmo e controle.',
+    corFaixa: '#FF9800',
+    corBarra: '#000000',
+    corPonteira: '#000000',
+    infantil: true,
+    graus: cloneStripes(STRIPES_72)
+  },
+  'Verde e Branca': {
+    categoria: 'Infantil',
+    metodoGraus: 'manual',
+    proximaFaixa: 'Verde',
     tempoFaixaMeses: 24,
     tempoMinimoMeses: 24,
-    idadeMinima: 13,
+    idadeMinima: 12,
     aulasMinimasFaixa: 84,
     descricao: 'Preparação para a transição ao sistema adulto com foco em estratégia.',
     corFaixa: '#0FA958',
     corBarra: '#FFFFFF',
     corPonteira: '#000000',
     infantil: true,
-    graus: [
-      { numero: 1, tempoMinimoMeses: 6, aulasMinimas: 21 },
-      { numero: 2, tempoMinimoMeses: 12, aulasMinimas: 42 },
-      { numero: 3, tempoMinimoMeses: 18, aulasMinimas: 63 },
-      { numero: 4, tempoMinimoMeses: 24, aulasMinimas: 84 }
-    ]
+    graus: cloneStripes(STRIPES_84)
+  },
+  Verde: {
+    categoria: 'Infantil',
+    metodoGraus: 'manual',
+    proximaFaixa: 'Verde e Preta',
+    tempoFaixaMeses: 24,
+    tempoMinimoMeses: 24,
+    idadeMinima: 13,
+    aulasMinimasFaixa: 84,
+    descricao: 'Preparação para a transição ao sistema adulto com foco em estratégia.',
+    corFaixa: '#0FA958',
+    corBarra: '#0FA958',
+    corPonteira: '#000000',
+    infantil: true,
+    graus: cloneStripes(STRIPES_84)
+  },
+  'Verde e Preta': {
+    categoria: 'Infantil',
+    metodoGraus: 'manual',
+    proximaFaixa: 'Branca',
+    tempoFaixaMeses: 24,
+    tempoMinimoMeses: 24,
+    idadeMinima: 13,
+    aulasMinimasFaixa: 84,
+    descricao: 'Faixa final infantil antes da migração para o sistema adulto.',
+    corFaixa: '#0FA958',
+    corBarra: '#000000',
+    corPonteira: '#000000',
+    infantil: true,
+    graus: cloneStripes(STRIPES_84)
   },
   Branca: {
     categoria: 'Adulto',
@@ -236,10 +382,19 @@ export const GRADUATION_RULES: GraduationRules = {
 };
 
 export const BELT_ORDER = [
+  'Branca Infantil',
+  'Cinza e Branca',
   'Cinza',
+  'Cinza e Preta',
+  'Amarela e Branca',
   'Amarela',
+  'Amarela e Preta',
+  'Laranja e Branca',
   'Laranja',
+  'Laranja e Preta',
+  'Verde e Branca',
   'Verde',
+  'Verde e Preta',
   'Branca',
   'Azul',
   'Roxa',
