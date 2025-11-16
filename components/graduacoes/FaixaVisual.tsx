@@ -6,7 +6,6 @@ interface FaixaVisualProps {
   corLinha: string;
   corPonteira: string;
   graus: number;
-  nomeFaixa: string;
 }
 
 export default function FaixaVisual({
@@ -14,7 +13,6 @@ export default function FaixaVisual({
   corLinha = "#FFFFFF",
   corPonteira = "#000000",
   graus = 0,
-  nomeFaixa = "Amarela e Branca",
 }: FaixaVisualProps) {
   const renderGraus = () => {
     const stripes = [];
@@ -33,11 +31,8 @@ export default function FaixaVisual({
   };
 
   return (
-    <div className="max-w-sm w-full p-4 bg-zinc-800 text-white rounded-lg border border-zinc-700 shadow-md">
-      <div className="text-sm text-gray-400 uppercase mb-2 text-center">
-        Faixa {nomeFaixa} com {graus} grau{graus !== 1 ? "s" : ""}
-      </div>
-      <div className="flex flex-col w-full overflow-hidden rounded border border-zinc-700">
+    <div className="max-w-sm w-full p-4 bg-zinc-800 text-white rounded-lg shadow-md">
+      <div className="flex flex-col w-full overflow-hidden rounded">
         {[corBase, corLinha, corBase].map((cor, idx) => (
           <div key={idx} className="flex h-3 w-full">
             <div className="flex-[2]" style={{ backgroundColor: cor }} />
