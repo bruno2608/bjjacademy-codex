@@ -1,4 +1,9 @@
-import { BELT_ORDER, GRADUATION_RULES, type GraduationRules } from '../config/graduationRules';
+import {
+  BELT_ORDER,
+  GRADUATION_RULES,
+  type GraduationRule,
+  type GraduationRules as GraduationRulesMap
+} from '../config/graduationRules';
 import type { Aluno } from '../types/aluno';
 import type { Presenca } from '../types/presenca';
 import type {
@@ -10,11 +15,11 @@ import type {
 
 export { GRADUATION_RULES, BELT_ORDER };
 
-export type BeltKey = keyof GraduationRules;
-export type BeltRule = GraduationRules[BeltKey];
+export type BeltKey = keyof GraduationRulesMap;
+export type BeltRule = GraduationRule;
 
 export function getRuleForBelt(faixa: string): BeltRule | null {
-  return (GRADUATION_RULES as Record<string, BeltRule>)[faixa] ?? null;
+  return (GRADUATION_RULES as GraduationRulesMap)[faixa] ?? null;
 }
 
 export function getNextBelt(faixa: string): string | null {
