@@ -209,9 +209,9 @@ export default function RegrasGraduacaoPage() {
                     corBase={rule.corFaixa}
                     corLinha={rule.corBarra}
                     corPonteira={rule.corPonteira}
-                    nomeFaixa={belt}
                     graus={rule.graus?.length ?? 0}
-                    className="w-full max-w-[11rem]"
+                    categoria={rule.categoria}
+                    className="w-full max-w-[12rem]"
                   />
                 </td>
                 <td className="px-4 py-4 align-middle">
@@ -387,9 +387,9 @@ export default function RegrasGraduacaoPage() {
                   corBase={form.corFaixa}
                   corLinha={form.corBarra}
                   corPonteira={form.corPonteira}
-                  nomeFaixa={form.nome || 'Pré-visualização'}
                   graus={form.graus.length}
-                  className="w-full max-w-[11rem]"
+                  categoria={form.categoria}
+                  className="w-full max-w-[12rem]"
                 />
               </div>
             </div>

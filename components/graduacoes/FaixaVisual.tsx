@@ -6,49 +6,101 @@ interface FaixaVisualProps {
   corLinha: string;
   corPonteira: string;
   graus: number;
-  nomeFaixa: string;
+  categoria?: 'Infantil' | 'Adulto';
+  className?: string;
 }
 
 export default function FaixaVisual({
-  corBase = "#FFEB3B",
-  corLinha = "#FFFFFF",
-  corPonteira = "#000000",
+  corBase = '#FFEB3B',
+  corLinha = '#FFFFFF',
+  corPonteira = '#000000',
   graus = 0,
-  nomeFaixa = "Amarela e Branca",
+  categoria,
+  className
 }: FaixaVisualProps) {
-  const renderGraus = () => {
+  const isInfantil = categoria === 'Infantil';
+  const ponteiraBodyWidth = 52;
+  const ponteiraTipWidth = 14;
+  const grauThickness = 5;
+  const grauGap = 3;
+  const beltHeight = isInfantil ? 'h-[14px] md:h-[16px]' : 'h-[14px] md:h-[16px]';
+
+  const infantilLayers = [corBase, corLinha, corBase];
+
+  const beltShellClasses = [
+    'relative',
+    'flex',
+    'h-full',
+    beltHeight,
+    'min-w-[7rem]',
+    'max-w-[12rem]',
+    'overflow-hidden',
+    'rounded-sm'
+  ];
+
+  const renderGraus = (backgroundColor: string) => {
+    if (graus <= 0) return null;
     const stripes = [];
+
     for (let i = 0; i < graus; i++) {
       stripes.push(
-        <React.Fragment key={i}>
-          <div className="w-[8px] h-full bg-white" />
-          <div className="w-[8px] h-full" style={{ backgroundColor: corPonteira }} />
+        <React.Fragment key={`grau-${i}`}>
+          <div
+            className="h-full bg-white"
+            style={{ width: grauThickness }}
+          />
+          {i < graus - 1 && (
+            <div className="h-full" style={{ width: grauGap, backgroundColor }} />
+          )}
         </React.Fragment>
       );
     }
-    if (graus > 0) {
-      stripes.push(<div key="fim" className="w-[8px] h-full" style={{ backgroundColor: corPonteira }} />);
-    }
-    return stripes;
+
+    return <div className="flex h-full items-center justify-center px-[4px]">{stripes}</div>;
   };
 
-  return (
-    <div className="max-w-sm w-full p-4 bg-zinc-800 text-white rounded-lg border border-zinc-700 shadow-md">
-      <div className="text-sm text-gray-400 uppercase mb-2 text-center">
-        Faixa {nomeFaixa} com {graus} grau{graus !== 1 ? "s" : ""}
-      </div>
-      <div className="flex flex-col w-full overflow-hidden rounded border border-zinc-700">
-        {[corBase, corLinha, corBase].map((cor, idx) => (
-          <div key={idx} className="flex h-3 w-full">
-            <div className="flex-[2]" style={{ backgroundColor: cor }} />
-            <div className="flex-[1] relative" style={{ backgroundColor: corPonteira }}>
-              <div className="absolute inset-0 flex items-center justify-center gap-[1px] px-[2px]">
-                {renderGraus()}
-              </div>
-            </div>
-            <div className="flex-[0.5]" style={{ backgroundColor: cor }} />
+  if (className) beltShellClasses.push(className);
+
+  if (isInfantil) {
+    return (
+      <div className={beltShellClasses.join(' ')}>
+        <div className="relative flex h-full w-full overflow-hidden rounded-sm">
+          <div className="flex h-full w-full flex-col">
+            {infantilLayers.map((cor, idx) => (
+              <div key={`${cor}-${idx}`} className="h-1/3 w-full" style={{ backgroundColor: cor }} />
+            ))}
           </div>
-        ))}
+
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex">
+            <div className="relative h-full" style={{ width: ponteiraBodyWidth, backgroundColor: corLinha }}>
+              {graus > 0 && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  {renderGraus(corLinha)}
+                </div>
+              )}
+            </div>
+            <div className="h-full" style={{ width: ponteiraTipWidth, backgroundColor: corPonteira }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={beltShellClasses.join(' ')}>
+      <div className="relative flex h-full w-full overflow-hidden rounded-sm">
+        <div className="h-full w-full" style={{ backgroundColor: corBase }} />
+
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex">
+          <div className="relative h-full" style={{ width: ponteiraBodyWidth, backgroundColor: corLinha }}>
+            {graus > 0 && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                {renderGraus(corLinha)}
+              </div>
+            )}
+          </div>
+          <div className="h-full" style={{ width: ponteiraTipWidth, backgroundColor: corPonteira }} />
+        </div>
       </div>
     </div>
   );
