@@ -192,15 +192,35 @@ export default function RegrasGraduacaoPage() {
         <table className="table table-compact table-fixed min-w-[760px] text-sm md:min-w-full">
           <thead>
             <tr className="text-[0.65rem] uppercase tracking-[0.25em] text-bjj-gray-200/70">
+              <th className="w-[12%] px-4 py-3 text-center font-semibold">Ações</th>
               <th className="w-[22%] px-4 py-3 font-semibold">Faixa</th>
               <th className="w-[28%] px-4 py-3 font-semibold">Visual</th>
               <th className="w-[38%] px-4 py-3 font-semibold">Requisitos</th>
-              <th className="w-[12%] px-4 py-3 text-center font-semibold">Ações</th>
             </tr>
           </thead>
           <tbody>
             {belts.map(([belt, rule]) => (
               <tr key={belt} className="align-middle text-sm text-bjj-gray-200">
+                <td className="px-4 py-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="btn-xs flex items-center gap-1"
+                      onClick={() => openEditModal(belt, rule)}
+                    >
+                      <Edit3 size={14} />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="btn-xs flex items-center gap-1"
+                      onClick={() => handleDelete(belt)}
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                </td>
                 <td className="px-4 py-4 align-middle">
                   <p className="text-base font-semibold text-bjj-white">{belt}</p>
                 </td>
@@ -228,26 +248,6 @@ export default function RegrasGraduacaoPage() {
                     <p>
                       <span className="font-semibold text-bjj-white">Próxima faixa:</span> {rule.proximaFaixa || '—'}
                     </p>
-                  </div>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="btn-xs flex items-center gap-1"
-                      onClick={() => openEditModal(belt, rule)}
-                    >
-                      <Edit3 size={14} />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="btn-xs flex items-center gap-1"
-                      onClick={() => handleDelete(belt)}
-                    >
-                      <Trash2 size={14} />
-                    </Button>
                   </div>
                 </td>
               </tr>
