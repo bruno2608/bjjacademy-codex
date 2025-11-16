@@ -216,8 +216,7 @@ export default function RegrasGraduacaoPage() {
             <tr className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/70">
               <th>Faixa</th>
               <th className="w-48">Visual</th>
-              <th className="hidden lg:table-cell">Descrição</th>
-              <th className="hidden xl:table-cell w-1/3">Requisitos básicos</th>
+              <th className="w-1/3">Requisitos</th>
               <th className="w-24 text-center">Ações</th>
             </tr>
           </thead>
@@ -226,9 +225,6 @@ export default function RegrasGraduacaoPage() {
               <tr key={belt} className="align-middle text-sm">
                 <td className="py-4">
                   <p className="font-semibold text-bjj-white">{belt}</p>
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-bjj-gray-200/60">
-                    {rule.categoria}
-                  </p>
                 </td>
                 <td>
                   <BeltPreview
@@ -238,10 +234,7 @@ export default function RegrasGraduacaoPage() {
                     stripes={rule.graus?.length ?? 0}
                   />
                 </td>
-                <td className="hidden lg:table-cell text-sm text-bjj-gray-200/80">
-                  {rule.descricao || 'Descrição não informada.'}
-                </td>
-                <td className="hidden xl:table-cell text-xs text-bjj-gray-200/80">
+                <td className="text-xs text-bjj-gray-200/80">
                   <ul className="space-y-1">
                     <li>
                       <span className="font-semibold text-bjj-white">Tempo:</span> {rule.tempoFaixaMeses} meses
