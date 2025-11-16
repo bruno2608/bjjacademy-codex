@@ -25,7 +25,7 @@ export default function FaixaVisual({
 
   const stripeAreaColor = corPonteira;
   const ponteiraWidth = isInfantil ? 0 : 52;
-  const tailWidth = isInfantil ? 0 : 12;
+  const tailWidth = 12;
   const stripeAreaWidth = isInfantil ? 52 : ponteiraWidth;
 
   const renderGraus = (backgroundColor: string) => {
@@ -55,10 +55,13 @@ export default function FaixaVisual({
         <div key={`${cor}-${idx}`} className="flex h-3 w-full overflow-hidden">
           <div className="flex-1" style={{ backgroundColor: cor }} />
           {isInfantil ? (
-            <div
-              className="flex-shrink-0"
-              style={{ backgroundColor: stripeAreaColor, width: stripeAreaWidth }}
-            />
+            <>
+              <div
+                className="flex-shrink-0"
+                style={{ backgroundColor: stripeAreaColor, width: stripeAreaWidth }}
+              />
+              <div className="flex-shrink-0" style={{ backgroundColor: cor, width: tailWidth }} />
+            </>
           ) : (
             <>
               <div
