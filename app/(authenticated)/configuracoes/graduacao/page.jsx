@@ -206,7 +206,7 @@ export default function RegrasGraduacaoPage() {
                 </td>
                 <td className="px-4 py-4 align-middle">
                   <FaixaVisual
-                    corFaixa={rule.corFaixa}
+                    corBase={rule.corFaixa}
                     corLinha={rule.corBarra}
                     corPonteira={rule.corPonteira}
                     nomeFaixa={belt}
@@ -384,7 +384,7 @@ export default function RegrasGraduacaoPage() {
               <div className="flex flex-col gap-1 text-xs">
                 <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Pré-visualização</span>
                 <FaixaVisual
-                  corFaixa={form.corFaixa}
+                  corBase={form.corFaixa}
                   corLinha={form.corBarra}
                   corPonteira={form.corPonteira}
                   nomeFaixa={form.nome || 'Pré-visualização'}
