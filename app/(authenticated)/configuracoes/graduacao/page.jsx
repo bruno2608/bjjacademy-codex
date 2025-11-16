@@ -207,10 +207,10 @@ export default function RegrasGraduacaoPage() {
                 <td className="px-4 py-4 align-middle">
                   <FaixaVisual
                     corFaixa={rule.corFaixa}
-                    corBarra={rule.corBarra}
+                    corLinha={rule.corBarra}
                     corPonteira={rule.corPonteira}
-                    quantidadeGraus={rule.graus?.length ?? 0}
-                    exibirGraus
+                    nomeFaixa={belt}
+                    graus={rule.graus?.length ?? 0}
                     className="w-full max-w-[11rem]"
                   />
                 </td>
@@ -385,10 +385,10 @@ export default function RegrasGraduacaoPage() {
                 <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Pré-visualização</span>
                 <FaixaVisual
                   corFaixa={form.corFaixa}
-                  corBarra={form.corBarra}
+                  corLinha={form.corBarra}
                   corPonteira={form.corPonteira}
-                  quantidadeGraus={form.graus.length}
-                  exibirGraus
+                  nomeFaixa={form.nome || 'Pré-visualização'}
+                  graus={form.graus.length}
                   className="w-full max-w-[11rem]"
                 />
               </div>

@@ -2,71 +2,86 @@ import type { FC } from 'react';
 
 export type FaixaVisualProps = {
   corFaixa: string;
-  corBarra: string;
+  corLinha: string;
   corPonteira: string;
-  quantidadeGraus?: number;
-  exibirGraus?: boolean;
+  nomeFaixa: string;
+  graus: number;
   className?: string;
+  mostrarRodape?: boolean;
 };
 
-const MAX_GRAUS = 4;
+const MAX_GRAUS = 6;
 
 /**
- * Reproduz o visual tradicional das faixas IBJJF usado no sistema antigo,
- * com três listras horizontais e uma ponteira à direita onde os graus são exibidos.
+ * Renderiza o visual tradicional das faixas IBJJF (3 listras horizontais
+ * com ponteira à direita), exibindo os graus como listras brancas dentro da ponteira.
  */
 const FaixaVisual: FC<FaixaVisualProps> = ({
   corFaixa,
-  corBarra,
+  corLinha,
   corPonteira,
-  quantidadeGraus = 0,
-  exibirGraus = true,
-  className = ''
+  nomeFaixa,
+  graus,
+  className = '',
+  mostrarRodape = false
 }) => {
-  const linhas = [corFaixa, corBarra || corFaixa, corFaixa];
-  const grauCount = Math.min(MAX_GRAUS, Math.max(0, quantidadeGraus));
+  const normalizedGraus = Math.max(0, Math.min(MAX_GRAUS, graus ?? 0));
+  const linhas = [corFaixa, corLinha || corFaixa, corFaixa];
 
   const containerClasses = [
-    'w-full max-w-[24rem] flex flex-col gap-1 overflow-hidden rounded-lg bg-gradient-to-r from-bjj-gray-900 via-bjj-gray-800 to-bjj-gray-900 p-2 shadow-lg',
+    'flex w-full max-w-sm flex-col gap-1 rounded-lg border border-bjj-gray-800/70 bg-gradient-to-r from-bjj-gray-900 via-bjj-gray-800 to-bjj-gray-900 p-3 shadow-lg',
     className
   ]
     .filter(Boolean)
     .join(' ');
 
-  const renderGraus = () => {
-    if (!exibirGraus || grauCount === 0) return null;
-
-    const stripes = Array.from({ length: grauCount * 2 }).map((_, index) => {
-      const isWhite = index % 2 === 0;
-      return (
-        <span
-          key={`grau-${index}`}
-          className={`h-full w-[8px] ${isWhite ? 'bg-white' : ''}`}
-          style={{ backgroundColor: isWhite ? undefined : corPonteira }}
-        />
-      );
-    });
-
-    return (
-      <div className="absolute inset-0 flex items-center justify-center gap-[1px] px-[2px]">
-        {stripes}
-      </div>
-    );
-  };
-
-  const renderLinha = (corSegmento: string, index: number) => (
-    <div key={`${corSegmento}-${index}`} className="flex h-3 w-full overflow-hidden">
-      <div className="flex-[2]" style={{ backgroundColor: corSegmento }} />
-      <div className="relative flex-[1]" style={{ backgroundColor: corPonteira }}>
-        {renderGraus()}
-      </div>
-      <div className="flex-[0.5]" style={{ backgroundColor: corSegmento }} />
+  const ponteira = (index: number) => (
+    <div key={`ponteira-${index}`} className="relative flex-[1]" style={{ backgroundColor: corPonteira }}>
+      {normalizedGraus > 0 && (
+        <div className="absolute inset-0 flex items-center justify-center gap-[1px] px-[2px]">
+          {Array.from({ length: normalizedGraus * 2 }).map((_, stripeIndex) => (
+            <span
+              key={`grau-${index}-${stripeIndex}`}
+              className="h-full"
+              style={{
+                width: '8px',
+                backgroundColor: stripeIndex % 2 === 0 ? '#FFFFFF' : corPonteira
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 
   return (
-    <div className={containerClasses} aria-label="Visual da faixa">
-      {linhas.map((cor, index) => renderLinha(cor, index))}
+    <div className={containerClasses} aria-label={`Visual da faixa ${nomeFaixa}`}>
+      {linhas.map((corSegmento, index) => (
+        <div key={`${corSegmento}-${index}`} className="flex h-3 w-full overflow-hidden rounded-sm">
+          <div className="flex-[2]" style={{ backgroundColor: corSegmento }} />
+          {ponteira(index)}
+          <div className="flex-[0.5]" style={{ backgroundColor: corSegmento }} />
+        </div>
+      ))}
+
+      {mostrarRodape && (
+        <div className="mt-3 flex items-center justify-center gap-3 text-[0.7rem] text-bjj-gray-200/80">
+          <span className="flex items-center gap-1">
+            <span
+              className="h-3 w-3 rounded-sm border border-bjj-gray-700"
+              style={{ backgroundColor: corFaixa }}
+            />
+            Faixa: {nomeFaixa}
+          </span>
+          <span className="text-bjj-gray-500">|</span>
+          <span className="flex items-center gap-1">
+            <span role="img" aria-label="Medalha">
+              🎖️
+            </span>
+            Graus: {normalizedGraus}
+          </span>
+        </div>
+      )}
     </div>
   );
 };
