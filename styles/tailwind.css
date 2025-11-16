@@ -131,7 +131,7 @@
   }
 
   .belt-widget {
-    @apply flex h-7 w-40 items-center overflow-hidden rounded-full border border-bjj-gray-800 bg-bjj-gray-900/30;
+    @apply relative flex h-8 w-56 items-center overflow-visible rounded-full border border-bjj-gray-800 bg-bjj-black/60;
   }
 
   .belt-widget__strap {
@@ -139,15 +139,20 @@
   }
 
   .belt-widget__center {
-    @apply h-full w-16;
+    @apply h-full w-16 border-x border-bjj-gray-900/50;
   }
 
-  .belt-widget__stripe-block {
-    @apply flex h-full w-10 items-center justify-center gap-0.5;
+  .belt-widget__tip {
+    @apply relative flex h-full w-16 items-center justify-center gap-1 px-2;
+    border-left: 1px solid rgba(0, 0, 0, 0.6);
+  }
+
+  .belt-widget__stripes {
+    @apply flex items-center gap-1;
   }
 
   .belt-widget__stripe {
-    @apply h-3 w-0.5 rounded-full bg-white;
+    @apply h-3 w-1 rounded-full bg-white;
   }
 
   .belt-widget__stripe--placeholder {
@@ -155,14 +160,7 @@
   }
 
   .belt-widget__pointer {
-    border-top-width: 14px;
-    border-bottom-width: 14px;
-    border-left-width: 14px;
-    border-top-color: transparent;
-    border-bottom-color: transparent;
-    border-right: 0;
-    border-style: solid;
-    width: 0;
-    height: 0;
+    @apply pointer-events-none absolute right-0 top-0 h-full w-6;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
   }
 }

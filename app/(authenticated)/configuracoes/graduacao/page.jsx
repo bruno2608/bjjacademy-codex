@@ -65,26 +65,24 @@ const buildFormFromRule = (nome, rule) => ({
 });
 
 const BeltPreview = ({ corFaixa, corBarra, corPonteira, stripes = 0 }) => {
-  const totalStripes = stripes > 0 ? stripes : 1;
+  const totalStripes = stripes > 0 ? stripes : 4;
   const isPlaceholder = stripes === 0;
   return (
-    <div className="belt-widget" style={{ backgroundColor: corFaixa }}>
+    <div className="belt-widget">
       <span className="belt-widget__strap" style={{ backgroundColor: corFaixa }} />
       <span className="belt-widget__center" style={{ backgroundColor: corBarra }} />
-      <span className="belt-widget__stripe-block" style={{ backgroundColor: corPonteira }}>
-        {Array.from({ length: totalStripes }).map((_, index) => (
-          <span
-            // eslint-disable-next-line react/no-array-index-key
-            key={index}
-            className={`belt-widget__stripe${isPlaceholder ? ' belt-widget__stripe--placeholder' : ''}`}
-          />
-        ))}
+      <span className="belt-widget__tip" style={{ backgroundColor: corPonteira }}>
+        <span className="belt-widget__stripes">
+          {Array.from({ length: totalStripes }).map((_, index) => (
+            <span
+              // eslint-disable-next-line react/no-array-index-key
+              key={index}
+              className={`belt-widget__stripe${isPlaceholder ? ' belt-widget__stripe--placeholder' : ''}`}
+            />
+          ))}
+        </span>
+        <span className="belt-widget__pointer" style={{ backgroundColor: corPonteira }} aria-hidden="true" />
       </span>
-      <span
-        className="belt-widget__pointer"
-        style={{ borderLeftColor: corPonteira }}
-        aria-hidden="true"
-      />
     </div>
   );
 };
