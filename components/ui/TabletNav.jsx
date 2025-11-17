@@ -63,9 +63,6 @@ export default function TabletNav() {
       aria-label="Navegação principal"
     >
       <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-3 md:px-6 xl:px-8">
-        <div className="whitespace-nowrap rounded-full bg-bjj-red/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-bjj-red">
-          BJJ Academy
-        </div>
         <div className="flex flex-1 items-center gap-2">
           <div className="hidden min-w-0 flex-1 flex-wrap items-center gap-2 sm:flex">
             {navigationItems.map((item) => renderNavLink(item))}

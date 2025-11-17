@@ -27,6 +27,7 @@ export const siteMap = {
     '/evolucao',
     '/historico-presencas',
     '/perfil',
+    '/configuracoes',
     '/presencas',
     '/alunos',
     '/relatorios',
