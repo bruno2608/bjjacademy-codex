@@ -333,7 +333,7 @@ export const GRADUATION_RULES: GraduationRules = {
   Preta: {
     categoria: 'Adulto',
     metodoGraus: 'manual',
-    proximaFaixa: 'Coral',
+    proximaFaixa: null,
     tempoFaixaMeses: 36,
     tempoMinimoMeses: 36,
     idadeMinima: 21,
@@ -350,34 +350,6 @@ export const GRADUATION_RULES: GraduationRules = {
       { numero: 5, tempoMinimoMeses: 144, aulasMinimas: 240 },
       { numero: 6, tempoMinimoMeses: 168, aulasMinimas: 280 }
     ]
-  },
-  Coral: {
-    categoria: 'Adulto',
-    metodoGraus: 'manual',
-    proximaFaixa: 'Vermelha',
-    tempoFaixaMeses: 120,
-    tempoMinimoMeses: 120,
-    idadeMinima: 50,
-    aulasMinimasFaixa: 0,
-    descricao: 'Reconhecimento pela contribuição vitalícia ao Jiu-Jitsu e à academia.',
-    corFaixa: '#FF7043',
-    corBarra: '#000000',
-    corPonteira: '#E10600',
-    graus: []
-  },
-  Vermelha: {
-    categoria: 'Adulto',
-    metodoGraus: 'manual',
-    proximaFaixa: null,
-    tempoFaixaMeses: 0,
-    tempoMinimoMeses: 0,
-    idadeMinima: 56,
-    aulasMinimasFaixa: 0,
-    descricao: 'Honraria máxima destinada aos grandes mestres do Jiu-Jitsu.',
-    corFaixa: '#C62828',
-    corBarra: '#000000',
-    corPonteira: '#E10600',
-    graus: []
   }
 };
 
@@ -399,7 +371,5 @@ export const BELT_ORDER = [
   'Azul',
   'Roxa',
   'Marrom',
-  'Preta',
-  'Coral',
-  'Vermelha'
+  'Preta'
 ] as const;

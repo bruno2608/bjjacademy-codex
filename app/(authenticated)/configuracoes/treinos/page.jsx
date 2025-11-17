@@ -5,6 +5,7 @@ import Modal from '../../../../components/ui/Modal';
 import Input from '../../../../components/ui/Input';
 import Select from '../../../../components/ui/Select';
 import Button from '../../../../components/ui/Button';
+import ConfirmDialog from '../../../../components/ui/ConfirmDialog';
 import { useTreinosStore } from '../../../../store/treinosStore';
 import { useTiposTreinoStore } from '../../../../store/tiposTreinoStore';
 
@@ -28,6 +29,7 @@ export default function TreinosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyTreino);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const sortedTreinos = useMemo(
     () =>
@@ -53,6 +55,17 @@ export default function TreinosPage() {
     setIsModalOpen(false);
     setEditingId(null);
     setForm(emptyTreino);
+  };
+
+  const pedirConfirmacaoExclusao = (treino) => {
+    setDeleteTarget(treino);
+  };
+
+  const confirmarExclusao = () => {
+    if (deleteTarget) {
+      removeTreino(deleteTarget.id);
+      setDeleteTarget(null);
+    }
   };
 
   const handleSubmit = (event) => {
@@ -118,7 +131,7 @@ export default function TreinosPage() {
                 type="button"
                 variant="secondary"
                 className="btn-sm border-bjj-red/70 text-bjj-red hover:border-bjj-red hover:text-bjj-red hover:bg-bjj-red/10"
-                onClick={() => removeTreino(treino.id)}
+                onClick={() => pedirConfirmacaoExclusao(treino)}
               >
                 Remover
               </Button>
@@ -192,6 +205,15 @@ export default function TreinosPage() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Confirmar exclusão"
+        message={deleteTarget ? `Deseja remover o treino ${deleteTarget.nome}?` : ''}
+        confirmLabel="Remover treino"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
