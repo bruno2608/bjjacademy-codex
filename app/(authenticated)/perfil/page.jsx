@@ -32,7 +32,7 @@ export default function PerfilPage() {
 
   const [form, setForm] = useState({
     nome: user?.name || aluno?.nome || '',
-    telefone: aluno?.telefone || '',
+    telefone: user?.telefone || aluno?.telefone || '',
     email: user?.email || aluno?.email || '',
     avatarUrl: aluno?.avatarUrl || user?.avatarUrl || ''
   });
@@ -41,11 +41,20 @@ export default function PerfilPage() {
   useEffect(() => {
     setForm({
       nome: user?.name || aluno?.nome || '',
-      telefone: aluno?.telefone || '',
+      telefone: user?.telefone || aluno?.telefone || '',
       email: user?.email || aluno?.email || '',
       avatarUrl: aluno?.avatarUrl || user?.avatarUrl || ''
     });
-  }, [aluno?.avatarUrl, aluno?.email, aluno?.nome, aluno?.telefone, user?.avatarUrl, user?.email, user?.name]);
+  }, [
+    aluno?.avatarUrl,
+    aluno?.email,
+    aluno?.nome,
+    aluno?.telefone,
+    user?.avatarUrl,
+    user?.email,
+    user?.name,
+    user?.telefone
+  ]);
 
   const initials = buildInitials(user?.name, user?.email);
 
@@ -57,7 +66,7 @@ export default function PerfilPage() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    updateUser?.({ name: form.nome, email: form.email, avatarUrl: form.avatarUrl });
+    updateUser?.({ name: form.nome, email: form.email, avatarUrl: form.avatarUrl, telefone: form.telefone });
     if (isAluno && aluno?.id) {
       updateAluno(aluno.id, {
         nome: form.nome,
@@ -125,7 +134,7 @@ export default function PerfilPage() {
               value={form.telefone}
               onChange={handleChange}
               placeholder="(00) 00000-0000"
-              disabled={!isAluno}
+              disabled={!isAluno && !updateUser}
               className="text-base"
             />
           </label>

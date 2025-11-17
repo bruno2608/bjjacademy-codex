@@ -71,7 +71,8 @@ export const useUserStore = create<UserState>((set) => ({
       name: email.split('@')[0] || 'Instrutor',
       email,
       roles: finalRoles.length ? finalRoles : ALL_ROLES,
-      avatarUrl: null
+      avatarUrl: null,
+      telefone: null
     };
 
     persistRoles(finalUser.roles);

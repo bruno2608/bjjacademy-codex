@@ -968,6 +968,7 @@ const useUserStore = create((set) => ({
         email,
         roles: finalRoles,
         avatarUrl: null,
+        telefone: null,
         alunoId
       },
       token: fakeToken
