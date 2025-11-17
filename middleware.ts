@@ -1,27 +1,16 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import type { UserRole } from './config/userRoles';
-import { flattenSiteMap, siteMap } from './config/siteMap';
 
-/**
- * Middleware responsável por validar permissões de acesso em tempo real.
- * Baseia-se no site map central e nos papéis salvos em cookie/localStorage.
- */
+import { normalizeRoles, ROLE_KEYS } from './config/roles';
+import { isRouteAllowed } from './config/sitemap';
 
-const PUBLIC_ROUTES = ['/login', '/unauthorized', '/manifest.json'];
+const PUBLIC_ROUTES = ['/login', '/cadastro', '/recuperar-senha', '/confirmar-email', '/manifest.json'];
 const STATIC_PREFIXES = ['/_next', '/icons', '/service-worker.js', '/sw.js'];
 
-const siteMapFlat = flattenSiteMap(siteMap);
-
-const matchSiteMap = (pathname: string) =>
-  siteMapFlat.find((item) => pathname === item.path || pathname.startsWith(`${item.path}/`));
-
-const parseRoles = (raw: string | undefined): UserRole[] => {
-  if (!raw) return [] as UserRole[];
-  return raw
-    .split(',')
-    .map((role) => role.trim())
-    .filter((value): value is UserRole => Boolean(value));
+const parseRoles = (raw: string | undefined) => {
+  if (!raw) return [] as ROLE_KEYS[];
+  const parts = raw.includes('[') ? JSON.parse(raw) : raw.split(',');
+  return normalizeRoles(parts);
 };
 
 export function middleware(request: NextRequest) {
@@ -31,24 +20,20 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const matchedRoute = matchSiteMap(pathname);
-  if (!matchedRoute) {
-    return NextResponse.next();
-  }
-
   const cookieRoles = request.cookies.get('bjj_roles')?.value;
+  const token = request.cookies.get('bjj_token')?.value;
   const roles = parseRoles(cookieRoles);
 
-  if (!roles.length) {
+  if (!roles.length || !token) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  const hasPermission = matchedRoute.roles.some((role) => roles.includes(role));
-  if (!hasPermission) {
-    const unauthorizedUrl = new URL('/unauthorized', request.url);
-    return NextResponse.redirect(unauthorizedUrl);
+  const allowed = isRouteAllowed(pathname, roles);
+  if (!allowed) {
+    const redirectUrl = new URL('/dashboard', request.url);
+    return NextResponse.redirect(redirectUrl);
   }
 
   return NextResponse.next();

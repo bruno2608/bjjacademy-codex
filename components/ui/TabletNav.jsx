@@ -8,13 +8,14 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getNavigationItemsForRoles } from '../../lib/navigation';
+import useRole from '../../hooks/useRole';
 import useUserStore from '../../store/userStore';
 import UserMenu from './UserMenu';
 
 export default function TabletNav() {
   const pathname = usePathname();
   const user = useUserStore((state) => state.user);
-  const roles = user?.roles || [];
+  const { roles } = useRole();
 
   const navigationItems = useMemo(
     () => getNavigationItemsForRoles(roles),

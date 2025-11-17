@@ -9,14 +9,15 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, Menu, X, Settings2, ChevronRight, ChevronDown, BarChart3, UserCircle2 } from 'lucide-react';
 import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
+import useRole from '../../hooks/useRole';
 import useUserStore from '../../store/userStore';
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const { user, logout } = useUserStore();
-  const roles = user?.roles || [];
+  const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
+  const { roles } = useRole();
 
   const navigationItems = useMemo(() => getNavigationItemsForRoles(roles), [roles]);
   const fullNavigation = useMemo(
@@ -24,6 +25,14 @@ export default function Header() {
     [roles]
   );
   const flattenedItems = useMemo(() => flattenNavigation(fullNavigation), [fullNavigation]);
+  const profilePath = useMemo(
+    () => flattenedItems.find((item) => item.path === '/perfil')?.path,
+    [flattenedItems]
+  );
+  const reportsPath = useMemo(
+    () => flattenedItems.find((item) => item.path === '/relatorios')?.path,
+    [flattenedItems]
+  );
   const configItem = useMemo(
     () => fullNavigation.find((item) => item.path === '/configuracoes'),
     [fullNavigation]
@@ -36,6 +45,12 @@ export default function Header() {
     // Mantém o dropdown alinhado à rota atual para evitar que fique sempre aberto.
     setConfigOpen(isConfigPath);
   }, [isConfigPath]);
+
+  useEffect(() => {
+    if (!hydrated) {
+      hydrateFromStorage();
+    }
+  }, [hydrateFromStorage, hydrated]);
 
   const initials = useMemo(() => {
     const source = user?.name || user?.email || 'Instrutor';
@@ -50,8 +65,6 @@ export default function Header() {
     logout();
     router.push('/login');
   };
-
-  const canAccess = (path) => flattenedItems.some((item) => item.path === path);
 
   return (
     <header className="flex items-center justify-between border-b border-bjj-gray-800 bg-bjj-gray-900/80 px-4 py-3 backdrop-blur xl:hidden">
@@ -142,9 +155,9 @@ export default function Header() {
               </div>
 
               <div className="mt-4 space-y-1">
-                {canAccess('/perfil') && (
+                {profilePath && (
                   <Link
-                    href="/perfil"
+                    href={profilePath}
                     className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
                     onClick={() => setOpen(false)}
                   >
@@ -152,9 +165,9 @@ export default function Header() {
                   </Link>
                 )}
 
-                {canAccess('/relatorios') && (
+                {reportsPath && (
                   <Link
-                    href="/relatorios"
+                    href={reportsPath}
                     className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
                     onClick={() => setOpen(false)}
                   >
