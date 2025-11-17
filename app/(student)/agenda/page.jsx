@@ -21,7 +21,7 @@ export default function AgendaPage() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-xs uppercase tracking-[0.25em] text-bjj-gray-400">Agenda</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-bjj-gray-400">Treinos do aluno</p>
         <h1 className="text-2xl font-semibold">Treinos da semana</h1>
         <p className="text-sm text-bjj-gray-300/80">Visualização apenas leitura dos treinos publicados pela academia.</p>
       </header>
