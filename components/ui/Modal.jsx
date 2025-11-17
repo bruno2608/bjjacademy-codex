@@ -5,22 +5,43 @@
  * Em telas menores ele assume o formato de bottom sheet para facilitar
  * o uso no mobile e manter a coerência com o app nativo.
  */
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export default function Modal({ isOpen, title, onClose, children }) {
+  const [mounted, setMounted] = useState(false);
+  const portalRef = useRef(null);
+
   useEffect(() => {
-    if (!isOpen) {
+    setMounted(true);
+    if (!portalRef.current && typeof document !== 'undefined') {
+      portalRef.current = document.body;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') {
       return undefined;
     }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose?.();
+      }
+    };
+
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
-  if (!isOpen) {
+  if (!isOpen || !mounted || !portalRef.current) {
     return null;
   }
 
@@ -30,7 +51,7 @@ export default function Modal({ isOpen, title, onClose, children }) {
     }
   };
 
-  return (
+  const content = (
     <div
       className="modal z-50"
       role="dialog"
@@ -56,4 +77,6 @@ export default function Modal({ isOpen, title, onClose, children }) {
       </div>
     </div>
   );
+
+  return createPortal(content, portalRef.current);
 }
