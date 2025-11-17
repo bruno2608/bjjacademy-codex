@@ -89,6 +89,27 @@ export const siteMap: SiteMapItem[] = [
     showInMainNav: true
   },
   {
+    title: 'Histórico de presenças',
+    path: '/historico-presencas',
+    icon: CalendarCheck,
+    roles: [...STAFF_ROLES, 'ALUNO'],
+    showInMainNav: false
+  },
+  {
+    title: 'Relatórios',
+    path: '/relatorios',
+    icon: BarChart3,
+    roles: [...STAFF_ROLES, 'ALUNO'],
+    showInMainNav: false
+  },
+  {
+    title: 'Evolução',
+    path: '/evolucao',
+    icon: Medal,
+    roles: ['ALUNO'],
+    showInMainNav: true
+  },
+  {
     title: 'Área do Instrutor',
     path: '/instrutor',
     icon: UserCircle2,

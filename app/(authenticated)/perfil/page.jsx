@@ -21,6 +21,8 @@ export default function PerfilPage() {
   const { user, updateUser } = useUserStore();
   const roles = user?.roles || [];
   const isAluno = roles.includes('ALUNO');
+  const canEditContato =
+    isAluno || roles.some((role) => ['PROFESSOR', 'INSTRUTOR', 'ADMIN', 'TI'].includes(role));
 
   const alunos = useAlunosStore((state) => state.alunos);
   const updateAluno = useAlunosStore((state) => state.updateAluno);
@@ -118,14 +120,7 @@ export default function PerfilPage() {
         <div className="grid gap-4 md:grid-cols-2">
           <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-400">
             Nome
-            <Input
-              name="nome"
-              value={form.nome}
-              onChange={handleChange}
-              required
-              disabled={!isAluno && !updateUser}
-              className="text-base"
-            />
+            <Input name="nome" value={form.nome} onChange={handleChange} required disabled={!canEditContato} className="text-base" />
           </label>
           <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-400">
             Telefone
@@ -134,7 +129,7 @@ export default function PerfilPage() {
               value={form.telefone}
               onChange={handleChange}
               placeholder="(00) 00000-0000"
-              disabled={!isAluno && !updateUser}
+              disabled={!canEditContato}
               className="text-base"
             />
           </label>
@@ -146,7 +141,7 @@ export default function PerfilPage() {
               value={form.email}
               onChange={handleChange}
               required
-              disabled={!isAluno && !updateUser}
+              disabled={!canEditContato}
               className="text-base"
             />
           </label>
@@ -157,7 +152,7 @@ export default function PerfilPage() {
               value={form.avatarUrl}
               onChange={handleChange}
               placeholder="https://"
-              disabled={!isAluno && !updateUser}
+              disabled={!canEditContato}
               className="text-base"
             />
           </label>
