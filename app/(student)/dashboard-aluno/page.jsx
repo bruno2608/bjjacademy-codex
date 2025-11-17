@@ -91,7 +91,7 @@ export default function DashboardAlunoPage() {
     return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
   }, [aluno, proximaMeta]);
 
-  const formatarData = (valor?: string | null) => {
+  const formatarData = (valor) => {
     if (!valor) return '—';
     const data = new Date(valor);
     if (Number.isNaN(data.getTime())) return valor;
