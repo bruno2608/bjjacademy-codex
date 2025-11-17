@@ -21,5 +21,19 @@ module.exports = withPWA({
   eslint: {
     // Evita que o build falhe tentando instalar dependências do ESLint/TypeScript automaticamente.
     ignoreDuringBuilds: true
+  },
+  async redirects() {
+    return [
+      {
+        source: '/documentos',
+        destination: '/instrutor/documentos',
+        permanent: false
+      },
+      {
+        source: '/historico-presencas',
+        destination: '/instrutor/historico-presencas',
+        permanent: false
+      }
+    ];
   }
 });

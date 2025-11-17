@@ -10,6 +10,7 @@ import { Filter, UserPlus2 } from 'lucide-react';
 import MultiSelectDropdown from '../../../components/ui/MultiSelectDropdown';
 import Table from '../../../components/ui/Table';
 import Modal from '../../../components/ui/Modal';
+import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import AlunoForm from '../../../components/alunos/AlunoForm';
 import PageHero from '../../../components/ui/PageHero';
 import LoadingState from '../../../components/ui/LoadingState';
@@ -18,6 +19,8 @@ import Button from '../../../components/ui/Button';
 import { getAlunos, deleteAluno, createAluno } from '../../../services/alunosService';
 import { usePresencasStore } from '../../../store/presencasStore';
 import { useTreinosStore } from '../../../store/treinosStore';
+import { useGraduationRulesStore } from '../../../store/graduationRulesStore';
+import { orderBelts } from '../../../lib/graduationRules';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
@@ -38,8 +41,10 @@ export default function AlunosPage() {
   const [filterFaixas, setFilterFaixas] = useState([]);
   const [filterStatuses, setFilterStatuses] = useState([]);
   const [filterTreinos, setFilterTreinos] = useState([]);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const presencas = usePresencasStore((state) => state.presencas);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
+  const rules = useGraduationRulesStore((state) => state.rules);
 
   useEffect(() => {
     let active = true;
@@ -68,13 +73,9 @@ export default function AlunosPage() {
   }, []);
 
   const faixasDisponiveis = useMemo(() => {
-    const conjunto = new Set(
-      alunos
-        .map((aluno) => aluno.faixa)
-        .filter((faixa) => typeof faixa === 'string' && faixa.trim().length > 0)
-    );
-    return Array.from(conjunto).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  }, [alunos]);
+    const beltNames = orderBelts(Object.keys(rules || {}));
+    return beltNames;
+  }, [rules]);
 
   const opcoesFaixa = useMemo(
     () => faixasDisponiveis.map((faixa) => ({ value: faixa, label: faixa })),
@@ -163,8 +164,14 @@ export default function AlunosPage() {
   }, []);
 
   const handleDelete = async (aluno) => {
-    await deleteAluno(aluno.id);
+    setDeleteTarget(aluno);
+  };
+
+  const confirmarExclusao = async () => {
+    if (!deleteTarget) return;
+    await deleteAluno(deleteTarget.id);
     await refreshList();
+    setDeleteTarget(null);
   };
 
   const handleEdit = (aluno) => {
@@ -213,15 +220,23 @@ export default function AlunosPage() {
                 <span className="text-[10px] text-bjj-gray-200/60">Digite pelo menos 3 letras para aplicar a busca.</span>
               )}
             </div>
-            <MultiSelectDropdown
-              label="Faixa"
-              options={opcoesFaixa}
-              value={filterFaixas}
-              onChange={(lista) => setFilterFaixas(normalizarSelecao(lista, faixasDisponiveis.length))}
-              allLabel="Todas as faixas"
-              placeholder="Selecionar faixas"
-              className="h-full"
-            />
+            <div className="flex flex-col gap-1">
+              <MultiSelectDropdown
+                label="Faixa"
+                options={opcoesFaixa}
+                value={filterFaixas}
+                onChange={(lista) => setFilterFaixas(normalizarSelecao(lista, faixasDisponiveis.length))}
+                allLabel="Todas as faixas"
+                placeholder={opcoesFaixa.length ? 'Selecionar faixas' : 'Cadastre faixas nas Regras'}
+                disabled={!opcoesFaixa.length}
+                className="h-full"
+              />
+              {!opcoesFaixa.length && (
+                <p className="text-[11px] text-bjj-gray-200/60">
+                  Cadastre faixas na aba Configurações → Regras para habilitar este filtro.
+                </p>
+              )}
+            </div>
             <MultiSelectDropdown
               label="Status"
               options={opcoesStatus}
@@ -279,6 +294,15 @@ export default function AlunosPage() {
         <AlunoForm onSubmit={handleCreate} isSubmitting={isSaving} submitLabel="Salvar cadastro" />
         {isSaving && <p className="text-xs text-bjj-gray-200/70 mt-3">Armazenando aluno na base...</p>}
       </Modal>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Confirmar exclusão"
+        message={deleteTarget ? `Deseja remover o aluno ${deleteTarget.nome}?` : ''}
+        confirmLabel="Remover aluno"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
