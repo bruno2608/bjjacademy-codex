@@ -1,32 +1,80 @@
 
 import React from "react";
 
+import { GRADUATION_RULES } from '../../config/graduationRules';
+
+type TamanhoFaixa = 'sm' | 'md' | 'lg';
+
 interface FaixaVisualProps {
-  corBase: string;
-  corLinha: string;
-  corPonteira: string;
-  graus: number;
+  faixa?: string;
+  corBase?: string;
+  corLinha?: string;
+  corPonteira?: string;
+  graus?: number;
   categoria?: 'Infantil' | 'Adulto';
+  tamanho?: TamanhoFaixa;
   className?: string;
 }
 
 export default function FaixaVisual({
-  corBase = '#FFEB3B',
-  corLinha = '#FFFFFF',
-  corPonteira = '#000000',
+  faixa,
+  corBase,
+  corLinha,
+  corPonteira,
   graus = 0,
   categoria,
+  tamanho = 'md',
   className
 }: FaixaVisualProps) {
-  const isInfantil = categoria === 'Infantil';
-  const bodyLayers = isInfantil
-    ? [corBase, corLinha, corBase]
-    : [corBase, corBase, corBase];
+  const regra = faixa ? GRADUATION_RULES[faixa] : null;
 
-  const stripeAreaColor = corPonteira;
-  const ponteiraWidth = isInfantil ? 0 : 'clamp(44px, 14vw, 52px)';
-  const tailWidth = 'clamp(10px, 4vw, 12px)';
-  const stripeAreaWidth = isInfantil ? 'clamp(42px, 13vw, 52px)' : ponteiraWidth;
+  const cores = {
+    base: regra?.corFaixa || corBase || '#FFEB3B',
+    linha: regra?.corBarra || corLinha || '#FFFFFF',
+    ponteira: regra?.corPonteira || corPonteira || '#000000'
+  };
+
+  const isInfantil = (regra?.categoria || categoria) === 'Infantil';
+  const bodyLayers = isInfantil
+    ? [cores.base, cores.linha, cores.base]
+    : [cores.base, cores.base, cores.base];
+
+  const sizes: Record<
+    TamanhoFaixa,
+    { layerHeight: string; ponteira: string; tail: string; stripe: string; minW: string; maxW: string }
+  > = {
+    sm: {
+      layerHeight: 'clamp(10px, 3vw, 12px)',
+      ponteira: 'clamp(38px, 12vw, 46px)',
+      tail: 'clamp(8px, 3vw, 10px)',
+      stripe: 'clamp(36px, 11vw, 46px)',
+      minW: '7.5rem',
+      maxW: '10rem'
+    },
+    md: {
+      layerHeight: 'clamp(12px, 3.5vw, 14px)',
+      ponteira: 'clamp(46px, 13vw, 54px)',
+      tail: 'clamp(10px, 3.5vw, 12px)',
+      stripe: 'clamp(42px, 12vw, 54px)',
+      minW: '8.5rem',
+      maxW: '12rem'
+    },
+    lg: {
+      layerHeight: 'clamp(14px, 4.2vw, 18px)',
+      ponteira: 'clamp(54px, 15vw, 64px)',
+      tail: 'clamp(12px, 4vw, 14px)',
+      stripe: 'clamp(50px, 14vw, 64px)',
+      minW: '10rem',
+      maxW: '14rem'
+    }
+  };
+
+  const preset = sizes[tamanho] || sizes.md;
+
+  const stripeAreaColor = cores.ponteira;
+  const ponteiraWidth = isInfantil ? 0 : preset.ponteira;
+  const tailWidth = preset.tail;
+  const stripeAreaWidth = isInfantil ? preset.stripe : ponteiraWidth;
 
   const renderGraus = (backgroundColor: string) => {
     if (graus <= 0) return null;
@@ -50,9 +98,12 @@ export default function FaixaVisual({
   if (className) containerClasses.push(className);
 
   return (
-    <div className={containerClasses.join(' ')}>
+    <div
+      className={containerClasses.join(' ')}
+      style={{ minWidth: preset.minW, maxWidth: preset.maxW }}
+    >
       {bodyLayers.map((cor, idx) => (
-        <div key={`${cor}-${idx}`} className="flex h-3 w-full overflow-hidden">
+        <div key={`${cor}-${idx}`} className="flex w-full overflow-hidden" style={{ height: preset.layerHeight }}>
           <div className="flex-1" style={{ backgroundColor: cor }} />
           {isInfantil ? (
             <>
@@ -66,7 +117,7 @@ export default function FaixaVisual({
             <>
               <div
                 className="flex-shrink-0"
-                style={{ backgroundColor: corPonteira, width: ponteiraWidth }}
+                style={{ backgroundColor: cores.ponteira, width: ponteiraWidth }}
               />
               <div className="flex-shrink-0" style={{ backgroundColor: cor, width: tailWidth }} />
             </>

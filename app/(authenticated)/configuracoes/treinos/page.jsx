@@ -42,12 +42,13 @@ export default function TreinosPage() {
   );
 
   const openModal = (treino) => {
+    const tipoDefault = tipos[0] || 'Gi';
     if (treino) {
       setEditingId(treino.id);
-      setForm({ nome: treino.nome, diaSemana: treino.diaSemana, hora: treino.hora, tipo: treino.tipo, ativo: treino.ativo });
+      setForm({ nome: treino.nome || treino.tipo, diaSemana: treino.diaSemana, hora: treino.hora, tipo: treino.tipo, ativo: treino.ativo });
     } else {
       setEditingId(null);
-      setForm({ ...emptyTreino, tipo: tipos[0] || 'Gi' });
+      setForm({ ...emptyTreino, tipo: tipoDefault, nome: tipoDefault });
     }
     setIsModalOpen(true);
   };
@@ -72,9 +73,9 @@ export default function TreinosPage() {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (editingId) {
-      updateTreino(editingId, form);
+      updateTreino(editingId, { ...form, nome: form.nome || form.tipo });
     } else {
-      addTreino(form);
+      addTreino({ ...form, nome: form.nome || form.tipo });
     }
     closeModal();
   };
@@ -103,7 +104,7 @@ export default function TreinosPage() {
             className="card flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
           >
             <div>
-              <h2 className="text-base font-semibold text-bjj-white">{treino.nome}</h2>
+              <h2 className="text-base font-semibold text-bjj-white">{treino.nome || treino.tipo}</h2>
               <p className="text-xs text-bjj-gray-200/70">
                 {treino.diaSemana} · {treino.hora} · {treino.tipo}
               </p>
@@ -151,15 +152,6 @@ export default function TreinosPage() {
 
       <Modal isOpen={isModalOpen} onClose={closeModal} title={editingId ? 'Editar treino' : 'Novo treino'}>
         <form className="space-y-4 text-sm text-bjj-gray-200/80" onSubmit={handleSubmit}>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Nome</span>
-            <Input
-              value={form.nome}
-              onChange={(event) => setForm((prev) => ({ ...prev, nome: event.target.value }))}
-              placeholder="Treino avançado · Noite"
-              required
-            />
-          </label>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <label className="flex flex-col gap-1">
               <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Dia da semana</span>
@@ -184,7 +176,9 @@ export default function TreinosPage() {
               <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Tipo</span>
               <Select
                 value={form.tipo}
-                onChange={(event) => setForm((prev) => ({ ...prev, tipo: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, tipo: event.target.value, nome: event.target.value }))
+                }
               >
                 {(tipos.length ? tipos : ['Gi']).map((tipo) => (
                   <option key={tipo}>{tipo}</option>
@@ -213,7 +207,7 @@ export default function TreinosPage() {
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
         title="Confirmar exclusão"
-        message={deleteTarget ? `Deseja remover o treino ${deleteTarget.nome}?` : ''}
+        message={deleteTarget ? `Deseja remover o treino ${deleteTarget.nome || deleteTarget.tipo}?` : ''}
         confirmLabel="Remover treino"
         onConfirm={confirmarExclusao}
         onCancel={() => setDeleteTarget(null)}

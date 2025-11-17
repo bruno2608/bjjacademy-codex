@@ -80,7 +80,7 @@ export const siteMap: SiteMapItem[] = [
     path: '/perfil-aluno',
     icon: UserCircle2,
     roles: ['ALUNO'],
-    showInMainNav: false
+    showInMainNav: true
   },
   {
     title: 'Agenda do Aluno',
@@ -99,21 +99,21 @@ export const siteMap: SiteMapItem[] = [
     path: '/historico-presencas',
     icon: CalendarCheck,
     roles: ['ALUNO'],
-    showInMainNav: false
+    showInMainNav: true
   },
   {
     title: 'Documentos do aluno',
     path: '/documentos',
     icon: ListChecks,
     roles: ['ALUNO'],
-    showInMainNav: false
+    showInMainNav: true
   },
   {
     title: 'Relatórios do aluno',
     path: '/relatorios-aluno',
     icon: BarChart3,
     roles: ['ALUNO'],
-    showInMainNav: false
+    showInMainNav: true
   },
   {
     title: 'Configurações da Academia',
