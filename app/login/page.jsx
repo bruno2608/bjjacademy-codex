@@ -14,16 +14,16 @@ import { ROLE_KEYS, normalizeRoles } from '../../config/roles';
 const AVAILABLE_ROLES = [
   ROLE_KEYS.ti,
   ROLE_KEYS.admin,
-  ROLE_KEYS.teacher,
-  ROLE_KEYS.instructor,
-  ROLE_KEYS.student
+  ROLE_KEYS.professor,
+  ROLE_KEYS.instrutor,
+  ROLE_KEYS.aluno
 ];
 const ROLE_LABELS = {
   [ROLE_KEYS.ti]: 'TI',
   [ROLE_KEYS.admin]: 'ADMIN',
-  [ROLE_KEYS.teacher]: 'PROFESSOR',
-  [ROLE_KEYS.instructor]: 'INSTRUTOR',
-  [ROLE_KEYS.student]: 'ALUNO'
+  [ROLE_KEYS.professor]: 'PROFESSOR',
+  [ROLE_KEYS.instrutor]: 'INSTRUTOR',
+  [ROLE_KEYS.aluno]: 'ALUNO'
 };
 
 export default function LoginPage() {
@@ -31,7 +31,7 @@ export default function LoginPage() {
   const { login, token } = useUserStore();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const [selectedRoles, setSelectedRoles] = useState([ROLE_KEYS.teacher, ROLE_KEYS.instructor]);
+  const [selectedRoles, setSelectedRoles] = useState([ROLE_KEYS.professor, ROLE_KEYS.instrutor]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -56,8 +56,7 @@ export default function LoginPage() {
     const savedToken = window.localStorage.getItem('bjj_token');
     if (savedToken && !token) {
       login({ email: 'instrutor@bjj.academy', roles: rolesParaLogin });
-      const hasStudent = rolesParaLogin.includes(ROLE_KEYS.student) && rolesParaLogin.length === 1;
-      router.replace(hasStudent ? '/dashboard-aluno' : '/dashboard-instrutor');
+      router.replace('/dashboard');
     }
   }, [login, router, selectedRoles, token]);
 
@@ -84,8 +83,7 @@ export default function LoginPage() {
     }
     setError('');
     login({ email: form.email, roles: selectedRoles });
-    const onlyStudent = selectedRoles.includes(ROLE_KEYS.student) && selectedRoles.length === 1;
-    router.push(onlyStudent ? '/dashboard-aluno' : '/dashboard-instrutor');
+    router.push('/dashboard');
   };
 
   return (
