@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
-import { getNavigationItemsForRoles } from '../../lib/navigation';
+import { getTopNavigationItemsForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import UserMenu from './UserMenu';
 
@@ -18,7 +18,7 @@ export default function TabletNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navigationItems = useMemo(
-    () => getNavigationItemsForRoles(roles),
+    () => getTopNavigationItemsForRoles(roles),
     [roles]
   );
 
@@ -30,24 +30,16 @@ export default function TabletNav() {
       <Link
         key={item.path}
         href={item.path}
-        className={`group inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm transition ${
+        className={`group inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition ${
           active
-            ? 'border-bjj-red/80 bg-bjj-red/15 text-bjj-white shadow-[0_12px_35px_rgba(225,6,0,0.18)]'
-            : 'border-bjj-gray-800/80 text-bjj-gray-200/80 hover:border-bjj-red/60 hover:bg-bjj-red/10 hover:text-bjj-white'
+            ? 'border-bjj-red/80 bg-gradient-to-r from-bjj-red/20 via-bjj-red/15 to-bjj-red/10 text-bjj-white shadow-[0_12px_35px_rgba(225,6,0,0.18)]'
+            : 'border-bjj-gray-800/70 bg-bjj-gray-900/70 text-bjj-gray-200/85 hover:border-bjj-red/60 hover:bg-bjj-red/10 hover:text-bjj-white'
         } ${condensed ? 'w-full justify-start' : ''}`}
         aria-current={active ? 'page' : undefined}
         onClick={() => setMobileOpen(false)}
       >
-        <span
-          className={`flex h-8 w-8 items-center justify-center rounded-lg border transition ${
-            active
-              ? 'border-bjj-red bg-bjj-red text-bjj-white'
-              : 'border-bjj-gray-800 bg-bjj-gray-900/60 text-bjj-gray-200/80 group-hover:border-bjj-red/70 group-hover:bg-bjj-gray-900/70'
-          }`}
-        >
-          {Icon ? <Icon size={16} /> : null}
-        </span>
-        <span className="font-semibold leading-none">{item.title}</span>
+        {Icon ? <Icon size={16} className="text-bjj-gray-200/90" /> : null}
+        <span className="leading-none">{item.title}</span>
       </Link>
     );
   };

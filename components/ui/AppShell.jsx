@@ -29,7 +29,7 @@ export default function AppShell({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-bjj-black text-bjj-white">
+    <div className="min-h-screen overflow-x-hidden bg-bjj-black text-bjj-white">
       <TabletNav />
       <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 pb-12 pt-6 md:px-6 xl:px-8">
         <SidebarNav />
