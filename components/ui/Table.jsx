@@ -10,6 +10,8 @@ import Badge from './Badge';
 
 export default function Table({ headers, data, onEdit, onDelete, isLoading = false }) {
   const tableHeaders = headers || ['Ações', 'Aluno', 'Graduação', 'Plano', 'Status', 'Contato'];
+  const actionButtonClasses =
+    'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red';
 
   return (
     <div
@@ -17,9 +19,9 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
       aria-busy={isLoading}
     >
       <div className="absolute right-[-20%] top-[-20%] h-28 w-28 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-      <div className="hidden md:grid md:grid-cols-[minmax(0,0.55fr)_minmax(0,1.6fr)_minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.85fr)_minmax(0,1.1fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
-        {tableHeaders.map((header) => (
-          <div key={header} className="px-3.5 py-3">
+      <div className="hidden md:grid md:grid-cols-[180px_minmax(0,1.6fr)_minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.85fr)_minmax(0,1.1fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
+        {tableHeaders.map((header, index) => (
+          <div key={header} className={`px-3.5 py-3 ${index === 0 ? 'text-center' : ''}`}>
             {header}
           </div>
         ))}
@@ -55,35 +57,23 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                    onClick={() => onEdit?.(row)}
-                  >
+                  <button className={actionButtonClasses} onClick={() => onEdit?.(row)}>
                     <Pencil size={15} />
                     <span className="sr-only">Editar dados do aluno</span>
                   </button>
-                  <button
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                    onClick={() => onDelete?.(row)}
-                  >
+                  <button className={actionButtonClasses} onClick={() => onDelete?.(row)}>
                     <Trash2 size={15} />
                     <span className="sr-only">Remover aluno</span>
                   </button>
                 </div>
               </div>
-              <div className="hidden md:grid md:grid-cols-[minmax(0,0.55fr)_minmax(0,1.6fr)_minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.85fr)_minmax(0,1.1fr)]">
-                <div className="flex items-center gap-2 border-b border-bjj-gray-800/60 px-3.5 py-3">
-                  <button
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                    onClick={() => onEdit?.(row)}
-                  >
+              <div className="hidden md:grid md:grid-cols-[180px_minmax(0,1.6fr)_minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.85fr)_minmax(0,1.1fr)]">
+                <div className="flex items-center justify-center gap-2 border-b border-bjj-gray-800/60 px-3.5 py-3">
+                  <button className={actionButtonClasses} onClick={() => onEdit?.(row)}>
                     <Pencil size={14} />
                     <span className="sr-only">Editar dados do aluno</span>
                   </button>
-                  <button
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                    onClick={() => onDelete?.(row)}
-                  >
+                  <button className={actionButtonClasses} onClick={() => onDelete?.(row)}>
                     <Trash2 size={14} />
                     <span className="sr-only">Remover aluno</span>
                   </button>
