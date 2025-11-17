@@ -66,8 +66,8 @@ export default function TabletNav() {
         <div className="whitespace-nowrap rounded-full bg-bjj-red/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-bjj-red">
           BJJ Academy
         </div>
-        <div className="flex flex-1 items-center gap-2 overflow-x-auto">
-          <div className="hidden sm:flex flex-1 items-center gap-2 overflow-x-auto">
+        <div className="flex flex-1 items-center gap-2">
+          <div className="hidden min-w-0 flex-1 flex-wrap items-center gap-2 sm:flex">
             {navigationItems.map((item) => renderNavLink(item))}
           </div>
           <button
