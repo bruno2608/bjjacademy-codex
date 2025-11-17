@@ -7,13 +7,17 @@ import type { AuthUser, LoginPayload } from '../types/user';
 type UserState = {
   user: AuthUser | null;
   token: string | null;
+  hydrated: boolean;
   login: (payload: LoginPayload) => void;
+  updateUser?: (payload: Partial<AuthUser>) => void;
   logout: () => void;
   hydrate: (payload: Partial<{ user: AuthUser | null; token: string | null }>) => void;
+  hydrateFromStorage: () => void;
 };
 
 const TOKEN_KEY = 'bjj_token';
 const ROLES_KEY = 'bjj_roles';
+const DEFAULT_ALUNO_ID = '1';
 
 const ROLE_ORDER: UserRole[] = ['TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR', 'ALUNO'];
 
@@ -37,9 +41,6 @@ const deriveRolesFromEmail = (email: string): UserRole[] => {
   return Array.from(baseRoles);
 };
 
-const buildAvatarUrl = (email: string): string =>
-  `https://i.pravatar.cc/150?u=${encodeURIComponent(email || 'instrutor@bjj.academy')}`;
-
 const persistRoles = (roles: UserRole[]) => {
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(ROLES_KEY, JSON.stringify(roles));
@@ -53,6 +54,7 @@ const clearPersistedRoles = () => {
   if (typeof window !== 'undefined') {
     window.localStorage.removeItem(ROLES_KEY);
     window.localStorage.removeItem(TOKEN_KEY);
+    window.localStorage.removeItem('bjj_user');
   }
   if (typeof document !== 'undefined') {
     document.cookie = `${ROLES_KEY}=; path=/; max-age=0`;
@@ -62,6 +64,7 @@ const clearPersistedRoles = () => {
 export const useUserStore = create<UserState>((set) => ({
   user: null,
   token: null,
+  hydrated: false,
   login: ({ email, roles }) => {
     if (typeof window === 'undefined') return;
     const fakeToken = `bjj-token-${Date.now()}`;
@@ -73,12 +76,22 @@ export const useUserStore = create<UserState>((set) => ({
       name: email.split('@')[0] || 'Instrutor',
       email,
       roles: finalRoles.length ? finalRoles : ALL_ROLES,
-      avatarUrl: buildAvatarUrl(email)
+      avatarUrl: null,
+      telefone: null,
+      alunoId: finalRoles.includes('ALUNO') ? DEFAULT_ALUNO_ID : null
     };
 
     persistRoles(finalUser.roles);
-    set({ user: finalUser, token: fakeToken });
+    window.localStorage.setItem(
+      'bjj_user',
+      JSON.stringify({ ...finalUser, alunoId: finalRoles.includes('ALUNO') ? DEFAULT_ALUNO_ID : null })
+    );
+    set({ user: finalUser, token: fakeToken, hydrated: true });
   },
+  updateUser: (payload) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, ...payload } : state.user
+    })),
   logout: () => {
     clearPersistedRoles();
     set({ user: null, token: null });
@@ -88,6 +101,57 @@ export const useUserStore = create<UserState>((set) => ({
       user: payload.user ?? state.user,
       token: payload.token ?? state.token
     }));
+  },
+  hydrateFromStorage: () => {
+    if (typeof window === 'undefined') return;
+    const hasToken = window.localStorage.getItem(TOKEN_KEY);
+    const rawUser = window.localStorage.getItem('bjj_user');
+    const rawRoles = window.localStorage.getItem(ROLES_KEY);
+
+    const cookieRoles = typeof document !== 'undefined'
+      ? document.cookie
+          .split(';')
+          .map((entry) => entry.trim())
+          .find((entry) => entry.startsWith(`${ROLES_KEY}=`))
+          ?.replace(`${ROLES_KEY}=`, '')
+      : undefined;
+
+    const parsedRoles = sanitizeRoles(
+      rawRoles
+        ? JSON.parse(rawRoles)
+        : cookieRoles
+        ? cookieRoles.split(',')
+        : []
+    );
+
+    if (!hasToken && !parsedRoles.length) {
+      set({ hydrated: true });
+      return;
+    }
+
+    let parsedUser: AuthUser | null = null;
+    if (rawUser) {
+      try {
+        parsedUser = JSON.parse(rawUser);
+      } catch (error) {
+        parsedUser = null;
+      }
+    }
+
+    const fallbackUser: AuthUser = {
+      name: parsedRoles.includes('ALUNO') ? 'Aluno' : 'Instrutor',
+      email: parsedRoles.includes('ALUNO') ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
+      avatarUrl: null,
+      telefone: null,
+      roles: parsedRoles,
+      alunoId: parsedRoles.includes('ALUNO') ? DEFAULT_ALUNO_ID : null
+    };
+
+    set({
+      user: parsedUser ? { ...fallbackUser, ...parsedUser, roles: parsedRoles } : fallbackUser,
+      token: hasToken ?? null,
+      hydrated: true
+    });
   }
 }));
 
