@@ -9,8 +9,8 @@ export function useRole() {
 
   const roles = useMemo<UserRole[]>(() => normalizeRoles(user?.roles ?? []), [user?.roles]);
 
-  const isStudent = roles.includes(ROLE_KEYS.student);
-  const isInstructor = hasAnyRole(roles, [ROLE_KEYS.instructor, ROLE_KEYS.teacher]);
+  const isStudent = roles.includes(ROLE_KEYS.aluno);
+  const isInstructor = hasAnyRole(roles, [ROLE_KEYS.instrutor, ROLE_KEYS.professor]);
   const isAdmin = hasAnyRole(roles, [ROLE_KEYS.admin, ROLE_KEYS.ti]);
   const isStaff = isInstructor || isAdmin;
 
