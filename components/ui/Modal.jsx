@@ -5,10 +5,14 @@
  * Em telas menores ele assume o formato de bottom sheet para facilitar
  * o uso no mobile e manter a coerência com o app nativo.
  */
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export default function Modal({ isOpen, title, onClose, children }) {
+  const [mounted, setMounted] = useState(false);
+  const portalRef = useRef(null);
+
   useEffect(() => {
     if (!isOpen || typeof document === 'undefined') {
       return undefined;
@@ -30,7 +34,7 @@ export default function Modal({ isOpen, title, onClose, children }) {
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) {
+  if (!isOpen || !mounted || !portalRef.current) {
     return null;
   }
 
