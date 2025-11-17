@@ -5,6 +5,8 @@ import Modal from '../../../../components/ui/Modal';
 import Input from '../../../../components/ui/Input';
 import Select from '../../../../components/ui/Select';
 import Button from '../../../../components/ui/Button';
+import ConfirmDialog from '../../../../components/ui/ConfirmDialog';
+import Badge from '../../../../components/ui/Badge';
 import { useTreinosStore } from '../../../../store/treinosStore';
 import { useTiposTreinoStore } from '../../../../store/tiposTreinoStore';
 
@@ -28,6 +30,7 @@ export default function TreinosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyTreino);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const sortedTreinos = useMemo(
     () =>
@@ -39,12 +42,13 @@ export default function TreinosPage() {
   );
 
   const openModal = (treino) => {
+    const tipoDefault = tipos[0] || 'Gi';
     if (treino) {
       setEditingId(treino.id);
-      setForm({ nome: treino.nome, diaSemana: treino.diaSemana, hora: treino.hora, tipo: treino.tipo, ativo: treino.ativo });
+      setForm({ nome: treino.nome || treino.tipo, diaSemana: treino.diaSemana, hora: treino.hora, tipo: treino.tipo, ativo: treino.ativo });
     } else {
       setEditingId(null);
-      setForm({ ...emptyTreino, tipo: tipos[0] || 'Gi' });
+      setForm({ ...emptyTreino, tipo: tipoDefault, nome: tipoDefault });
     }
     setIsModalOpen(true);
   };
@@ -55,12 +59,23 @@ export default function TreinosPage() {
     setForm(emptyTreino);
   };
 
+  const pedirConfirmacaoExclusao = (treino) => {
+    setDeleteTarget(treino);
+  };
+
+  const confirmarExclusao = () => {
+    if (deleteTarget) {
+      removeTreino(deleteTarget.id);
+      setDeleteTarget(null);
+    }
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (editingId) {
-      updateTreino(editingId, form);
+      updateTreino(editingId, { ...form, nome: form.nome || form.tipo });
     } else {
-      addTreino(form);
+      addTreino({ ...form, nome: form.nome || form.tipo });
     }
     closeModal();
   };
@@ -89,15 +104,18 @@ export default function TreinosPage() {
             className="card flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
           >
             <div>
-              <h2 className="text-base font-semibold text-bjj-white">{treino.nome}</h2>
+              <h2 className="text-base font-semibold text-bjj-white">{treino.nome || treino.tipo}</h2>
               <p className="text-xs text-bjj-gray-200/70">
                 {treino.diaSemana} · {treino.hora} · {treino.tipo}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-bjj-gray-200/70">
-              <span className={`badge badge-sm ${treino.ativo ? 'badge-success text-bjj-white' : 'badge-outline border-bjj-gray-700 text-bjj-gray-200'}`}>
+              <Badge
+                variant={treino.ativo ? 'success' : 'neutral'}
+                className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase"
+              >
                 {treino.ativo ? 'Ativo' : 'Inativo'}
-              </span>
+              </Badge>
               <Button
                 type="button"
                 variant="secondary"
@@ -118,7 +136,7 @@ export default function TreinosPage() {
                 type="button"
                 variant="secondary"
                 className="btn-sm border-bjj-red/70 text-bjj-red hover:border-bjj-red hover:text-bjj-red hover:bg-bjj-red/10"
-                onClick={() => removeTreino(treino.id)}
+                onClick={() => pedirConfirmacaoExclusao(treino)}
               >
                 Remover
               </Button>
@@ -134,15 +152,6 @@ export default function TreinosPage() {
 
       <Modal isOpen={isModalOpen} onClose={closeModal} title={editingId ? 'Editar treino' : 'Novo treino'}>
         <form className="space-y-4 text-sm text-bjj-gray-200/80" onSubmit={handleSubmit}>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Nome</span>
-            <Input
-              value={form.nome}
-              onChange={(event) => setForm((prev) => ({ ...prev, nome: event.target.value }))}
-              placeholder="Treino avançado · Noite"
-              required
-            />
-          </label>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <label className="flex flex-col gap-1">
               <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Dia da semana</span>
@@ -167,7 +176,9 @@ export default function TreinosPage() {
               <span className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/60">Tipo</span>
               <Select
                 value={form.tipo}
-                onChange={(event) => setForm((prev) => ({ ...prev, tipo: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, tipo: event.target.value, nome: event.target.value }))
+                }
               >
                 {(tipos.length ? tipos : ['Gi']).map((tipo) => (
                   <option key={tipo}>{tipo}</option>
@@ -192,6 +203,15 @@ export default function TreinosPage() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Confirmar exclusão"
+        message={deleteTarget ? `Deseja remover o treino ${deleteTarget.nome || deleteTarget.tipo}?` : ''}
+        confirmLabel="Remover treino"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

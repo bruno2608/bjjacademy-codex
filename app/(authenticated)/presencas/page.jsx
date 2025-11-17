@@ -10,6 +10,7 @@ import AttendanceTable from '../../../components/presencas/AttendanceTable';
 import PresenceForm from '../../../components/presencas/PresenceForm';
 import LoadingState from '../../../components/ui/LoadingState';
 import Modal from '../../../components/ui/Modal';
+import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import MultiSelectDropdown from '../../../components/ui/MultiSelectDropdown';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
@@ -46,6 +47,7 @@ export default function PresencasPage() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isSessionOpen, setIsSessionOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [sessionRecord, setSessionRecord] = useState(null);
   const [sessionTreinoId, setSessionTreinoId] = useState('');
   const [sessionTakenTreinos, setSessionTakenTreinos] = useState([]);
@@ -271,10 +273,16 @@ export default function PresencasPage() {
     setPresencas((prev) => prev.map((item) => (item.id === atualizado.id ? atualizado : item)));
   };
 
-  const handleDelete = async (registro) => {
+  const handleDelete = (registro) => {
     if (!registro?.id) return;
-    await deletePresenca(registro.id);
+    setDeleteTarget(registro);
+  };
+
+  const confirmarExclusao = async () => {
+    if (!deleteTarget) return;
+    await deletePresenca(deleteTarget.id);
     await atualizarLista();
+    setDeleteTarget(null);
   };
 
   const abrirResumo = () => setIsSummaryOpen(true);
@@ -666,6 +674,21 @@ export default function PresencasPage() {
           </div>
         </div>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Confirmar exclusão"
+        message={
+          deleteTarget
+            ? `Deseja remover o registro de ${deleteTarget.alunoNome} em ${new Date(deleteTarget.data).toLocaleDateString(
+                'pt-BR'
+              )}?`
+            : ''
+        }
+        confirmLabel="Remover registro"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
