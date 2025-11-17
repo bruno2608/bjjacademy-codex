@@ -8,6 +8,7 @@ type UserState = {
   user: AuthUser | null;
   token: string | null;
   login: (payload: LoginPayload) => void;
+  updateUser?: (payload: Partial<AuthUser>) => void;
   logout: () => void;
   hydrate: (payload: Partial<{ user: AuthUser | null; token: string | null }>) => void;
 };
@@ -36,9 +37,6 @@ const deriveRolesFromEmail = (email: string): UserRole[] => {
   if (normalized.includes('aluno')) baseRoles.add('ALUNO');
   return Array.from(baseRoles);
 };
-
-const buildAvatarUrl = (email: string): string =>
-  `https://i.pravatar.cc/150?u=${encodeURIComponent(email || 'instrutor@bjj.academy')}`;
 
 const persistRoles = (roles: UserRole[]) => {
   if (typeof window !== 'undefined') {
@@ -73,12 +71,17 @@ export const useUserStore = create<UserState>((set) => ({
       name: email.split('@')[0] || 'Instrutor',
       email,
       roles: finalRoles.length ? finalRoles : ALL_ROLES,
-      avatarUrl: buildAvatarUrl(email)
+      avatarUrl: null,
+      telefone: null
     };
 
     persistRoles(finalUser.roles);
     set({ user: finalUser, token: fakeToken });
   },
+  updateUser: (payload) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, ...payload } : state.user
+    })),
   logout: () => {
     clearPersistedRoles();
     set({ user: null, token: null });
