@@ -5,6 +5,7 @@ import {
   CalendarCheck,
   Medal,
   BarChart3,
+  FileText,
   Settings2,
   Clock3,
   ListChecks,
@@ -84,50 +85,28 @@ export const siteMap: SiteMapItem[] = [
     title: 'Meu Perfil',
     path: '/perfil',
     icon: UserCircle2,
-    roles: STAFF_ROLES,
+    roles: [...STAFF_ROLES, 'ALUNO'],
     showInMainNav: false
   },
   {
-    title: 'Meu Perfil',
-    path: '/perfil-aluno',
-    icon: UserCircle2,
-    roles: ['ALUNO'],
-    showInMainNav: false
+    title: 'Histórico de presenças',
+    path: '/historico-presencas',
+    icon: CalendarCheck,
+    roles: STAFF_ROLES,
+    showInMainNav: true
+  },
+  {
+    title: 'Documentos do aluno',
+    path: '/documentos',
+    icon: FileText,
+    roles: STAFF_ROLES,
+    showInMainNav: true
   },
   {
     title: 'Evolução',
     path: '/evolucao',
     icon: Medal,
     roles: ['ALUNO'],
-    showInMainNav: true
-  },
-  {
-    title: 'Histórico de presenças',
-    path: '/historico-presencas',
-    icon: CalendarCheck,
-    roles: ['ALUNO'],
-    showInMainNav: true
-  },
-  {
-    title: 'Documentos do aluno',
-    path: '/documentos',
-    icon: ListChecks,
-    roles: ['ALUNO'],
-    showInMainNav: true
-  },
-  {
-    title: 'Relatórios',
-    path: '/relatorios-aluno',
-    icon: BarChart3,
-    roles: ['ALUNO'],
-    children: [
-      {
-        title: 'Relatórios do aluno',
-        path: '/relatorios-aluno',
-        icon: BarChart3,
-        roles: ['ALUNO']
-      }
-    ],
     showInMainNav: true
   },
   {
