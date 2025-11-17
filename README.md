@@ -75,7 +75,7 @@ styles/
 
 ### Perfis e permissões
 
-- **Aluno:** acessa o layout `(student)` com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`. Tentativas de visitar rotas administrativas redirecionam para `/dashboard-aluno`; histórico de presenças e relatórios pessoais ficam no menu do usuário.
+- **Aluno:** acessa o layout `(student)` com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`. Tentativas de visitar rotas administrativas redirecionam para `/dashboard-aluno`; o histórico de presenças é servido por uma única rota compartilhada `/historico-presencas` (layout autenticado), e relatórios pessoais ficam no menu do usuário.
 - **Professor/Admin/TI:** usam o layout `(authenticated)` com dashboards, cadastros, presenças, graduações e configurações. As ações de aprovar/recusar check-ins pendentes e cancelar treino ficam restritas aqui.
 - **Site map + middleware:** `config/siteMap.ts` e `middleware.ts` filtram links e protegem as rotas com RBAC centralizado baseado no papel salvo via Zustand.
 
