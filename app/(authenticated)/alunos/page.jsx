@@ -18,6 +18,8 @@ import Button from '../../../components/ui/Button';
 import { getAlunos, deleteAluno, createAluno } from '../../../services/alunosService';
 import { usePresencasStore } from '../../../store/presencasStore';
 import { useTreinosStore } from '../../../store/treinosStore';
+import { useGraduationRulesStore } from '../../../store/graduationRulesStore';
+import { orderBelts } from '../../../lib/graduationRules';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
@@ -40,6 +42,7 @@ export default function AlunosPage() {
   const [filterTreinos, setFilterTreinos] = useState([]);
   const presencas = usePresencasStore((state) => state.presencas);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
+  const rules = useGraduationRulesStore((state) => state.rules);
 
   useEffect(() => {
     let active = true;
@@ -68,13 +71,9 @@ export default function AlunosPage() {
   }, []);
 
   const faixasDisponiveis = useMemo(() => {
-    const conjunto = new Set(
-      alunos
-        .map((aluno) => aluno.faixa)
-        .filter((faixa) => typeof faixa === 'string' && faixa.trim().length > 0)
-    );
-    return Array.from(conjunto).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  }, [alunos]);
+    const beltNames = orderBelts(Object.keys(rules || {}));
+    return beltNames;
+  }, [rules]);
 
   const opcoesFaixa = useMemo(
     () => faixasDisponiveis.map((faixa) => ({ value: faixa, label: faixa })),
@@ -215,15 +214,23 @@ export default function AlunosPage() {
                 <span className="text-[10px] text-bjj-gray-200/60">Digite pelo menos 3 letras para aplicar a busca.</span>
               )}
             </div>
-            <MultiSelectDropdown
-              label="Faixa"
-              options={opcoesFaixa}
-              value={filterFaixas}
-              onChange={(lista) => setFilterFaixas(normalizarSelecao(lista, faixasDisponiveis.length))}
-              allLabel="Todas as faixas"
-              placeholder="Selecionar faixas"
-              className="h-full"
-            />
+            <div className="flex flex-col gap-1">
+              <MultiSelectDropdown
+                label="Faixa"
+                options={opcoesFaixa}
+                value={filterFaixas}
+                onChange={(lista) => setFilterFaixas(normalizarSelecao(lista, faixasDisponiveis.length))}
+                allLabel="Todas as faixas"
+                placeholder={opcoesFaixa.length ? 'Selecionar faixas' : 'Cadastre faixas nas Regras'}
+                disabled={!opcoesFaixa.length}
+                className="h-full"
+              />
+              {!opcoesFaixa.length && (
+                <p className="text-[11px] text-bjj-gray-200/60">
+                  Cadastre faixas na aba Configurações → Regras para habilitar este filtro.
+                </p>
+              )}
+            </div>
             <MultiSelectDropdown
               label="Status"
               options={opcoesStatus}

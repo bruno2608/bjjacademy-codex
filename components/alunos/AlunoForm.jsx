@@ -6,17 +6,27 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { BELT_ORDER, getMaxStripes } from '../../lib/graduationRules';
+import { BELT_ORDER, getMaxStripes, orderBelts } from '../../lib/graduationRules';
+import { PLANOS_MOCK, STATUS_ALUNO } from '../../data/catalogs';
+import { useGraduationRulesStore } from '../../store/graduationRulesStore';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 import FormSection from '../ui/FormSection';
 
-const planos = ['Mensal', 'Trimestral', 'Anual'];
-const statusOptions = ['Ativo', 'Inativo'];
-const beltOptions = BELT_ORDER.filter((faixa) => faixa !== 'Vermelha');
+const beltFallback = BELT_ORDER.filter((faixa) => faixa !== 'Vermelha');
 
 export default function AlunoForm({ initialData, onSubmit, isSubmitting = false, submitLabel = 'Salvar' }) {
+  const rules = useGraduationRulesStore((state) => state.rules);
+
+  const beltOptions = useMemo(() => {
+    const beltnames = orderBelts(Object.keys(rules || {})).filter((faixa) => faixa !== 'Vermelha');
+    return beltnames.length ? beltnames : beltFallback;
+  }, [rules]);
+
+  const planos = useMemo(() => PLANOS_MOCK, []);
+  const statusOptions = useMemo(() => STATUS_ALUNO, []);
+
   const [formData, setFormData] = useState({
     nome: '',
     telefone: '',
@@ -42,7 +52,15 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
         dataUltimaGraduacao: initialData.dataUltimaGraduacao || ''
       });
     }
-  }, [initialData]);
+  }, [initialData, planos, statusOptions]);
+
+  useEffect(() => {
+    if (!beltOptions.length) return;
+    setFormData((prev) => ({
+      ...prev,
+      faixa: beltOptions.includes(prev.faixa) ? prev.faixa : beltOptions[0]
+    }));
+  }, [beltOptions]);
 
   useEffect(() => {
     setFormData((prev) => {
