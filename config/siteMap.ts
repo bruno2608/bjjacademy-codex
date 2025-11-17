@@ -95,6 +95,13 @@ export const siteMap: SiteMapItem[] = [
     roles: ['ALUNO']
   },
   {
+    title: 'Evolução',
+    path: '/evolucao',
+    icon: Medal,
+    roles: ['ALUNO'],
+    showInMainNav: true
+  },
+  {
     title: 'Histórico de presenças',
     path: '/historico-presencas',
     icon: CalendarCheck,
