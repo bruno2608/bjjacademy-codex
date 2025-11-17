@@ -47,6 +47,10 @@ export function middleware(request: NextRequest) {
 
   const hasPermission = matchedRoute.roles.some((role) => roles.includes(role));
   if (!hasPermission) {
+    if (roles.length === 1 && roles.includes('ALUNO')) {
+      const studentUrl = new URL('/dashboard-aluno', request.url);
+      return NextResponse.redirect(studentUrl);
+    }
     const unauthorizedUrl = new URL('/unauthorized', request.url);
     return NextResponse.redirect(unauthorizedUrl);
   }
