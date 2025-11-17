@@ -22,6 +22,11 @@ export const siteMap = {
   ],
   professor: [
     '/dashboard',
+    '/checkin',
+    '/treinos',
+    '/evolucao',
+    '/historico-presencas',
+    '/perfil',
     '/presencas',
     '/alunos',
     '/relatorios',
