@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import siteMap from '../../../config/siteMap';
+import { navigationItems } from '../../lib/navigation';
 
 /**
  * Página hub das configurações administrativas com links para as subseções.
  */
 
-const configNode = siteMap.find((item) => item.path === '/configuracoes');
+const configNode = navigationItems.find((item) => item.path === '/configuracoes');
 const sections = configNode?.children ?? [];
 
 export const metadata = {

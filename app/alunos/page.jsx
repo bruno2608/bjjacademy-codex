@@ -20,7 +20,7 @@ import { getAlunos, deleteAluno, createAluno } from '../../services/alunosServic
 import { usePresencasStore } from '../../store/presencasStore';
 import { useTreinosStore } from '../../store/treinosStore';
 import { useGraduationRulesStore } from '../../store/graduationRulesStore';
-import { orderBelts } from '../../../lib/graduationRules';
+import { orderBelts } from '../../lib/graduationRules';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [

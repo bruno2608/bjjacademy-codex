@@ -9,7 +9,7 @@ import Button from '../../../components/ui/Button';
 import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import FaixaVisual from '../../../components/graduacoes/FaixaVisual';
 import { useGraduationRulesStore } from '../../../store/graduationRulesStore';
-import { BELT_ORDER } from '../../../../config/graduationRules';
+import { BELT_ORDER } from '../../../config/graduationRules';
 
 /**
  * Permite editar os requisitos mockados de cada faixa sem impactar o módulo principal.

@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { Medal, TrendingUp, Clock3 } from 'lucide-react';
 import FaixaVisual from '../../components/graduacoes/FaixaVisual';
-import { calculateNextStep, estimateGraduationDate } from '../../../lib/graduationRules';
+import { calculateNextStep, estimateGraduationDate } from '../../lib/graduationRules';
 import { useAlunosStore } from '../../store/alunosStore';
 import { usePresencasStore } from '../../store/presencasStore';
 import useUserStore from '../../store/userStore';

@@ -5,8 +5,8 @@
  */
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AlunoForm from '../../components/alunos/AlunoForm';
-import { createAluno } from '../../services/alunosService';
+import AlunoForm from '../../../components/alunos/AlunoForm';
+import { createAluno } from '../../../services/alunosService';
 
 export default function NovoAlunoPage() {
   const router = useRouter();
