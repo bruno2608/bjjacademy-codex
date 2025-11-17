@@ -21,10 +21,10 @@ const DEFAULT_ALUNO_ID = '1';
 
 const deriveRolesFromEmail = (email: string): UserRole[] => {
   const normalized = email.toLowerCase();
-  const baseRoles = new Set<UserRole>([ROLE_KEYS.instructor, ROLE_KEYS.teacher]);
+  const baseRoles = new Set<UserRole>([ROLE_KEYS.instrutor, ROLE_KEYS.professor]);
   if (normalized.includes('admin')) baseRoles.add(ROLE_KEYS.admin);
   if (normalized.includes('ti')) baseRoles.add(ROLE_KEYS.ti);
-  if (normalized.includes('aluno') || normalized.includes('student')) baseRoles.add(ROLE_KEYS.student);
+  if (normalized.includes('aluno') || normalized.includes('student')) baseRoles.add(ROLE_KEYS.aluno);
   return Array.from(baseRoles);
 };
 
@@ -65,13 +65,13 @@ export const useUserStore = create<UserState>((set) => ({
       roles: finalRoles.length ? finalRoles : ALL_ROLES,
       avatarUrl: null,
       telefone: null,
-      alunoId: finalRoles.includes(ROLE_KEYS.student) ? DEFAULT_ALUNO_ID : null
+      alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null
     };
 
     persistRoles(finalUser.roles);
     window.localStorage.setItem(
       'bjj_user',
-      JSON.stringify({ ...finalUser, alunoId: finalRoles.includes(ROLE_KEYS.student) ? DEFAULT_ALUNO_ID : null })
+      JSON.stringify({ ...finalUser, alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null })
     );
     set({ user: finalUser, token: fakeToken, hydrated: true });
   },
@@ -126,12 +126,12 @@ export const useUserStore = create<UserState>((set) => ({
     }
 
     const fallbackUser: AuthUser = {
-      name: parsedRoles.includes(ROLE_KEYS.student) ? 'Aluno' : 'Instrutor',
-      email: parsedRoles.includes(ROLE_KEYS.student) ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
+      name: parsedRoles.includes(ROLE_KEYS.aluno) ? 'Aluno' : 'Instrutor',
+      email: parsedRoles.includes(ROLE_KEYS.aluno) ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
       avatarUrl: null,
       telefone: null,
       roles: parsedRoles,
-      alunoId: parsedRoles.includes(ROLE_KEYS.student) ? DEFAULT_ALUNO_ID : null
+      alunoId: parsedRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null
     };
 
     set({

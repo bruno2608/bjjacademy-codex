@@ -1,21 +1,11 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import type { UserRole } from './config/roles';
-import { hasAnyRole, normalizeRoles, ROLE_KEYS, STAFF_ROLES } from './config/roles';
-import { flattenSiteMap, siteMap } from './config/siteMap';
 
-/**
- * Middleware responsável por validar permissões de acesso em tempo real.
- * Baseia-se no site map central e nos papéis salvos em cookie/localStorage.
- */
+import { ROLE_KEYS, normalizeRoles, type UserRole } from './config/roles';
+import { allowedRoutesForRoles, canAccessPath } from './config/siteMap';
 
 const PUBLIC_ROUTES = ['/login', '/unauthorized', '/manifest.json'];
 const STATIC_PREFIXES = ['/_next', '/icons', '/service-worker.js', '/sw.js'];
-
-const siteMapFlat = flattenSiteMap(siteMap);
-
-const matchSiteMap = (pathname: string) =>
-  siteMapFlat.find((item) => pathname === item.path || pathname.startsWith(`${item.path}/`));
 
 const parseRoles = (raw: string | undefined): UserRole[] => {
   if (!raw) return [] as UserRole[];
@@ -30,11 +20,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const matchedRoute = matchSiteMap(pathname);
-  if (!matchedRoute) {
-    return NextResponse.next();
-  }
-
   const cookieRoles = request.cookies.get('bjj_roles')?.value;
   const roles = parseRoles(cookieRoles);
 
@@ -44,20 +29,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const hasPermission = hasAnyRole(roles, matchedRoute.roles);
-  if (!hasPermission) {
-    if (roles.length === 1 && roles.includes(ROLE_KEYS.student)) {
-      const studentUrl = new URL('/dashboard-aluno', request.url);
-      return NextResponse.redirect(studentUrl);
-    }
+  const normalizedPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+  const hasAccess = roles.some((role) => [ROLE_KEYS.admin, ROLE_KEYS.ti].includes(role))
+    ? true
+    : canAccessPath(roles, normalizedPath);
 
-    if (hasAnyRole(roles, STAFF_ROLES)) {
-      const staffUrl = new URL('/dashboard-instrutor', request.url);
-      return NextResponse.redirect(staffUrl);
-    }
-
-    const unauthorizedUrl = new URL('/unauthorized', request.url);
-    return NextResponse.redirect(unauthorizedUrl);
+  if (!hasAccess) {
+    const allowedRoutes = allowedRoutesForRoles(roles);
+    const fallback = allowedRoutes.includes('/dashboard') ? '/dashboard' : allowedRoutes[0] || '/unauthorized';
+    const redirectUrl = new URL(fallback, request.url);
+    return NextResponse.redirect(redirectUrl);
   }
 
   return NextResponse.next();
