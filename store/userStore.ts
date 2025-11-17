@@ -37,9 +37,6 @@ const deriveRolesFromEmail = (email: string): UserRole[] => {
   return Array.from(baseRoles);
 };
 
-const buildAvatarUrl = (email: string): string =>
-  `https://i.pravatar.cc/150?u=${encodeURIComponent(email || 'instrutor@bjj.academy')}`;
-
 const persistRoles = (roles: UserRole[]) => {
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(ROLES_KEY, JSON.stringify(roles));
@@ -73,7 +70,7 @@ export const useUserStore = create<UserState>((set) => ({
       name: email.split('@')[0] || 'Instrutor',
       email,
       roles: finalRoles.length ? finalRoles : ALL_ROLES,
-      avatarUrl: buildAvatarUrl(email)
+      avatarUrl: null
     };
 
     persistRoles(finalUser.roles);
