@@ -35,7 +35,7 @@ export default function UserMenu() {
     () => getNavigationItemsForRoles(roles, { includeHidden: true }),
     [roles]
   );
-  const flattenedPaths = useMemo(() => new Set(flattenNavigation(navigationItems).map((item) => item.path)), [navigationItems]);
+  const flattenedItems = useMemo(() => flattenNavigation(navigationItems), [navigationItems]);
 
   const configItem = useMemo(
     () => navigationItems.find((item) => item.path === '/configuracoes'),
@@ -45,6 +45,21 @@ export default function UserMenu() {
   const isConfigPath = useMemo(
     () => Boolean(pathname && pathname.startsWith('/configuracoes')),
     [pathname]
+  );
+
+  const profilePath = useMemo(
+    () => flattenedItems.find((item) => item.path === '/perfil')?.path,
+    [flattenedItems]
+  );
+
+  const historyPath = useMemo(
+    () => flattenedItems.find((item) => item.path === '/historico-presencas')?.path,
+    [flattenedItems]
+  );
+
+  const reportsPath = useMemo(
+    () => flattenedItems.find((item) => item.path === '/relatorios')?.path,
+    [flattenedItems]
   );
 
   useEffect(() => {
@@ -76,8 +91,6 @@ export default function UserMenu() {
     logout();
     router.push('/login');
   };
-
-  const canAccess = (path) => flattenedPaths.has(path);
 
   const initials = buildInitials(user?.name, user?.email);
   const avatarUrl = user?.avatarUrl;
@@ -128,9 +141,9 @@ export default function UserMenu() {
           </header>
 
           <nav className="mt-4 space-y-1 text-sm text-bjj-gray-200/80">
-            {canAccess('/perfil') && (
+            {profilePath && (
               <Link
-                href="/perfil"
+                href={profilePath}
                 className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
                 onClick={() => setOpen(false)}
               >
@@ -138,9 +151,19 @@ export default function UserMenu() {
               </Link>
             )}
 
-            {canAccess('/relatorios') && (
+            {historyPath && (
               <Link
-                href="/relatorios"
+                href={historyPath}
+                className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
+                onClick={() => setOpen(false)}
+              >
+                <ChevronRight size={14} className="text-bjj-gray-500" /> Histórico de presenças
+              </Link>
+            )}
+
+            {reportsPath && (
+              <Link
+                href={reportsPath}
                 className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
                 onClick={() => setOpen(false)}
               >
