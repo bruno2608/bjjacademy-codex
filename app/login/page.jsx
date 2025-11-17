@@ -42,7 +42,8 @@ export default function LoginPage() {
     const savedToken = window.localStorage.getItem('bjj_token');
     if (savedToken && !token) {
       login({ email: 'instrutor@bjj.academy', roles: rolesParaLogin });
-      router.replace('/dashboard');
+      const hasStudent = rolesParaLogin.includes('ALUNO') && rolesParaLogin.length === 1;
+      router.replace(hasStudent ? '/dashboard-aluno' : '/dashboard');
     }
   }, [login, router, selectedRoles, token]);
 
@@ -69,7 +70,8 @@ export default function LoginPage() {
     }
     setError('');
     login({ email: form.email, roles: selectedRoles });
-    router.push('/dashboard');
+    const onlyStudent = selectedRoles.includes('ALUNO') && selectedRoles.length === 1;
+    router.push(onlyStudent ? '/dashboard-aluno' : '/dashboard');
   };
 
   return (
