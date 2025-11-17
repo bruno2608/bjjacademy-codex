@@ -4,7 +4,7 @@ export type AuthUser = {
   name: string;
   email: string;
   roles: UserRole[];
-  avatarUrl: string;
+  avatarUrl?: string | null;
 };
 
 export type LoginPayload = {
