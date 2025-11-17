@@ -14,13 +14,6 @@ export default function Modal({ isOpen, title, onClose, children }) {
   const portalRef = useRef(null);
 
   useEffect(() => {
-    setMounted(true);
-    if (!portalRef.current && typeof document !== 'undefined') {
-      portalRef.current = document.body;
-    }
-  }, []);
-
-  useEffect(() => {
     if (!isOpen || typeof document === 'undefined') {
       return undefined;
     }
@@ -33,11 +26,11 @@ export default function Modal({ isOpen, title, onClose, children }) {
 
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.body.style.overflow = originalOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
 
@@ -78,5 +71,5 @@ export default function Modal({ isOpen, title, onClose, children }) {
     </div>
   );
 
-  return createPortal(content, portalRef.current);
+  return content;
 }
