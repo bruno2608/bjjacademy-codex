@@ -5,6 +5,7 @@ export type AuthUser = {
   email: string;
   roles: UserRole[];
   avatarUrl?: string | null;
+  alunoId?: string | null;
 };
 
 export type LoginPayload = {

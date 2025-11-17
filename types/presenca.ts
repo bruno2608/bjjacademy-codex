@@ -1,4 +1,4 @@
-export type PresencaStatus = 'Presente' | 'Ausente';
+export type PresencaStatus = 'Presente' | 'Ausente' | 'Pendente' | 'Cancelado';
 
 export type Presenca = {
   id: string;
