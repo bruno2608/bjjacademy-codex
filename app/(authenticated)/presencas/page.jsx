@@ -273,6 +273,11 @@ export default function PresencasPage() {
 
   const handleDelete = async (registro) => {
     if (!registro?.id) return;
+    const formattedDate = new Date(registro.data).toLocaleDateString('pt-BR');
+    const confirmed = window.confirm(
+      `Deseja remover o registro de ${registro.alunoNome} em ${formattedDate}?`
+    );
+    if (!confirmed) return;
     await deletePresenca(registro.id);
     await atualizarLista();
   };

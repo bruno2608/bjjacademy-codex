@@ -163,6 +163,8 @@ export default function AlunosPage() {
   }, []);
 
   const handleDelete = async (aluno) => {
+    const confirmed = window.confirm(`Deseja remover o aluno ${aluno.nome}?`);
+    if (!confirmed) return;
     await deleteAluno(aluno.id);
     await refreshList();
   };
