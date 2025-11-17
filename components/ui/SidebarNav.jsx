@@ -13,10 +13,7 @@ export default function SidebarNav() {
   if (!items.length) return null;
 
   return (
-    <aside className="sticky top-[90px] hidden h-[calc(100vh-130px)] w-64 shrink-0 flex-col gap-4 overflow-hidden rounded-3xl bg-gradient-to-b from-bjj-gray-900 via-bjj-gray-900/85 to-bjj-black/70 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.35)] lg:flex">
-      <div className="rounded-2xl border border-bjj-red/30 bg-bjj-red/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-bjj-red">
-        Painel BJJ Academy
-      </div>
+    <aside className="sticky top-[90px] hidden h-[calc(100vh-130px)] w-64 shrink-0 flex-col gap-3 overflow-hidden rounded-3xl bg-gradient-to-b from-bjj-gray-900 via-bjj-gray-900/85 to-bjj-black/70 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.35)] lg:flex">
       <div className="flex-1 space-y-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-bjj-gray-800/80">
         {items.map((item) => {
           const active = pathname === item.path || pathname.startsWith(`${item.path}/`);
