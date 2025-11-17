@@ -3,9 +3,6 @@
 import { useEffect, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 
-import Header from './Header';
-import MobileNav from './MobileNav';
-import Sidebar from './Sidebar';
 import TabletNav from './TabletNav';
 import useUserStore from '../../store/userStore';
 
@@ -33,14 +30,7 @@ export default function AppShell({ children }) {
   return (
     <div className="min-h-screen bg-bjj-black text-bjj-white">
       <TabletNav />
-      <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 pb-24 pt-6 md:px-6 xl:px-8">
-        <Sidebar />
-        <div className="flex min-h-[calc(100vh-4rem)] flex-1 flex-col gap-6">
-          <Header />
-          <main className="flex-1 pb-10">{children}</main>
-        </div>
-      </div>
-      <MobileNav />
+      <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 md:px-6 xl:px-8">{children}</main>
     </div>
   );
 }
