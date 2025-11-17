@@ -5,6 +5,7 @@ import {
   CalendarCheck,
   Medal,
   BarChart3,
+  FileText,
   Settings2,
   Clock3,
   ListChecks,
