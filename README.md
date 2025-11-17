@@ -34,11 +34,16 @@ e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
 ```
 app/
   (authenticated)/
+    dashboard-instrutor/
     dashboard/
     alunos/
       [id]/
     presencas/
+      historico/
     graduacoes/
+    regras-graduacao/
+    horarios/
+    tipos-treino/
     configuracoes/
       graduacao/
       treinos/
@@ -48,7 +53,7 @@ app/
     perfil/
   (student)/
     dashboard-aluno/
-    agenda/
+    treinos/
     checkin/
     evolucao/
   login/
@@ -75,9 +80,10 @@ styles/
 
 ### Perfis e permissões
 
-- **Aluno:** acessa o layout `(student)` com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`. Tentativas de visitar rotas administrativas redirecionam para `/dashboard-aluno`; o histórico de presenças é servido por uma única rota compartilhada `/historico-presencas` (layout autenticado), e relatórios pessoais ficam no menu do usuário.
-- **Professor/Admin/TI:** usam o layout `(authenticated)` com dashboards, cadastros, presenças, graduações e configurações. As ações de aprovar/recusar check-ins pendentes e cancelar treino ficam restritas aqui.
-- **Site map + middleware:** `config/siteMap.ts` e `middleware.ts` filtram links e protegem as rotas com RBAC centralizado baseado no papel salvo via Zustand.
+- **Aluno (`student`):** acessa `(student)` com `/dashboard-aluno`, `/checkin`, `/treinos`, `/evolucao`, histórico em `/presencas/historico`, `/perfil` (apenas nome/telefone/foto) e relatórios pessoais. Tentativas de abrir telas administrativas redirecionam para o dashboard do aluno.
+- **Instrutor/Professor (`instructor`/`teacher`):** utilizam `(authenticated)` com `/dashboard-instrutor`, presenças, check-in manual, `/graduacoes`, `/regras-graduacao`, `/horarios`, `/tipos-treino`, `/relatorios`, `/presencas/historico` (qualquer aluno) e `/perfil` editável.
+- **Admin/TI (`admin`/`ti`):** têm acesso total, incluindo as configurações da academia e cadastros avançados.
+- **Site map + middleware:** `config/siteMap.ts`, `config/roles.ts` e `middleware.ts` filtram links e protegem as rotas com RBAC centralizado baseado no papel salvo via Zustand.
 
 ### Check-in do aluno (mock)
 

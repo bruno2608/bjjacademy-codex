@@ -4,18 +4,17 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/ui/Header';
 import TabletNav from '../../components/ui/TabletNav';
-import useUserStore from '../../store/userStore';
+import useRole from '../../hooks/useRole';
 
 export default function StudentLayout({ children }) {
   const router = useRouter();
-  const { user } = useUserStore();
-  const roles = user?.roles || [];
+  const { roles, isStudent } = useRole();
 
   useEffect(() => {
-    if (roles.length && !roles.includes('ALUNO')) {
-      router.replace('/dashboard');
+    if (roles.length && !isStudent) {
+      router.replace('/dashboard-instrutor');
     }
-  }, [roles, router]);
+  }, [isStudent, roles, router]);
 
   return (
     <div className="flex min-h-screen flex-col bg-bjj-black">

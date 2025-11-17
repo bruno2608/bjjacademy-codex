@@ -9,13 +9,21 @@ import { useRouter } from 'next/navigation';
 import Header from '../../components/ui/Header';
 import TabletNav from '../../components/ui/TabletNav';
 import useUserStore from '../../store/userStore';
+import { normalizeRoles } from '../../config/roles';
 
 export default function AuthenticatedLayout({ children }) {
   const router = useRouter();
   const token = useUserStore((state) => state.token);
   const login = useUserStore((state) => state.login);
+  const hydrateFromStorage = useUserStore((state) => state.hydrateFromStorage);
+  const hydrated = useUserStore((state) => state.hydrated);
 
   useEffect(() => {
+    if (!hydrated) {
+      hydrateFromStorage();
+      return;
+    }
+
     const storedToken = typeof window !== 'undefined' ? localStorage.getItem('bjj_token') : null;
     if (!storedToken && !token) {
       router.replace('/login');
@@ -26,7 +34,7 @@ export default function AuthenticatedLayout({ children }) {
         try {
           const storedRoles = window.localStorage.getItem('bjj_roles');
           if (storedRoles) {
-            const parsed = JSON.parse(storedRoles);
+            const parsed = normalizeRoles(JSON.parse(storedRoles));
             if (Array.isArray(parsed)) {
               roles = parsed;
             }
@@ -37,7 +45,7 @@ export default function AuthenticatedLayout({ children }) {
       }
       login({ email: 'instrutor@bjj.academy', roles });
     }
-  }, [login, router, token]);
+  }, [hydrateFromStorage, hydrated, login, router, token]);
 
   return (
     <div className="flex min-h-screen flex-col bg-bjj-black">

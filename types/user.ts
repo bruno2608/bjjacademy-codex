@@ -1,4 +1,4 @@
-import type { UserRole } from '../config/userRoles';
+import type { UserRole } from '../config/roles';
 
 export type AuthUser = {
   name: string;

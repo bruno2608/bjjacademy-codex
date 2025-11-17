@@ -6,24 +6,14 @@
 import { create } from 'zustand';
 import { calculateNextStep, getMaxStripes, getNextBelt } from '../lib/graduationRules';
 import { DEFAULT_TREINOS, useTreinosStore } from './treinosStore';
-
-const ROLE_ORDER = ['TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR', 'ALUNO'];
-
-const sanitizeRoles = (roles) => {
-  if (!Array.isArray(roles)) return [];
-  const unique = new Set();
-  roles.forEach((role) => {
-    if (ROLE_ORDER.includes(role)) unique.add(role);
-  });
-  return Array.from(unique);
-};
+import { ROLE_KEYS, normalizeRoles } from '../config/roles';
 
 const deriveRolesFromEmail = (email) => {
   const normalized = (email || '').toLowerCase();
-  const baseRoles = new Set(['PROFESSOR', 'INSTRUTOR']);
-  if (normalized.includes('admin')) baseRoles.add('ADMIN');
-  if (normalized.includes('ti')) baseRoles.add('TI');
-  if (normalized.includes('aluno')) baseRoles.add('ALUNO');
+  const baseRoles = new Set([ROLE_KEYS.instructor, ROLE_KEYS.teacher]);
+  if (normalized.includes('admin')) baseRoles.add(ROLE_KEYS.admin);
+  if (normalized.includes('ti')) baseRoles.add(ROLE_KEYS.ti);
+  if (normalized.includes('aluno') || normalized.includes('student')) baseRoles.add(ROLE_KEYS.student);
   return Array.from(baseRoles);
 };
 
@@ -960,9 +950,9 @@ const useUserStore = create((set) => ({
   login: ({ email, roles }) => {
     const fakeToken = 'bjj-token-' + Date.now();
     localStorage.setItem('bjj_token', fakeToken);
-    const resolvedRoles = sanitizeRoles(roles);
+    const resolvedRoles = normalizeRoles(roles);
     const finalRoles = resolvedRoles.length ? resolvedRoles : deriveRolesFromEmail(email);
-    const alunoId = finalRoles.includes('ALUNO') ? initialAlunos[0]?.id || null : null;
+    const alunoId = finalRoles.includes(ROLE_KEYS.student) ? initialAlunos[0]?.id || null : null;
     persistRoles(finalRoles);
     const normalizedUser = {
       name: email.split('@')[0] || 'Instrutor',
@@ -1002,7 +992,7 @@ const useUserStore = create((set) => ({
           ?.replace('bjj_roles=', '')
       : undefined;
 
-    const parsedRoles = sanitizeRoles(
+    const parsedRoles = normalizeRoles(
       rawRoles
         ? JSON.parse(rawRoles)
         : cookieRoles
@@ -1025,12 +1015,12 @@ const useUserStore = create((set) => ({
     }
 
     const fallbackUser = {
-      name: parsedRoles.includes('ALUNO') ? 'Aluno' : 'Instrutor',
-      email: parsedRoles.includes('ALUNO') ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
+      name: parsedRoles.includes(ROLE_KEYS.student) ? 'Aluno' : 'Instrutor',
+      email: parsedRoles.includes(ROLE_KEYS.student) ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
       avatarUrl: null,
       telefone: null,
       roles: parsedRoles,
-      alunoId: parsedRoles.includes('ALUNO') ? initialAlunos[0]?.id || null : null
+      alunoId: parsedRoles.includes(ROLE_KEYS.student) ? initialAlunos[0]?.id || null : null
     };
 
     set({

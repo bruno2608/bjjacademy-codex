@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import type { UserRole } from './config/userRoles';
+import type { UserRole } from './config/roles';
+import { hasAnyRole, normalizeRoles, ROLE_KEYS, STAFF_ROLES } from './config/roles';
 import { flattenSiteMap, siteMap } from './config/siteMap';
 
 /**
@@ -18,10 +19,8 @@ const matchSiteMap = (pathname: string) =>
 
 const parseRoles = (raw: string | undefined): UserRole[] => {
   if (!raw) return [] as UserRole[];
-  return raw
-    .split(',')
-    .map((role) => role.trim())
-    .filter((value): value is UserRole => Boolean(value));
+  const parts = raw.includes('[') ? JSON.parse(raw) : raw.split(',');
+  return normalizeRoles(parts);
 };
 
 export function middleware(request: NextRequest) {
@@ -45,12 +44,18 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const hasPermission = matchedRoute.roles.some((role) => roles.includes(role));
+  const hasPermission = hasAnyRole(roles, matchedRoute.roles);
   if (!hasPermission) {
-    if (roles.length === 1 && roles.includes('ALUNO')) {
+    if (roles.length === 1 && roles.includes(ROLE_KEYS.student)) {
       const studentUrl = new URL('/dashboard-aluno', request.url);
       return NextResponse.redirect(studentUrl);
     }
+
+    if (hasAnyRole(roles, STAFF_ROLES)) {
+      const staffUrl = new URL('/dashboard-instrutor', request.url);
+      return NextResponse.redirect(staffUrl);
+    }
+
     const unauthorizedUrl = new URL('/unauthorized', request.url);
     return NextResponse.redirect(unauthorizedUrl);
   }

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, Menu, X, Settings2, ChevronRight, ChevronDown, BarChart3, UserCircle2 } from 'lucide-react';
 import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
+import useRole from '../../hooks/useRole';
 import useUserStore from '../../store/userStore';
 
 export default function Header() {
@@ -16,7 +17,7 @@ export default function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
-  const roles = user?.roles || [];
+  const { roles } = useRole();
 
   const navigationItems = useMemo(() => getNavigationItemsForRoles(roles), [roles]);
   const fullNavigation = useMemo(

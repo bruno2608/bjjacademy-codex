@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { UserRole } from '../config/userRoles';
+import { ROLE_KEYS, normalizeRoles, type UserRole } from '../config/roles';
 import { ALL_ROLES } from '../config/userRoles';
 import type { AuthUser, LoginPayload } from '../types/user';
 
@@ -19,25 +19,12 @@ const TOKEN_KEY = 'bjj_token';
 const ROLES_KEY = 'bjj_roles';
 const DEFAULT_ALUNO_ID = '1';
 
-const ROLE_ORDER: UserRole[] = ['TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR', 'ALUNO'];
-
-const sanitizeRoles = (roles?: UserRole[]): UserRole[] => {
-  if (!Array.isArray(roles)) return [];
-  const unique = new Set<UserRole>();
-  roles.forEach((role) => {
-    if (ROLE_ORDER.includes(role)) {
-      unique.add(role);
-    }
-  });
-  return Array.from(unique);
-};
-
 const deriveRolesFromEmail = (email: string): UserRole[] => {
   const normalized = email.toLowerCase();
-  const baseRoles = new Set<UserRole>(['PROFESSOR', 'INSTRUTOR']);
-  if (normalized.includes('admin')) baseRoles.add('ADMIN');
-  if (normalized.includes('ti')) baseRoles.add('TI');
-  if (normalized.includes('aluno')) baseRoles.add('ALUNO');
+  const baseRoles = new Set<UserRole>([ROLE_KEYS.instructor, ROLE_KEYS.teacher]);
+  if (normalized.includes('admin')) baseRoles.add(ROLE_KEYS.admin);
+  if (normalized.includes('ti')) baseRoles.add(ROLE_KEYS.ti);
+  if (normalized.includes('aluno') || normalized.includes('student')) baseRoles.add(ROLE_KEYS.student);
   return Array.from(baseRoles);
 };
 
@@ -70,7 +57,7 @@ export const useUserStore = create<UserState>((set) => ({
     const fakeToken = `bjj-token-${Date.now()}`;
     window.localStorage.setItem(TOKEN_KEY, fakeToken);
 
-    const resolvedRoles = sanitizeRoles(roles);
+    const resolvedRoles = normalizeRoles(roles);
     const finalRoles = resolvedRoles.length ? resolvedRoles : deriveRolesFromEmail(email);
     const finalUser: AuthUser = {
       name: email.split('@')[0] || 'Instrutor',
@@ -78,13 +65,13 @@ export const useUserStore = create<UserState>((set) => ({
       roles: finalRoles.length ? finalRoles : ALL_ROLES,
       avatarUrl: null,
       telefone: null,
-      alunoId: finalRoles.includes('ALUNO') ? DEFAULT_ALUNO_ID : null
+      alunoId: finalRoles.includes(ROLE_KEYS.student) ? DEFAULT_ALUNO_ID : null
     };
 
     persistRoles(finalUser.roles);
     window.localStorage.setItem(
       'bjj_user',
-      JSON.stringify({ ...finalUser, alunoId: finalRoles.includes('ALUNO') ? DEFAULT_ALUNO_ID : null })
+      JSON.stringify({ ...finalUser, alunoId: finalRoles.includes(ROLE_KEYS.student) ? DEFAULT_ALUNO_ID : null })
     );
     set({ user: finalUser, token: fakeToken, hydrated: true });
   },
@@ -116,7 +103,7 @@ export const useUserStore = create<UserState>((set) => ({
           ?.replace(`${ROLES_KEY}=`, '')
       : undefined;
 
-    const parsedRoles = sanitizeRoles(
+    const parsedRoles = normalizeRoles(
       rawRoles
         ? JSON.parse(rawRoles)
         : cookieRoles
@@ -139,12 +126,12 @@ export const useUserStore = create<UserState>((set) => ({
     }
 
     const fallbackUser: AuthUser = {
-      name: parsedRoles.includes('ALUNO') ? 'Aluno' : 'Instrutor',
-      email: parsedRoles.includes('ALUNO') ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
+      name: parsedRoles.includes(ROLE_KEYS.student) ? 'Aluno' : 'Instrutor',
+      email: parsedRoles.includes(ROLE_KEYS.student) ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
       avatarUrl: null,
       telefone: null,
       roles: parsedRoles,
-      alunoId: parsedRoles.includes('ALUNO') ? DEFAULT_ALUNO_ID : null
+      alunoId: parsedRoles.includes(ROLE_KEYS.student) ? DEFAULT_ALUNO_ID : null
     };
 
     set({

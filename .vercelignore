@@ -1,2 +1,1 @@
-# Avoid duplicate Next.js routes across student and authenticated groups
-app/(student)/historico-presencas
+# No custom ignore rules required.

@@ -5,6 +5,8 @@ import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
 import useUserStore from '../../../store/userStore';
 import { useAlunosStore } from '../../../store/alunosStore';
+import useRole from '../../../hooks/useRole';
+import { ROLE_KEYS } from '../../../config/roles';
 
 const buildInitials = (name = '', email = '') => {
   const source = name || email || 'Instrutor';
@@ -19,10 +21,9 @@ const buildInitials = (name = '', email = '') => {
 
 export default function PerfilPage() {
   const { user, updateUser } = useUserStore();
-  const roles = user?.roles || [];
-  const isAluno = roles.includes('ALUNO');
-  const canEditContato =
-    isAluno || roles.some((role) => ['PROFESSOR', 'INSTRUTOR', 'ADMIN', 'TI'].includes(role));
+  const { roles, isStudent, isStaff } = useRole();
+  const isAluno = isStudent;
+  const canEditContato = isAluno || isStaff;
 
   const alunos = useAlunosStore((state) => state.alunos);
   const updateAluno = useAlunosStore((state) => state.updateAluno);
@@ -104,9 +105,9 @@ export default function PerfilPage() {
             </p>
           </div>
           <div className="ml-auto inline-flex flex-wrap gap-2 text-xs">
-            {(roles.length ? roles : ['INSTRUTOR']).map((role) => (
+            {(roles.length ? roles : [ROLE_KEYS.instructor]).map((role) => (
               <span key={role} className="rounded-full border border-bjj-red/50 bg-bjj-red/10 px-3 py-1 font-semibold text-bjj-white">
-                {role}
+                {role.toUpperCase()}
               </span>
             ))}
           </div>

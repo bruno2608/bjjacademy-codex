@@ -12,6 +12,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { ChevronDown, ChevronRight, LogOut, Settings2, UserCircle2, BarChart3 } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
+import useRole from '../../hooks/useRole';
 
 const buildInitials = (name = '', email = '') => {
   const source = name || email || 'Instrutor';
@@ -26,7 +27,7 @@ export default function UserMenu() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
-  const roles = user?.roles || [];
+  const { roles } = useRole();
   const [open, setOpen] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
   const menuRef = useRef(null);
@@ -53,20 +54,18 @@ export default function UserMenu() {
   );
 
   const canSeeHistory = useMemo(
-    () => roles.some((role) => ['ALUNO', 'TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR'].includes(role)),
+    () => roles.some((role) => ['student', 'ti', 'admin', 'teacher', 'instructor'].includes(role)),
     [roles]
   );
 
   const historyPath = useMemo(() => {
-    const pathFromNav = flattenedItems.find((item) => item.path === '/historico-presencas')?.path;
+    const pathFromNav = flattenedItems.find((item) => item.path === '/presencas/historico')?.path;
     if (pathFromNav) return pathFromNav;
-    // Sempre expõe o histórico para alunos mesmo que a navegação não tenha carregado
-    // (ex.: metas ocultas ou filtros de menu). O middleware já cuida da autorização.
-    return canSeeHistory ? '/historico-presencas' : '/historico-presencas';
+    return canSeeHistory ? '/presencas/historico' : undefined;
   }, [canSeeHistory, flattenedItems]);
 
   const canSeeReports = useMemo(
-    () => roles.some((role) => ['ALUNO', 'TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR'].includes(role)),
+    () => roles.some((role) => ['student', 'ti', 'admin', 'teacher', 'instructor'].includes(role)),
     [roles]
   );
 
