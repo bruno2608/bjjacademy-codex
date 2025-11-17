@@ -25,7 +25,7 @@ type PresencasState = {
       id?: string;
       horaInicio?: string;
     }
-  ) => { registro: Presenca | null; status: 'registrado' | 'pendente' | 'duplicado' };
+  ) => { registro: Presenca | null; status: 'registrado' | 'pendente' | 'duplicado' | 'fora_do_horario' };
   approveCheckin: (id: string) => Presenca | null;
   rejectCheckin: (id: string) => Presenca | null;
   cancelarTreinoDoDia: (data: string, treinoId: string | null) => Presenca[];
@@ -88,7 +88,7 @@ export const usePresencasStore = create<PresencasState>((set) => ({
     });
   },
   registerCheckin: (payload) => {
-    let status: 'registrado' | 'pendente' | 'duplicado' = 'pendente';
+    let status: 'registrado' | 'pendente' | 'duplicado' | 'fora_do_horario' = 'pendente';
     let registro: Presenca | null = null;
     const janelaMinutos = 30;
     set((state) => {
@@ -106,7 +106,14 @@ export const usePresencasStore = create<PresencasState>((set) => ({
       const dataReferencia = payload.data ? new Date(`${payload.data}T${payload.horaInicio || '00:00'}`) : new Date();
       const inicio = dataReferencia.getTime();
       const limite = inicio + janelaMinutos * 60 * 1000;
-      const confirmavel = agora.getTime() >= inicio && agora.getTime() <= limite;
+
+      if (agora.getTime() < inicio || agora.getTime() > limite) {
+        status = 'fora_do_horario';
+        registro = null;
+        return { presencas: lista };
+      }
+
+      const confirmavel = agora.getTime() === inicio;
       status = confirmavel ? 'registrado' : 'pendente';
 
       registro = {
