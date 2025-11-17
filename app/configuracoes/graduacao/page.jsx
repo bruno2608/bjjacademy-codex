@@ -196,7 +196,7 @@ export default function RegrasGraduacaoPage() {
         <table className="table table-compact table-fixed min-w-[760px] text-sm md:min-w-full">
           <thead>
             <tr className="text-[0.65rem] uppercase tracking-[0.25em] text-bjj-gray-200/70">
-              <th className="w-[12%] px-4 py-3 text-center font-semibold">Ações</th>
+              <th className="w-[120px] px-4 py-3 text-center font-semibold">Ações</th>
               <th className="w-[22%] px-4 py-3 font-semibold">Faixa</th>
               <th className="w-[38%] px-4 py-3 font-semibold">Requisitos</th>
               <th className="w-[28%] px-4 py-3 font-semibold">Visual</th>
@@ -210,7 +210,8 @@ export default function RegrasGraduacaoPage() {
                     <Button
                       type="button"
                       variant="secondary"
-                      className="btn-xs flex items-center gap-1"
+                      className="btn-xs h-10 w-10 rounded-lg border border-bjj-gray-800 bg-bjj-gray-900 text-bjj-gray-100 hover:border-bjj-red/70 hover:text-bjj-white"
+                      aria-label={`Editar ${belt}`}
                       onClick={() => openEditModal(belt, rule)}
                     >
                       <Edit3 size={14} />
@@ -218,7 +219,8 @@ export default function RegrasGraduacaoPage() {
                     <Button
                       type="button"
                       variant="secondary"
-                      className="btn-xs flex items-center gap-1"
+                      className="btn-xs h-10 w-10 rounded-lg border border-bjj-gray-800 bg-bjj-gray-900 text-bjj-gray-100 hover:border-bjj-red/70 hover:text-bjj-white"
+                      aria-label={`Excluir ${belt}`}
                       onClick={() => handleDelete(belt)}
                     >
                       <Trash2 size={14} />

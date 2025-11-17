@@ -75,6 +75,17 @@ export function normalizeRoles(values: unknown): UserRole[] {
     }
   });
 
+  if (unique.has(ROLE_KEYS.ti) || unique.has(ROLE_KEYS.admin)) {
+    unique.add(ROLE_KEYS.professor);
+    unique.add(ROLE_KEYS.instrutor);
+    unique.add(ROLE_KEYS.aluno);
+  } else if (unique.has(ROLE_KEYS.professor)) {
+    unique.add(ROLE_KEYS.instrutor);
+    unique.add(ROLE_KEYS.aluno);
+  } else if (unique.has(ROLE_KEYS.instrutor)) {
+    unique.add(ROLE_KEYS.aluno);
+  }
+
   return Array.from(unique);
 }
 
