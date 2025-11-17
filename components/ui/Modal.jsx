@@ -5,13 +5,16 @@
  * Em telas menores ele assume o formato de bottom sheet para facilitar
  * o uso no mobile e manter a coerência com o app nativo.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export default function Modal({ isOpen, title, onClose, children }) {
   const [mounted, setMounted] = useState(false);
-  const portalRef = useRef(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isOpen || typeof document === 'undefined') {
@@ -34,7 +37,7 @@ export default function Modal({ isOpen, title, onClose, children }) {
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen || !mounted || !portalRef.current) {
+  if (!isOpen || !mounted) {
     return null;
   }
 
@@ -45,12 +48,17 @@ export default function Modal({ isOpen, title, onClose, children }) {
   };
 
   const content = (
-    <div
-      className="modal z-50"
+    <dialog
+      className={`modal ${isOpen ? 'modal-open' : ''} z-50`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
       onClick={handleBackdropClick}
+      open={isOpen}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose?.();
+      }}
     >
       <div className="modal-box w-full max-w-2xl border border-bjj-gray-800/70 bg-bjj-gray-900 text-bjj-white shadow-[0_18px_35px_-18px_rgba(0,0,0,0.6)]">
         <header className="mb-4 flex items-center justify-between border-b border-bjj-gray-800 pb-3">
@@ -68,8 +76,8 @@ export default function Modal({ isOpen, title, onClose, children }) {
         </header>
         <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1 lg:max-h-[75vh]">{children}</div>
       </div>
-    </div>
+    </dialog>
   );
 
-  return content;
+  return createPortal(content, document.body);
 }
