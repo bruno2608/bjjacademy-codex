@@ -5,13 +5,14 @@ import {
   CalendarCheck,
   Medal,
   BarChart3,
+  FileText,
   Settings2,
   Clock3,
   ListChecks,
   UserCircle2
 } from 'lucide-react';
 import type { UserRole } from './userRoles';
-import { ALL_ROLES, STAFF_ROLES } from './userRoles';
+import { STAFF_ROLES } from './userRoles';
 
 export type SiteMapItem = {
   title: string;
@@ -35,7 +36,25 @@ export const siteMap: SiteMapItem[] = [
     title: 'Dashboard',
     path: '/dashboard',
     icon: LayoutDashboard,
-    roles: ALL_ROLES
+    roles: STAFF_ROLES
+  },
+  {
+    title: 'Dashboard Aluno',
+    path: '/dashboard-aluno',
+    icon: LayoutDashboard,
+    roles: ['ALUNO']
+  },
+  {
+    title: 'Check-in do Aluno',
+    path: '/checkin',
+    icon: CalendarCheck,
+    roles: ['ALUNO']
+  },
+  {
+    title: 'Treinos do Aluno',
+    path: '/agenda',
+    icon: Clock3,
+    roles: ['ALUNO']
   },
   {
     title: 'Alunos',
@@ -56,17 +75,38 @@ export const siteMap: SiteMapItem[] = [
     roles: STAFF_ROLES
   },
   {
-    title: 'Relatórios',
-    path: '/relatorios',
-    icon: BarChart3,
-    roles: STAFF_ROLES,
-    showInMainNav: false
-  },
-  {
     title: 'Meu Perfil',
     path: '/perfil',
     icon: UserCircle2,
-    roles: ALL_ROLES,
+    roles: [...STAFF_ROLES, 'ALUNO'],
+    showInMainNav: false
+  },
+  {
+    title: 'Evolução',
+    path: '/evolucao',
+    icon: Medal,
+    roles: ['ALUNO'],
+    showInMainNav: true
+  },
+  {
+    title: 'Histórico de presenças',
+    path: '/historico-presencas',
+    icon: CalendarCheck,
+    roles: [...STAFF_ROLES, 'ALUNO'],
+    showInMainNav: false
+  },
+  {
+    title: 'Documentos do aluno',
+    path: '/documentos',
+    icon: FileText,
+    roles: [...STAFF_ROLES, 'ALUNO'],
+    showInMainNav: false
+  },
+  {
+    title: 'Relatórios',
+    path: '/relatorios',
+    icon: BarChart3,
+    roles: [...STAFF_ROLES, 'ALUNO'],
     showInMainNav: false
   },
   {
