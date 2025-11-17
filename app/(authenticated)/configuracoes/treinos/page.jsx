@@ -6,6 +6,7 @@ import Input from '../../../../components/ui/Input';
 import Select from '../../../../components/ui/Select';
 import Button from '../../../../components/ui/Button';
 import ConfirmDialog from '../../../../components/ui/ConfirmDialog';
+import Badge from '../../../../components/ui/Badge';
 import { useTreinosStore } from '../../../../store/treinosStore';
 import { useTiposTreinoStore } from '../../../../store/tiposTreinoStore';
 
@@ -108,9 +109,12 @@ export default function TreinosPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-bjj-gray-200/70">
-              <span className={`badge badge-sm ${treino.ativo ? 'badge-success text-bjj-white' : 'badge-outline border-bjj-gray-700 text-bjj-gray-200'}`}>
+              <Badge
+                variant={treino.ativo ? 'success' : 'neutral'}
+                className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase"
+              >
                 {treino.ativo ? 'Ativo' : 'Inativo'}
-              </span>
+              </Badge>
               <Button
                 type="button"
                 variant="secondary"
