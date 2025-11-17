@@ -109,10 +109,18 @@ export const siteMap: SiteMapItem[] = [
     showInMainNav: true
   },
   {
-    title: 'Relatórios do aluno',
+    title: 'Relatórios',
     path: '/relatorios-aluno',
     icon: BarChart3,
     roles: ['ALUNO'],
+    children: [
+      {
+        title: 'Relatórios do aluno',
+        path: '/relatorios-aluno',
+        icon: BarChart3,
+        roles: ['ALUNO']
+      }
+    ],
     showInMainNav: true
   },
   {

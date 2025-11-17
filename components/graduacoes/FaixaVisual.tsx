@@ -44,28 +44,28 @@ export default function FaixaVisual({
     { layerHeight: string; ponteira: string; tail: string; stripe: string; minW: string; maxW: string }
   > = {
     sm: {
-      layerHeight: 'clamp(10px, 3vw, 12px)',
-      ponteira: 'clamp(38px, 12vw, 46px)',
-      tail: 'clamp(8px, 3vw, 10px)',
-      stripe: 'clamp(36px, 11vw, 46px)',
-      minW: '7.5rem',
-      maxW: '10rem'
+      layerHeight: 'clamp(11px, 3vw, 14px)',
+      ponteira: 'clamp(44px, 13vw, 56px)',
+      tail: 'clamp(9px, 3vw, 12px)',
+      stripe: 'clamp(42px, 12vw, 56px)',
+      minW: 'clamp(9rem, 34vw, 11rem)',
+      maxW: 'clamp(12rem, 48vw, 15rem)'
     },
     md: {
-      layerHeight: 'clamp(12px, 3.5vw, 14px)',
-      ponteira: 'clamp(46px, 13vw, 54px)',
-      tail: 'clamp(10px, 3.5vw, 12px)',
-      stripe: 'clamp(42px, 12vw, 54px)',
-      minW: '8.5rem',
-      maxW: '12rem'
+      layerHeight: 'clamp(13px, 3.6vw, 16px)',
+      ponteira: 'clamp(54px, 14vw, 66px)',
+      tail: 'clamp(11px, 3.6vw, 14px)',
+      stripe: 'clamp(48px, 13vw, 66px)',
+      minW: 'clamp(10rem, 38vw, 13rem)',
+      maxW: 'clamp(14rem, 56vw, 18rem)'
     },
     lg: {
-      layerHeight: 'clamp(14px, 4.2vw, 18px)',
-      ponteira: 'clamp(54px, 15vw, 64px)',
-      tail: 'clamp(12px, 4vw, 14px)',
-      stripe: 'clamp(50px, 14vw, 64px)',
-      minW: '10rem',
-      maxW: '14rem'
+      layerHeight: 'clamp(15px, 4.4vw, 20px)',
+      ponteira: 'clamp(64px, 16vw, 80px)',
+      tail: 'clamp(12px, 4.2vw, 16px)',
+      stripe: 'clamp(56px, 15vw, 80px)',
+      minW: 'clamp(11rem, 42vw, 15rem)',
+      maxW: 'clamp(16rem, 60vw, 22rem)'
     }
   };
 
