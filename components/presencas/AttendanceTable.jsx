@@ -5,7 +5,7 @@
  * alternar status rapidamente, mantendo o novo visual gamificado e
  * preparado para mobile-first.
  */
-import { CheckCircle2, Circle, Loader2, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { CheckCircle2, Loader2, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import Badge from '../ui/Badge';
 
 export default function AttendanceTable({
@@ -61,8 +61,11 @@ export default function AttendanceTable({
                       {faixa} · {graus}º grau
                     </p>
                   </div>
-                  <Badge variant={record.status === 'Presente' ? 'success' : 'neutral'}>
-                    {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
+                  <Badge
+                    variant={record.status === 'Presente' ? 'success' : 'neutral'}
+                    className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase"
+                  >
+                    {record.status}
                   </Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[11px] text-bjj-gray-200/70">
@@ -171,10 +174,13 @@ export default function AttendanceTable({
                     </span>
                   </div>
                   <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
-                    <Badge variant={record.status === 'Presente' ? 'success' : 'neutral'}>
-                      {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
-                    </Badge>
-                  </div>
+                  <Badge
+                    variant={record.status === 'Presente' ? 'success' : 'neutral'}
+                    className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase"
+                  >
+                    {record.status}
+                  </Badge>
+                </div>
                 </div>
             </div>
           );

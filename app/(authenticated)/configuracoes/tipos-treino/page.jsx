@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTiposTreinoStore } from '../../../../store/tiposTreinoStore';
 import Input from '../../../../components/ui/Input';
 import Button from '../../../../components/ui/Button';
+import ConfirmDialog from '../../../../components/ui/ConfirmDialog';
 
 /**
  * Mantém o catálogo de modalidades que alimenta cadastros de treino e presenças.
@@ -14,6 +15,7 @@ export default function TiposTreinoPage() {
   const [novoTipo, setNovoTipo] = useState('');
   const [editIndex, setEditIndex] = useState(null);
   const [editValue, setEditValue] = useState('');
+  const [deleteIndex, setDeleteIndex] = useState(null);
 
   const handleAdd = (event) => {
     event.preventDefault();
@@ -33,6 +35,13 @@ export default function TiposTreinoPage() {
     updateTipo(editIndex, editValue);
     setEditIndex(null);
     setEditValue('');
+  };
+
+  const confirmarExclusao = () => {
+    if (deleteIndex !== null) {
+      removeTipo(deleteIndex);
+      setDeleteIndex(null);
+    }
   };
 
   return (
@@ -99,7 +108,7 @@ export default function TiposTreinoPage() {
                     type="button"
                     variant="secondary"
                     className="btn-sm border-bjj-red/70 text-bjj-red hover:border-bjj-red hover:text-bjj-red hover:bg-bjj-red/10"
-                    onClick={() => removeTipo(index)}
+                    onClick={() => setDeleteIndex(index)}
                   >
                     Remover
                   </Button>
@@ -114,6 +123,15 @@ export default function TiposTreinoPage() {
           </p>
         )}
       </section>
+
+      <ConfirmDialog
+        isOpen={deleteIndex !== null}
+        title="Confirmar exclusão"
+        message={deleteIndex !== null ? `Deseja remover o tipo de treino "${tipos[deleteIndex]}"?` : ''}
+        confirmLabel="Remover tipo"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setDeleteIndex(null)}
+      />
     </div>
   );
 }
