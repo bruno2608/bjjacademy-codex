@@ -15,7 +15,7 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const { user, logout } = useUserStore();
+  const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
   const roles = user?.roles || [];
 
   const navigationItems = useMemo(() => getNavigationItemsForRoles(roles), [roles]);
@@ -44,6 +44,12 @@ export default function Header() {
     // Mantém o dropdown alinhado à rota atual para evitar que fique sempre aberto.
     setConfigOpen(isConfigPath);
   }, [isConfigPath]);
+
+  useEffect(() => {
+    if (!hydrated) {
+      hydrateFromStorage();
+    }
+  }, [hydrateFromStorage, hydrated]);
 
   const initials = useMemo(() => {
     const source = user?.name || user?.email || 'Instrutor';

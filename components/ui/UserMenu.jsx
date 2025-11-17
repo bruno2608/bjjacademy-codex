@@ -25,7 +25,7 @@ const buildInitials = (name = '', email = '') => {
 export default function UserMenu() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useUserStore();
+  const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
   const roles = user?.roles || [];
   const [open, setOpen] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
@@ -94,6 +94,12 @@ export default function UserMenu() {
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!hydrated) {
+      hydrateFromStorage();
+    }
+  }, [hydrateFromStorage, hydrated]);
 
   useEffect(() => {
     if (isConfigPath) {

@@ -39,6 +39,7 @@ const persistRoles = (roles) => {
 const clearPersistedRoles = () => {
   if (typeof window !== 'undefined') {
     window.localStorage.removeItem('bjj_roles');
+    window.localStorage.removeItem('bjj_user');
   }
   if (typeof document !== 'undefined') {
     document.cookie = 'bjj_roles=; path=/; max-age=0';
@@ -951,6 +952,7 @@ const mockGraduacoes = [
 const useUserStore = create((set) => ({
   user: null,
   token: null,
+  hydrated: false,
   alunos: initialAlunos,
   presencas: mockPresencas,
   graduacoes: mockGraduacoes,
@@ -962,16 +964,19 @@ const useUserStore = create((set) => ({
     const finalRoles = resolvedRoles.length ? resolvedRoles : deriveRolesFromEmail(email);
     const alunoId = finalRoles.includes('ALUNO') ? initialAlunos[0]?.id || null : null;
     persistRoles(finalRoles);
+    const normalizedUser = {
+      name: email.split('@')[0] || 'Instrutor',
+      email,
+      roles: finalRoles,
+      avatarUrl: null,
+      telefone: null,
+      alunoId
+    };
+    localStorage.setItem('bjj_user', JSON.stringify(normalizedUser));
     set({
-      user: {
-        name: email.split('@')[0] || 'Instrutor',
-        email,
-        roles: finalRoles,
-        avatarUrl: null,
-        telefone: null,
-        alunoId
-      },
-      token: fakeToken
+      user: normalizedUser,
+      token: fakeToken,
+      hydrated: true
     });
   },
   updateUser: (payload = {}) =>
@@ -982,6 +987,57 @@ const useUserStore = create((set) => ({
     localStorage.removeItem('bjj_token');
     clearPersistedRoles();
     set({ user: null, token: null });
+  },
+  hydrateFromStorage: () => {
+    if (typeof window === 'undefined') return;
+    const hasToken = window.localStorage.getItem('bjj_token');
+    const rawUser = window.localStorage.getItem('bjj_user');
+    const rawRoles = window.localStorage.getItem('bjj_roles');
+
+    const cookieRoles = typeof document !== 'undefined'
+      ? document.cookie
+          .split(';')
+          .map((entry) => entry.trim())
+          .find((entry) => entry.startsWith('bjj_roles='))
+          ?.replace('bjj_roles=', '')
+      : undefined;
+
+    const parsedRoles = sanitizeRoles(
+      rawRoles
+        ? JSON.parse(rawRoles)
+        : cookieRoles
+        ? cookieRoles.split(',')
+        : []
+    );
+
+    if (!hasToken && !parsedRoles.length) {
+      set({ hydrated: true });
+      return;
+    }
+
+    let parsedUser = null;
+    if (rawUser) {
+      try {
+        parsedUser = JSON.parse(rawUser);
+      } catch (error) {
+        parsedUser = null;
+      }
+    }
+
+    const fallbackUser = {
+      name: parsedRoles.includes('ALUNO') ? 'Aluno' : 'Instrutor',
+      email: parsedRoles.includes('ALUNO') ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
+      avatarUrl: null,
+      telefone: null,
+      roles: parsedRoles,
+      alunoId: parsedRoles.includes('ALUNO') ? initialAlunos[0]?.id || null : null
+    };
+
+    set({
+      user: parsedUser ? { ...fallbackUser, ...parsedUser, roles: parsedRoles } : fallbackUser,
+      token: hasToken || null,
+      hydrated: true
+    });
   },
   setAlunos: (alunos) =>
     set((state) => {
