@@ -973,6 +973,10 @@ const useUserStore = create((set) => ({
       token: fakeToken
     });
   },
+  updateUser: (payload = {}) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, ...payload } : state.user
+    })),
   logout: () => {
     localStorage.removeItem('bjj_token');
     clearPersistedRoles();
