@@ -90,32 +90,45 @@ export default function EvolucaoPage() {
             </header>
 
             {historicoGraduacoes.length ? (
-              <div className="relative space-y-5 border-l border-bjj-gray-800/80 pl-6">
-                {historicoGraduacoes.map((item, idx) => (
-                  <div key={item.id || idx} className="relative">
-                    <span className="absolute -left-[9px] top-1 h-3 w-3 rounded-full bg-bjj-red shadow-[0_0_0_3px_rgba(255,255,255,0.06)]" />
-                    <div className="flex flex-col gap-1 rounded-xl bg-bjj-black/30 px-4 py-3 shadow-[0_12px_32px_rgba(0,0,0,0.25)]">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-white">
-                          <span
-                            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.18em] ${
-                              item.tipo === 'Grau'
-                                ? 'bg-bjj-red/15 text-bjj-red'
-                                : 'bg-bjj-gray-800/70 text-bjj-gray-100'
-                            }`}
-                          >
-                            {item.tipo === 'Grau' ? `${item.grau}º grau` : 'Faixa'}
-                            <span className="text-[10px] text-bjj-gray-300/90">{item.faixa}</span>
-                          </span>
-                          <span className="text-xs text-bjj-gray-200/80">Instrutor: {item.instrutor || 'Equipe BJJ Academy'}</span>
-                        </div>
-                        <span className="text-[12px] text-bjj-gray-300/80">{formatarData(item.data)}</span>
+              <ul className="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical text-bjj-gray-100">
+                {historicoGraduacoes.map((item, idx) => {
+                  const isGrau = item.tipo === 'Grau';
+                  const indicadorClasse = isGrau
+                    ? 'border-bjj-red bg-bjj-red/15 text-bjj-red'
+                    : 'border-amber-300 bg-amber-200/10 text-amber-200';
+                  return (
+                    <li key={item.id || idx}>
+                      <div className="timeline-middle">
+                        <span
+                          className={`flex h-8 w-8 items-center justify-center rounded-full border bg-bjj-black/60 ${indicadorClasse}`}
+                        >
+                          <Medal size={18} />
+                        </span>
                       </div>
-                      <p className="text-sm text-bjj-gray-100">{item.descricao || 'Atualização registrada'}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                      <div className="timeline-end mb-6 w-full">
+                        <div className="flex flex-col gap-1 rounded-xl bg-bjj-black/30 px-4 py-3 shadow-[0_12px_32px_rgba(0,0,0,0.25)]">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-white">
+                              <span
+                                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.18em] ${
+                                  isGrau ? 'bg-bjj-red/15 text-bjj-red' : 'bg-bjj-gray-800/70 text-bjj-gray-100'
+                                }`}
+                              >
+                                {isGrau ? `${item.grau}º grau` : 'Faixa'}
+                                <span className="text-[10px] text-bjj-gray-300/90">{item.faixa}</span>
+                              </span>
+                              <span className="text-xs text-bjj-gray-200/80">Instrutor: {item.instrutor || 'Equipe BJJ Academy'}</span>
+                            </div>
+                            <span className="text-[12px] text-bjj-gray-300/80">{formatarData(item.data)}</span>
+                          </div>
+                          <p className="text-sm text-bjj-gray-100">{item.descricao || 'Atualização registrada'}</p>
+                        </div>
+                      </div>
+                      {idx < historicoGraduacoes.length - 1 && <hr className="border-bjj-gray-800" />}
+                    </li>
+                  );
+                })}
+              </ul>
             ) : (
               <div className="rounded-xl border border-dashed border-bjj-gray-800/70 bg-bjj-black/30 px-4 py-5 text-sm text-bjj-gray-300/80">
                 Ainda não há graduações registradas. Continue frequentando as aulas para liberar este histórico.
