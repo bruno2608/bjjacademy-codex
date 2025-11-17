@@ -35,7 +35,13 @@ export const siteMap: SiteMapItem[] = [
     title: 'Dashboard',
     path: '/dashboard',
     icon: LayoutDashboard,
-    roles: ALL_ROLES
+    roles: STAFF_ROLES
+  },
+  {
+    title: 'Dashboard Aluno',
+    path: '/dashboard-aluno',
+    icon: LayoutDashboard,
+    roles: ['ALUNO']
   },
   {
     title: 'Alunos',
@@ -67,6 +73,46 @@ export const siteMap: SiteMapItem[] = [
     path: '/perfil',
     icon: UserCircle2,
     roles: ALL_ROLES,
+    showInMainNav: false
+  },
+  {
+    title: 'Perfil do Aluno',
+    path: '/perfil-aluno',
+    icon: UserCircle2,
+    roles: ['ALUNO'],
+    showInMainNav: false
+  },
+  {
+    title: 'Agenda do Aluno',
+    path: '/agenda',
+    icon: Clock3,
+    roles: ['ALUNO']
+  },
+  {
+    title: 'Check-in do Aluno',
+    path: '/checkin',
+    icon: CalendarCheck,
+    roles: ['ALUNO']
+  },
+  {
+    title: 'Histórico de presenças',
+    path: '/historico-presencas',
+    icon: CalendarCheck,
+    roles: ['ALUNO'],
+    showInMainNav: false
+  },
+  {
+    title: 'Documentos do aluno',
+    path: '/documentos',
+    icon: ListChecks,
+    roles: ['ALUNO'],
+    showInMainNav: false
+  },
+  {
+    title: 'Relatórios do aluno',
+    path: '/relatorios-aluno',
+    icon: BarChart3,
+    roles: ['ALUNO'],
     showInMainNav: false
   },
   {

@@ -5,6 +5,8 @@ import Modal from '../../../../components/ui/Modal';
 import Input from '../../../../components/ui/Input';
 import Select from '../../../../components/ui/Select';
 import Button from '../../../../components/ui/Button';
+import ConfirmDialog from '../../../../components/ui/ConfirmDialog';
+import Badge from '../../../../components/ui/Badge';
 import { useTreinosStore } from '../../../../store/treinosStore';
 import { useTiposTreinoStore } from '../../../../store/tiposTreinoStore';
 
@@ -28,6 +30,7 @@ export default function TreinosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyTreino);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const sortedTreinos = useMemo(
     () =>
@@ -53,6 +56,17 @@ export default function TreinosPage() {
     setIsModalOpen(false);
     setEditingId(null);
     setForm(emptyTreino);
+  };
+
+  const pedirConfirmacaoExclusao = (treino) => {
+    setDeleteTarget(treino);
+  };
+
+  const confirmarExclusao = () => {
+    if (deleteTarget) {
+      removeTreino(deleteTarget.id);
+      setDeleteTarget(null);
+    }
   };
 
   const handleSubmit = (event) => {
@@ -95,9 +109,12 @@ export default function TreinosPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-bjj-gray-200/70">
-              <span className={`badge badge-sm ${treino.ativo ? 'badge-success text-bjj-white' : 'badge-outline border-bjj-gray-700 text-bjj-gray-200'}`}>
+              <Badge
+                variant={treino.ativo ? 'success' : 'neutral'}
+                className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase"
+              >
                 {treino.ativo ? 'Ativo' : 'Inativo'}
-              </span>
+              </Badge>
               <Button
                 type="button"
                 variant="secondary"
@@ -118,7 +135,7 @@ export default function TreinosPage() {
                 type="button"
                 variant="secondary"
                 className="btn-sm border-bjj-red/70 text-bjj-red hover:border-bjj-red hover:text-bjj-red hover:bg-bjj-red/10"
-                onClick={() => removeTreino(treino.id)}
+                onClick={() => pedirConfirmacaoExclusao(treino)}
               >
                 Remover
               </Button>
@@ -192,6 +209,15 @@ export default function TreinosPage() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Confirmar exclusão"
+        message={deleteTarget ? `Deseja remover o treino ${deleteTarget.nome}?` : ''}
+        confirmLabel="Remover treino"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
