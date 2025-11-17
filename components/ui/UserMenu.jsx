@@ -52,13 +52,13 @@ export default function UserMenu() {
     [flattenedItems]
   );
 
-  const reportsPath = useMemo(
-    () => flattenedItems.find((item) => item.path === '/relatorios')?.path,
+  const historyPath = useMemo(
+    () => flattenedItems.find((item) => item.path === '/historico-presencas')?.path,
     [flattenedItems]
   );
 
-  const resourceLinks = useMemo(
-    () => flattenedItems.filter((item) => item.path === '/historico-presencas' && item.path),
+  const reportsPath = useMemo(
+    () => flattenedItems.find((item) => item.path === '/relatorios')?.path,
     [flattenedItems]
   );
 
@@ -151,16 +151,15 @@ export default function UserMenu() {
               </Link>
             )}
 
-            {resourceLinks.map((item) => (
+            {historyPath && (
               <Link
-                key={item.path}
-                href={item.path}
+                href={historyPath}
                 className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
                 onClick={() => setOpen(false)}
               >
-                <ChevronRight size={14} className="text-bjj-gray-500" /> {item.title}
+                <ChevronRight size={14} className="text-bjj-gray-500" /> Histórico de presenças
               </Link>
-            ))}
+            )}
 
             {reportsPath && (
               <Link
