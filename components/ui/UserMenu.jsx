@@ -52,15 +52,27 @@ export default function UserMenu() {
     [flattenedItems]
   );
 
-  const historyPath = useMemo(
-    () => flattenedItems.find((item) => item.path === '/historico-presencas')?.path,
-    [flattenedItems]
+  const canSeeHistory = useMemo(
+    () => roles.some((role) => ['ALUNO', 'TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR'].includes(role)),
+    [roles]
   );
 
-  const reportsPath = useMemo(
-    () => flattenedItems.find((item) => item.path === '/relatorios')?.path,
-    [flattenedItems]
+  const historyPath = useMemo(() => {
+    const pathFromNav = flattenedItems.find((item) => item.path === '/historico-presencas')?.path;
+    if (pathFromNav) return pathFromNav;
+    return canSeeHistory ? '/historico-presencas' : undefined;
+  }, [canSeeHistory, flattenedItems]);
+
+  const canSeeReports = useMemo(
+    () => roles.some((role) => ['ALUNO', 'TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR'].includes(role)),
+    [roles]
   );
+
+  const reportsPath = useMemo(() => {
+    const pathFromNav = flattenedItems.find((item) => item.path === '/relatorios')?.path;
+    if (pathFromNav) return pathFromNav;
+    return canSeeReports ? '/relatorios' : undefined;
+  }, [canSeeReports, flattenedItems]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
