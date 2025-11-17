@@ -60,7 +60,9 @@ export default function UserMenu() {
   const historyPath = useMemo(() => {
     const pathFromNav = flattenedItems.find((item) => item.path === '/historico-presencas')?.path;
     if (pathFromNav) return pathFromNav;
-    return canSeeHistory ? '/historico-presencas' : undefined;
+    // Sempre expõe o histórico para alunos mesmo que a navegação não tenha carregado
+    // (ex.: metas ocultas ou filtros de menu). O middleware já cuida da autorização.
+    return canSeeHistory ? '/historico-presencas' : '/historico-presencas';
   }, [canSeeHistory, flattenedItems]);
 
   const canSeeReports = useMemo(
