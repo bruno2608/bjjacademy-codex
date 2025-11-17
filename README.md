@@ -19,12 +19,14 @@ e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
 | Área | Destaques |
 | --- | --- |
 | Autenticação | Tela de login remodelada com hero informativo, seleção de papéis mock e token persistido (localStorage). |
-| Dashboard | Hero `PageHero`, cards gradiente e alternância entre visões **Geral · Presenças · Graduações**. |
+| Dashboard (staff) | Hero `PageHero`, cards gradiente e alternância entre visões **Geral · Presenças · Graduações**. |
 | Alunos | CRUD mockado com formulário em modal, distribuição de faixas e destaques para próximos graduandos. |
-| Presenças | Registro rápido focado no check-in do dia, dropdown de sessão do dia, múltiplos treinos e correção via modal dedicado. |
+| Presenças (staff) | Registro rápido focado no check-in do dia, dropdown de sessão do dia, múltiplos treinos e correção via modal dedicado. |
 | Graduações | Tela inspirada no app com hero, cards progressivos, linha do tempo e agendamento por grau/faixa. |
 | Configurações | Hub com Regras de Graduação editáveis, Horários de Treino com persistência local e Tipos de Treino customizáveis. |
 | Permissões | Site map centralizado, middleware de RBAC e navegação (sidebar/mobile/tablet) filtrada pelos papéis do usuário. |
+| Área do Aluno | Layout separado com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`; histórico de presenças e relatórios pessoais acessíveis pelo menu do usuário. |
+| Check-in do Aluno | Tela dedicada com lógica automática/pendente conforme horário do treino e status visível ao professor. |
 | PWA | Manifesto completo, service worker com cache básico e ícones em múltiplos tamanhos. |
 
 ## 🧭 **Mapa da estrutura**
@@ -32,17 +34,27 @@ e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
 ```
 app/
   (authenticated)/
+    dashboard-instrutor/
     dashboard/
     alunos/
       [id]/
     presencas/
+      historico/
     graduacoes/
+    regras-graduacao/
+    horarios/
+    tipos-treino/
     configuracoes/
       graduacao/
       treinos/
       tipos-treino/
     relatorios/
     perfil/
+  (student)/
+    dashboard-aluno/
+    treinos/
+    checkin/
+    evolucao/
   login/
 components/
   ui/
@@ -64,6 +76,19 @@ styles/
   globals.css
   tailwind.css
 ```
+
+### Perfis e permissões
+
+- **Aluno (`student`):** acessa `(student)` com `/dashboard-aluno`, `/checkin`, `/treinos`, `/evolucao`, histórico em `/presencas/historico`, `/perfil` (apenas nome/telefone/foto) e relatórios pessoais. Tentativas de abrir telas administrativas redirecionam para o dashboard do aluno.
+- **Instrutor/Professor (`instructor`/`teacher`):** utilizam `(authenticated)` com `/dashboard-instrutor`, presenças, check-in manual, `/graduacoes`, `/regras-graduacao`, `/horarios`, `/tipos-treino`, `/relatorios`, `/presencas/historico` (qualquer aluno) e `/perfil` editável.
+- **Admin/TI (`admin`/`ti`):** têm acesso total, incluindo as configurações da academia e cadastros avançados.
+- **Site map + middleware:** `config/siteMap.ts`, `config/roles.ts` e `middleware.ts` filtram links e protegem as rotas com RBAC centralizado baseado no papel salvo via Zustand.
+
+### Check-in do aluno (mock)
+
+- **Treinos do dia** são carregados da store de presenças com horário, professor e tipo (Gi/No-Gi).
+- **Regras de horário:** check-in automático até o início do treino ou +30min; fora desse intervalo abre modal de confirmação e registra status **pendente** para aprovação do professor.
+- **Limites:** um registro por treino, com status exibido no histórico do aluno e na tela de presenças do professor.
 
 ### Componentes compartilhados de UI
 

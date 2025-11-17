@@ -9,15 +9,29 @@ import { ShieldCheck, ArrowRight } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import { ROLE_KEYS, normalizeRoles } from '../../config/roles';
 
-const AVAILABLE_ROLES = ['TI', 'ADMIN', 'PROFESSOR', 'INSTRUTOR', 'ALUNO'];
+const AVAILABLE_ROLES = [
+  ROLE_KEYS.ti,
+  ROLE_KEYS.admin,
+  ROLE_KEYS.teacher,
+  ROLE_KEYS.instructor,
+  ROLE_KEYS.student
+];
+const ROLE_LABELS = {
+  [ROLE_KEYS.ti]: 'TI',
+  [ROLE_KEYS.admin]: 'ADMIN',
+  [ROLE_KEYS.teacher]: 'PROFESSOR',
+  [ROLE_KEYS.instructor]: 'INSTRUTOR',
+  [ROLE_KEYS.student]: 'ALUNO'
+};
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, token } = useUserStore();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const [selectedRoles, setSelectedRoles] = useState(['PROFESSOR', 'INSTRUTOR']);
+  const [selectedRoles, setSelectedRoles] = useState([ROLE_KEYS.teacher, ROLE_KEYS.instructor]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -25,7 +39,7 @@ export default function LoginPage() {
     try {
       const storedRoles = window.localStorage.getItem('bjj_roles');
       if (storedRoles) {
-        const parsed = JSON.parse(storedRoles);
+        const parsed = normalizeRoles(JSON.parse(storedRoles));
         if (Array.isArray(parsed) && parsed.length) {
           rolesParaLogin = parsed;
           setSelectedRoles((prev) => {
@@ -42,7 +56,8 @@ export default function LoginPage() {
     const savedToken = window.localStorage.getItem('bjj_token');
     if (savedToken && !token) {
       login({ email: 'instrutor@bjj.academy', roles: rolesParaLogin });
-      router.replace('/dashboard');
+      const hasStudent = rolesParaLogin.includes(ROLE_KEYS.student) && rolesParaLogin.length === 1;
+      router.replace(hasStudent ? '/dashboard-aluno' : '/dashboard-instrutor');
     }
   }, [login, router, selectedRoles, token]);
 
@@ -69,7 +84,8 @@ export default function LoginPage() {
     }
     setError('');
     login({ email: form.email, roles: selectedRoles });
-    router.push('/dashboard');
+    const onlyStudent = selectedRoles.includes(ROLE_KEYS.student) && selectedRoles.length === 1;
+    router.push(onlyStudent ? '/dashboard-aluno' : '/dashboard-instrutor');
   };
 
   return (
@@ -152,7 +168,7 @@ export default function LoginPage() {
                         checked={checked}
                         onChange={() => toggleRole(role)}
                       />
-                      {role}
+                      {ROLE_LABELS[role] || role.toUpperCase()}
                     </label>
                   );
                 })}

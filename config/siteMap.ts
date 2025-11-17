@@ -10,8 +10,8 @@ import {
   ListChecks,
   UserCircle2
 } from 'lucide-react';
-import type { UserRole } from './userRoles';
-import { ALL_ROLES, STAFF_ROLES } from './userRoles';
+import type { UserRole } from './roles';
+import { ROLE_KEYS, STAFF_ROLES, ADMIN_ROLES, STUDENT_ROLES } from './roles';
 
 export type SiteMapItem = {
   title: string;
@@ -32,16 +32,63 @@ export type SiteMapItem = {
  */
 export const siteMap: SiteMapItem[] = [
   {
-    title: 'Dashboard',
-    path: '/dashboard',
+    title: 'Dashboard do Aluno',
+    path: '/dashboard-aluno',
     icon: LayoutDashboard,
-    roles: ALL_ROLES
+    roles: STUDENT_ROLES
   },
   {
-    title: 'Alunos',
-    path: '/alunos',
-    icon: Users,
+    title: 'Check-in',
+    path: '/checkin',
+    icon: CalendarCheck,
+    roles: STUDENT_ROLES
+  },
+  {
+    title: 'Treinos do Aluno',
+    path: '/treinos',
+    icon: Clock3,
+    roles: STUDENT_ROLES
+  },
+  {
+    title: 'Evolução',
+    path: '/evolucao',
+    icon: Medal,
+    roles: STUDENT_ROLES,
+    showInMainNav: true
+  },
+  {
+    title: 'Histórico de presenças',
+    path: '/presencas/historico',
+    icon: CalendarCheck,
+    roles: [...STAFF_ROLES, ROLE_KEYS.student],
+    showInMainNav: true
+  },
+  {
+    title: 'Relatórios',
+    path: '/relatorios',
+    icon: BarChart3,
+    roles: [...STAFF_ROLES, ROLE_KEYS.student],
+    showInMainNav: true
+  },
+  {
+    title: 'Meu Perfil',
+    path: '/perfil',
+    icon: UserCircle2,
+    roles: [...STAFF_ROLES, ROLE_KEYS.student],
+    showInMainNav: false
+  },
+  {
+    title: 'Dashboard Instrutor',
+    path: '/dashboard-instrutor',
+    icon: LayoutDashboard,
     roles: STAFF_ROLES
+  },
+  {
+    title: 'Dashboard Admin',
+    path: '/dashboard',
+    icon: LayoutDashboard,
+    roles: ADMIN_ROLES,
+    showInMainNav: false
   },
   {
     title: 'Presenças',
@@ -56,43 +103,53 @@ export const siteMap: SiteMapItem[] = [
     roles: STAFF_ROLES
   },
   {
-    title: 'Relatórios',
-    path: '/relatorios',
-    icon: BarChart3,
-    roles: STAFF_ROLES,
-    showInMainNav: false
+    title: 'Regras de Graduação',
+    path: '/regras-graduacao',
+    icon: Medal,
+    roles: STAFF_ROLES
   },
   {
-    title: 'Meu Perfil',
-    path: '/perfil',
-    icon: UserCircle2,
-    roles: ALL_ROLES,
-    showInMainNav: false
+    title: 'Horários de Treino',
+    path: '/horarios',
+    icon: Clock3,
+    roles: STAFF_ROLES
+  },
+  {
+    title: 'Tipos de Treino',
+    path: '/tipos-treino',
+    icon: ListChecks,
+    roles: STAFF_ROLES
+  },
+  {
+    title: 'Alunos',
+    path: '/alunos',
+    icon: Users,
+    roles: STAFF_ROLES
   },
   {
     title: 'Configurações da Academia',
     path: '/configuracoes',
     icon: Settings2,
-    roles: ['TI', 'ADMIN', 'PROFESSOR'],
+    roles: ADMIN_ROLES,
     showInMainNav: false,
     children: [
       {
         title: 'Regras de Graduação',
         path: '/configuracoes/graduacao',
         icon: Medal,
-        roles: ['TI', 'ADMIN', 'PROFESSOR']
+        roles: ADMIN_ROLES
       },
       {
         title: 'Horários de Treino',
         path: '/configuracoes/treinos',
         icon: Clock3,
-        roles: ['TI', 'ADMIN', 'PROFESSOR']
+        roles: ADMIN_ROLES
       },
       {
         title: 'Tipos de Treino',
         path: '/configuracoes/tipos-treino',
         icon: ListChecks,
-        roles: ['TI', 'ADMIN', 'PROFESSOR']
+        roles: ADMIN_ROLES
       }
     ]
   }
