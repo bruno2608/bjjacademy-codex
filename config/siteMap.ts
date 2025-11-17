@@ -5,6 +5,7 @@ import {
   CalendarCheck,
   Medal,
   BarChart3,
+  FileText,
   Settings2,
   Clock3,
   ListChecks,
@@ -100,6 +101,40 @@ export const siteMap: SiteMapItem[] = [
     icon: BarChart3,
     roles: [...STAFF_ROLES, 'ALUNO'],
     showInMainNav: false
+  },
+  {
+    title: 'Evolução',
+    path: '/evolucao',
+    icon: Medal,
+    roles: ['ALUNO'],
+    showInMainNav: true
+  },
+  {
+    title: 'Área do Instrutor',
+    path: '/instrutor',
+    icon: UserCircle2,
+    roles: STAFF_ROLES,
+    showInMainNav: true,
+    children: [
+      {
+        title: 'Histórico de presenças',
+        path: '/instrutor/historico-presencas',
+        icon: CalendarCheck,
+        roles: STAFF_ROLES
+      },
+      {
+        title: 'Documentos do aluno',
+        path: '/instrutor/documentos',
+        icon: FileText,
+        roles: STAFF_ROLES
+      },
+      {
+        title: 'Relatórios',
+        path: '/relatorios',
+        icon: BarChart3,
+        roles: STAFF_ROLES
+      }
+    ]
   },
   {
     title: 'Configurações da Academia',
