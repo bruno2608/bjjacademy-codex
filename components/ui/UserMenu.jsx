@@ -57,6 +57,12 @@ export default function UserMenu() {
     [flattenedItems]
   );
 
+  const resourceLinks = useMemo(
+    () =>
+      flattenedItems.filter((item) => ['/historico-presencas', '/documentos'].includes(item.path ?? '') && item.path),
+    [flattenedItems]
+  );
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!menuRef.current) return;
@@ -145,6 +151,17 @@ export default function UserMenu() {
                 <UserCircle2 size={16} /> Meu perfil
               </Link>
             )}
+
+            {resourceLinks.map((item) => (
+              <Link
+                key={item.path}
+                href={item.path}
+                className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
+                onClick={() => setOpen(false)}
+              >
+                <ChevronRight size={14} className="text-bjj-gray-500" /> {item.title}
+              </Link>
+            ))}
 
             {reportsPath && (
               <Link

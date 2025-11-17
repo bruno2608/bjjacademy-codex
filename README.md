@@ -25,7 +25,7 @@ e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
 | Graduações | Tela inspirada no app com hero, cards progressivos, linha do tempo e agendamento por grau/faixa. |
 | Configurações | Hub com Regras de Graduação editáveis, Horários de Treino com persistência local e Tipos de Treino customizáveis. |
 | Permissões | Site map centralizado, middleware de RBAC e navegação (sidebar/mobile/tablet) filtrada pelos papéis do usuário. |
-| Área do Aluno | Layout separado com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`; históricos detalhados, documentos e relatórios ficam na área do instrutor (`/instrutor/*`). |
+| Área do Aluno | Layout separado com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`; históricos, documentos e relatórios pessoais acessíveis pelo menu do usuário. |
 | Check-in do Aluno | Tela dedicada com lógica automática/pendente conforme horário do treino e status visível ao professor. |
 | PWA | Manifesto completo, service worker com cache básico e ícones em múltiplos tamanhos. |
 
@@ -44,9 +44,8 @@ app/
       treinos/
       tipos-treino/
     relatorios/
-    instrutor/
-      historico-presencas/
-      documentos/
+    historico-presencas/
+    documentos/
     perfil/
   (student)/
     dashboard-aluno/
@@ -77,7 +76,7 @@ styles/
 
 ### Perfis e permissões
 
-- **Aluno:** acessa o layout `(student)` com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`. Tentativas de visitar rotas administrativas redirecionam para `/dashboard-aluno`; históricos detalhados, documentos e relatórios ficam na área do instrutor (`/instrutor/*`).
+- **Aluno:** acessa o layout `(student)` com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`. Tentativas de visitar rotas administrativas redirecionam para `/dashboard-aluno`; históricos, documentos e relatórios pessoais ficam no menu do usuário.
 - **Professor/Admin/TI:** usam o layout `(authenticated)` com dashboards, cadastros, presenças, graduações e configurações. As ações de aprovar/recusar check-ins pendentes e cancelar treino ficam restritas aqui.
 - **Site map + middleware:** `config/siteMap.ts` e `middleware.ts` filtram links e protegem as rotas com RBAC centralizado baseado no papel salvo via Zustand.
 
