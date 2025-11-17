@@ -6,6 +6,7 @@ import Modal from '../../../../components/ui/Modal';
 import Input from '../../../../components/ui/Input';
 import Select from '../../../../components/ui/Select';
 import Button from '../../../../components/ui/Button';
+import ConfirmDialog from '../../../../components/ui/ConfirmDialog';
 import FaixaVisual from '../../../../components/graduacoes/FaixaVisual';
 import { useGraduationRulesStore } from '../../../../store/graduationRulesStore';
 import { BELT_ORDER } from '../../../../config/graduationRules';
@@ -71,6 +72,7 @@ export default function RegrasGraduacaoPage() {
   const [mode, setMode] = useState(null);
   const [form, setForm] = useState(null);
   const [error, setError] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState('');
 
   const belts = useMemo(() => sortBelts(Object.entries(rules)), [rules]);
   const beltNames = useMemo(() => belts.map(([belt]) => belt), [belts]);
@@ -125,10 +127,12 @@ export default function RegrasGraduacaoPage() {
     }));
   };
 
-  const handleDelete = (beltName) => {
-    const confirmed = window.confirm(`Deseja remover a faixa ${beltName}?`);
-    if (!confirmed) return;
-    removeRule(beltName);
+  const handleDelete = (beltName) => setDeleteTarget(beltName);
+
+  const confirmarExclusao = () => {
+    if (!deleteTarget) return;
+    removeRule(deleteTarget);
+    setDeleteTarget('');
   };
 
   const handleSubmit = (event) => {
@@ -458,6 +462,15 @@ export default function RegrasGraduacaoPage() {
           </form>
         )}
       </Modal>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Confirmar exclusão"
+        message={deleteTarget ? `Deseja remover a faixa ${deleteTarget}?` : ''}
+        confirmLabel="Remover faixa"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setDeleteTarget('')}
+      />
     </div>
   );
 }

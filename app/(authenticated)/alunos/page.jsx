@@ -10,6 +10,7 @@ import { Filter, UserPlus2 } from 'lucide-react';
 import MultiSelectDropdown from '../../../components/ui/MultiSelectDropdown';
 import Table from '../../../components/ui/Table';
 import Modal from '../../../components/ui/Modal';
+import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import AlunoForm from '../../../components/alunos/AlunoForm';
 import PageHero from '../../../components/ui/PageHero';
 import LoadingState from '../../../components/ui/LoadingState';
@@ -40,6 +41,7 @@ export default function AlunosPage() {
   const [filterFaixas, setFilterFaixas] = useState([]);
   const [filterStatuses, setFilterStatuses] = useState([]);
   const [filterTreinos, setFilterTreinos] = useState([]);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const presencas = usePresencasStore((state) => state.presencas);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
   const rules = useGraduationRulesStore((state) => state.rules);
@@ -162,10 +164,14 @@ export default function AlunosPage() {
   }, []);
 
   const handleDelete = async (aluno) => {
-    const confirmed = window.confirm(`Deseja remover o aluno ${aluno.nome}?`);
-    if (!confirmed) return;
-    await deleteAluno(aluno.id);
+    setDeleteTarget(aluno);
+  };
+
+  const confirmarExclusao = async () => {
+    if (!deleteTarget) return;
+    await deleteAluno(deleteTarget.id);
     await refreshList();
+    setDeleteTarget(null);
   };
 
   const handleEdit = (aluno) => {
@@ -288,6 +294,15 @@ export default function AlunosPage() {
         <AlunoForm onSubmit={handleCreate} isSubmitting={isSaving} submitLabel="Salvar cadastro" />
         {isSaving && <p className="text-xs text-bjj-gray-200/70 mt-3">Armazenando aluno na base...</p>}
       </Modal>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Confirmar exclusão"
+        message={deleteTarget ? `Deseja remover o aluno ${deleteTarget.nome}?` : ''}
+        confirmLabel="Remover aluno"
+        onConfirm={confirmarExclusao}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
