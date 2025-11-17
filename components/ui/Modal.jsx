@@ -10,15 +10,25 @@ import { X } from 'lucide-react';
 
 export default function Modal({ isOpen, title, onClose, children }) {
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || typeof document === 'undefined') {
       return undefined;
     }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose?.();
+      }
+    };
+
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+
     return () => {
       document.body.style.overflow = originalOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) {
     return null;
@@ -30,7 +40,7 @@ export default function Modal({ isOpen, title, onClose, children }) {
     }
   };
 
-  return (
+  const content = (
     <div
       className="modal z-50"
       role="dialog"
@@ -56,4 +66,6 @@ export default function Modal({ isOpen, title, onClose, children }) {
       </div>
     </div>
   );
+
+  return content;
 }
