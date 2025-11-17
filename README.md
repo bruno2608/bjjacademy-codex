@@ -49,6 +49,7 @@ app/
       treinos/
       tipos-treino/
     relatorios/
+    historico-presencas/
     perfil/
   (student)/
     dashboard-aluno/
