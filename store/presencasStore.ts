@@ -20,6 +20,15 @@ type PresencasState = {
   updatePresenca: (id: string, payload: Partial<Presenca>) => void;
   togglePresencaStatus: (id: string) => Presenca | null;
   removePresenca: (id: string) => void;
+  registerCheckin: (
+    payload: Omit<Presenca, 'id' | 'status' | 'hora'> & {
+      id?: string;
+      horaInicio?: string;
+    }
+  ) => { registro: Presenca | null; status: 'registrado' | 'pendente' | 'duplicado' };
+  approveCheckin: (id: string) => Presenca | null;
+  rejectCheckin: (id: string) => Presenca | null;
+  cancelarTreinoDoDia: (data: string, treinoId: string | null) => Presenca[];
 };
 
 export const usePresencasStore = create<PresencasState>((set) => ({
@@ -77,5 +86,83 @@ export const usePresencasStore = create<PresencasState>((set) => ({
       syncAlunos(atualizadas);
       return { presencas: atualizadas };
     });
+  },
+  registerCheckin: (payload) => {
+    let status: 'registrado' | 'pendente' | 'duplicado' = 'pendente';
+    let registro: Presenca | null = null;
+    const janelaMinutos = 30;
+    set((state) => {
+      const lista = Array.isArray(state.presencas) ? state.presencas : [];
+      const existente = lista.find(
+        (item) => item.alunoId === payload.alunoId && item.data === payload.data && item.treinoId === payload.treinoId
+      );
+      if (existente) {
+        status = 'duplicado';
+        registro = existente;
+        return { presencas: lista };
+      }
+
+      const agora = new Date();
+      const dataReferencia = payload.data ? new Date(`${payload.data}T${payload.horaInicio || '00:00'}`) : new Date();
+      const inicio = dataReferencia.getTime();
+      const limite = inicio + janelaMinutos * 60 * 1000;
+      const confirmavel = agora.getTime() >= inicio && agora.getTime() <= limite;
+      status = confirmavel ? 'registrado' : 'pendente';
+
+      registro = {
+        id: payload.id || `checkin-${Date.now()}`,
+        ...payload,
+        status: confirmavel ? 'Presente' : 'Pendente',
+        hora: confirmavel ? getCurrentTime() : null,
+        treinoModalidade: payload.treinoModalidade ?? payload.treinoId ?? null
+      } as Presenca;
+
+      const atualizadas = [...lista, registro];
+      syncAlunos(atualizadas);
+      return { presencas: atualizadas };
+    });
+    return { registro, status };
+  },
+  approveCheckin: (id) => {
+    let atualizado: Presenca | null = null;
+    set((state) => {
+      const atualizadas = state.presencas.map((item) => {
+        if (item.id !== id) return item;
+        atualizado = { ...item, status: 'Presente', hora: item.hora || getCurrentTime() };
+        return atualizado;
+      });
+      syncAlunos(atualizadas);
+      return { presencas: atualizadas };
+    });
+    return atualizado;
+  },
+  rejectCheckin: (id) => {
+    let atualizado: Presenca | null = null;
+    set((state) => {
+      const atualizadas = state.presencas.map((item) => {
+        if (item.id !== id) return item;
+        atualizado = { ...item, status: 'Ausente', hora: null };
+        return atualizado;
+      });
+      syncAlunos(atualizadas);
+      return { presencas: atualizadas };
+    });
+    return atualizado;
+  },
+  cancelarTreinoDoDia: (data, treinoId) => {
+    let novos: Presenca[] = [];
+    set((state) => {
+      const atualizadas = state.presencas.map((item) => {
+        if (item.data === data && item.treinoId === treinoId) {
+          const cancelado = { ...item, status: 'Cancelado' as const };
+          novos.push(cancelado);
+          return cancelado;
+        }
+        return item;
+      });
+      syncAlunos(atualizadas);
+      return { presencas: atualizadas };
+    });
+    return novos;
   }
 }));
