@@ -44,15 +44,14 @@ app/
       treinos/
       tipos-treino/
     relatorios/
+    historico-presencas/
+    documentos/
     perfil/
   (student)/
     dashboard-aluno/
-    perfil-aluno/
     agenda/
     checkin/
-    historico-presencas/
-    documentos/
-    relatorios-aluno/
+    evolucao/
   login/
 components/
   ui/
@@ -77,7 +76,7 @@ styles/
 
 ### Perfis e permissões
 
-- **Aluno:** acessa apenas o layout `(student)` com dashboard próprio, perfil editável (nome/contato/foto), agenda semanal mockada, check-in, histórico de presenças, documentos e placeholder de relatórios. Tentativas de visitar rotas administrativas redirecionam para `/dashboard-aluno`.
+- **Aluno:** acessa o layout `(student)` com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`. Tentativas de visitar rotas administrativas redirecionam para `/dashboard-aluno`; históricos detalhados, documentos e relatórios ficam na área do instrutor.
 - **Professor/Admin/TI:** usam o layout `(authenticated)` com dashboards, cadastros, presenças, graduações e configurações. As ações de aprovar/recusar check-ins pendentes e cancelar treino ficam restritas aqui.
 - **Site map + middleware:** `config/siteMap.ts` e `middleware.ts` filtram links e protegem as rotas com RBAC centralizado baseado no papel salvo via Zustand.
 

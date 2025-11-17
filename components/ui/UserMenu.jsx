@@ -48,12 +48,12 @@ export default function UserMenu() {
   );
 
   const profilePath = useMemo(
-    () => flattenedItems.find((item) => item.path === '/perfil' || item.path === '/perfil-aluno')?.path,
+    () => flattenedItems.find((item) => item.path === '/perfil')?.path,
     [flattenedItems]
   );
 
   const reportsPath = useMemo(
-    () => flattenedItems.find((item) => item.path === '/relatorios' || item.path === '/relatorios-aluno')?.path,
+    () => flattenedItems.find((item) => item.path === '/relatorios')?.path,
     [flattenedItems]
   );
 

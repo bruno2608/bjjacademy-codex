@@ -8,6 +8,7 @@ type UserState = {
   user: AuthUser | null;
   token: string | null;
   login: (payload: LoginPayload) => void;
+  updateUser?: (payload: Partial<AuthUser>) => void;
   logout: () => void;
   hydrate: (payload: Partial<{ user: AuthUser | null; token: string | null }>) => void;
 };
@@ -76,6 +77,10 @@ export const useUserStore = create<UserState>((set) => ({
     persistRoles(finalUser.roles);
     set({ user: finalUser, token: fakeToken });
   },
+  updateUser: (payload) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, ...payload } : state.user
+    })),
   logout: () => {
     clearPersistedRoles();
     set({ user: null, token: null });
