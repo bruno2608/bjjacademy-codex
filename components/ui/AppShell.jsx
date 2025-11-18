@@ -4,19 +4,32 @@ import { useEffect, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 
 import TabletNav from './TabletNav';
+import { useAlunosStore } from '../../store/alunosStore';
 import useUserStore from '../../store/userStore';
 
 const BARE_PATHS = ['/login', '/unauthorized'];
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
-  const { hydrateFromStorage, hydrated } = useUserStore();
+  const { hydrateFromStorage, hydrated, user, updateUser } = useUserStore();
+  const alunos = useAlunosStore((state) => state.alunos);
 
   useEffect(() => {
     if (!hydrated) {
       hydrateFromStorage();
     }
   }, [hydrateFromStorage, hydrated]);
+
+  useEffect(() => {
+    if (!user?.alunoId) return;
+    const aluno = alunos.find((item) => item.id === user.alunoId);
+    if (!aluno) return;
+
+    const nextAvatar = aluno.avatarUrl || user.avatarUrl;
+    if (nextAvatar && nextAvatar !== user.avatarUrl && updateUser) {
+      updateUser({ avatarUrl: nextAvatar, name: aluno.nome });
+    }
+  }, [alunos, updateUser, user]);
 
   const isBareLayout = useMemo(
     () => BARE_PATHS.some((publicPath) => pathname?.startsWith(publicPath)),
