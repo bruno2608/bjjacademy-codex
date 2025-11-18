@@ -1,43 +1,50 @@
 export const ROLE_KEYS = {
-  student: 'student',
-  instructor: 'instructor',
-  teacher: 'teacher',
+  aluno: 'aluno',
+  instrutor: 'instrutor',
+  professor: 'professor',
   admin: 'admin',
   ti: 'ti'
 } as const;
 
 export type UserRole = (typeof ROLE_KEYS)[keyof typeof ROLE_KEYS];
+export type Role = UserRole;
 
 export const ROLE_ALIASES: Record<string, UserRole> = {
-  aluno: ROLE_KEYS.student,
-  student: ROLE_KEYS.student,
-  instrutor: ROLE_KEYS.instructor,
-  instructor: ROLE_KEYS.instructor,
-  professor: ROLE_KEYS.teacher,
-  teacher: ROLE_KEYS.teacher,
+  aluno: ROLE_KEYS.aluno,
+  student: ROLE_KEYS.aluno,
+  instrutor: ROLE_KEYS.instrutor,
+  instructor: ROLE_KEYS.instrutor,
+  professor: ROLE_KEYS.professor,
+  teacher: ROLE_KEYS.professor,
   admin: ROLE_KEYS.admin,
   administrador: ROLE_KEYS.admin,
   ti: ROLE_KEYS.ti,
   technology: ROLE_KEYS.ti
 };
 
-export const STUDENT_ROLES: UserRole[] = [ROLE_KEYS.student];
-export const INSTRUCTOR_ROLES: UserRole[] = [ROLE_KEYS.instructor, ROLE_KEYS.teacher];
-export const STAFF_ROLES: UserRole[] = [...INSTRUCTOR_ROLES, ROLE_KEYS.admin, ROLE_KEYS.ti];
+export const STUDENT_ROLES: UserRole[] = [ROLE_KEYS.aluno];
+export const INSTRUCTOR_ROLES: UserRole[] = [ROLE_KEYS.instrutor];
+export const TEACHER_ROLES: UserRole[] = [ROLE_KEYS.professor];
+export const STAFF_ROLES: UserRole[] = [
+  ROLE_KEYS.instrutor,
+  ROLE_KEYS.professor,
+  ROLE_KEYS.admin,
+  ROLE_KEYS.ti
+];
 export const ADMIN_ROLES: UserRole[] = [ROLE_KEYS.admin, ROLE_KEYS.ti];
 
 export const ROLE_PERMISSIONS = {
-  [ROLE_KEYS.student]: {
+  [ROLE_KEYS.aluno]: {
     canEditSelf: true,
     canEditGraduation: false,
     canSeeAdmin: false
   },
-  [ROLE_KEYS.instructor]: {
+  [ROLE_KEYS.instrutor]: {
     canEditSelf: true,
     canEditGraduation: true,
     canSeeAdmin: false
   },
-  [ROLE_KEYS.teacher]: {
+  [ROLE_KEYS.professor]: {
     canEditSelf: true,
     canEditGraduation: true,
     canSeeAdmin: false
@@ -67,6 +74,17 @@ export function normalizeRoles(values: unknown): UserRole[] {
       unique.add(mapped);
     }
   });
+
+  if (unique.has(ROLE_KEYS.ti) || unique.has(ROLE_KEYS.admin)) {
+    unique.add(ROLE_KEYS.professor);
+    unique.add(ROLE_KEYS.instrutor);
+    unique.add(ROLE_KEYS.aluno);
+  } else if (unique.has(ROLE_KEYS.professor)) {
+    unique.add(ROLE_KEYS.instrutor);
+    unique.add(ROLE_KEYS.aluno);
+  } else if (unique.has(ROLE_KEYS.instrutor)) {
+    unique.add(ROLE_KEYS.aluno);
+  }
 
   return Array.from(unique);
 }
