@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
   Activity,
   BarChart2,
@@ -11,7 +12,8 @@ import {
   PieChart,
   ShieldCheck,
   TrendingUp,
-  Users
+  Users,
+  ArrowRight
 } from 'lucide-react';
 
 import FaixaVisual from '../../components/graduacoes/FaixaVisual';
@@ -23,7 +25,10 @@ import { ROLE_KEYS } from '../../config/roles';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
-const defaultAvatar = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80';
+const defaultAvatar = 'https://ui-avatars.com/api/?background=1b1b1b&color=fff&name=BJJ+Academy';
+
+const ensureAvatar = (name, avatarUrl) =>
+  avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
 
 function HelperDropdown({ title, items }) {
   return (
@@ -110,7 +115,7 @@ function StudentDashboard() {
   const aluno = useMemo(() => alunos.find((item) => item.id === alunoId) || alunos[0], [alunoId, alunos]);
   const faixaAtual = aluno?.faixa || 'Branca';
   const graus = aluno?.graus || 0;
-  const avatarUrl = aluno?.avatarUrl || user?.avatarUrl || defaultAvatar;
+  const avatarUrl = ensureAvatar(aluno?.nome, aluno?.avatarUrl || user?.avatarUrl || defaultAvatar);
 
   const stats = useMemo(() => {
     const registrosAluno = presencas.filter((item) => item.alunoId === aluno?.id);
@@ -154,24 +159,13 @@ function StudentDashboard() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-[1.6fr,1fr]">
-        <div
-          className={`${cardBase} relative overflow-hidden hero bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/70 to-bjj-black p-0`}
-          style={{
-            backgroundImage:
-              "linear-gradient(135deg, rgba(16,16,16,0.75), rgba(16,16,16,0.2)), url('https://images.unsplash.com/photo-1544916473-7e04c8b4b51d?auto=format&fit=crop&w=1200&q=80')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-bjj-black/85 via-bjj-black/40 to-transparent" />
-          <div className="hero-content relative w-full flex-col items-start justify-between gap-4 px-6 py-6">
-            <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="space-y-2">
+        <div className={`${cardBase} relative overflow-hidden bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/70 to-bjj-black p-0`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-bjj-black/80 via-bjj-black/35 to-transparent" />
+          <div className="relative flex w-full flex-col gap-4 px-6 py-6">
+            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-1">
                 <p className={badge}>Dashboard do aluno</p>
-                <h1 className="text-2xl font-semibold text-white leading-tight">Bem-vindo, {aluno?.nome || 'Aluno'}!</h1>
-                <p className="max-w-xl text-sm text-bjj-gray-200/85">
-                  Acompanhe sua jornada e evolua suas graduações acompanhando presenças e progresso.
-                </p>
+                <h1 className="text-xl font-semibold text-white leading-tight">{aluno?.nome || 'Aluno'}</h1>
               </div>
               <HelperDropdown
                 title="Ajuda"
@@ -191,17 +185,19 @@ function StudentDashboard() {
                 avatarUrl={avatarUrl}
               />
               <div className="grid flex-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 px-4 py-3 shadow-inner">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Faixa</p>
-                  <p className="mt-1 text-lg font-semibold">{faixaAtual}</p>
-                </div>
-                <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 px-4 py-3 shadow-inner">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Grau atual</p>
-                  <p className="mt-1 text-lg font-semibold">{graus}º grau</p>
-                </div>
-                <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 px-4 py-3 shadow-inner">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Aulas</p>
-                  <p className="mt-1 text-lg font-semibold">{aluno?.aulasNoGrauAtual || 0} aulas</p>
+                {[{ label: 'Faixa', value: faixaAtual }, { label: 'Grau atual', value: `${graus}º grau` }].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 px-4 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.25)]"
+                  >
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
+                    <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
+                  </div>
+                ))}
+                <div className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 px-4 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.25)]">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Aulas no grau</p>
+                  <p className="mt-1 text-lg font-semibold text-white">{progressoProximoGrau.aulasNoGrau}</p>
+                  <ProgressBar percent={progressoProximoGrau.percent} />
                 </div>
               </div>
             </div>
@@ -247,22 +243,48 @@ function StudentDashboard() {
         </div>
       </div>
 
-      <div className="stats stats-vertical md:stats-horizontal w-full rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-left text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
-        <div className="stat">
-          <div className="stat-title text-bjj-gray-300">Aulas no grau</div>
-          <div className="stat-value text-white">{progressoProximoGrau.aulasNoGrau}</div>
-          <div className="stat-desc text-bjj-gray-300">meta de {progressoProximoGrau.alvo} aulas</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title text-bjj-gray-300">Presenças</div>
-          <div className="stat-value text-white">{stats.presentes}</div>
-          <div className="stat-desc text-green-300">últimos registros confirmados</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title text-bjj-gray-300">Pendências</div>
-          <div className="stat-value text-white">{stats.pendentes}</div>
-          <div className="stat-desc text-yellow-300">aguardando aprovação</div>
-        </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        {[
+          {
+            title: 'Aulas no grau',
+            value: progressoProximoGrau.aulasNoGrau,
+            helper: `meta de ${progressoProximoGrau.alvo} aulas`,
+            href: '/evolucao',
+            tone: 'from-bjj-gray-900/80 to-bjj-black/90',
+            badgeTone: 'text-bjj-gray-300'
+          },
+          {
+            title: 'Presenças',
+            value: stats.presentes,
+            helper: 'últimos registros confirmados',
+            href: '/historico-presencas',
+            tone: 'from-bjj-gray-900/85 to-bjj-black/80',
+            badgeTone: 'text-green-300'
+          },
+          {
+            title: 'Pendências',
+            value: stats.pendentes,
+            helper: 'aguardando aprovação',
+            href: '/presencas',
+            tone: 'from-bjj-gray-900/80 to-bjj-black/85',
+            badgeTone: 'text-yellow-300'
+          }
+        ].map((item) => (
+          <Link
+            key={item.title}
+            href={item.href}
+            className={`${cardBase} group flex items-center justify-between gap-4 border-bjj-gray-800/80 bg-gradient-to-br ${item.tone} p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_18px_45px_rgba(225,6,0,0.18)]`}
+          >
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-bjj-gray-200/90">{item.title}</p>
+              <p className="text-3xl font-bold text-white">{item.value}</p>
+              <p className={`text-xs ${item.badgeTone}`}>{item.helper}</p>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-800/80 text-white group-hover:bg-bjj-red group-hover:text-white">
+              <ArrowRight size={16} />
+            </div>
+          </Link>
+        ))}
       </div>
 
       <div className={`${cardBase} p-6`}>
@@ -311,8 +333,8 @@ function ProfessorDashboard() {
     const ativos = alunos.filter((a) => a.status === 'Ativo').length;
     const inativos = totalAlunos - ativos;
     const graduados = alunos.filter((a) => (a.faixa || '').toLowerCase() !== 'branca').length;
-    const pendentes = presencas.filter((p) => p.status === 'Pendente').length;
-  const presentesSemana = presencas.filter((p) => p.status === 'CONFIRMADO').length;
+    const pendentes = presencas.filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN').length;
+    const presentesSemana = presencas.filter((p) => p.status === 'CONFIRMADO').length;
     return { totalAlunos, ativos, inativos, graduados, pendentes, presentesSemana };
   }, [alunos, presencas]);
 
@@ -348,119 +370,249 @@ function ProfessorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className={`${cardBase} hero bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
-        <div className="hero-content w-full flex-col items-start justify-between gap-4 px-6 py-6 sm:flex-row sm:items-center">
-          <div className="space-y-2">
-            <p className={badge}>Visão geral</p>
-            <h1 className="text-2xl font-semibold text-white leading-tight">Painel principal da BJJ Academy</h1>
-            <p className="text-sm text-bjj-gray-200/85">Monitore os módulos críticos e escolha a visão detalhada desejada.</p>
-          </div>
-          <div className="flex flex-col items-end gap-3 sm:w-[380px]">
-            <HelperDropdown
-              title="Ajuda"
-              items={[
-                { label: 'Abas do painel', description: 'Alterne entre visões gerais, alunos, presenças e graduações.' },
-                { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
-                { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
-              ]}
-            />
-            <div className="flex w-full items-center gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/50 px-4 py-3 shadow-inner">
-              <div className="avatar">
-                <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
-                  <img src={instructorAvatar} alt={`Avatar de ${instructorName}`} loading="lazy" />
-                </div>
+      <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
+        <div className="grid gap-6 px-5 py-5 lg:grid-cols-[1.15fr,1fr]">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="space-y-1">
+                <p className={badge}>Visão geral</p>
+                <h1 className="text-xl font-semibold text-white leading-tight">{instructorName}</h1>
+                <p className="text-xs text-bjj-gray-300/90">Painel compacto com atalhos para aprovar presenças e gerenciar alunos.</p>
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
-              </div>
-            </div>
-            <div className="grid w-full grid-cols-2 gap-3">
-              <StatPill icon={CalendarCheck} title="Aulas na semana" value={metrics.presentesSemana} accent="text-green-300" />
-              <StatPill icon={BarChart3} title="Histórico na semana" value={presencas.length} accent="text-yellow-300" />
-              <StatPill icon={Users} title="Total de alunos" value={metrics.totalAlunos} accent="text-white" />
-              <StatPill icon={Medal} title="Graduados" value={metrics.graduados} accent="text-bjj-red" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="stats stats-vertical md:stats-horizontal w-full rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-left text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
-        <div className="stat">
-          <div className="stat-title text-bjj-gray-300">Alunos ativos</div>
-          <div className="stat-value text-white">{metrics.ativos}</div>
-          <div className="stat-desc text-green-300">de {metrics.totalAlunos} matrículas</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title text-bjj-gray-300">Pendências</div>
-          <div className="stat-value text-white">{metrics.pendentes}</div>
-          <div className="stat-desc text-yellow-300">aprovar check-ins atrasados</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title text-bjj-gray-300">Graduados</div>
-          <div className="stat-value text-white">{metrics.graduados}</div>
-          <div className="stat-desc text-bjj-gray-300">faixas acima da branca</div>
-        </div>
-      </div>
-
-      <div className={`${cardBase} p-6`}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className={badge}>Painel da academia</p>
-            <h3 className="text-xl font-semibold text-white">Resumo detalhado</h3>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 p-1">
-            {[
-              { key: 'visao', label: 'Visão Geral' },
-              { key: 'alunos', label: 'Alunos' },
-              { key: 'presencas', label: 'Presenças' },
-              { key: 'graduacoes', label: 'Graduações' }
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  activeTab === tab.key
-                    ? 'bg-bjj-red text-white shadow-[0_12px_30px_rgba(225,6,0,0.25)]'
-                    : 'text-bjj-gray-200 hover:bg-bjj-gray-800'
-                }`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {tabCards[activeTab].map((card) => {
-            const Icon = card.icon;
-            return (
-              <div
-                key={card.title}
-                className="rounded-2xl border border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-bjj-gray-200/90">{card.title}</p>
-                    <p className="mt-1 text-3xl font-bold text-white">{card.value}</p>
+              <div className="flex items-center gap-2 rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-2">
+                <div className="avatar">
+                  <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
+                    <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
                   </div>
-                  <span className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-900/80 ${card.tone}`}>
-                    <Icon size={18} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
+                </div>
+                <HelperDropdown
+                  title="Ajuda"
+                  items={[
+                    { label: 'Visões rápidas', description: 'Altere entre visões gerais, alunos, presenças e graduações.' },
+                    { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
+                    { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
+                  ]}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[{ label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' },
+                { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
+                { label: 'Graduações', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' }
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="group flex items-center justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-4 py-3 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_14px_32px_rgba(0,0,0,0.35)]"
+                >
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
+                    <p className="text-2xl font-bold text-white leading-tight">{item.value}</p>
+                  </div>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
+                    <item.icon size={18} />
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-4">
+              {[{ label: 'Presenças', href: '/presencas', icon: CalendarCheck },
+                { label: 'Alunos', href: '/alunos', icon: Users },
+                { label: 'Relatórios', href: '/relatorios', icon: PieChart },
+                { label: 'Histórico', href: '/historico-presencas', icon: BarChart2 }
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center justify-between rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/50 px-3 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:text-bjj-red"
+                >
+                  <span className="flex items-center gap-2">
+                    <item.icon size={16} />
+                    {item.label}
+                  </span>
+                  <ArrowRight size={14} />
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[{ label: 'Aulas na semana', value: metrics.presentesSemana, icon: CalendarCheck, href: '/presencas' },
+              { label: 'Histórico na semana', value: presencas.length, icon: BarChart3, href: '/historico-presencas' },
+              { label: 'Total de alunos', value: metrics.totalAlunos, icon: Users, href: '/alunos' },
+              { label: 'Check-ins registrados', value: presencas.length, icon: Activity, href: '/presencas' }
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="group rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
+                    <p className="mt-2 text-3xl font-bold text-white leading-none">{item.value}</p>
+                  </div>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
+                    <item.icon size={18} />
                   </span>
                 </div>
                 <div className="mt-3 h-1.5 rounded-full bg-bjj-gray-800">
-                  <div className="h-full rounded-full bg-bjj-red/70" style={{ width: '75%' }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: `${Math.min(100, Number(item.value) || 0)}%` }} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
+          <div className={`${cardBase} p-5`}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">Visão analítica</h3>
+              <span className="badge badge-ghost badge-sm text-[11px] tracking-[0.15em] text-bjj-gray-200">Atualizado</span>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-bjj-gray-200/90">Check-ins por status</p>
+                  <Clock3 size={16} className="text-bjj-gray-200" />
+                </div>
+                <div className="mt-4 space-y-3">
+                  {[{ label: 'Confirmados', value: presencas.filter((p) => p.status === 'CONFIRMADO').length, tone: 'bg-green-500' },
+                    { label: 'Pendentes', value: metrics.pendentes, tone: 'bg-yellow-400' },
+                    { label: 'Ausentes', value: presencas.filter((p) => p.status === 'AUSENTE' || p.status === 'AUSENTE_JUSTIFICADA').length, tone: 'bg-bjj-red' }
+                  ].map((row) => (
+                    <div key={row.label} className="space-y-2">
+                      <div className="flex items-center justify-between text-sm text-bjj-gray-200">
+                        <span>{row.label}</span>
+                        <span className="font-semibold text-white">{row.value}</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-bjj-gray-800">
+                        <div className={`h-full rounded-full ${row.tone}`} style={{ width: `${Math.min(100, row.value * 10)}%` }} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            );
-          })}
+              <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-bjj-gray-200/90">Presenças na semana</p>
+                  <BarChart2 size={16} className="text-bjj-gray-200" />
+                </div>
+                <div className="mt-4 flex items-end gap-3">
+                  {[5, 8, 6, 9, 7, 10, 4].map((value, idx) => (
+                    <div key={idx} className="flex flex-1 flex-col items-center gap-2">
+                      <div className="w-full rounded-t-xl bg-gradient-to-t from-bjj-red to-red-400" style={{ height: `${value * 6}px` }} />
+                      <span className="text-[11px] text-bjj-gray-300">D{idx + 1}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={`${cardBase} p-6`}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className={badge}>Painel da academia</p>
+                <h3 className="text-xl font-semibold text-white">Resumo detalhado</h3>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 p-1">
+                {[{ key: 'visao', label: 'Visão Geral' }, { key: 'alunos', label: 'Alunos' }, { key: 'presencas', label: 'Presenças' }, { key: 'graduacoes', label: 'Graduações' }].map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      activeTab === tab.key
+                        ? 'bg-bjj-red text-white shadow-[0_12px_30px_rgba(225,6,0,0.25)]'
+                        : 'text-bjj-gray-200 hover:bg-bjj-gray-800'
+                    }`}
+                    onClick={() => setActiveTab(tab.key)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {tabCards[activeTab].map((card) => {
+                const Icon = card.icon;
+                return (
+                  <div
+                    key={card.title}
+                    className="rounded-2xl border border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-bjj-gray-200/90">{card.title}</p>
+                        <p className="mt-1 text-3xl font-bold text-white">{card.value}</p>
+                      </div>
+                      <span className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-900/80 ${card.tone}`}>
+                        <Icon size={18} />
+                      </span>
+                    </div>
+                    <div className="mt-3 h-1.5 rounded-full bg-bjj-gray-800">
+                      <div className="h-full rounded-full bg-bjj-red/70" style={{ width: '75%' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-b from-bjj-gray-900 to-bjj-black p-5`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={badge}>Pendências</p>
+              <h3 className="text-lg font-semibold text-white">Check-ins em análise</h3>
+            </div>
+            <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-950 shadow">
+              {metrics.pendentes} aguardando
+            </span>
+          </div>
+          <div className="space-y-3">
+            {presencas
+              .filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN')
+              .slice(0, 5)
+              .map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-start justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome || 'Aluno'}</p>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.tipoTreino}</p>
+                  </div>
+                  <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
+                    Aguardando
+                  </span>
+                </div>
+              ))}
+            {metrics.pendentes === 0 && (
+              <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/50 p-4 text-sm text-bjj-gray-300">
+                Nenhum check-in pendente no momento. Acompanhe novos envios em tempo real.
+              </p>
+            )}
+          </div>
+          <Link
+            href="/presencas"
+            className="btn btn-sm rounded-full border-none bg-bjj-red text-white shadow-lg hover:bg-red-600"
+          >
+            Ir para presenças
+          </Link>
         </div>
       </div>
     </div>
   );
 }
-
 export default function DashboardPage() {
   const { isInstructor, isAdmin, roles } = useRole();
   const isProfessorLayout = isInstructor || isAdmin || roles.includes(ROLE_KEYS.professor) || roles.includes(ROLE_KEYS.instrutor);

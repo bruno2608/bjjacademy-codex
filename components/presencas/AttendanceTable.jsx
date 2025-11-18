@@ -25,22 +25,35 @@ export default function AttendanceTable({
   const statusTone = (status) => {
     switch (status) {
       case 'CONFIRMADO':
-        return { label: 'PRESENTE', variant: 'success' };
+        return { label: 'PRESENTE', variant: 'success', className: 'bg-green-600 text-white shadow-[0_0_0_1px_rgba(34,197,94,0.35)]' };
       case 'CHECKIN':
-        return { label: 'CHECK-IN', variant: 'warning' };
+        return {
+          label: 'CHECK-IN',
+          variant: 'warning',
+          className: 'bg-amber-400 text-bjj-black shadow-[0_0_0_1px_rgba(251,191,36,0.4)]'
+        };
       case 'PENDENTE':
-        return { label: 'PENDENTE', variant: 'warning' };
+        return {
+          label: 'PENDENTE',
+          variant: 'warning',
+          className: 'bg-amber-500 text-bjj-black font-semibold shadow-[0_0_0_1px_rgba(245,158,11,0.45)]'
+        };
       case 'AUSENTE':
-        return { label: 'AUSENTE', variant: 'error' };
+        return { label: 'AUSENTE', variant: 'danger', className: 'bg-red-600 text-white shadow-[0_0_0_1px_rgba(248,113,113,0.45)]' };
       case 'AUSENTE_JUSTIFICADA':
-        return { label: 'AUSENTE JUSTIFICADA', variant: 'error' };
+        return {
+          label: 'AUSENTE JUSTIFICADA',
+          variant: 'danger',
+          className: 'bg-red-500 text-white shadow-[0_0_0_1px_rgba(248,113,113,0.45)]'
+        };
       default:
-        return { label: status || '—', variant: 'neutral' };
+        return { label: status || '—', variant: 'neutral', className: 'bg-bjj-gray-700/40 text-bjj-gray-100' };
     }
   };
 
-  const canConfirm = (status) => status === 'CHECKIN' || status === 'PENDENTE';
-  const canAbsent = (status) => status === 'CHECKIN' || status === 'PENDENTE';
+  const canConfirm = (status) =>
+    status === 'CHECKIN' || status === 'PENDENTE' || status === 'AUSENTE' || status === 'AUSENTE_JUSTIFICADA';
+  const canAbsent = (status) => status === 'CHECKIN' || status === 'PENDENTE' || status === 'CONFIRMADO';
 
   return (
     <div
@@ -91,7 +104,10 @@ export default function AttendanceTable({
                       {faixa} · {graus}º grau
                     </p>
                   </div>
-                  <Badge variant={tone.variant} className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase">
+                  <Badge
+                    variant={tone.variant}
+                    className={`px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase ${tone.className}`}
+                  >
                     {tone.label}
                   </Badge>
                 </div>
@@ -187,7 +203,10 @@ export default function AttendanceTable({
                   </span>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
-                  <Badge variant={tone.variant} className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase">
+                  <Badge
+                    variant={tone.variant}
+                    className={`px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase ${tone.className}`}
+                  >
                     {tone.label}
                   </Badge>
                 </div>

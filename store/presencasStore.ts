@@ -4,6 +4,26 @@ import { MOCK_PRESENCAS } from '../data/mockPresencas';
 import type { Presenca, StatusPresenca } from '../types/presenca';
 import { useAlunosStore } from './alunosStore';
 
+const normalizarStatus = (status: Presenca['status']): StatusPresenca => {
+  const mapa: Record<string, StatusPresenca> = {
+    PRESENTE: 'CONFIRMADO',
+    CONFIRMADO: 'CONFIRMADO',
+    CHECKIN: 'CHECKIN',
+    PENDENTE: 'PENDENTE',
+    AUSENTE: 'AUSENTE',
+    AUSENTE_JUSTIFICADA: 'AUSENTE_JUSTIFICADA'
+  };
+
+  const chave = (status || '').toString().toUpperCase();
+  return mapa[chave] ?? 'PENDENTE';
+};
+
+const normalizarPresencas = (lista: Presenca[]): Presenca[] =>
+  (lista || []).map((item) => ({
+    ...item,
+    status: normalizarStatus(item.status)
+  }));
+
 const getCurrentTime = () =>
   new Date()
     .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
@@ -40,11 +60,12 @@ type PresencasState = {
 };
 
 export const usePresencasStore = create<PresencasState>((set) => ({
-  presencas: MOCK_PRESENCAS,
+  presencas: normalizarPresencas(MOCK_PRESENCAS),
   treinosFechados: {},
   setPresencas: (presencas) => {
-    set({ presencas });
-    syncAlunos(presencas);
+    const normalizadas = normalizarPresencas(presencas);
+    set({ presencas: normalizadas });
+    syncAlunos(normalizadas);
   },
   addPresenca: (presenca) => {
     set((state) => {
@@ -201,7 +222,7 @@ export const usePresencasStore = create<PresencasState>((set) => ({
     let ausentesCriados = 0;
     set((state) => {
       const lista = Array.isArray(state.presencas) ? state.presencas : [];
-      const atualizadas = lista.map((item) => {
+      const atualizadas = lista.map((item) => { 
         if (item.data === data && item.treinoId === treinoId) {
           if (item.status === 'CHECKIN') {
             confirmados += 1;
