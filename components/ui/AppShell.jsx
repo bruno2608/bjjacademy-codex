@@ -41,15 +41,15 @@ export default function AppShell({ children }) {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-bjj-black text-bjj-white">
+    <div className="min-h-screen overflow-x-hidden bg-base-100 text-base-content">
       <TabletNav />
-      <main className="mx-auto w-full max-w-6xl px-4 pb-12 pt-6 md:px-6 xl:px-8">{children}</main>
-      <footer className="footer footer-center mt-auto w-full border-t border-bjj-gray-900 bg-bjj-gray-950/80 px-4 py-6 text-sm text-bjj-gray-300">
+      <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 md:px-6 xl:px-8">{children}</main>
+      <footer className="footer footer-center mt-auto w-full border-t border-base-300/60 bg-base-200/40 px-4 py-6 text-sm text-base-content">
         <div className="flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm">
-          <span className="font-semibold text-white">BJJ Academy</span>
-          <span className="text-bjj-gray-400">PWA pronto para instalar</span>
-          <span className="text-bjj-gray-400">Built with Next.js 14 + Tailwind + DaisyUI</span>
-          <span className="text-bjj-gray-400">Suporte: suporte@bjj.academy</span>
+          <span className="font-semibold">BJJ Academy</span>
+          <span className="opacity-70">PWA pronto para instalar</span>
+          <span className="opacity-70">Built with Next.js 14 + Tailwind + DaisyUI</span>
+          <span className="opacity-70">Suporte: suporte@bjj.academy</span>
         </div>
       </footer>
     </div>

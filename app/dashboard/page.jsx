@@ -37,10 +37,10 @@ const badgeTone = {
 
 function StatCard({ icon: Icon, title, value }) {
   return (
-    <div className="stats stats-vertical lg:stats-horizontal rounded-2xl border border-base-300/60 bg-base-200 shadow-xl">
+    <div className="stats stats-vertical rounded-2xl border border-base-300/70 bg-base-200/90 shadow-xl lg:stats-horizontal">
       <div className="stat">
         <div className="stat-figure">
-          <div className="btn btn-circle btn-sm border-none bg-gradient-to-br from-primary/80 to-primary/40 text-white shadow">
+          <div className="btn btn-circle btn-sm border-none bg-gradient-to-br from-primary/80 to-primary/50 text-white shadow-lg">
             <Icon size={16} />
           </div>
         </div>
@@ -54,7 +54,7 @@ function StatCard({ icon: Icon, title, value }) {
 
 function DistributionCard({ label, value, icon: Icon }) {
   return (
-    <div className="card rounded-xl bg-base-200 p-4 shadow-md">
+    <div className="card rounded-2xl bg-base-200/90 p-4 shadow-xl">
       <div className="flex items-center justify-between">
         <p className="text-lg font-bold text-white">{label}</p>
         <div className="btn btn-circle btn-ghost btn-xs border border-base-300/70 text-primary">
@@ -68,7 +68,7 @@ function DistributionCard({ label, value, icon: Icon }) {
 
 function PendingCard({ title, items }) {
   return (
-    <div className="card rounded-2xl border border-base-300/60 bg-base-200 shadow-xl">
+    <div className="card rounded-2xl border border-base-300/70 bg-base-200/90 shadow-xl">
       <div className="card-body">
         <div className="flex items-center justify-between">
           <div>
@@ -104,24 +104,22 @@ function PendingCard({ title, items }) {
 
 function HeaderCard({ title, subtitle, avatarUrl, helper, children }) {
   return (
-    <div className="card rounded-2xl bg-gradient-to-br from-base-200 via-base-300 to-base-200 shadow-xl">
-      <div className="card-body gap-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="avatar">
-              <div className="w-14 rounded-full ring ring-primary/60 ring-offset-2 ring-offset-base-300">
-                <img src={avatarUrl || defaultAvatar} alt={title} loading="lazy" />
-              </div>
-            </div>
-            <div>
-              <p className="text-sm uppercase tracking-wide text-primary">{subtitle}</p>
-              <h1 className="text-xl font-bold text-white">{title}</h1>
+    <div className="rounded-2xl border border-base-300/70 bg-gradient-to-r from-base-200/80 via-base-200/50 to-base-200/80 p-5 shadow-xl">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="avatar">
+            <div className="w-14 rounded-full ring ring-primary/60 ring-offset-2 ring-offset-base-300">
+              <img src={avatarUrl || defaultAvatar} alt={title} loading="lazy" />
             </div>
           </div>
-          {helper}
+          <div>
+            <p className="text-sm uppercase tracking-wide text-primary">{subtitle}</p>
+            <h1 className="text-xl font-bold text-white">{title}</h1>
+          </div>
         </div>
-        {children}
+        {helper}
       </div>
+      {children && <div className="mt-4">{children}</div>}
     </div>
   );
 }
@@ -205,9 +203,18 @@ function StudentDashboard() {
             </ul>
           </div>
         }
-      >
-        <div className="grid gap-4 lg:grid-cols-[1.2fr,1fr]">
-          <div className="card rounded-2xl border border-base-300/70 bg-base-200 shadow-xl">
+      />
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={CheckCircle2} title="Presenças" value={stats.presentes} />
+        <StatCard icon={Clock3} title="Pendentes" value={stats.pendentes} />
+        <StatCard icon={BarChart2} title="Faltas" value={stats.faltas} />
+        <StatCard icon={Target} title="Aulas no grau" value={progressoProximoGrau.aulasNoGrau} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <div className="card rounded-2xl border border-base-300/70 bg-base-200/90 shadow-xl">
             <div className="card-body gap-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -216,11 +223,11 @@ function StudentDashboard() {
                 </div>
                 <Medal className="text-primary" size={20} />
               </div>
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
-                <div className="rounded-2xl border border-base-300/70 bg-base-300/40 p-3">
+              <div className="grid gap-4 lg:grid-cols-[auto,1fr] lg:items-center">
+                <div className="rounded-2xl border border-base-300/70 bg-base-300/30 p-3">
                   <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="xl" />
                 </div>
-                <div className="flex-1 space-y-2">
+                <div className="space-y-2">
                   <div className="flex flex-wrap gap-2 text-xs">
                     <span className="badge badge-outline border-base-300 bg-base-300/30">Faixa: {faixaAtual}</span>
                     <span className="badge badge-outline border-base-300 bg-base-300/30">Grau: {graus}º</span>
@@ -241,51 +248,46 @@ function StudentDashboard() {
               </div>
             </div>
           </div>
-
-          <div className="card rounded-2xl border border-base-300/70 bg-base-200 shadow-xl">
-            <div className="card-body gap-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-70">Resumo rápido</p>
-                  <h3 className="card-title text-white">Sua atividade</h3>
-                </div>
-                <Target className="text-primary" size={20} />
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <StatCard icon={Activity} title="Presenças" value={stats.presentes} />
-                <StatCard icon={Clock3} title="Pendentes" value={stats.pendentes} />
-                <StatCard icon={BarChart2} title="Faltas" value={stats.faltas} />
-                <StatCard icon={Medal} title="Progresso" value={`${progressoProximoGrau.percent}%`} />
-              </div>
-            </div>
-          </div>
         </div>
-      </HeaderCard>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={CheckCircle2} title="Presenças" value={stats.presentes} />
-        <StatCard icon={Clock3} title="Pendentes" value={stats.pendentes} />
-        <StatCard icon={BarChart2} title="Faltas" value={stats.faltas} />
-        <StatCard icon={Target} title="Aulas no grau" value={progressoProximoGrau.aulasNoGrau} />
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-[1.3fr,1fr]">
-        <div className="card rounded-2xl border border-base-300/70 bg-base-200 shadow-xl">
+        <div className="card rounded-2xl border border-base-300/70 bg-base-200/90 shadow-xl">
           <div className="card-body gap-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm opacity-70">Evolução semanal</p>
-                <h3 className="card-title text-white">Check-ins e confirmações</h3>
+                <p className="text-sm opacity-70">Resumo rápido</p>
+                <h3 className="card-title text-white">Sua atividade</h3>
               </div>
-              <LineChart className="text-primary" size={20} />
+              <Target className="text-primary" size={20} />
             </div>
-            <div className="h-64 lg:h-80">
-              <WeeklyEvolutionChart data={weeklySeries} />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <StatCard icon={Activity} title="Presenças" value={stats.presentes} />
+              <StatCard icon={Clock3} title="Pendentes" value={stats.pendentes} />
+              <StatCard icon={BarChart2} title="Faltas" value={stats.faltas} />
+              <StatCard icon={Medal} title="Progresso" value={`${progressoProximoGrau.percent}%`} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <div className="card rounded-2xl border border-base-300/70 bg-base-200/90 shadow-xl">
+            <div className="card-body gap-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm opacity-70">Evolução semanal</p>
+                  <h3 className="card-title text-white">Check-ins e confirmações</h3>
+                </div>
+                <LineChart className="text-primary" size={20} />
+              </div>
+              <div className="h-64 lg:h-80">
+                <WeeklyEvolutionChart data={weeklySeries} />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="card rounded-2xl border border-base-300/70 bg-base-200 shadow-xl">
+        <div className="card rounded-2xl border border-base-300/70 bg-base-200/90 shadow-xl">
           <div className="card-body gap-4">
             <div className="flex items-center justify-between">
               <h3 className="card-title text-white">Últimas presenças</h3>
@@ -410,7 +412,7 @@ function ProfessorDashboard() {
         avatarUrl={ensureAvatar(instructorName, instructorAvatar)}
         helper={
           <div className="flex items-center gap-3">
-            <div className="tabs tabs-boxed bg-base-300/60 rounded-full p-1 text-sm">
+            <div className="tabs tabs-boxed rounded-full bg-base-300/60 p-1 text-sm">
               {['visao', 'alunos', 'presencas', 'graduacoes'].map((tab) => (
                 <a
                   key={tab}
@@ -429,26 +431,28 @@ function ProfessorDashboard() {
             </div>
           </div>
         }
-      >
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {tabCards[activeTab].map((item) => (
-            <StatCard key={item.title} icon={item.icon} title={item.title} value={item.value} />
-          ))}
-        </div>
-      </HeaderCard>
+      />
 
-      <div className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
-        <div className="card rounded-2xl border border-base-300/70 bg-base-200 shadow-xl">
-          <div className="card-body gap-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm opacity-70">Evolução semanal</p>
-                <h3 className="card-title text-white">Check-ins e aprovações</h3>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {tabCards[activeTab].map((item) => (
+          <StatCard key={item.title} icon={item.icon} title={item.title} value={item.value} />
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <div className="card rounded-2xl border border-base-300/70 bg-base-200/90 shadow-xl">
+            <div className="card-body gap-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm opacity-70">Evolução semanal</p>
+                  <h3 className="card-title text-white">Check-ins e aprovações</h3>
+                </div>
+                <LineChart className="text-primary" size={20} />
               </div>
-              <LineChart className="text-primary" size={20} />
-            </div>
-            <div className="h-64 lg:h-80">
-              <WeeklyEvolutionChart data={weeklySeries} />
+              <div className="h-64 lg:h-80">
+                <WeeklyEvolutionChart data={weeklySeries} />
+              </div>
             </div>
           </div>
         </div>
@@ -456,7 +460,7 @@ function ProfessorDashboard() {
         <PendingCard title="Check-ins aguardando" items={pendingCheckins} />
       </div>
 
-      <div className="card rounded-2xl border border-base-300/70 bg-base-200 shadow-xl">
+      <div className="card rounded-2xl border border-base-300/70 bg-base-200/90 shadow-xl">
         <div className="card-body gap-4">
           <div className="flex items-center justify-between">
             <div>
@@ -465,7 +469,7 @@ function ProfessorDashboard() {
             </div>
             <MapPin className="text-primary" size={18} />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <DistributionCard label="Ativos" value={metrics.ativos} icon={Users} />
             <DistributionCard label="Pendentes" value={metrics.pendentes} icon={Clock3} />
             <DistributionCard label="Graduados" value={metrics.graduados} icon={Medal} />
