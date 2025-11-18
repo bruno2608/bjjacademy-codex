@@ -371,23 +371,18 @@ function ProfessorDashboard() {
   return (
     <div className="space-y-6">
       <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
-        <div className="flex w-full flex-col items-start justify-between gap-4 px-6 py-6 sm:flex-row sm:items-center">
-          <div className="space-y-1">
-            <p className={badge}>Visão geral</p>
-            <h1 className="text-xl font-semibold text-white leading-tight">{instructorName}</h1>
-          </div>
-          <div className="flex flex-col items-end gap-3 sm:w-[380px]">
-            <HelperDropdown
-              title="Ajuda"
-              items={[
-                { label: 'Visões rápidas', description: 'Alterne entre visões gerais, alunos, presenças e graduações.' },
-                { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
-                { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
-              ]}
-            />
-            <div className="flex w-full items-center gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/50 px-4 py-3 shadow-inner">
+        <div className="grid gap-6 px-6 py-6 lg:grid-cols-[1.3fr,1fr]">
+          <div className="flex flex-col justify-between gap-4">
+            <div className="space-y-2">
+              <p className={badge}>Visão geral</p>
+              <h1 className="text-2xl font-semibold text-white leading-tight">{instructorName}</h1>
+              <p className="text-sm text-bjj-gray-300/90">
+                Consolide check-ins, aprovações e graduações em um painel único com atalhos rápidos para cada módulo.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
               <div className="avatar">
-                <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
+                <div className="w-14 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
                   <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
                 </div>
               </div>
@@ -395,100 +390,190 @@ function ProfessorDashboard() {
                 <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
               </div>
+              <HelperDropdown
+                title="Ajuda"
+                items={[
+                  { label: 'Visões rápidas', description: 'Altere entre visões gerais, alunos, presenças e graduações.' },
+                  { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
+                  { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
+                ]}
+              />
             </div>
-            <div className="grid w-full grid-cols-2 gap-3">
-              <StatPill icon={CalendarCheck} title="Aulas na semana" value={metrics.presentesSemana} accent="text-green-300" />
-              <StatPill icon={BarChart3} title="Histórico na semana" value={presencas.length} accent="text-yellow-300" />
-              <StatPill icon={Users} title="Total de alunos" value={metrics.totalAlunos} accent="text-white" />
-              <StatPill icon={Medal} title="Graduados" value={metrics.graduados} accent="text-bjj-red" />
-            </div>
           </div>
-        </div>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-4 text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
-          <p className="text-sm font-semibold text-bjj-gray-200/90">Alunos ativos</p>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-white leading-none">{metrics.ativos}</span>
-            <span className="text-xs text-green-300">de {metrics.totalAlunos} matrículas</span>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-4 text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
-          <p className="text-sm font-semibold text-bjj-gray-200/90">Check-ins pendentes</p>
-          <div className="mt-2 flex items-center gap-3">
-            <span className="text-3xl font-bold text-white leading-none">{metrics.pendentes}</span>
-            <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-950 shadow">Aguardando aprovação</span>
-          </div>
-          <p className="mt-2 text-xs font-medium text-bjj-gray-200">Envios fora da janela aguardando análise</p>
-        </div>
-        <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-4 text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
-          <p className="text-sm font-semibold text-bjj-gray-200/90">Graduados</p>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-white leading-none">{metrics.graduados}</span>
-            <span className="text-xs text-bjj-gray-300">faixas acima da branca</span>
-          </div>
-        </div>
-      </div>
-
-      <div className={`${cardBase} p-6`}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className={badge}>Painel da academia</p>
-            <h3 className="text-xl font-semibold text-white">Resumo detalhado</h3>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 p-1">
-            {[
-              { key: 'visao', label: 'Visão Geral' },
-              { key: 'alunos', label: 'Alunos' },
-              { key: 'presencas', label: 'Presenças' },
-              { key: 'graduacoes', label: 'Graduações' }
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  activeTab === tab.key
-                    ? 'bg-bjj-red text-white shadow-[0_12px_30px_rgba(225,6,0,0.25)]'
-                    : 'text-bjj-gray-200 hover:bg-bjj-gray-800'
-                }`}
-                onClick={() => setActiveTab(tab.key)}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[{ label: 'Aulas na semana', value: metrics.presentesSemana, icon: CalendarCheck, href: '/presencas' },
+              { label: 'Histórico na semana', value: presencas.length, icon: BarChart3, href: '/historico-presencas' },
+              { label: 'Total de alunos', value: metrics.totalAlunos, icon: Users, href: '/alunos' },
+              { label: 'Graduados', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' },
+              { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
+              { label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' }
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="group rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
               >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {tabCards[activeTab].map((card) => {
-            const Icon = card.icon;
-            return (
-              <div
-                key={card.title}
-                className="rounded-2xl border border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]"
-              >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-sm font-semibold text-bjj-gray-200/90">{card.title}</p>
-                    <p className="mt-1 text-3xl font-bold text-white">{card.value}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
+                    <p className="mt-2 text-3xl font-bold text-white leading-none">{item.value}</p>
                   </div>
-                  <span className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-900/80 ${card.tone}`}>
-                    <Icon size={18} />
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
+                    <item.icon size={18} />
                   </span>
                 </div>
                 <div className="mt-3 h-1.5 rounded-full bg-bjj-gray-800">
-                  <div className="h-full rounded-full bg-bjj-red/70" style={{ width: '75%' }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: `${Math.min(100, Number(item.value) || 0)}%` }} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
+          <div className={`${cardBase} p-5`}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">Visão analítica</h3>
+              <span className="badge badge-ghost badge-sm text-[11px] tracking-[0.15em] text-bjj-gray-200">Atualizado</span>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-bjj-gray-200/90">Check-ins por status</p>
+                  <Clock3 size={16} className="text-bjj-gray-200" />
+                </div>
+                <div className="mt-4 space-y-3">
+                  {[{ label: 'Confirmados', value: presencas.filter((p) => p.status === 'CONFIRMADO').length, tone: 'bg-green-500' },
+                    { label: 'Pendentes', value: metrics.pendentes, tone: 'bg-yellow-400' },
+                    { label: 'Ausentes', value: presencas.filter((p) => p.status === 'AUSENTE' || p.status === 'AUSENTE_JUSTIFICADA').length, tone: 'bg-bjj-red' }
+                  ].map((row) => (
+                    <div key={row.label} className="space-y-2">
+                      <div className="flex items-center justify-between text-sm text-bjj-gray-200">
+                        <span>{row.label}</span>
+                        <span className="font-semibold text-white">{row.value}</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-bjj-gray-800">
+                        <div className={`h-full rounded-full ${row.tone}`} style={{ width: `${Math.min(100, row.value * 10)}%` }} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            );
-          })}
+              <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-bjj-gray-200/90">Presenças na semana</p>
+                  <BarChart2 size={16} className="text-bjj-gray-200" />
+                </div>
+                <div className="mt-4 flex items-end gap-3">
+                  {[5, 8, 6, 9, 7, 10, 4].map((value, idx) => (
+                    <div key={idx} className="flex flex-1 flex-col items-center gap-2">
+                      <div className="w-full rounded-t-xl bg-gradient-to-t from-bjj-red to-red-400" style={{ height: `${value * 6}px` }} />
+                      <span className="text-[11px] text-bjj-gray-300">D{idx + 1}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={`${cardBase} p-6`}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className={badge}>Painel da academia</p>
+                <h3 className="text-xl font-semibold text-white">Resumo detalhado</h3>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 p-1">
+                {[{ key: 'visao', label: 'Visão Geral' }, { key: 'alunos', label: 'Alunos' }, { key: 'presencas', label: 'Presenças' }, { key: 'graduacoes', label: 'Graduações' }].map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      activeTab === tab.key
+                        ? 'bg-bjj-red text-white shadow-[0_12px_30px_rgba(225,6,0,0.25)]'
+                        : 'text-bjj-gray-200 hover:bg-bjj-gray-800'
+                    }`}
+                    onClick={() => setActiveTab(tab.key)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {tabCards[activeTab].map((card) => {
+                const Icon = card.icon;
+                return (
+                  <div
+                    key={card.title}
+                    className="rounded-2xl border border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-bjj-gray-200/90">{card.title}</p>
+                        <p className="mt-1 text-3xl font-bold text-white">{card.value}</p>
+                      </div>
+                      <span className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-900/80 ${card.tone}`}>
+                        <Icon size={18} />
+                      </span>
+                    </div>
+                    <div className="mt-3 h-1.5 rounded-full bg-bjj-gray-800">
+                      <div className="h-full rounded-full bg-bjj-red/70" style={{ width: '75%' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-b from-bjj-gray-900 to-bjj-black p-5`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={badge}>Pendências</p>
+              <h3 className="text-lg font-semibold text-white">Check-ins em análise</h3>
+            </div>
+            <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-950 shadow">
+              {metrics.pendentes} aguardando
+            </span>
+          </div>
+          <div className="space-y-3">
+            {presencas
+              .filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN')
+              .slice(0, 5)
+              .map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-start justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome || 'Aluno'}</p>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.tipoTreino}</p>
+                  </div>
+                  <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
+                    Aguardando
+                  </span>
+                </div>
+              ))}
+            {metrics.pendentes === 0 && (
+              <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/50 p-4 text-sm text-bjj-gray-300">
+                Nenhum check-in pendente no momento. Acompanhe novos envios em tempo real.
+              </p>
+            )}
+          </div>
+          <Link
+            href="/presencas"
+            className="btn btn-sm rounded-full border-none bg-bjj-red text-white shadow-lg hover:bg-red-600"
+          >
+            Ir para presenças
+          </Link>
         </div>
       </div>
     </div>
   );
 }
-
 export default function DashboardPage() {
   const { isInstructor, isAdmin, roles } = useRole();
   const isProfessorLayout = isInstructor || isAdmin || roles.includes(ROLE_KEYS.professor) || roles.includes(ROLE_KEYS.instrutor);
