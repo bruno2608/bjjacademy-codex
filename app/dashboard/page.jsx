@@ -406,24 +406,28 @@ function ProfessorDashboard() {
         </div>
       </div>
 
-      <div className="stats stats-vertical md:stats-horizontal w-full rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-left text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
-        <div className="stat">
-          <div className="stat-title text-bjj-gray-300">Alunos ativos</div>
-          <div className="stat-value text-white">{metrics.ativos}</div>
-          <div className="stat-desc text-green-300">de {metrics.totalAlunos} matrículas</div>
-        </div>
-        <div className="stat">
-          <div className="stat-title text-bjj-gray-300">Check-ins pendentes</div>
-          <div className="stat-value text-white">{metrics.pendentes}</div>
-          <div className="stat-desc space-y-1 text-bjj-gray-100">
-            <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-950 shadow">Aguardando aprovação</span>
-            <p className="text-xs font-medium text-bjj-gray-200">Envios fora da janela aguardando análise</p>
+      <div className="grid gap-3 md:grid-cols-3">
+        <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-4 text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+          <p className="text-sm font-semibold text-bjj-gray-200/90">Alunos ativos</p>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-3xl font-bold text-white leading-none">{metrics.ativos}</span>
+            <span className="text-xs text-green-300">de {metrics.totalAlunos} matrículas</span>
           </div>
         </div>
-        <div className="stat">
-          <div className="stat-title text-bjj-gray-300">Graduados</div>
-          <div className="stat-value text-white">{metrics.graduados}</div>
-          <div className="stat-desc text-bjj-gray-300">faixas acima da branca</div>
+        <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-4 text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+          <p className="text-sm font-semibold text-bjj-gray-200/90">Check-ins pendentes</p>
+          <div className="mt-2 flex items-center gap-3">
+            <span className="text-3xl font-bold text-white leading-none">{metrics.pendentes}</span>
+            <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-950 shadow">Aguardando aprovação</span>
+          </div>
+          <p className="mt-2 text-xs font-medium text-bjj-gray-200">Envios fora da janela aguardando análise</p>
+        </div>
+        <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-4 text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+          <p className="text-sm font-semibold text-bjj-gray-200/90">Graduados</p>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-3xl font-bold text-white leading-none">{metrics.graduados}</span>
+            <span className="text-xs text-bjj-gray-300">faixas acima da branca</span>
+          </div>
         </div>
       </div>
 
