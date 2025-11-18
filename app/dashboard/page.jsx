@@ -24,6 +24,32 @@ import { ROLE_KEYS } from '../../config/roles';
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
 
+function HelperDropdown({ title, items }) {
+  return (
+    <div className="dropdown dropdown-end">
+      <label tabIndex={0} className="btn btn-ghost btn-sm rounded-full border border-bjj-gray-800 text-xs text-bjj-gray-100">
+        {title}
+      </label>
+      <ul
+        tabIndex={0}
+        className="dropdown-content menu menu-sm z-20 w-72 rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900 p-3 text-xs text-bjj-gray-200 shadow-xl"
+      >
+        {items.map((item) => (
+          <li key={item.label} className="py-1">
+            <div className="flex items-start gap-3 rounded-xl bg-bjj-black/60 p-3">
+              <div className="mt-0.5 h-2.5 w-2.5 rounded-full bg-bjj-red" />
+              <div>
+                <p className="font-semibold text-white">{item.label}</p>
+                <p className="text-[11px] text-bjj-gray-300/80">{item.description}</p>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function StatPill({ icon: Icon, title, value, accent }) {
   return (
     <div className={`${cardBase} flex items-center gap-4 border-bjj-gray-800/80 p-4`}>
@@ -84,10 +110,24 @@ function StudentDashboard() {
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-[1.7fr,1.1fr]">
         <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-6`}>
-          <p className={badge}>Dashboard do aluno</p>
-          <div className="mt-3 flex flex-col gap-3 text-left">
-            <h1 className="text-3xl font-semibold text-white">Bem-vindo, {aluno?.nome || 'Aluno'}!</h1>
-            <p className="text-bjj-gray-200/85">Acompanhe sua jornada, evolua suas graduações e visualize suas últimas presenças.</p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className={badge}>Dashboard do aluno</p>
+              <div className="mt-3 flex flex-col gap-3 text-left">
+                <h1 className="text-3xl font-semibold text-white">Bem-vindo, {aluno?.nome || 'Aluno'}!</h1>
+                <p className="text-bjj-gray-200/85">
+                  Acompanhe sua jornada, evolua suas graduações e visualize suas últimas presenças.
+                </p>
+              </div>
+            </div>
+            <HelperDropdown
+              title="Ajuda"
+              items={[
+                { label: 'Check-in', description: 'Registre antes de iniciar a aula para liberar o histórico automaticamente.' },
+                { label: 'Faixa e grau', description: 'Campos bloqueados: apenas o instrutor pode alterá-los.' },
+                { label: 'Evolução', description: 'Complete as aulas mínimas para avançar para o próximo grau.' }
+              ]}
+            />
           </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 px-4 py-3">
@@ -141,6 +181,24 @@ function StudentDashboard() {
             <Medal className="text-bjj-white" size={20} />
           </div>
           <ProgressBar percent={progressoProximoGrau.percent} />
+        </div>
+      </div>
+
+      <div className="stats stats-vertical md:stats-horizontal w-full rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-left text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+        <div className="stat">
+          <div className="stat-title text-bjj-gray-300">Aulas no grau</div>
+          <div className="stat-value text-white">{progressoProximoGrau.aulasNoGrau}</div>
+          <div className="stat-desc text-bjj-gray-300">meta de {progressoProximoGrau.alvo} aulas</div>
+        </div>
+        <div className="stat">
+          <div className="stat-title text-bjj-gray-300">Presenças</div>
+          <div className="stat-value text-white">{stats.presentes}</div>
+          <div className="stat-desc text-green-300">últimos registros confirmados</div>
+        </div>
+        <div className="stat">
+          <div className="stat-title text-bjj-gray-300">Pendências</div>
+          <div className="stat-value text-white">{stats.pendentes}</div>
+          <div className="stat-desc text-yellow-300">aguardando aprovação</div>
         </div>
       </div>
 
@@ -234,12 +292,40 @@ function ProfessorDashboard() {
             <h1 className="text-3xl font-semibold text-white">Painel principal da BJJ Academy</h1>
             <p className="text-sm text-bjj-gray-200/85">Monitore os módulos críticos e escolha a visão detalhada desejada.</p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:w-[360px]">
-            <StatPill icon={CalendarCheck} title="Aulas na semana" value={metrics.presentesSemana} accent="text-green-300" />
-            <StatPill icon={BarChart3} title="Histórico na semana" value={presencas.length} accent="text-yellow-300" />
-            <StatPill icon={Users} title="Total de alunos" value={metrics.totalAlunos} accent="text-white" />
-            <StatPill icon={Medal} title="Graduados" value={metrics.graduados} accent="text-bjj-red" />
+          <div className="flex flex-col items-end gap-3 sm:w-[380px]">
+            <HelperDropdown
+              title="Ajuda"
+              items={[
+                { label: 'Abas do painel', description: 'Alterne entre visões gerais, alunos, presenças e graduações.' },
+                { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
+                { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
+              ]}
+            />
+            <div className="grid w-full grid-cols-2 gap-3">
+              <StatPill icon={CalendarCheck} title="Aulas na semana" value={metrics.presentesSemana} accent="text-green-300" />
+              <StatPill icon={BarChart3} title="Histórico na semana" value={presencas.length} accent="text-yellow-300" />
+              <StatPill icon={Users} title="Total de alunos" value={metrics.totalAlunos} accent="text-white" />
+              <StatPill icon={Medal} title="Graduados" value={metrics.graduados} accent="text-bjj-red" />
+            </div>
           </div>
+        </div>
+      </div>
+
+      <div className="stats stats-vertical md:stats-horizontal w-full rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-left text-bjj-gray-200 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+        <div className="stat">
+          <div className="stat-title text-bjj-gray-300">Alunos ativos</div>
+          <div className="stat-value text-white">{metrics.ativos}</div>
+          <div className="stat-desc text-green-300">de {metrics.totalAlunos} matrículas</div>
+        </div>
+        <div className="stat">
+          <div className="stat-title text-bjj-gray-300">Pendências</div>
+          <div className="stat-value text-white">{metrics.pendentes}</div>
+          <div className="stat-desc text-yellow-300">aprovar check-ins atrasados</div>
+        </div>
+        <div className="stat">
+          <div className="stat-title text-bjj-gray-300">Graduados</div>
+          <div className="stat-value text-white">{metrics.graduados}</div>
+          <div className="stat-desc text-bjj-gray-300">faixas acima da branca</div>
         </div>
       </div>
 

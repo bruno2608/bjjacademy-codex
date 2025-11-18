@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
 import useUserStore from '../../store/userStore';
-import Input from '../../components/ui/Input';
+import ValidatedField from '../../components/ui/ValidatedField';
 import Button from '../../components/ui/Button';
 import { ROLE_KEYS, normalizeRoles } from '../../config/roles';
 
@@ -31,6 +31,7 @@ export default function LoginPage() {
   const { login, token } = useUserStore();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [touched, setTouched] = useState({ email: false, password: false });
   const [selectedRoles, setSelectedRoles] = useState([ROLE_KEYS.professor, ROLE_KEYS.instrutor]);
 
   useEffect(() => {
@@ -73,6 +74,7 @@ export default function LoginPage() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
   const handleSubmit = (event) => {
@@ -116,30 +118,32 @@ export default function LoginPage() {
             <p className="text-sm text-bjj-gray-200/70">Use suas credenciais para acessar o painel.</p>
           </header>
           <form className="space-y-3.5" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/60">E-mail</label>
-              <Input
-                name="email"
-                type="email"
-                placeholder="voce@bjj.academy"
-                value={form.email}
-                onChange={handleChange}
-                className="mt-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/60">Senha</label>
-              <Input
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
-                className="mt-2"
-                required
-              />
-            </div>
+            <ValidatedField
+              name="email"
+              type="email"
+              label="E-mail"
+              placeholder="voce@bjj.academy"
+              value={form.email}
+              onChange={handleChange}
+              onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+              helper="Use seu e-mail institucional"
+              error={!form.email && touched.email ? 'E-mail é obrigatório' : ''}
+              success={form.email && !error ? 'Formato válido' : ''}
+              required
+            />
+            <ValidatedField
+              name="password"
+              type="password"
+              label="Senha"
+              placeholder="••••••••"
+              value={form.password}
+              onChange={handleChange}
+              onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
+              helper="Mínimo 6 caracteres"
+              error={!form.password && touched.password ? 'Informe a senha' : ''}
+              success={form.password && !error ? 'Ok' : ''}
+              required
+            />
             {error && <p className="text-sm text-bjj-red">{error}</p>}
             <fieldset className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 text-xs text-bjj-gray-200/70">
               <legend className="px-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-200/60">

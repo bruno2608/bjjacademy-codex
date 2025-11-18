@@ -14,6 +14,7 @@ export default function CheckinPage() {
   const { user } = useUserStore();
   const alunoId = user?.alunoId;
   const hoje = new Date().toISOString().split('T')[0];
+  const today = useMemo(() => new Date(), []);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
   const registerCheckin = usePresencasStore((state) => state.registerCheckin);
   const presencas = usePresencasStore((state) => state.presencas);
@@ -29,6 +30,37 @@ export default function CheckinPage() {
     () => presencas.filter((p) => p.alunoId === alunoId && p.data === hoje),
     [alunoId, hoje, presencas]
   );
+
+  const presenceByDay = useMemo(() => {
+    const map = new Map();
+    const month = today.getMonth() + 1;
+    const year = today.getFullYear();
+    presencas.forEach((item) => {
+      if (item.alunoId !== alunoId) return;
+      const [ano, mes] = (item.data || '').split('-').map(Number);
+      if (ano === year && mes === month) {
+        map.set(item.data, item.status);
+      }
+    });
+    return map;
+  }, [alunoId, presencas, today]);
+
+  const calendarDays = useMemo(() => {
+    const month = today.getMonth();
+    const year = today.getFullYear();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const firstWeekday = new Date(year, month, 1).getDay();
+    const days = Array.from({ length: firstWeekday }, () => null);
+
+    for (let day = 1; day <= totalDays; day += 1) {
+      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      days.push({
+        day,
+        status: presenceByDay.get(dateKey) || null
+      });
+    }
+    return days;
+  }, [presenceByDay, today]);
 
   const handleCheckin = (treino) => {
     const resultado = registerCheckin({
@@ -71,45 +103,84 @@ export default function CheckinPage() {
         </div>
       </header>
 
-      <div className="space-y-3">
-        {treinosDoDia.map((treino) => {
-          const registro = checkinsDoAluno.find((item) => item.treinoId === treino.id);
-          const status = registro?.status || 'Não registrado';
-          return (
-            <div
-              key={treino.id}
-              className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <p className="text-sm font-semibold text-white">{treino.nome}</p>
-                <p className="text-xs text-bjj-gray-300/80">
-                  {treino.tipo} · {treino.hora}
-                </p>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-3">
+          {treinosDoDia.map((treino) => {
+            const registro = checkinsDoAluno.find((item) => item.treinoId === treino.id);
+            const status = registro?.status || 'Não registrado';
+            return (
+              <div
+                key={treino.id}
+                className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-white">{treino.nome}</p>
+                  <p className="text-xs text-bjj-gray-300/80">
+                    {treino.tipo} · {treino.hora}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${
+                      status === 'Presente'
+                        ? 'bg-green-600/20 text-green-300'
+                        : status === 'Pendente'
+                        ? 'bg-yellow-500/20 text-yellow-300'
+                        : 'bg-bjj-gray-800 text-bjj-gray-200'
+                    }`}
+                  >
+                    {status}
+                  </span>
+                  <Button
+                    onClick={() => handleCheckin(treino)}
+                    className="btn-sm"
+                    type="button"
+                    disabled={status === 'Presente' || status === 'Pendente'}
+                  >
+                    {status === 'Presente' ? 'Confirmado' : status === 'Pendente' ? 'Aguardando' : 'Registrar check-in'}
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${
-                    status === 'Presente'
-                      ? 'bg-green-600/20 text-green-300'
-                      : status === 'Pendente'
-                      ? 'bg-yellow-500/20 text-yellow-300'
-                      : 'bg-bjj-gray-800 text-bjj-gray-200'
-                  }`}
-                >
-                  {status}
-                </span>
-                <Button
-                  onClick={() => handleCheckin(treino)}
-                  className="btn-sm"
-                  type="button"
-                  disabled={status === 'Presente' || status === 'Pendente'}
-                >
-                  {status === 'Presente' ? 'Confirmado' : status === 'Pendente' ? 'Aguardando' : 'Registrar check-in'}
-                </Button>
-              </div>
+            );
+          })}
+        </div>
+
+        <div className="calendar w-full rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-bjj-gray-100 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">Calendário</p>
+              <p className="text-sm font-semibold capitalize">{today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</p>
             </div>
-          );
-        })}
+            <div className="flex gap-1 text-[10px]">
+              <span className="badge badge-outline border-green-500/40 text-green-300">Presente</span>
+              <span className="badge badge-outline border-yellow-400/40 text-yellow-300">Pendente</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-7 gap-1 px-3 pb-2 text-center text-[11px] uppercase text-bjj-gray-300">
+            {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((dia) => (
+              <span key={dia}>{dia}</span>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1 px-3 pb-4">
+            {calendarDays.map((entry, index) => {
+              if (!entry) return <div key={`empty-${index}`} className="h-10" />;
+              const statusStyle =
+                entry.status === 'Presente'
+                  ? 'border-green-500/50 bg-green-600/10 text-green-200'
+                  : entry.status === 'Pendente'
+                  ? 'border-yellow-400/50 bg-yellow-500/10 text-yellow-200'
+                  : 'border-bjj-gray-800 bg-bjj-black/40 text-bjj-gray-200';
+              return (
+                <div
+                  key={entry.day}
+                  className={`flex h-10 items-center justify-center rounded-lg border text-sm font-semibold ${statusStyle}`}
+                >
+                  {entry.day}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {feedback && (
