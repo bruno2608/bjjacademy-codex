@@ -15,7 +15,9 @@ import {
   Users,
   ArrowRight,
   LineChart,
-  Target
+  Target,
+  MapPin,
+  Zap
 } from 'lucide-react';
 
 import FaixaVisual from '../../components/graduacoes/FaixaVisual';
@@ -136,6 +138,58 @@ function Sparkline({ points }) {
       />
       <path d={d} stroke="#fca5a5" strokeWidth="2" fill="none" strokeLinecap="round" />
     </svg>
+  );
+}
+
+function WorldMapCard({ stats }) {
+  const markers = [
+    { label: 'Academia', top: '46%', left: '38%', tone: 'bg-bjj-red' },
+    { label: 'Filial', top: '55%', left: '52%', tone: 'bg-green-400' },
+    { label: 'Equipe', top: '35%', left: '60%', tone: 'bg-yellow-300' }
+  ];
+
+  return (
+    <div className={`${cardBase} relative overflow-hidden border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-gray-900 p-5`}>
+      <div className="absolute inset-0 opacity-70" style={{
+        background:
+          'radial-gradient(circle at 20% 30%, rgba(239,68,68,0.18), transparent 35%), radial-gradient(circle at 70% 40%, rgba(252,211,77,0.12), transparent 32%), radial-gradient(circle at 55% 70%, rgba(52,211,153,0.12), transparent 30%)'
+      }} />
+      <div className="relative flex items-start justify-between">
+        <div>
+          <p className={badge}>Academia ativa</p>
+          <h3 className="text-lg font-semibold text-white">Distribuição</h3>
+        </div>
+        <div className="badge badge-outline border-bjj-red/60 bg-bjj-red/10 text-xs text-white">Atualizado agora</div>
+      </div>
+
+      <div className="relative mt-5 h-52 rounded-3xl border border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-900/70 to-bjj-black/70">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.06),transparent_45%)]" />
+        <div className="absolute inset-[18%] rounded-2xl border border-bjj-gray-800/60" />
+        {markers.map((marker) => (
+          <div
+            key={marker.label}
+            className={`absolute flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold text-white shadow-xl ${marker.tone}`}
+            style={{ top: marker.top, left: marker.left, transform: 'translate(-50%, -50%)' }}
+          >
+            <MapPin size={14} />
+            {marker.label}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-3 text-sm text-bjj-gray-200/90">
+        {[
+          { label: 'Alunos ativos', value: stats.ativos, tone: 'text-green-300' },
+          { label: 'Pendentes', value: stats.pendentes, tone: 'text-yellow-300' },
+          { label: 'Graduações', value: stats.graduados, tone: 'text-bjj-red' }
+        ].map((item) => (
+          <div key={item.label} className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-black/50 p-3">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
+            <p className={`text-2xl font-bold text-white ${item.tone}`}>{item.value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -423,98 +477,133 @@ function ProfessorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-5`}>
-        <div className="grid gap-5 lg:grid-cols-[1.2fr,1fr]">
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="grid gap-4 xl:grid-cols-[1.6fr,1fr]">
+        <div className={`${cardBase} space-y-4 bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-5`}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="avatar">
+                <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
+                  <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
+                </div>
+              </div>
               <div>
                 <p className={badge}>Painel do professor</p>
-                <div className="flex items-center gap-3">
-                  <div className="avatar">
-                    <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
-                      <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
-                    </div>
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-semibold text-white leading-tight">{instructorName}</h1>
-                    <p className="text-[11px] uppercase tracking-[0.25em] text-bjj-gray-400">Instrutor</p>
-                  </div>
-                </div>
+                <h1 className="text-xl font-semibold text-white leading-tight">{instructorName}</h1>
               </div>
-              <HelperDropdown
-                title="Ajuda"
-                items={[
-                  { label: 'Aprovações', description: 'Priorize check-ins fora da janela antes de fechar o treino.' },
-                  { label: 'Relatórios', description: 'Use a visão de relatórios para conversar com a equipe.' }
-                ]}
-              />
             </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {[
-                { title: 'Pendentes', value: metrics.pendentes, icon: Clock3, tone: 'from-bjj-gray-900 to-bjj-black' },
-                { title: 'Confirmados', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'from-green-900/40 to-green-700/30' },
-                { title: 'Alunos ativos', value: metrics.ativos, icon: Users, tone: 'from-bjj-gray-900 to-bjj-black' },
-                { title: 'Faixas avançadas', value: metrics.graduados, icon: Medal, tone: 'from-bjj-gray-900 to-bjj-black' }
-              ].map((item) => (
-                <div
-                  key={item.title}
-                  className={`${cardBase} group flex items-center justify-between gap-3 border-bjj-gray-800/80 bg-gradient-to-br ${item.tone} p-4`}
-                >
-                  <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">{item.title}</p>
-                    <p className="text-3xl font-bold text-white">{item.value}</p>
-                  </div>
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-bjj-black/50 text-white">
-                    <item.icon size={18} className="text-bjj-red" />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 text-sm text-bjj-gray-300/85">
-              {[
-                { label: 'Presenças', href: '/presencas' },
-                { label: 'Alunos', href: '/alunos' },
-                { label: 'Relatórios', href: '/relatorios' },
-                { label: 'Histórico', href: '/historico-presencas' }
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/50 px-4 py-2 font-semibold text-white shadow-inner transition hover:-translate-y-0.5 hover:border-bjj-red/60"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
+            <HelperDropdown
+              title="Ajuda"
+              items={[
+                { label: 'Pendentes', description: 'Aprove os check-ins fora da janela antes de fechar o treino.' },
+                { label: 'Relatórios', description: 'Conferir evolução e presença por equipe.' }
+              ]}
+            />
           </div>
 
-          <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-black/50 p-4`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={badge}>Evolução semanal</p>
-                <h3 className="text-lg font-semibold text-white">Check-ins e aprovações</h3>
-              </div>
-              <LineChart size={18} className="text-bjj-red" />
-            </div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {[{ label: 'Aguardando', value: metrics.pendentes, tone: 'text-yellow-300' }, { label: 'Confirmados', value: metrics.presentesSemana, tone: 'text-green-300' }].map((item) => (
-                <div key={item.label} className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/40 p-3">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                  <p className={`text-2xl font-bold text-white ${item.tone}`}>{item.value}</p>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            {[
+              { title: 'Pendentes', value: metrics.pendentes, icon: Clock3, tone: 'from-bjj-gray-900/90 to-bjj-black/80' },
+              { title: 'Confirmados', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'from-green-900/30 to-green-700/30' },
+              { title: 'Alunos ativos', value: metrics.ativos, icon: Users, tone: 'from-bjj-gray-900/90 to-bjj-black/70' },
+              { title: 'Faixas avançadas', value: metrics.graduados, icon: Medal, tone: 'from-bjj-gray-900/90 to-bjj-black/70' },
+              { title: 'Próximos treinos', value: 4, icon: Zap, tone: 'from-bjj-gray-900/90 to-bjj-black/70' }
+            ].map((item) => (
+              <div
+                key={item.title}
+                className={`${cardBase} group flex items-center justify-between gap-3 border-bjj-gray-800/80 bg-gradient-to-br ${item.tone} p-4`}
+              >
+                <div className="min-w-0 space-y-0.5">
+                  <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">{item.title}</p>
+                  <p className="text-3xl font-bold text-white">{item.value}</p>
                 </div>
-              ))}
-            </div>
-            <div className="mt-4 rounded-2xl border border-bjj-gray-800/70 bg-gradient-to-r from-bjj-gray-900/80 to-bjj-black p-4">
-              <Sparkline points={weeklySeries} />
-              <div className="mt-2 flex items-center justify-between text-xs text-bjj-gray-300/80">
-                <span>Trend 7d</span>
-                <span className="flex items-center gap-1 text-green-300">
-                  <Target size={14} /> {metrics.presentesSemana} confirmações
-                </span>
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-bjj-black/50 text-white">
+                  <item.icon size={18} className="text-bjj-red" />
+                </div>
               </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 text-sm text-bjj-gray-300/85">
+            {[
+              { label: 'Presenças', href: '/presencas' },
+              { label: 'Alunos', href: '/alunos' },
+              { label: 'Relatórios', href: '/relatorios' },
+              { label: 'Histórico', href: '/historico-presencas' }
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/50 px-4 py-2 font-semibold text-white shadow-inner transition hover:-translate-y-0.5 hover:border-bjj-red/60"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <WorldMapCard stats={metrics} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
+        <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-black/55 p-5`}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className={badge}>Evolução semanal</p>
+              <h3 className="text-xl font-semibold text-white">Aguardando x aprovações</h3>
             </div>
+            <LineChart size={18} className="text-bjj-red" />
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {[{ label: 'Aguardando', value: metrics.pendentes, tone: 'text-yellow-300' }, { label: 'Confirmados', value: metrics.presentesSemana, tone: 'text-green-300' }].map((item) => (
+              <div key={item.label} className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/60 p-3">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
+                <p className={`text-2xl font-bold text-white ${item.tone}`}>{item.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 rounded-3xl border border-bjj-gray-800/70 bg-gradient-to-r from-bjj-gray-900/85 via-bjj-black to-bjj-gray-900/70 p-5">
+            <Sparkline points={weeklySeries} />
+            <div className="mt-3 flex items-center justify-between text-xs text-bjj-gray-300/80">
+              <span>Trend 7d</span>
+              <span className="flex items-center gap-1 text-green-300">
+                <Target size={14} /> {metrics.presentesSemana} confirmações
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-black/50 p-5`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={badge}>Pendências</p>
+              <h3 className="text-xl font-semibold text-white">Check-ins aguardando</h3>
+            </div>
+            <Clock3 size={18} className="text-yellow-300" />
+          </div>
+          <div className="mt-4 space-y-3 text-sm text-bjj-gray-200/90">
+            {pendingCheckins.map((p) => (
+              <div
+                key={p.id}
+                className="flex items-center justify-between rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/40 p-3"
+              >
+                <div>
+                  <p className="font-semibold text-white">{p.alunoNome}</p>
+                  <p className="text-xs text-bjj-gray-300/80">{p.data} · {p.tipoTreino}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-yellow-500/25 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
+                    {p.status === 'CHECKIN' ? 'Check-in' : 'Pendente'}
+                  </span>
+                  <Link
+                    href="/presencas"
+                    className="btn btn-sm rounded-full border border-bjj-red/60 bg-bjj-red/10 text-xs font-semibold text-white"
+                  >
+                    Abrir
+                  </Link>
+                </div>
+              </div>
+            ))}
+            {!pendingCheckins.length && <p className="text-xs text-bjj-gray-400">Nenhum check-in pendente.</p>}
           </div>
         </div>
       </div>
@@ -558,7 +647,7 @@ function ProfessorDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.3fr,1fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.2fr,1fr]">
         <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-black/50 p-5`}>
           <div className="flex items-center justify-between">
             <div>
@@ -594,7 +683,7 @@ function ProfessorDashboard() {
                   <p className="text-xs text-bjj-gray-300/80">{p.data} · {p.tipoTreino}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-yellow-500/20 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
+                  <span className="rounded-full bg-yellow-500/25 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
                     {p.status === 'CHECKIN' ? 'Check-in' : 'Pendente'}
                   </span>
                   <Link
