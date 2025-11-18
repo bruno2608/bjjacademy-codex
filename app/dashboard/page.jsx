@@ -1,625 +1,913 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import Link from 'next/link';
+/**
+ * Dashboard exibe métricas principais com alternância entre visões
+ * gerais, de presenças e de graduações. Assim o operador consegue
+ * focar em cada módulo antes de acessar as telas específicas.
+ */
+import { useEffect, useMemo, useState } from 'react';
 import {
-  Activity,
-  BarChart2,
-  BarChart3,
-  CalendarCheck,
-  Clock3,
-  Medal,
-  PieChart,
-  ShieldCheck,
-  TrendingUp,
   Users,
-  ArrowRight
+  Award,
+  CalendarCheck,
+  Medal,
+  Activity,
+  Flame,
+  Clock3,
+  UserPlus,
+  UserMinus,
+  Layers,
+  PieChart,
+  Cake
 } from 'lucide-react';
+import Card from '../../components/ui/Card';
+import PageHero from '../../components/ui/PageHero';
+import LoadingState from '../../components/ui/LoadingState';
+import ToggleTag from '../../components/ui/ToggleTag';
+import Badge from '../../components/ui/Badge';
+import { getAlunos } from '../../services/alunosService';
+import { getPresencas } from '../../services/presencasService';
+import { getGraduacoes } from '../../services/graduacoesService';
+import { calculateNextStep } from '../../lib/graduationRules';
 
-import FaixaVisual from '../../components/graduacoes/FaixaVisual';
-import useRole from '../../hooks/useRole';
-import { usePresencasStore } from '../../store/presencasStore';
-import { useAlunosStore } from '../../store/alunosStore';
-import useUserStore from '../../store/userStore';
-import { ROLE_KEYS } from '../../config/roles';
+const VIEW_OPTIONS = [
+  { id: 'geral', label: 'Visão geral', helper: 'Panorama da academia' },
+  { id: 'alunos', label: 'Alunos', helper: 'Cadastros e atenção' },
+  { id: 'presencas', label: 'Presenças', helper: 'Engajamento diário' },
+  { id: 'graduacoes', label: 'Graduações', helper: 'Planejamento e evolução' }
+];
 
-const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
-const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
-const defaultAvatar = 'https://ui-avatars.com/api/?background=1b1b1b&color=fff&name=BJJ+Academy';
+const formatDate = (value) => {
+  if (!value) return 'Sem data';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+};
 
-const ensureAvatar = (name, avatarUrl) =>
-  avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
+const calcularMediaEntreGraduacoes = (historico = []) => {
+  if (!historico || historico.length < 2) return null;
+  const ordenadas = [...historico].sort((a, b) => new Date(a.data) - new Date(b.data));
+  let acumulado = 0;
+  let contagem = 0;
+  for (let i = 1; i < ordenadas.length; i += 1) {
+    const anterior = new Date(ordenadas[i - 1].data);
+    const atual = new Date(ordenadas[i].data);
+    if (Number.isNaN(anterior.getTime()) || Number.isNaN(atual.getTime())) continue;
+    const diff = Math.abs((atual.getFullYear() - anterior.getFullYear()) * 12 + (atual.getMonth() - anterior.getMonth()));
+    acumulado += diff;
+    contagem += 1;
+  }
+  if (contagem === 0) return null;
+  return acumulado / contagem;
+};
 
-function HelperDropdown({ title, items }) {
-  return (
-    <div className="dropdown dropdown-end">
-      <label tabIndex={0} className="btn btn-ghost btn-sm rounded-full border border-bjj-gray-800 text-xs text-bjj-gray-100">
-        {title}
-      </label>
-      <ul
-        tabIndex={0}
-        className="dropdown-content menu menu-sm z-20 w-72 rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900 p-3 text-xs text-bjj-gray-200 shadow-xl"
-      >
-        {items.map((item) => (
-          <li key={item.label} className="py-1">
-            <div className="flex items-start gap-3 rounded-xl bg-bjj-black/60 p-3">
-              <div className="mt-0.5 h-2.5 w-2.5 rounded-full bg-bjj-red" />
-              <div>
-                <p className="font-semibold text-white">{item.label}</p>
-                <p className="text-[11px] text-bjj-gray-300/80">{item.description}</p>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+const differenceInDays = (value) => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const hoje = new Date();
+  const diffMs = hoje.getTime() - parsed.getTime();
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+};
 
-function StatPill({ icon: Icon, title, value, accent }) {
-  return (
-    <div className={`${cardBase} flex items-center gap-4 border-bjj-gray-800/80 p-4`}>
-      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-bjj-gray-900/90 ${accent}`}>
-        <Icon size={18} />
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm font-semibold text-bjj-gray-200/90">{title}</p>
-        <p className="text-2xl font-bold text-white">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function ProgressBar({ percent }) {
-  return (
-    <div className="mt-3 h-2 rounded-full bg-bjj-gray-800">
-      <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: `${percent}%` }} />
-    </div>
-  );
-}
-
-function ProfileBadge({ name, faixa, grau, aulas, avatarUrl }) {
-  const label = grau ? `${faixa} · ${grau}º grau` : faixa;
-  return (
-    <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner sm:max-w-sm">
-      <div className="flex items-center gap-4">
-        <div className="avatar">
-          <div className="w-16 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
-            <img src={avatarUrl || defaultAvatar} alt={`Avatar de ${name}`} loading="lazy" />
-          </div>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-white leading-tight">{name}</p>
-          <p className="text-xs text-bjj-gray-300/80">{label}</p>
-        </div>
-      </div>
-      <div>
-        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">
-          <span>Progresso</span>
-          <span>{aulas} aulas</span>
-        </div>
-        <div className="mt-2 h-2.5 rounded-full bg-bjj-gray-800">
-          <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: '65%' }} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StudentDashboard() {
-  const { user } = useUserStore();
-  const alunoId = user?.alunoId;
-  const presencas = usePresencasStore((state) => state.presencas);
-  const alunos = useAlunosStore((state) => state.alunos);
-
-  const aluno = useMemo(() => alunos.find((item) => item.id === alunoId) || alunos[0], [alunoId, alunos]);
-  const faixaAtual = aluno?.faixa || 'Branca';
-  const graus = aluno?.graus || 0;
-  const avatarUrl = ensureAvatar(aluno?.nome, aluno?.avatarUrl || user?.avatarUrl || defaultAvatar);
-
-  const stats = useMemo(() => {
-    const registrosAluno = presencas.filter((item) => item.alunoId === aluno?.id);
-    const presentes = registrosAluno.filter((item) => item.status === 'CONFIRMADO').length;
-    const faltas = registrosAluno.filter((item) => item.status === 'AUSENTE' || item.status === 'AUSENTE_JUSTIFICADA').length;
-    const pendentes = registrosAluno.filter((item) => item.status === 'CHECKIN' || item.status === 'PENDENTE').length;
-    return { presentes, faltas, pendentes };
-  }, [aluno?.id, presencas]);
-
-  const progressoProximoGrau = useMemo(() => {
-    const aulasNoGrau = aluno?.aulasNoGrauAtual || 0;
-    const alvo = 20;
-    const percent = Math.min(100, Math.round((aulasNoGrau / alvo) * 100));
-    return { aulasNoGrau, alvo, percent };
-  }, [aluno?.aulasNoGrauAtual]);
-
-  const ultimasPresencas = useMemo(
-    () =>
-      presencas
-        .filter((item) => item.alunoId === aluno?.id)
-        .slice(-5)
-        .reverse(),
-    [aluno?.id, presencas]
-  );
-
-  const formatStatus = (status) => {
-    switch (status) {
-      case 'CONFIRMADO':
-        return { label: 'Presente', tone: 'bg-green-600/20 text-green-300' };
-      case 'CHECKIN':
-      case 'PENDENTE':
-        return { label: 'Pendente', tone: 'bg-yellow-500/20 text-yellow-300' };
-      case 'AUSENTE':
-      case 'AUSENTE_JUSTIFICADA':
-        return { label: 'Ausente', tone: 'bg-bjj-red/20 text-bjj-red' };
-      default:
-        return { label: 'Sem registro', tone: 'bg-bjj-gray-700 text-bjj-gray-200' };
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-[1.6fr,1fr]">
-        <div className={`${cardBase} relative overflow-hidden bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/70 to-bjj-black p-0`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-bjj-black/80 via-bjj-black/35 to-transparent" />
-          <div className="relative flex w-full flex-col gap-4 px-6 py-6">
-            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="space-y-1">
-                <p className={badge}>Dashboard do aluno</p>
-                <h1 className="text-xl font-semibold text-white leading-tight">{aluno?.nome || 'Aluno'}</h1>
-              </div>
-              <HelperDropdown
-                title="Ajuda"
-                items={[
-                  { label: 'Check-in', description: 'Registre antes de iniciar a aula para liberar o histórico automaticamente.' },
-                  { label: 'Faixa e grau', description: 'Campos bloqueados: apenas o instrutor pode alterá-los.' },
-                  { label: 'Evolução', description: 'Complete as aulas mínimas para avançar para o próximo grau.' }
-                ]}
-              />
-            </div>
-            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:gap-6">
-              <ProfileBadge
-                name={aluno?.nome || 'Aluno'}
-                faixa={faixaAtual}
-                grau={graus}
-                aulas={aluno?.aulasNoGrauAtual || 0}
-                avatarUrl={avatarUrl}
-              />
-              <div className="grid flex-1 gap-3 sm:grid-cols-3">
-                {[{ label: 'Faixa', value: faixaAtual }, { label: 'Grau atual', value: `${graus}º grau` }].map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 px-4 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.25)]"
-                  >
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
-                  </div>
-                ))}
-                <div className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 px-4 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.25)]">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Aulas no grau</p>
-                  <p className="mt-1 text-lg font-semibold text-white">{progressoProximoGrau.aulasNoGrau}</p>
-                  <ProgressBar percent={progressoProximoGrau.percent} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-5`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">Sua faixa</p>
-              <p className="text-lg font-semibold">Progresso do próximo grau</p>
-            </div>
-            <ShieldCheck className="text-bjj-red" size={18} />
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3">
-              <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="xl" />
-            </div>
-            <div className="flex-1 space-y-2">
-              <p className="text-sm text-bjj-gray-200/90">{progressoProximoGrau.percent}% do próximo grau</p>
-              <ProgressBar percent={progressoProximoGrau.percent} />
-              <p className="text-xs text-bjj-gray-300/80">
-                {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatPill icon={Activity} title="Presenças recentes" value={stats.presentes} accent="text-green-400" />
-        <StatPill icon={BarChart2} title="Faltas registradas" value={stats.faltas} accent="text-bjj-red" />
-        <StatPill icon={Clock3} title="Check-ins pendentes" value={stats.pendentes} accent="text-yellow-300" />
-        <div className={`${cardBase} border-bjj-gray-800/80 p-4`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-bjj-gray-200/90">Progresso do próximo grau</p>
-              <p className="text-2xl font-bold text-white">{progressoProximoGrau.percent}%</p>
-            </div>
-            <Medal className="text-bjj-white" size={20} />
-          </div>
-          <ProgressBar percent={progressoProximoGrau.percent} />
-        </div>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-3">
-        {[
-          {
-            title: 'Aulas no grau',
-            value: progressoProximoGrau.aulasNoGrau,
-            helper: `meta de ${progressoProximoGrau.alvo} aulas`,
-            href: '/evolucao',
-            tone: 'from-bjj-gray-900/80 to-bjj-black/90',
-            badgeTone: 'text-bjj-gray-300'
-          },
-          {
-            title: 'Presenças',
-            value: stats.presentes,
-            helper: 'últimos registros confirmados',
-            href: '/historico-presencas',
-            tone: 'from-bjj-gray-900/85 to-bjj-black/80',
-            badgeTone: 'text-green-300'
-          },
-          {
-            title: 'Pendências',
-            value: stats.pendentes,
-            helper: 'aguardando aprovação',
-            href: '/presencas',
-            tone: 'from-bjj-gray-900/80 to-bjj-black/85',
-            badgeTone: 'text-yellow-300'
-          }
-        ].map((item) => (
-          <Link
-            key={item.title}
-            href={item.href}
-            className={`${cardBase} group flex items-center justify-between gap-4 border-bjj-gray-800/80 bg-gradient-to-br ${item.tone} p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_18px_45px_rgba(225,6,0,0.18)]`}
-          >
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-bjj-gray-200/90">{item.title}</p>
-              <p className="text-3xl font-bold text-white">{item.value}</p>
-              <p className={`text-xs ${item.badgeTone}`}>{item.helper}</p>
-            </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-800/80 text-white group-hover:bg-bjj-red group-hover:text-white">
-              <ArrowRight size={16} />
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      <div className={`${cardBase} p-6`}>
-        <header className="mb-4 flex items-center justify-between">
-          <div>
-            <p className={badge}>Últimas presenças</p>
-            <h3 className="text-xl font-semibold">Últimos registros</h3>
-          </div>
-          <Activity size={18} className="text-green-400" />
-        </header>
-        <ul className="divide-y divide-bjj-gray-800/70 text-sm">
-          {ultimasPresencas.map((item) => (
-            <li key={item.id} className="flex items-center justify-between py-3 text-bjj-gray-100">
-              <div>
-                <p className="font-semibold text-white">{item.tipoTreino}</p>
-                <p className="text-xs text-bjj-gray-300/80">{item.data} · {item.hora || '—'}</p>
-              </div>
-              {(() => {
-                const tone = formatStatus(item.status);
-                return (
-                <span
-                  className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${tone.tone}`}
-                >
-                  {tone.label}
-                </span>
-                );
-              })()}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-function ProfessorDashboard() {
-  const { user } = useUserStore();
-  const presencas = usePresencasStore((state) => state.presencas);
-  const alunos = useAlunosStore((state) => state.alunos);
-  const [activeTab, setActiveTab] = useState('visao');
-  const instructorName = user?.name || 'Instrutor';
-  const instructorAvatar = user?.avatarUrl || defaultAvatar;
-
-  const metrics = useMemo(() => {
-    const totalAlunos = alunos.length;
-    const ativos = alunos.filter((a) => a.status === 'Ativo').length;
-    const inativos = totalAlunos - ativos;
-    const graduados = alunos.filter((a) => (a.faixa || '').toLowerCase() !== 'branca').length;
-    const pendentes = presencas.filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN').length;
-    const presentesSemana = presencas.filter((p) => p.status === 'CONFIRMADO').length;
-    return { totalAlunos, ativos, inativos, graduados, pendentes, presentesSemana };
-  }, [alunos, presencas]);
-
-  const tabCards = useMemo(
-    () => ({
-      visao: [
-        { title: 'Presenças hoje', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'text-green-300' },
-        { title: 'Registros pendentes', value: metrics.pendentes, icon: Clock3, tone: 'text-yellow-300' },
-        { title: 'Faixas em progresso', value: metrics.graduados, icon: Medal, tone: 'text-white' },
-        { title: 'Alunos ativos', value: metrics.ativos, icon: Users, tone: 'text-bjj-red' }
-      ],
-      alunos: [
-        { title: 'Total de alunos', value: metrics.totalAlunos, icon: Users, tone: 'text-white' },
-        { title: 'Alunos ativos', value: metrics.ativos, icon: Activity, tone: 'text-green-300' },
-        { title: 'Inativos', value: metrics.inativos, icon: BarChart2, tone: 'text-yellow-300' },
-        { title: 'Últimas matrículas', value: 4, icon: TrendingUp, tone: 'text-bjj-red' }
-      ],
-      presencas: [
-        { title: 'Presenças na semana', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'text-green-300' },
-        { title: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, tone: 'text-yellow-300' },
-        { title: 'Ausências', value: presencas.filter((p) => p.status === 'Ausente').length, icon: BarChart3, tone: 'text-bjj-red' },
-        { title: 'Check-ins registrados', value: presencas.length, icon: Activity, tone: 'text-white' }
-      ],
-      graduacoes: [
-        { title: 'Próximas graduações', value: alunos.filter((a) => a.proximaMeta).length || 6, icon: Medal, tone: 'text-white' },
-        { title: 'Faixas avançadas', value: metrics.graduados, icon: ShieldCheck, tone: 'text-bjj-red' },
-        { title: 'Tempo médio na faixa', value: '14 meses', icon: Clock3, tone: 'text-yellow-300' },
-        { title: 'Relatórios emitidos', value: 12, icon: PieChart, tone: 'text-green-300' }
-      ]
-    }),
-    [alunos, metrics, presencas]
-  );
-
-  return (
-    <div className="space-y-6">
-      <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
-        <div className="grid gap-6 px-5 py-5 lg:grid-cols-[1.15fr,1fr]">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className={badge}>Visão geral</p>
-                <h1 className="text-xl font-semibold text-white leading-tight">{instructorName}</h1>
-                <p className="text-xs text-bjj-gray-300/90">Painel compacto com atalhos para aprovar presenças e gerenciar alunos.</p>
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-2">
-                <div className="avatar">
-                  <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
-                    <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
-                </div>
-                <HelperDropdown
-                  title="Ajuda"
-                  items={[
-                    { label: 'Visões rápidas', description: 'Altere entre visões gerais, alunos, presenças e graduações.' },
-                    { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
-                    { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[{ label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' },
-                { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
-                { label: 'Graduações', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' }
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="group flex items-center justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-4 py-3 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_14px_32px_rgba(0,0,0,0.35)]"
-                >
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="text-2xl font-bold text-white leading-tight">{item.value}</p>
-                  </div>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
-                    <item.icon size={18} />
-                  </span>
-                </Link>
-              ))}
-            </div>
-
-            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-4">
-              {[{ label: 'Presenças', href: '/presencas', icon: CalendarCheck },
-                { label: 'Alunos', href: '/alunos', icon: Users },
-                { label: 'Relatórios', href: '/relatorios', icon: PieChart },
-                { label: 'Histórico', href: '/historico-presencas', icon: BarChart2 }
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center justify-between rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/50 px-3 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:text-bjj-red"
-                >
-                  <span className="flex items-center gap-2">
-                    <item.icon size={16} />
-                    {item.label}
-                  </span>
-                  <ArrowRight size={14} />
-                </Link>
-              ))}
-            </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {[{ label: 'Aulas na semana', value: metrics.presentesSemana, icon: CalendarCheck, href: '/presencas' },
-              { label: 'Histórico na semana', value: presencas.length, icon: BarChart3, href: '/historico-presencas' },
-              { label: 'Total de alunos', value: metrics.totalAlunos, icon: Users, href: '/alunos' },
-              { label: 'Check-ins registrados', value: presencas.length, icon: Activity, href: '/presencas' }
-            ].map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="group rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="mt-2 text-3xl font-bold text-white leading-none">{item.value}</p>
-                  </div>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
-                    <item.icon size={18} />
-                  </span>
-                </div>
-                <div className="mt-3 h-1.5 rounded-full bg-bjj-gray-800">
-                  <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: `${Math.min(100, Number(item.value) || 0)}%` }} />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
-          <div className={`${cardBase} p-5`}>
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Visão analítica</h3>
-              <span className="badge badge-ghost badge-sm text-[11px] tracking-[0.15em] text-bjj-gray-200">Atualizado</span>
-            </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-bjj-gray-200/90">Check-ins por status</p>
-                  <Clock3 size={16} className="text-bjj-gray-200" />
-                </div>
-                <div className="mt-4 space-y-3">
-                  {[{ label: 'Confirmados', value: presencas.filter((p) => p.status === 'CONFIRMADO').length, tone: 'bg-green-500' },
-                    { label: 'Pendentes', value: metrics.pendentes, tone: 'bg-yellow-400' },
-                    { label: 'Ausentes', value: presencas.filter((p) => p.status === 'AUSENTE' || p.status === 'AUSENTE_JUSTIFICADA').length, tone: 'bg-bjj-red' }
-                  ].map((row) => (
-                    <div key={row.label} className="space-y-2">
-                      <div className="flex items-center justify-between text-sm text-bjj-gray-200">
-                        <span>{row.label}</span>
-                        <span className="font-semibold text-white">{row.value}</span>
-                      </div>
-                      <div className="h-2 rounded-full bg-bjj-gray-800">
-                        <div className={`h-full rounded-full ${row.tone}`} style={{ width: `${Math.min(100, row.value * 10)}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-bjj-gray-200/90">Presenças na semana</p>
-                  <BarChart2 size={16} className="text-bjj-gray-200" />
-                </div>
-                <div className="mt-4 flex items-end gap-3">
-                  {[5, 8, 6, 9, 7, 10, 4].map((value, idx) => (
-                    <div key={idx} className="flex flex-1 flex-col items-center gap-2">
-                      <div className="w-full rounded-t-xl bg-gradient-to-t from-bjj-red to-red-400" style={{ height: `${value * 6}px` }} />
-                      <span className="text-[11px] text-bjj-gray-300">D{idx + 1}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={`${cardBase} p-6`}>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className={badge}>Painel da academia</p>
-                <h3 className="text-xl font-semibold text-white">Resumo detalhado</h3>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 p-1">
-                {[{ key: 'visao', label: 'Visão Geral' }, { key: 'alunos', label: 'Alunos' }, { key: 'presencas', label: 'Presenças' }, { key: 'graduacoes', label: 'Graduações' }].map((tab) => (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      activeTab === tab.key
-                        ? 'bg-bjj-red text-white shadow-[0_12px_30px_rgba(225,6,0,0.25)]'
-                        : 'text-bjj-gray-200 hover:bg-bjj-gray-800'
-                    }`}
-                    onClick={() => setActiveTab(tab.key)}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {tabCards[activeTab].map((card) => {
-                const Icon = card.icon;
-                return (
-                  <div
-                    key={card.title}
-                    className="rounded-2xl border border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-bjj-gray-200/90">{card.title}</p>
-                        <p className="mt-1 text-3xl font-bold text-white">{card.value}</p>
-                      </div>
-                      <span className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-900/80 ${card.tone}`}>
-                        <Icon size={18} />
-                      </span>
-                    </div>
-                    <div className="mt-3 h-1.5 rounded-full bg-bjj-gray-800">
-                      <div className="h-full rounded-full bg-bjj-red/70" style={{ width: '75%' }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-b from-bjj-gray-900 to-bjj-black p-5`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className={badge}>Pendências</p>
-              <h3 className="text-lg font-semibold text-white">Check-ins em análise</h3>
-            </div>
-            <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-950 shadow">
-              {metrics.pendentes} aguardando
-            </span>
-          </div>
-          <div className="space-y-3">
-            {presencas
-              .filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN')
-              .slice(0, 5)
-              .map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-start justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome || 'Aluno'}</p>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.tipoTreino}</p>
-                  </div>
-                  <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
-                    Aguardando
-                  </span>
-                </div>
-              ))}
-            {metrics.pendentes === 0 && (
-              <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/50 p-4 text-sm text-bjj-gray-300">
-                Nenhum check-in pendente no momento. Acompanhe novos envios em tempo real.
-              </p>
-            )}
-          </div>
-          <Link
-            href="/presencas"
-            className="btn btn-sm rounded-full border-none bg-bjj-red text-white shadow-lg hover:bg-red-600"
-          >
-            Ir para presenças
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
 export default function DashboardPage() {
-  const { isInstructor, isAdmin, roles } = useRole();
-  const isProfessorLayout = isInstructor || isAdmin || roles.includes(ROLE_KEYS.professor) || roles.includes(ROLE_KEYS.instrutor);
+  const [activeView, setActiveView] = useState('geral');
+  const [alunos, setAlunos] = useState([]);
+  const [presencas, setPresencas] = useState([]);
+  const [graduacoes, setGraduacoes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (isProfessorLayout) {
-    return <ProfessorDashboard />;
+  useEffect(() => {
+    let active = true;
+    async function carregarDados() {
+      try {
+        const [listaAlunos, listaPresencas, listaGraduacoes] = await Promise.all([
+          getAlunos(),
+          getPresencas(),
+          getGraduacoes()
+        ]);
+        if (!active) {
+          return;
+        }
+        setAlunos(listaAlunos);
+        setPresencas(listaPresencas);
+        setGraduacoes(listaGraduacoes);
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+    carregarDados();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const mesAtualLabel = useMemo(() => {
+    const label = new Date().toLocaleString('pt-BR', { month: 'long' });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }, []);
+
+  const totalAlunos = alunos.length || 1;
+  const ativos = alunos.filter((aluno) => aluno.status === 'Ativo').length;
+  const inativos = alunos.filter((aluno) => aluno.status !== 'Ativo').length;
+  const taxaAtivos = Math.round((ativos / totalAlunos) * 100);
+
+  const avaliacoes = Math.round(alunos.length * 0.5 + 5);
+  const presencasSemana = presencas.filter((item) => {
+    const data = new Date(item.data);
+    const hojeData = new Date();
+    const diff = Math.abs(data - hojeData) / (1000 * 60 * 60 * 24);
+    return diff <= 7;
+  }).length;
+  const graduacoesPlanejadas = graduacoes.filter((item) => item.status !== 'Concluído').length;
+
+  const alunosAtivos = useMemo(() => alunos.filter((aluno) => aluno.status === 'Ativo'), [alunos]);
+
+  const aniversariantesDoMes = useMemo(() => {
+    const hojeData = new Date();
+    const mesAtual = hojeData.getMonth();
+    const anoAtual = hojeData.getFullYear();
+
+    return alunos
+      .map((aluno) => {
+        if (!aluno.dataNascimento) return null;
+        const nascimento = new Date(aluno.dataNascimento);
+        if (Number.isNaN(nascimento.getTime()) || nascimento.getMonth() !== mesAtual) return null;
+        const dia = nascimento.getDate();
+        const proximoAniversario = new Date(anoAtual, mesAtual, dia);
+        return {
+          id: aluno.id,
+          nome: aluno.nome,
+          faixa: aluno.faixa,
+          graus: aluno.graus,
+          status: aluno.status,
+          dataLabel: proximoAniversario.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+          idade: Math.max(anoAtual - nascimento.getFullYear(), 0),
+          dia
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.dia - b.dia);
+  }, [alunos]);
+  const aniversariantesDestaque = useMemo(() => aniversariantesDoMes.slice(0, 6), [aniversariantesDoMes]);
+  const totalAniversariantesMes = aniversariantesDoMes.length;
+
+  const registrosDoDia = useMemo(() => {
+    const registros = presencas.filter((item) => item.data === hoje);
+    const alunosComRegistro = new Set(registros.map((item) => item.alunoId));
+    const placeholders = alunosAtivos
+      .filter((aluno) => !alunosComRegistro.has(aluno.id))
+      .map((aluno) => ({
+        id: `placeholder-${aluno.id}`,
+        alunoId: aluno.id,
+        alunoNome: aluno.nome,
+        faixa: aluno.faixa,
+        graus: aluno.graus,
+        data: hoje,
+        status: 'Ausente',
+        hora: null
+      }));
+    return [...registros, ...placeholders];
+  }, [alunosAtivos, hoje, presencas]);
+
+  const presentesDia = registrosDoDia.filter((item) => item.status === 'Presente').length;
+  const ausentesDia = registrosDoDia.length - presentesDia;
+  const atrasosDia = registrosDoDia.filter(
+    (item) => item.status === 'Presente' && item.hora && item.hora > '10:00'
+  ).length;
+  const taxaDia = Math.round((presentesDia / (registrosDoDia.length || 1)) * 100);
+
+  const diasAtivos = useMemo(() => {
+    const conjunto = new Set(presencas.map((item) => item.data));
+    return conjunto.size;
+  }, [presencas]);
+
+  const rankingPresenca = useMemo(() => {
+    const mapa = new Map();
+    presencas.forEach((registro) => {
+      const atual = mapa.get(registro.alunoId) || {
+        id: registro.alunoId,
+        nome: registro.alunoNome,
+        faixa: registro.faixa,
+        graus: registro.graus,
+        presencas: 0,
+        faltas: 0
+      };
+
+      if (registro.status === 'Presente') {
+        atual.presencas += 1;
+      } else {
+        atual.faltas += 1;
+      }
+
+      mapa.set(registro.alunoId, atual);
+    });
+
+    return Array.from(mapa.values()).sort((a, b) => b.presencas - a.presencas);
+  }, [presencas]);
+
+  const evolucoes = useMemo(
+    () =>
+      alunos
+        .map((aluno) => ({ aluno, recomendacao: calculateNextStep(aluno, { presencas }) }))
+        .filter((item) => Boolean(item.recomendacao)),
+    [alunos, presencas]
+  );
+
+  const grausPendentes = evolucoes.filter((item) => item.recomendacao.tipo === 'Grau').length;
+  const faixasPendentes = evolucoes.filter((item) => item.recomendacao.tipo === 'Faixa').length;
+
+  const proximasCerimonias = graduacoes
+    .filter((item) => item.status !== 'Concluído')
+    .sort((a, b) => new Date(a.previsao) - new Date(b.previsao));
+
+  const evolucoesEmDestaque = evolucoes.slice(0, 5);
+
+  const novos30Dias = useMemo(
+    () =>
+      alunos
+        .map((aluno) => ({ aluno, diasDesdeEntrada: differenceInDays(aluno.dataInicio) }))
+        .filter((item) => item.diasDesdeEntrada !== null && item.diasDesdeEntrada <= 30)
+        .sort((a, b) => a.diasDesdeEntrada - b.diasDesdeEntrada),
+    [alunos]
+  );
+
+  const presencasUltimoMes = useMemo(() => {
+    const corte = new Date();
+    corte.setDate(corte.getDate() - 30);
+    return presencas.filter((item) => {
+      const data = new Date(item.data);
+      return !Number.isNaN(data.getTime()) && data >= corte;
+    });
+  }, [presencas]);
+
+  const frequenciaUltimoMes = useMemo(() => {
+    const mapa = new Map();
+    presencasUltimoMes.forEach((item) => {
+      if (item.status !== 'Presente') return;
+      mapa.set(item.alunoId, (mapa.get(item.alunoId) || 0) + 1);
+    });
+    return mapa;
+  }, [presencasUltimoMes]);
+
+  const alunosEmAtencao = useMemo(
+    () =>
+      alunosAtivos
+        .map((aluno) => ({ aluno, presencasNoPeriodo: frequenciaUltimoMes.get(aluno.id) || 0 }))
+        .filter((item) => item.presencasNoPeriodo <= 2)
+        .sort((a, b) => a.presencasNoPeriodo - b.presencasNoPeriodo || a.aluno.nome.localeCompare(b.aluno.nome, 'pt-BR'))
+        .slice(0, 6),
+    [alunosAtivos, frequenciaUltimoMes]
+  );
+
+  const distribuicaoFaixas = useMemo(() => {
+    const mapa = new Map();
+    alunos.forEach((aluno) => {
+      const faixa = aluno.faixa || 'Sem faixa';
+      mapa.set(faixa, (mapa.get(faixa) || 0) + 1);
+    });
+    return Array.from(mapa.entries())
+      .map(([label, total]) => ({ label, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [alunos]);
+
+  const distribuicaoPlanos = useMemo(() => {
+    const mapa = new Map();
+    alunos.forEach((aluno) => {
+      const plano = aluno.plano || 'Sem plano';
+      mapa.set(plano, (mapa.get(plano) || 0) + 1);
+    });
+    return Array.from(mapa.entries())
+      .map(([label, total]) => ({ label, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [alunos]);
+
+  const faixaMaisPopular = distribuicaoFaixas[0];
+  const planoPopular = distribuicaoPlanos[0];
+
+  const mediaGraduacoesGeral = useMemo(() => {
+    const medias = alunos
+      .map((aluno) => calcularMediaEntreGraduacoes(aluno.historicoGraduacoes))
+      .filter((valor) => Number.isFinite(valor));
+    if (!medias.length) return null;
+    const soma = medias.reduce((acc, valor) => acc + valor, 0);
+    return soma / medias.length;
+  }, [alunos]);
+
+  const heroContent = useMemo(() => {
+    if (activeView === 'alunos') {
+      return {
+        badge: 'Cadastros',
+        title: 'Panorama de alunos',
+        subtitle: 'Identifique novos cadastros, planos populares e quem precisa de atenção.',
+        stats: [
+          {
+            label: 'Alunos ativos',
+            value: ativos,
+            helper: `${novos30Dias.length} novos · ${alunosEmAtencao.length} em atenção`
+          },
+          {
+            label: 'Novos (30 dias)',
+            value: novos30Dias.length,
+            helper: 'Revise fichas de integração recentes'
+          },
+          {
+            label: 'Plano favorito',
+            value: planoPopular ? planoPopular.label : 'Sem dados',
+            helper: `${planoPopular ? planoPopular.total : 0} aluno(s)`
+          },
+          {
+            label: 'Faixa predominante',
+            value: faixaMaisPopular ? faixaMaisPopular.label : 'Sem registros',
+            helper: `${faixaMaisPopular ? faixaMaisPopular.total : 0} atleta(s)`
+          }
+        ]
+      };
+    }
+
+    if (activeView === 'presencas') {
+      return {
+        badge: 'Engajamento',
+        title: 'Indicadores de frequência',
+        subtitle: 'Acompanhe o comportamento diário antes de abrir a tela de presenças.',
+        stats: [
+          {
+            label: 'Taxa de hoje',
+            value: `${taxaDia}%`,
+            helper: `${presentesDia} presenças · ${ausentesDia} faltas`
+          },
+          {
+            label: 'Dias monitorados',
+            value: diasAtivos,
+            helper: 'Período recente com registros ativos'
+          },
+          {
+            label: 'Aluno destaque',
+            value: rankingPresenca[0]?.nome || 'Aguardando registros',
+            helper: rankingPresenca[0]
+              ? `${rankingPresenca[0].presencas} presenças registradas`
+              : 'Sem ranking disponível'
+          }
+        ]
+      };
+    }
+
+    if (activeView === 'graduacoes') {
+      return {
+        badge: 'Planejamento',
+        title: 'Visão estratégica de graduações',
+        subtitle: 'Priorize próximos graus, trocas de faixa e eventos planejados.',
+        stats: [
+          {
+            label: 'Recomendações ativas',
+            value: evolucoes.length,
+            helper: `${grausPendentes} graus · ${faixasPendentes} faixas`
+          },
+          {
+            label: 'Cerimônias planejadas',
+            value: proximasCerimonias.length,
+            helper: `${graduacoesPlanejadas} eventos totais`
+          },
+          {
+            label: 'Tempo médio',
+            value: mediaGraduacoesGeral
+              ? `${Math.round(mediaGraduacoesGeral)} meses`
+              : 'Sem histórico',
+            helper: 'Entre graduações registradas'
+          }
+        ]
+      };
+    }
+
+    return {
+      badge: 'Visão geral',
+      title: 'Painel principal da BJJ Academy',
+      subtitle: 'Monitore os módulos críticos e escolha a visão detalhada desejada.',
+      stats: [
+        {
+          label: 'Ativos na academia',
+          value: ativos,
+          helper: `${taxaAtivos}% da base (${inativos} em pausa)`
+        },
+        {
+          label: 'Presenças na semana',
+          value: presencasSemana,
+          helper: `${presencas.length} registros no mês`
+        },
+        {
+          label: 'Graduações a preparar',
+          value: graduacoesPlanejadas,
+          helper: `${faixasPendentes} faixas · ${grausPendentes} graus`
+        },
+        {
+          label: 'Avaliações concluídas',
+          value: avaliacoes,
+          helper: 'Histórico estimado com base nos alunos ativos'
+        }
+      ]
+    };
+  }, [
+    activeView,
+    ativos,
+    taxaAtivos,
+    inativos,
+    presencasSemana,
+    presencas.length,
+    graduacoesPlanejadas,
+    faixasPendentes,
+    grausPendentes,
+    avaliacoes,
+    taxaDia,
+    presentesDia,
+    ausentesDia,
+    diasAtivos,
+    rankingPresenca,
+    evolucoes.length,
+    proximasCerimonias.length,
+    mediaGraduacoesGeral,
+    novos30Dias.length,
+    alunosEmAtencao.length,
+    planoPopular?.label,
+    faixaMaisPopular?.label
+  ]);
+
+  if (isLoading) {
+    return <LoadingState title="Carregando panorama" message="Conectando módulos de alunos, presenças e graduações." />;
   }
 
-  return <StudentDashboard />;
+  return (
+    <div className="space-y-6">
+      <PageHero
+        badge={heroContent.badge}
+        title={heroContent.title}
+        subtitle={heroContent.subtitle}
+        stats={heroContent.stats}
+      />
+
+      <div className="flex flex-wrap gap-2">
+        {VIEW_OPTIONS.map((option) => {
+          const isActive = option.id === activeView;
+          return (
+            <ToggleTag key={option.id} active={isActive} onClick={() => setActiveView(option.id)}>
+              {option.label}
+              <span className="hidden text-[11px] text-bjj-gray-200/70 md:inline">{option.helper}</span>
+            </ToggleTag>
+          );
+        })}
+      </div>
+
+      {activeView === 'geral' && (
+        <>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <Card
+              title="Alunos ativos"
+              value={ativos}
+              icon={Users}
+              description="Mantenha cadastros atualizados para decisões rápidas."
+            />
+            <Card
+              title="Graus em revisão"
+              value={grausPendentes}
+              icon={Award}
+              description="Sugestões de próximos graus com base nas regras oficiais."
+            />
+          <Card
+            title="Faixas em preparação"
+            value={faixasPendentes}
+            icon={Medal}
+            description="Alunos prontos para avançar de faixa nos próximos meses."
+          />
+          <Card
+            title={`Aniversários (${mesAtualLabel})`}
+            value={totalAniversariantesMes}
+            icon={Cake}
+            description="Planeje ações personalizadas para os aniversariantes do mês."
+          />
+        </div>
+
+          <section className="grid grid-cols-1 gap-3 xl:grid-cols-[2fr,1fr]">
+            <article className="card space-y-4">
+              <header className="space-y-1.5">
+                <h2 className="text-lg font-semibold text-bjj-white">Radar rápido</h2>
+                <p className="text-sm text-bjj-gray-200/70">
+                  Visualize quem está mais próximo da próxima evolução e direcione feedback durante as aulas.
+                </p>
+              </header>
+              {evolucoesEmDestaque.length === 0 ? (
+                <p className="text-sm text-bjj-gray-200/70">Nenhuma recomendação pendente para as próximas semanas.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {evolucoesEmDestaque.slice(0, 3).map(({ aluno, recomendacao }) => (
+                    <li
+                      key={aluno.id}
+                      className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-bjj-white">{aluno.nome}</p>
+                        <p className="text-xs text-bjj-gray-200/70">{recomendacao.descricao}</p>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/80">
+                        {recomendacao.tipo === 'Grau' ? 'Próximo grau' : 'Próxima faixa'}
+                        <span className="text-bjj-red font-semibold">
+                          {recomendacao.tipo === 'Grau' ? `${recomendacao.grauAlvo}º` : recomendacao.proximaFaixa}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+
+            <aside className="card space-y-4">
+              <header className="space-y-1.5">
+                <h2 className="text-lg font-semibold text-bjj-white">Agenda curta</h2>
+                <p className="text-sm text-bjj-gray-200/70">Principais compromissos dos próximos treinos e graduações.</p>
+              </header>
+              {proximasCerimonias.length === 0 ? (
+                <p className="text-sm text-bjj-gray-200/70">Nenhuma cerimônia planejada para os próximos meses.</p>
+              ) : (
+                <ul className="space-y-2.5">
+                  {proximasCerimonias.slice(0, 3).map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-3 py-2"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-bjj-white">{item.alunoNome}</p>
+                        <p className="text-xs text-bjj-gray-200/70">
+                          {item.faixaAtual} → {item.proximaFaixa}
+                        </p>
+                      </div>
+                      <span className="text-[11px] text-bjj-gray-200/60">{formatDate(item.previsao)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </aside>
+          </section>
+
+          <section className="card space-y-4">
+            <header className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-bjj-white">Aniversariantes de {mesAtualLabel}</h2>
+                <p className="text-sm text-bjj-gray-200/70">
+                  Antecipe mensagens e ações especiais para quem celebra o próximo ciclo este mês.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/70">
+                <Cake size={13} className="text-bjj-red" /> {totalAniversariantesMes || 0} no mês
+              </span>
+            </header>
+
+            {aniversariantesDestaque.length === 0 ? (
+              <p className="text-sm text-bjj-gray-200/70">Nenhum aniversário neste mês. Aproveite para revisar cadastros.</p>
+            ) : (
+              <ul className="space-y-2">
+                {aniversariantesDestaque.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 md:flex-row md:items-center md:justify-between"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold text-bjj-white">{item.nome}</p>
+                        <Badge variant={item.status === 'Ativo' ? 'success' : 'neutral'}>{item.status}</Badge>
+                      </div>
+                      <p className="text-xs text-bjj-gray-200/70">
+                        {item.faixa} · {item.graus}º grau
+                      </p>
+                    </div>
+                    <div className="text-sm text-bjj-gray-200/80 md:text-right">
+                      <p className="font-semibold text-bjj-white">{item.dataLabel}</p>
+                      <p className="text-xs text-bjj-gray-200/70">Completa {item.idade} anos</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </>
+      )}
+
+      {activeView === 'alunos' && (
+        <section className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <Card
+              title="Novos no mês"
+              value={novos30Dias.length}
+              icon={UserPlus}
+              description="Cadastros realizados nos últimos 30 dias."
+            />
+            <Card
+              title="Em atenção"
+              value={alunosEmAtencao.length}
+              icon={UserMinus}
+              description="Alunos com até duas presenças no período recente."
+            />
+            <Card
+              title="Plano destaque"
+              value={planoPopular ? planoPopular.label : 'Sem dados'}
+              icon={Layers}
+              description={planoPopular ? `${planoPopular.total} participante(s)` : 'Cadastre planos para acompanhar.'}
+            />
+            <Card
+              title="Faixa líder"
+              value={faixaMaisPopular ? faixaMaisPopular.label : 'N/A'}
+              icon={PieChart}
+              description={faixaMaisPopular ? `${faixaMaisPopular.total} atleta(s)` : 'Atualize faixas dos cadastros.'}
+            />
+          </div>
+
+          <section className="grid grid-cols-1 gap-3 xl:grid-cols-[2fr,1fr]">
+            <article className="card space-y-4">
+              <header className="space-y-1.5">
+                <h2 className="text-lg font-semibold text-bjj-white">Integração recente</h2>
+                <p className="text-sm text-bjj-gray-200/70">
+                  Cadastros concluídos nas últimas semanas para organizar apresentações, kits e contratos.
+                </p>
+              </header>
+              {novos30Dias.length === 0 ? (
+                <p className="text-sm text-bjj-gray-200/70">Nenhum aluno novo nos últimos 30 dias.</p>
+              ) : (
+                <ul className="space-y-2.5">
+                  {novos30Dias.slice(0, 6).map(({ aluno, diasDesdeEntrada }) => (
+                    <li
+                      key={aluno.id}
+                      className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-bjj-white">{aluno.nome}</p>
+                        <p className="text-xs text-bjj-gray-200/70">
+                          {aluno.faixa} · {aluno.graus}º grau · Plano {aluno.plano}
+                        </p>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/80">
+                        {diasDesdeEntrada === 0
+                          ? 'Hoje'
+                          : `Há ${diasDesdeEntrada} dia${diasDesdeEntrada > 1 ? 's' : ''}`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+
+            <aside className="card space-y-4">
+              <header className="space-y-1.5">
+                <h2 className="text-lg font-semibold text-bjj-white">Distribuição por faixa</h2>
+                <p className="text-sm text-bjj-gray-200/70">Entenda a composição atual para planejar turmas e graduações.</p>
+              </header>
+              {distribuicaoFaixas.length === 0 ? (
+                <p className="text-sm text-bjj-gray-200/70">Atualize a faixa dos alunos para visualizar a distribuição.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {distribuicaoFaixas.map((item) => (
+                    <li key={item.label} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-bjj-gray-200/70">
+                        <span className="font-semibold text-bjj-white">{item.label}</span>
+                        <span>{item.total} aluno(s)</span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-bjj-gray-800">
+                        <div
+                          className="h-full rounded-full bg-bjj-red"
+                          style={{ width: `${Math.max(8, Math.round((item.total / (totalAlunos || 1)) * 100))}%` }}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </aside>
+          </section>
+
+          <section className="card space-y-4">
+            <header className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-semibold text-bjj-white">Frequência em atenção</h2>
+                <p className="text-sm text-bjj-gray-200/70">
+                  Alunos com participação baixa nas últimas quatro semanas para contato proativo.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/70">
+                {presencasUltimoMes.length} registro(s) analisado(s)
+              </span>
+            </header>
+            {alunosEmAtencao.length === 0 ? (
+              <p className="text-sm text-bjj-gray-200/70">Sem alunos em atenção neste período.</p>
+            ) : (
+              <ul className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                {alunosEmAtencao.map(({ aluno, presencasNoPeriodo }) => (
+                  <li
+                    key={aluno.id}
+                    className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-bjj-white">{aluno.nome}</p>
+                      <p className="text-xs text-bjj-gray-200/70">
+                        {aluno.faixa} · {aluno.plano}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-bjj-gray-200/70">
+                      <span className="font-semibold text-bjj-white">{presencasNoPeriodo} presença(s)</span>
+                      <span>Meta: 4+</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </section>
+      )}
+
+      {activeView === 'presencas' && (
+        <section className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <Card
+              title="Taxa de presença (dia)"
+              value={`${taxaDia}%`}
+              icon={Activity}
+              description="Percentual de confirmações registradas hoje."
+            />
+            <Card
+              title="Faltas registradas"
+              value={ausentesDia}
+              icon={Clock3}
+              description="Alunos aguardando check-in ou faltantes."
+            />
+            <Card
+              title="Dias monitorados"
+              value={diasAtivos}
+              icon={CalendarCheck}
+              description="Total de dias acompanhados recentemente."
+            />
+          </div>
+
+          <article className="card space-y-4">
+            <header className="space-y-1.5">
+              <h2 className="text-lg font-semibold text-bjj-white">Resumo do dia</h2>
+              <p className="text-sm text-bjj-gray-200/70">Distribuição rápida das presenças registradas até o momento.</p>
+            </header>
+            <div className="grid grid-cols-2 gap-3 text-sm text-bjj-gray-200/80 md:grid-cols-4">
+              <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
+                <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Total de alunos</p>
+                <p className="mt-1 text-xl font-semibold text-bjj-white">{registrosDoDia.length}</p>
+              </div>
+              <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
+                <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Presenças</p>
+                <p className="mt-1 text-xl font-semibold text-bjj-white">{presentesDia}</p>
+                <p className="text-[11px] text-bjj-gray-200/60">{taxaDia}% da turma</p>
+              </div>
+              <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
+                <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Faltas</p>
+                <p className="mt-1 text-xl font-semibold text-bjj-white">{ausentesDia}</p>
+                <p className="text-[11px] text-bjj-gray-200/60">Aguardando registro</p>
+              </div>
+              <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
+                <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Atrasos</p>
+                <p className="mt-1 text-xl font-semibold text-bjj-white">{atrasosDia}</p>
+                <p className="text-[11px] text-bjj-gray-200/60">Chegadas após 10h</p>
+              </div>
+            </div>
+          </article>
+
+          <section className="card space-y-4">
+            <header className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-semibold text-bjj-white">Ranking de presença</h2>
+                <p className="text-sm text-bjj-gray-200/70">
+                  Top alunos com maior engajamento acumulado nas últimas sessões registradas.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/70">
+                <Flame size={13} className="text-bjj-red" /> {rankingPresenca.slice(0, 5).length} destaque(s)
+              </span>
+            </header>
+
+            {rankingPresenca.length === 0 ? (
+              <p className="text-sm text-bjj-gray-200/70">Nenhum registro de presença para exibir o ranking.</p>
+            ) : (
+              <ul className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-4">
+                {rankingPresenca.slice(0, 8).map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-bjj-white">{item.nome}</p>
+                      <p className="text-xs text-bjj-gray-200/70">
+                        {item.faixa} · {item.graus}º grau
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-bjj-gray-200/70">
+                      <span className="font-semibold text-bjj-white">{item.presencas} presenças</span>
+                      <span>{item.faltas} falta(s)</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </section>
+      )}
+
+      {activeView === 'graduacoes' && (
+        <section className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <Card
+              title="Recomendações ativas"
+              value={evolucoes.length}
+              icon={Activity}
+              description="Total de alunos com sugestão automática de próximo passo."
+            />
+            <Card
+              title="Graus pendentes"
+              value={grausPendentes}
+              icon={Award}
+              description="Quantidade de faixas com grau recomendado para os próximos treinos."
+            />
+            <Card
+              title="Faixas pendentes"
+              value={faixasPendentes}
+              icon={Medal}
+              description="Alunos que já cumprem o requisito de troca de faixa."
+            />
+          </div>
+
+          <section className="grid grid-cols-1 gap-3 xl:grid-cols-[2fr,1fr]">
+            <article className="card space-y-4">
+              <header className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-bjj-white">Radar de evolução</h2>
+                  <p className="text-sm text-bjj-gray-200/70">
+                    Priorize quem está pronto para avançar: acompanhe próximos graus e trocas de faixa sugeridas.
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/70">
+                  <Activity size={13} className="text-bjj-red" /> {evolucoes.length} recomendação(ões)
+                </span>
+              </header>
+              {evolucoes.length === 0 ? (
+                <p className="text-sm text-bjj-gray-200/70">Nenhuma recomendação pendente para as próximas semanas.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {evolucoes.map(({ aluno, recomendacao }) => (
+                    <li
+                      key={aluno.id}
+                      className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-bjj-white">{aluno.nome}</p>
+                        <p className="text-xs text-bjj-gray-200/70">{recomendacao.descricao}</p>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-3 py-1 text-xs text-bjj-gray-200/80">
+                        {recomendacao.tipo === 'Grau' ? 'Próximo grau' : 'Próxima faixa'}
+                        <span className="text-bjj-red font-semibold">
+                          {recomendacao.tipo === 'Grau' ? `${recomendacao.grauAlvo}º` : recomendacao.proximaFaixa}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+
+            <aside className="card space-y-4">
+              <header className="space-y-1.5">
+                <h2 className="text-lg font-semibold text-bjj-white">Próximas cerimônias</h2>
+                <p className="text-sm text-bjj-gray-200/70">
+                  Organize o cronograma e alinhe expectativa com alunos e responsáveis.
+                </p>
+              </header>
+              {proximasCerimonias.length === 0 ? (
+                <p className="text-sm text-bjj-gray-200/70">Nenhuma cerimônia planejada para os próximos meses.</p>
+              ) : (
+                <ul className="space-y-2.5">
+                  {proximasCerimonias.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex flex-col gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-bjj-white">{item.alunoNome}</p>
+                        <span className="text-[11px] text-bjj-gray-200/60">{formatDate(item.previsao)}</span>
+                      </div>
+                      <p className="text-xs text-bjj-gray-200/70">
+                        {item.faixaAtual} → {item.proximaFaixa}
+                      </p>
+                      <span className="inline-flex items-center gap-1.5 text-xs text-bjj-gray-200/60">
+                        <Flame size={13} className="text-bjj-red" /> {item.status}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </aside>
+          </section>
+        </section>
+      )}
+    </div>
+  );
 }
