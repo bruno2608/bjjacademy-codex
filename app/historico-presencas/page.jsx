@@ -40,6 +40,21 @@ export default function HistoricoPresencasPage() {
       .reverse();
   }, [alunoId, isAluno, meses, presencas]);
 
+  const statusTone = (status) => {
+    switch (status) {
+      case 'CONFIRMADO':
+        return { label: 'Presente', tone: 'bg-green-600/20 text-green-300' };
+      case 'CHECKIN':
+      case 'PENDENTE':
+        return { label: 'Pendente', tone: 'bg-yellow-500/20 text-yellow-300' };
+      case 'AUSENTE':
+      case 'AUSENTE_JUSTIFICADA':
+        return { label: 'Ausente', tone: 'bg-bjj-red/20 text-bjj-red' };
+      default:
+        return { label: 'Sem registro', tone: 'bg-bjj-gray-700 text-bjj-gray-200' };
+    }
+  };
+
   return (
     <div className="space-y-4">
       <header className="flex flex-col gap-1">
@@ -75,19 +90,16 @@ export default function HistoricoPresencasPage() {
                 <p className="font-semibold text-white">{item.tipoTreino}</p>
                 <p className="text-xs text-bjj-gray-400">{item.data}</p>
               </div>
+              {(() => {
+                const tone = statusTone(item.status);
+                return (
               <span
-                className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${
-                  item.status === 'Presente'
-                    ? 'bg-green-600/20 text-green-300'
-                    : item.status === 'Pendente'
-                    ? 'bg-yellow-500/20 text-yellow-300'
-                    : item.status === 'Cancelado'
-                    ? 'bg-bjj-gray-700 text-bjj-gray-200'
-                    : 'bg-bjj-red/20 text-bjj-red'
-                }`}
+                className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${tone.tone}`}
               >
-                {item.status}
+                {tone.label}
               </span>
+                );
+              })()}
             </li>
           ))}
         </ul>

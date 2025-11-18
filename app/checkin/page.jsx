@@ -18,6 +18,7 @@ export default function CheckinPage() {
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
   const registerCheckin = usePresencasStore((state) => state.registerCheckin);
   const presencas = usePresencasStore((state) => state.presencas);
+  const isTreinoFechado = usePresencasStore((state) => state.isTreinoFechado);
   const [feedback, setFeedback] = useState('');
 
   const diaSemana = normalizeWeekday(hoje);
@@ -39,7 +40,14 @@ export default function CheckinPage() {
       if (item.alunoId !== alunoId) return;
       const [ano, mes] = (item.data || '').split('-').map(Number);
       if (ano === year && mes === month) {
-        map.set(item.data, item.status);
+        const status = item.status;
+        if (status === 'CONFIRMADO') {
+          map.set(item.data, 'PRESENTE');
+        } else if (status === 'CHECKIN' || status === 'PENDENTE') {
+          if (!map.has(item.data)) {
+            map.set(item.data, 'PENDENTE');
+          }
+        }
       }
     });
     return map;
@@ -76,14 +84,31 @@ export default function CheckinPage() {
       horaInicio: treino.hora
     });
 
-    if (resultado.status === 'registrado') {
-      setFeedback('Check-in confirmado automaticamente. Boa aula!');
-    } else if (resultado.status === 'pendente') {
-      setFeedback('Registro enviado para aprovação por ter ocorrido após o horário de início.');
-    } else if (resultado.status === 'fora_do_horario') {
-      setFeedback('Fora do horário permitido. Tente novamente no horário do treino.');
-    } else {
+    if (resultado.status === 'fechado') {
+      setFeedback('Este treino já foi fechado pelo professor.');
+    } else if (resultado.status === 'duplicado') {
       setFeedback('Você já registrou presença para este treino.');
+    } else if (resultado.status === 'checkin') {
+      setFeedback('Check-in enviado. Aguardando confirmação do professor.');
+    } else {
+      setFeedback('Seu check-in foi enviado para análise do professor.');
+    }
+  };
+
+  const statusLabel = (status) => {
+    switch (status) {
+      case 'CONFIRMADO':
+        return { label: 'PRESENÇA CONFIRMADA', tone: 'bg-green-600/20 text-green-300' };
+      case 'CHECKIN':
+        return { label: 'CHECK-IN ENVIADO', tone: 'bg-yellow-500/20 text-yellow-200' };
+      case 'PENDENTE':
+        return { label: 'EM ANÁLISE PELO PROFESSOR', tone: 'bg-yellow-500/20 text-yellow-200' };
+      case 'AUSENTE':
+        return { label: 'AUSENTE', tone: 'bg-red-600/10 text-red-300' };
+      case 'AUSENTE_JUSTIFICADA':
+        return { label: 'AUSENTE JUSTIFICADA', tone: 'bg-red-600/10 text-red-300' };
+      default:
+        return { label: 'NÃO REGISTRADO', tone: 'bg-bjj-gray-800 text-bjj-gray-200' };
     }
   };
 
@@ -107,7 +132,8 @@ export default function CheckinPage() {
         <div className="lg:col-span-2 space-y-3">
           {treinosDoDia.map((treino) => {
             const registro = checkinsDoAluno.find((item) => item.treinoId === treino.id);
-            const status = registro?.status || 'Não registrado';
+            const fechado = isTreinoFechado(hoje, treino.id);
+            const statusInfo = statusLabel(registro?.status);
             return (
               <div
                 key={treino.id}
@@ -121,23 +147,17 @@ export default function CheckinPage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${
-                      status === 'Presente'
-                        ? 'bg-green-600/20 text-green-300'
-                        : status === 'Pendente'
-                        ? 'bg-yellow-500/20 text-yellow-300'
-                        : 'bg-bjj-gray-800 text-bjj-gray-200'
-                    }`}
+                    className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${statusInfo.tone}`}
                   >
-                    {status}
+                    {statusInfo.label}
                   </span>
                   <Button
                     onClick={() => handleCheckin(treino)}
                     className="btn-sm"
                     type="button"
-                    disabled={status === 'Presente' || status === 'Pendente'}
+                    disabled={Boolean(registro) || fechado}
                   >
-                    {status === 'Presente' ? 'Confirmado' : status === 'Pendente' ? 'Aguardando' : 'Registrar check-in'}
+                    {registro ? 'Aguardando' : fechado ? 'Treino fechado' : 'Registrar check-in'}
                   </Button>
                 </div>
               </div>
@@ -165,9 +185,9 @@ export default function CheckinPage() {
             {calendarDays.map((entry, index) => {
               if (!entry) return <div key={`empty-${index}`} className="h-10" />;
               const statusStyle =
-                entry.status === 'Presente'
+                entry.status === 'PRESENTE'
                   ? 'border-green-500/50 bg-green-600/10 text-green-200'
-                  : entry.status === 'Pendente'
+                  : entry.status === 'PENDENTE'
                   ? 'border-yellow-400/50 bg-yellow-500/10 text-yellow-200'
                   : 'border-bjj-gray-800 bg-bjj-black/40 text-bjj-gray-200';
               return (
@@ -192,9 +212,9 @@ export default function CheckinPage() {
       <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-black/60 p-4 text-sm text-bjj-gray-200/80">
         <h3 className="mb-2 text-sm font-semibold text-white">Regras do check-in</h3>
         <ul className="list-disc space-y-1 pl-5">
-          <li>Check-in automático até 30 minutos após o início do treino.</li>
-          <li>Fora do horário, o pedido vai para aprovação do professor.</li>
-          <li>Um registro por treino. Você pode marcar mais de um treino no mesmo dia.</li>
+          <li>Você pode registrar o check-in até 30 minutos após o início do treino.</li>
+          <li>Todo check-in é enviado para análise do professor.</li>
+          <li>Um registro por treino. Você pode participar de mais de um treino por dia.</li>
         </ul>
       </div>
     </div>

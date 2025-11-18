@@ -21,15 +21,22 @@ import {
   createPresenca,
   deletePresenca,
   getPresencas,
-  togglePresenca,
-  updatePresenca
+  updatePresenca,
+  confirmarPresenca,
+  marcarAusencia,
+  justificarAusencia,
+  fecharTreinoRapido,
+  marcarTreinoFechado
 } from '../../services/presencasService';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os status' },
-  { value: 'Presente', label: 'Presente' },
-  { value: 'Ausente', label: 'Ausente' }
+  { value: 'PENDENTE', label: 'Pendente' },
+  { value: 'CHECKIN', label: 'Check-in' },
+  { value: 'CONFIRMADO', label: 'Confirmado' },
+  { value: 'AUSENTE', label: 'Ausente' },
+  { value: 'AUSENTE_JUSTIFICADA', label: 'Ausente justificada' }
 ];
 const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
 
@@ -46,12 +53,15 @@ export default function PresencasPage() {
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isSessionOpen, setIsSessionOpen] = useState(false);
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [sessionRecord, setSessionRecord] = useState(null);
   const [sessionTreinoId, setSessionTreinoId] = useState('');
   const [sessionTakenTreinos, setSessionTakenTreinos] = useState([]);
   const [sessionContext, setSessionContext] = useState('placeholder');
+  const [treinoParaFechar, setTreinoParaFechar] = useState('');
+  const [treinoEmAnalise, setTreinoEmAnalise] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterFaixas, setFilterFaixas] = useState([]);
   const [filterStatuses, setFilterStatuses] = useState([]);
@@ -162,7 +172,7 @@ export default function PresencasPage() {
           faixa: aluno.faixa,
           graus: aluno.graus,
           data: hoje,
-          status: 'Ausente',
+          status: 'AUSENTE',
           hora: null,
           treinoId: treinoSugestao?.id || null,
           tipoTreino: treinoSugestao?.nome || 'Sessão principal',
@@ -207,13 +217,47 @@ export default function PresencasPage() {
     });
   }, [filterFaixas, filterStatuses, filterTreinos, limparSelecao, registrosDoDia, searchTerm]);
 
+  const statusOrder = {
+    PENDENTE: 0,
+    CHECKIN: 1,
+    CONFIRMADO: 2,
+    AUSENTE: 3,
+    AUSENTE_JUSTIFICADA: 4
+  };
+
+  const statusLabel = (status) => {
+    switch (status) {
+      case 'CONFIRMADO':
+        return { label: 'PRESENTE', tone: 'text-green-300' };
+      case 'CHECKIN':
+        return { label: 'CHECK-IN', tone: 'text-yellow-200' };
+      case 'PENDENTE':
+        return { label: 'PENDENTE', tone: 'text-yellow-200' };
+      case 'AUSENTE':
+        return { label: 'AUSENTE', tone: 'text-red-300' };
+      case 'AUSENTE_JUSTIFICADA':
+        return { label: 'AUSENTE JUSTIFICADA', tone: 'text-red-300' };
+      default:
+        return { label: status || '—', tone: 'text-bjj-gray-200' };
+    }
+  };
+
+  const registrosFiltradosOrdenados = useMemo(
+    () =>
+      [...registrosFiltrados].sort((a, b) => {
+        const ordemA = statusOrder[a.status] ?? 5;
+        const ordemB = statusOrder[b.status] ?? 5;
+        if (ordemA !== ordemB) return ordemA - ordemB;
+        return a.alunoNome.localeCompare(b.alunoNome, 'pt-BR');
+      }),
+    [registrosFiltrados]
+  );
+
   const totalFiltrado = registrosFiltrados.length;
 
-  const presentesDia = registrosDoDia.filter((item) => item.status === 'Presente').length;
-  const ausentesDia = registrosDoDia.length - presentesDia;
-  const atrasosDia = registrosDoDia.filter(
-    (item) => item.status === 'Presente' && item.hora && item.hora > '10:00'
-  ).length;
+  const presentesDia = registrosDoDia.filter((item) => item.status === 'CONFIRMADO').length;
+  const faltasDia = registrosDoDia.filter((item) => item.status === 'AUSENTE' || item.status === 'AUSENTE_JUSTIFICADA').length;
+  const pendentesDia = registrosDoDia.filter((item) => item.status === 'CHECKIN' || item.status === 'PENDENTE').length;
   const totalDia = registrosDoDia.length || 1;
   const taxaPresencaDia = (presentesDia / totalDia) * 100;
 
@@ -254,6 +298,17 @@ export default function PresencasPage() {
     [treinosDoDiaPadrao]
   );
 
+  const treinoAnaliseLabel = useMemo(
+    () => opcoesTreinos.find((item) => item.value === treinoEmAnalise)?.label || 'Treino selecionado',
+    [opcoesTreinos, treinoEmAnalise]
+  );
+
+  useEffect(() => {
+    if (!treinoParaFechar && opcoesTreinos.length) {
+      setTreinoParaFechar(opcoesTreinos[0].value);
+    }
+  }, [opcoesTreinos, treinoParaFechar]);
+
   const treinosDisponiveisModal = useMemo(() => {
     if (!sessionRecord) {
       return treinosDoDiaPadrao;
@@ -263,14 +318,61 @@ export default function PresencasPage() {
     return candidatos.length ? candidatos : treinosDoDiaPadrao;
   }, [normalizarDiaSemana, sessionRecord, treinos, treinosDoDiaPadrao]);
 
-  const handleToggle = async (registro) => {
+  const handleConfirm = async (registro) => {
     if (!registro?.id) {
       abrirSelecaoSessao(registro);
       return;
     }
 
-    const atualizado = await togglePresenca(registro.id);
-    setPresencas((prev) => prev.map((item) => (item.id === atualizado.id ? atualizado : item)));
+    const atualizado = await confirmarPresenca(registro.id);
+    if (atualizado) {
+      setPresencas((prev) => prev.map((item) => (item.id === atualizado.id ? atualizado : item)));
+    }
+  };
+
+  const handleMarkAbsent = async (registro, justificativa = false) => {
+    if (!registro?.id) return;
+    const atualizado = justificativa
+      ? await justificarAusencia(registro.id)
+      : await marcarAusencia(registro.id);
+    if (atualizado) {
+      setPresencas((prev) => prev.map((item) => (item.id === atualizado.id ? atualizado : item)));
+    }
+  };
+
+  const abrirFechamento = () => {
+    const sugestao = filterTreinos.includes(TODOS_TREINOS) ? treinosDoDiaPadrao[0]?.id : filterTreinos[0];
+    setTreinoParaFechar(sugestao || treinosDoDiaPadrao[0]?.id || '');
+    setIsCloseModalOpen(true);
+  };
+
+  const fecharModalFechamento = () => setIsCloseModalOpen(false);
+
+  const fecharTreinoAutomatico = async () => {
+    const alvo = treinoParaFechar || treinosDoDiaPadrao[0]?.id || null;
+    await fecharTreinoRapido(
+      hoje,
+      alvo,
+      alunosAtivos.map((aluno) => ({ id: aluno.id, nome: aluno.nome, faixa: aluno.faixa, graus: aluno.graus }))
+    );
+    await atualizarLista();
+    setIsCloseModalOpen(false);
+  };
+
+  const direcionarParaAnalise = () => {
+    const alvo = treinoParaFechar || treinosDoDiaPadrao[0]?.id || '';
+    if (alvo) {
+      setFilterTreinos([alvo]);
+    }
+    setTreinoEmAnalise(alvo);
+    setIsCloseModalOpen(false);
+  };
+
+  const salvarFechamentoManual = async () => {
+    const alvo = treinoEmAnalise || treinosDoDiaPadrao[0]?.id || null;
+    marcarTreinoFechado(hoje, alvo);
+    await atualizarLista();
+    setTreinoEmAnalise('');
   };
 
   const handleDelete = (registro) => {
@@ -371,7 +473,7 @@ export default function PresencasPage() {
       faixa: registro.faixa,
       graus: registro.graus,
       data: dataRegistro,
-      status: 'Presente',
+      status: 'CONFIRMADO',
       tipoTreino: sugestao?.nome || registro.tipoTreino || 'Sessão principal'
     });
     setIsSessionOpen(true);
@@ -404,7 +506,7 @@ export default function PresencasPage() {
       faixa: sessionRecord.faixa,
       graus: sessionRecord.graus,
       data: sessionRecord.data,
-      status: 'Presente',
+      status: 'CONFIRMADO',
       treinoId: treinoSelecionado?.id || null,
       tipoTreino: treinoSelecionado?.nome || sessionRecord.tipoTreino || 'Sessão principal',
       hora: treinoSelecionado?.hora || formatTime()
@@ -456,9 +558,14 @@ export default function PresencasPage() {
               Visualize todos os alunos ativos de hoje e registre presença com apenas um clique.
             </p>
           </div>
-          <Button type="button" variant="secondary" className="w-full md:w-auto" onClick={abrirResumo}>
-            <PieChart size={16} /> Resumo do dia
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={abrirResumo}>
+              <PieChart size={16} /> Resumo do dia
+            </Button>
+            <Button type="button" className="w-full sm:w-auto" onClick={abrirFechamento}>
+              Fechar treino
+            </Button>
+          </div>
         </div>
         {!treinos.length && (
           <p className="rounded-xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 text-xs text-bjj-gray-200/70">
@@ -475,13 +582,13 @@ export default function PresencasPage() {
         </div>
         <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
           <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Faltas</p>
-          <p className="mt-1 text-xl font-semibold text-bjj-white">{ausentesDia}</p>
-          <p className="text-xs text-bjj-gray-200/60">Total de alunos aguardando check-in</p>
+          <p className="mt-1 text-xl font-semibold text-bjj-white">{faltasDia}</p>
+          <p className="text-xs text-bjj-gray-200/60">Ausências e justificativas registradas</p>
         </div>
         <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
-          <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Dias monitorados</p>
-          <p className="mt-1 text-xl font-semibold text-bjj-white">{diasAtivos}</p>
-          <p className="text-xs text-bjj-gray-200/60">Histórico de treinos acompanhados</p>
+          <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Pendentes</p>
+          <p className="mt-1 text-xl font-semibold text-bjj-white">{pendentesDia}</p>
+          <p className="text-xs text-bjj-gray-200/60">Check-ins aguardando confirmação</p>
         </div>
       </section>
 
@@ -547,15 +654,62 @@ export default function PresencasPage() {
         </div>
       </article>
 
+      {treinoEmAnalise && (
+        <div className="flex flex-col gap-2 rounded-xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.18em] text-bjj-gray-200/60">Fechamento em análise</p>
+            <p className="text-sm font-semibold text-bjj-white">{treinoAnaliseLabel}</p>
+            <p className="text-xs text-bjj-gray-200/70">Revise check-ins pendentes antes de encerrar o treino.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="secondary" onClick={() => setTreinoEmAnalise('')} className="w-full sm:w-auto">
+              Cancelar
+            </Button>
+            <Button type="button" onClick={salvarFechamentoManual} className="w-full sm:w-auto">
+              Salvar & Fechar treino
+            </Button>
+          </div>
+        </div>
+      )}
+
       <AttendanceTable
-        records={registrosFiltrados}
-        onToggle={handleToggle}
+        records={registrosFiltradosOrdenados}
+        onConfirm={handleConfirm}
+        onMarkAbsent={(registro) => handleMarkAbsent(registro, false)}
+        onMarkJustified={(registro) => handleMarkAbsent(registro, true)}
         onDelete={handleDelete}
         onEdit={abrirEdicao}
         onAddSession={abrirSessaoExtra}
         onRequestSession={abrirSelecaoSessao}
         isLoading={isRefreshing}
       />
+
+      <Modal isOpen={isCloseModalOpen} onClose={fecharModalFechamento} title="Fechar treino">
+        <div className="space-y-4 text-sm text-bjj-gray-200/80">
+          <p>Fechar treino e registrar faltas para quem não confirmou presença?</p>
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Treino</p>
+            <Select value={treinoParaFechar} onChange={(event) => setTreinoParaFechar(event.target.value)}>
+              {opcoesTreinos.map((treino) => (
+                <option key={treino.value} value={treino.value}>
+                  {treino.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Button type="button" variant="ghost" onClick={fecharModalFechamento} className="w-full">
+              Não
+            </Button>
+            <Button type="button" variant="secondary" onClick={direcionarParaAnalise} className="w-full">
+              Analisar
+            </Button>
+            <Button type="button" onClick={fecharTreinoAutomatico} className="w-full">
+              Sim, fechar agora
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal isOpen={isSummaryOpen} onClose={fecharResumo} title="Resumo do treino">
         <div className="space-y-4 text-sm text-bjj-gray-200/80">
@@ -565,29 +719,29 @@ export default function PresencasPage() {
               <p className="mt-1 text-2xl font-semibold text-bjj-white">{registrosDoDia.length}</p>
             </div>
             <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 p-4">
-              <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Atrasos</p>
-              <p className="mt-1 text-2xl font-semibold text-bjj-white">{atrasosDia}</p>
+              <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Pendentes</p>
+              <p className="mt-1 text-2xl font-semibold text-bjj-white">{pendentesDia}</p>
             </div>
           </div>
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Distribuição do dia</p>
             <div className="space-y-2">
-              {[{ rotulo: 'Presenças', valor: presentesDia, cor: 'bg-bjj-red' }, { rotulo: 'Faltas', valor: ausentesDia, cor: 'bg-bjj-gray-800' }].map((item) => {
-                const percentual = Math.round((item.valor / totalDia) * 100);
-                return (
-                  <div key={item.rotulo}>
-                    <div className="flex items-center justify-between text-xs">
-                      <span>{item.rotulo}</span>
-                      <span>{item.valor} · {percentual}%</span>
+              <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Distribuição do dia</p>
+              <div className="space-y-2">
+                {[{ rotulo: 'Presenças', valor: presentesDia, cor: 'bg-bjj-red' }, { rotulo: 'Faltas', valor: faltasDia, cor: 'bg-bjj-gray-800' }].map((item) => {
+                  const percentual = Math.round((item.valor / totalDia) * 100);
+                  return (
+                    <div key={item.rotulo}>
+                      <div className="flex items-center justify-between text-xs">
+                        <span>{item.rotulo}</span>
+                        <span>{item.valor} · {percentual}%</span>
+                      </div>
+                      <div className="mt-1 h-2 rounded-full bg-bjj-gray-800/60">
+                        <div className={`h-full rounded-full ${item.cor}`} style={{ width: `${percentual}%` }} />
+                      </div>
                     </div>
-                    <div className="mt-1 h-2 rounded-full bg-bjj-gray-800/60">
-                      <div className={`h-full rounded-full ${item.cor}`} style={{ width: `${percentual}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Lista rápida</p>
             <ul className="space-y-2.5">
@@ -599,18 +753,18 @@ export default function PresencasPage() {
                   <div>
                     <p className="text-sm font-semibold text-bjj-white">{item.alunoNome}</p>
                     <p className="text-[11px] text-bjj-gray-200/60">
-                      {item.status === 'Presente'
+                      {item.status === 'CONFIRMADO'
                         ? `Confirmado às ${item.hora || '—'}`
+                        : item.status === 'CHECKIN' || item.status === 'PENDENTE'
+                        ? 'Aguardando confirmação'
                         : 'Ainda não marcado'}
                     </p>
                     <p className="text-[11px] text-bjj-gray-200/50">{item.tipoTreino || 'Sessão principal'}</p>
                   </div>
                   <span
-                    className={`text-xs font-semibold ${
-                      item.status === 'Presente' ? 'text-bjj-red' : 'text-bjj-gray-200'
-                    }`}
+                    className={`text-xs font-semibold ${statusLabel(item.status).tone}`}
                   >
-                    {item.status}
+                    {statusLabel(item.status).label}
                   </span>
                 </li>
               ))}

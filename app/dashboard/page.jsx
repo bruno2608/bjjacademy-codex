@@ -84,9 +84,9 @@ function StudentDashboard() {
 
   const stats = useMemo(() => {
     const registrosAluno = presencas.filter((item) => item.alunoId === aluno?.id);
-    const presentes = registrosAluno.filter((item) => item.status === 'Presente').length;
-    const faltas = registrosAluno.filter((item) => item.status === 'Ausente').length;
-    const pendentes = registrosAluno.filter((item) => item.status === 'Pendente').length;
+    const presentes = registrosAluno.filter((item) => item.status === 'CONFIRMADO').length;
+    const faltas = registrosAluno.filter((item) => item.status === 'AUSENTE' || item.status === 'AUSENTE_JUSTIFICADA').length;
+    const pendentes = registrosAluno.filter((item) => item.status === 'CHECKIN' || item.status === 'PENDENTE').length;
     return { presentes, faltas, pendentes };
   }, [aluno?.id, presencas]);
 
@@ -105,6 +105,21 @@ function StudentDashboard() {
         .reverse(),
     [aluno?.id, presencas]
   );
+
+  const formatStatus = (status) => {
+    switch (status) {
+      case 'CONFIRMADO':
+        return { label: 'Presente', tone: 'bg-green-600/20 text-green-300' };
+      case 'CHECKIN':
+      case 'PENDENTE':
+        return { label: 'Pendente', tone: 'bg-yellow-500/20 text-yellow-300' };
+      case 'AUSENTE':
+      case 'AUSENTE_JUSTIFICADA':
+        return { label: 'Ausente', tone: 'bg-bjj-red/20 text-bjj-red' };
+      default:
+        return { label: 'Sem registro', tone: 'bg-bjj-gray-700 text-bjj-gray-200' };
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -215,19 +230,16 @@ function StudentDashboard() {
                 <p className="font-semibold text-white">{item.tipoTreino}</p>
                 <p className="text-xs text-bjj-gray-300/80">{item.data} · {item.hora || '—'}</p>
               </div>
-              <span
-                className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${
-                  item.status === 'Presente'
-                    ? 'bg-green-600/20 text-green-300'
-                    : item.status === 'Pendente'
-                    ? 'bg-yellow-500/20 text-yellow-300'
-                    : item.status === 'Cancelado'
-                    ? 'bg-bjj-gray-700 text-bjj-gray-200'
-                    : 'bg-bjj-red/20 text-bjj-red'
-                }`}
-              >
-                {item.status}
-              </span>
+              {(() => {
+                const tone = formatStatus(item.status);
+                return (
+                <span
+                  className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${tone.tone}`}
+                >
+                  {tone.label}
+                </span>
+                );
+              })()}
             </li>
           ))}
         </ul>
@@ -247,7 +259,7 @@ function ProfessorDashboard() {
     const inativos = totalAlunos - ativos;
     const graduados = alunos.filter((a) => (a.faixa || '').toLowerCase() !== 'branca').length;
     const pendentes = presencas.filter((p) => p.status === 'Pendente').length;
-    const presentesSemana = presencas.filter((p) => p.status === 'Presente').length;
+  const presentesSemana = presencas.filter((p) => p.status === 'CONFIRMADO').length;
     return { totalAlunos, ativos, inativos, graduados, pendentes, presentesSemana };
   }, [alunos, presencas]);
 

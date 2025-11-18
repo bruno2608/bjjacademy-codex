@@ -13,13 +13,35 @@ const actionButtonClasses =
 
 export default function AttendanceTable({
   records,
-  onToggle,
+  onConfirm,
+  onMarkAbsent,
+  onMarkJustified,
   onDelete,
   onEdit,
   onAddSession,
   onRequestSession,
   isLoading = false
 }) {
+  const statusTone = (status) => {
+    switch (status) {
+      case 'CONFIRMADO':
+        return { label: 'PRESENTE', variant: 'success' };
+      case 'CHECKIN':
+        return { label: 'CHECK-IN', variant: 'warning' };
+      case 'PENDENTE':
+        return { label: 'PENDENTE', variant: 'warning' };
+      case 'AUSENTE':
+        return { label: 'AUSENTE', variant: 'error' };
+      case 'AUSENTE_JUSTIFICADA':
+        return { label: 'AUSENTE JUSTIFICADA', variant: 'error' };
+      default:
+        return { label: status || '—', variant: 'neutral' };
+    }
+  };
+
+  const canConfirm = (status) => status === 'CHECKIN' || status === 'PENDENTE';
+  const canAbsent = (status) => status === 'CHECKIN' || status === 'PENDENTE';
+
   return (
     <div
       className="relative overflow-hidden rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 shadow-[0_12px_28px_-20px_rgba(0,0,0,0.45)]"
@@ -43,13 +65,18 @@ export default function AttendanceTable({
           const horarioLabel = hora !== '—' ? `${hora}h` : 'Sem horário';
           const dataTreinoLabel = `${formattedDate} · ${horarioLabel} · ${treinoLabel}`;
           const isPlaceholder = Boolean(record.isPlaceholder);
-          const handleToggle = () => {
+          const tone = statusTone(record.status);
+
+          const handleConfirm = () => {
             if (isPlaceholder) {
               onRequestSession?.(record);
             } else {
-              onToggle?.(record);
+              onConfirm?.(record);
             }
           };
+
+          const handleAbsent = () => onMarkAbsent?.(record);
+          const handleJustified = () => onMarkJustified?.(record);
 
           return (
             <div
@@ -64,11 +91,8 @@ export default function AttendanceTable({
                       {faixa} · {graus}º grau
                     </p>
                   </div>
-                  <Badge
-                    variant={record.status === 'Presente' ? 'success' : 'neutral'}
-                    className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase"
-                  >
-                    {record.status}
+                  <Badge variant={tone.variant} className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase">
+                    {tone.label}
                   </Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[11px] text-bjj-gray-200/70">
@@ -86,11 +110,9 @@ export default function AttendanceTable({
                   <div>
                     <p className="font-semibold text-bjj-gray-200/90">Ação rápida</p>
                     <div className="mt-1 inline-flex items-center gap-2">
-                      <button className={actionButtonClasses} onClick={handleToggle}>
-                        {record.status === 'Presente' ? <RotateCcw size={16} /> : <CheckCircle2 size={16} />}
-                        <span className="sr-only">
-                          {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
-                        </span>
+                      <button className={actionButtonClasses} onClick={handleConfirm} disabled={!canConfirm(record.status)}>
+                        <CheckCircle2 size={16} />
+                        <span className="sr-only">Confirmar presença</span>
                       </button>
                       {!isPlaceholder && (
                         <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
@@ -98,10 +120,16 @@ export default function AttendanceTable({
                           <span className="sr-only">Adicionar outra sessão</span>
                         </button>
                       )}
-                      <button className={actionButtonClasses} onClick={() => onDelete?.(record)} disabled={isPlaceholder}>
+                      <button className={actionButtonClasses} onClick={handleAbsent} disabled={!canAbsent(record.status)}>
                         <Trash2 size={15} />
-                        <span className="sr-only">Remover registro</span>
+                        <span className="sr-only">Marcar falta</span>
                       </button>
+                      {!isPlaceholder && (
+                        <button className={actionButtonClasses} onClick={handleJustified}>
+                          <RotateCcw size={15} />
+                          <span className="sr-only">Justificar falta</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -111,57 +139,59 @@ export default function AttendanceTable({
                     <span className="sr-only">Corrigir presença</span>
                   </button>
                 )}
+              </div>
+
+              <div className="hidden md:grid md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)]">
+                <div className="flex items-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
+                  <button className={actionButtonClasses} onClick={handleConfirm} disabled={!canConfirm(record.status)}>
+                    <CheckCircle2 size={15} />
+                    <span className="sr-only">Confirmar presença</span>
+                  </button>
+                  <button className={actionButtonClasses} onClick={handleAbsent} disabled={!canAbsent(record.status)}>
+                    <Trash2 size={14} />
+                    <span className="sr-only">Marcar falta</span>
+                  </button>
+                  {!isPlaceholder && (
+                    <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
+                      <Plus size={14} />
+                      <span className="sr-only">Adicionar outra sessão</span>
+                    </button>
+                  )}
+                  {!isPlaceholder && (
+                    <button className={actionButtonClasses} onClick={() => onEdit?.(record)}>
+                      <Pencil size={14} />
+                      <span className="sr-only">Corrigir presença</span>
+                    </button>
+                  )}
+                  {!isPlaceholder && (
+                    <button className={actionButtonClasses} onClick={handleJustified}>
+                      <RotateCcw size={14} />
+                      <span className="sr-only">Justificar falta</span>
+                    </button>
+                  )}
+                  <button className={actionButtonClasses} onClick={() => onDelete?.(record)} disabled={isPlaceholder}>
+                    <Trash2 size={14} />
+                    <span className="sr-only">Remover registro</span>
+                  </button>
                 </div>
-                <div className="hidden md:grid md:grid-cols-[minmax(0,0.55fr)_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)]">
-                  <div className="flex items-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
-                    <button
-                      className={actionButtonClasses}
-                      onClick={handleToggle}
-                      disabled={isPlaceholder && record.status === 'Presente'}
-                    >
-                      {record.status === 'Presente' ? <RotateCcw size={15} /> : <CheckCircle2 size={15} />}
-                      <span className="sr-only">
-                        {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
-                      </span>
-                    </button>
-                    {!isPlaceholder && (
-                      <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
-                        <Plus size={14} />
-                        <span className="sr-only">Adicionar outra sessão</span>
-                      </button>
-                    )}
-                    {!isPlaceholder && (
-                      <button className={actionButtonClasses} onClick={() => onEdit?.(record)}>
-                        <Pencil size={14} />
-                        <span className="sr-only">Corrigir presença</span>
-                      </button>
-                    )}
-                    <button className={actionButtonClasses} onClick={() => onDelete?.(record)} disabled={isPlaceholder}>
-                      <Trash2 size={14} />
-                      <span className="sr-only">Remover registro</span>
-                    </button>
-                  </div>
-                  <div className="border-b border-bjj-gray-800/60 px-3 py-3">
-                    <p className="text-sm font-semibold text-bjj-white">{record.alunoNome}</p>
-                  </div>
-                  <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
-                    <span className="font-medium text-bjj-white/90">{faixa}</span>
-                    <span className="block text-[11px] text-bjj-gray-200/70">{graus}º grau</span>
-                  </div>
-                  <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px] text-bjj-gray-200/80">
-                    <span className="block whitespace-nowrap text-[11px] text-bjj-gray-200/80" title={dataTreinoLabel}>
-                      {dataTreinoLabel}
-                    </span>
-                  </div>
-                  <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
-                  <Badge
-                    variant={record.status === 'Presente' ? 'success' : 'neutral'}
-                    className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase"
-                  >
-                    {record.status}
+                <div className="border-b border-bjj-gray-800/60 px-3 py-3">
+                  <p className="text-sm font-semibold text-bjj-white">{record.alunoNome}</p>
+                </div>
+                <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
+                  <span className="font-medium text-bjj-white/90">{faixa}</span>
+                  <span className="block text-[11px] text-bjj-gray-200/70">{graus}º grau</span>
+                </div>
+                <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px] text-bjj-gray-200/80">
+                  <span className="block whitespace-nowrap text-[11px] text-bjj-gray-200/80" title={dataTreinoLabel}>
+                    {dataTreinoLabel}
+                  </span>
+                </div>
+                <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
+                  <Badge variant={tone.variant} className="px-3 py-[6px] text-[11px] font-semibold tracking-wide uppercase">
+                    {tone.label}
                   </Badge>
                 </div>
-                </div>
+              </div>
             </div>
           );
         })}

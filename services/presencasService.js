@@ -46,14 +46,23 @@ export async function createPresenca(payload) {
     id: payload.id || `presence-${Date.now()}`,
     ...payload,
     ...treino,
-    hora: payload.hora ?? horaAtual()
+    hora: payload.hora ?? horaAtual(),
+    status: payload.status || 'CONFIRMADO',
+    origem: payload.origem || 'PROFESSOR'
   };
   usePresencasStore.getState().addPresenca(novaPresenca);
   return mockRequest(novaPresenca);
 }
 
 export async function togglePresenca(id) {
-  const atualizado = usePresencasStore.getState().togglePresencaStatus(id);
+  const { presencas, approveCheckin, rejectCheckin } = usePresencasStore.getState();
+  const atual = presencas.find((item) => item.id === id);
+  if (!atual) return mockRequest(null);
+  if (atual.status === 'CONFIRMADO') {
+    const atualizado = rejectCheckin(id);
+    return mockRequest(atualizado);
+  }
+  const atualizado = approveCheckin(id);
   return mockRequest(atualizado);
 }
 
@@ -67,4 +76,34 @@ export async function updatePresenca(id, payload) {
   usePresencasStore.getState().updatePresenca(id, { ...payload, ...treino });
   const registro = usePresencasStore.getState().presencas.find((item) => item.id === id);
   return mockRequest(registro);
+}
+
+export async function confirmarPresenca(id) {
+  const atualizado = usePresencasStore.getState().approveCheckin(id);
+  return mockRequest(atualizado);
+}
+
+export async function marcarAusencia(id) {
+  const atualizado = usePresencasStore.getState().rejectCheckin(id);
+  return mockRequest(atualizado);
+}
+
+export async function justificarAusencia(id) {
+  const atualizado = usePresencasStore.getState().markJustified(id);
+  return mockRequest(atualizado);
+}
+
+export async function fecharTreinoRapido(data, treinoId, alunosAtivos) {
+  const resultado = usePresencasStore
+    .getState()
+    .fecharTreinoRapido(data, treinoId, alunosAtivos || []);
+  return mockRequest(resultado);
+}
+
+export function marcarTreinoFechado(data, treinoId) {
+  usePresencasStore.getState().marcarTreinoFechado(data, treinoId);
+}
+
+export function isTreinoFechado(data, treinoId) {
+  return usePresencasStore.getState().isTreinoFechado(data, treinoId);
 }
