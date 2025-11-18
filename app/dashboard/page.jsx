@@ -415,11 +415,9 @@ function ProfessorDashboard() {
         <div className="stat">
           <div className="stat-title text-bjj-gray-300">Check-ins pendentes</div>
           <div className="stat-value text-white">{metrics.pendentes}</div>
-          <div className="stat-desc flex items-center gap-2 text-yellow-300">
-            <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-900">
-              Aguardando aprovação
-            </span>
-            <span>envios fora da janela</span>
+          <div className="stat-desc space-y-1 text-bjj-gray-100">
+            <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-950 shadow">Aguardando aprovação</span>
+            <p className="text-xs font-medium text-bjj-gray-200">Envios fora da janela aguardando análise</p>
           </div>
         </div>
         <div className="stat">
