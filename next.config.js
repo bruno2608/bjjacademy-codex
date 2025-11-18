@@ -29,11 +29,6 @@ module.exports = withPWA({
         destination: '/instrutor/documentos',
         permanent: false
       },
-      {
-        source: '/historico-presencas',
-        destination: '/historico-presencas',
-        permanent: false
-      }
     ];
   }
 });
