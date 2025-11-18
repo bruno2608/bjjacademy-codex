@@ -31,7 +31,7 @@ module.exports = withPWA({
       },
       {
         source: '/historico-presencas',
-        destination: '/instrutor/historico-presencas',
+        destination: '/historico-presencas',
         permanent: false
       }
     ];
