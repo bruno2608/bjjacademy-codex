@@ -24,9 +24,9 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Grau',
     grauAlvo: 4,
     criterioTempo: 'Tempo mínimo: 24 meses para o 4º grau',
-    mesesRestantes: 4,
+    mesesRestantes: 2,
     previsao: '2024-09-01',
-    status: 'Planejado',
+    status: 'Em avaliação',
     instrutor: 'Prof. Carla'
   },
   {
@@ -80,9 +80,65 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Faixa',
     grauAlvo: null,
     criterioTempo: 'Tempo mínimo: 24 meses com 4 graus completos',
-    mesesRestantes: 2,
+    mesesRestantes: 1,
     previsao: '2024-07-22',
+    status: 'Planejado',
+    instrutor: 'Prof. Bruno'
+  },
+  {
+    id: 'g7',
+    alunoId: '9',
+    alunoNome: 'Thiago Santos',
+    faixaAtual: 'Preta',
+    proximaFaixa: 'Preta',
+    tipo: 'Grau',
+    grauAlvo: 2,
+    criterioTempo: 'Tempo mínimo: 36 meses entre graus de faixa preta',
+    mesesRestantes: 5,
+    previsao: '2025-03-12',
+    status: 'Em progresso',
+    instrutor: 'Prof. Mauro'
+  },
+  {
+    id: 'g8',
+    alunoId: '5',
+    alunoNome: 'Pedro Lima',
+    faixaAtual: 'Branca',
+    proximaFaixa: 'Branca',
+    tipo: 'Grau',
+    grauAlvo: 1,
+    criterioTempo: 'Novatos com 6 meses ganham 1º grau automático',
+    mesesRestantes: 2,
+    previsao: '2025-01-15',
+    status: 'Planejado',
+    instrutor: 'Prof. Ana'
+  },
+  {
+    id: 'g9',
+    alunoId: '4',
+    alunoNome: 'Ana Martins',
+    faixaAtual: 'Azul',
+    proximaFaixa: 'Roxa',
+    tipo: 'Faixa',
+    grauAlvo: null,
+    criterioTempo: 'Elegível após 20 meses e 3 graus completos',
+    mesesRestantes: 3,
+    previsao: '2025-04-30',
     status: 'Em avaliação',
     instrutor: 'Prof. Bruno'
+  },
+  {
+    id: 'g10',
+    alunoId: '11',
+    alunoNome: 'Lucas Araújo',
+    faixaAtual: 'Roxa',
+    proximaFaixa: 'Marrom',
+    tipo: 'Faixa',
+    grauAlvo: null,
+    criterioTempo: 'Progresso acelerado após correção de faltas',
+    mesesRestantes: 8,
+    previsao: '2025-08-18',
+    status: 'Em progresso',
+    instrutor: 'Prof. Carla'
   }
 ];
