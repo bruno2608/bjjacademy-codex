@@ -321,50 +321,6 @@ function StudentDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
-        {[
-          {
-            title: 'Aulas no grau',
-            value: progressoProximoGrau.aulasNoGrau,
-            helper: `meta de ${progressoProximoGrau.alvo} aulas`,
-            href: '/evolucao',
-            tone: 'from-bjj-gray-900/80 to-bjj-black/90',
-            badgeTone: 'text-bjj-gray-300'
-          },
-          {
-            title: 'Presenças',
-            value: stats.presentes,
-            helper: 'últimos registros confirmados',
-            href: '/historico-presencas',
-            tone: 'from-bjj-gray-900/85 to-bjj-black/80',
-            badgeTone: 'text-green-300'
-          },
-          {
-            title: 'Pendências',
-            value: stats.pendentes,
-            helper: 'aguardando aprovação',
-            href: '/presencas',
-            tone: 'from-bjj-gray-900/80 to-bjj-black/85',
-            badgeTone: 'text-yellow-300'
-          }
-        ].map((item) => (
-          <Link
-            key={item.title}
-            href={item.href}
-            className={`${cardBase} group flex items-center justify-between gap-4 border-bjj-gray-800/80 bg-gradient-to-br ${item.tone} p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_18px_45px_rgba(225,6,0,0.18)]`}
-          >
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-bjj-gray-200/90">{item.title}</p>
-              <p className="text-3xl font-bold text-white">{item.value}</p>
-              <p className={`text-xs ${item.badgeTone}`}>{item.helper}</p>
-            </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-800/80 text-white group-hover:bg-bjj-red group-hover:text-white">
-              <ArrowRight size={16} />
-            </div>
-          </Link>
-        ))}
-      </div>
-
       <div className={`${cardBase} p-6`}>
         <header className="mb-4 flex items-center justify-between">
           <div>
@@ -524,20 +480,9 @@ function ProfessorDashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-sm text-bjj-gray-300/85">
-            {[
-              { label: 'Presenças', href: '/presencas' },
-              { label: 'Alunos', href: '/alunos' },
-              { label: 'Relatórios', href: '/relatorios' },
-              { label: 'Histórico', href: '/historico-presencas' }
-            ].map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/50 px-4 py-2 font-semibold text-white shadow-inner transition hover:-translate-y-0.5 hover:border-bjj-red/60"
-              >
-                {item.label}
-              </Link>
-            ))}
+            <span className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-4 py-2 text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">
+              Navegue pelas abas ou menu para acessar módulos
+            </span>
           </div>
         </div>
 
