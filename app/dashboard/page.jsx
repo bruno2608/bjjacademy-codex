@@ -108,17 +108,15 @@ function StudentDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-[1.7fr,1.1fr]">
-        <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-6`}>
-          <div className="flex items-start justify-between gap-3">
-            <div>
+      <div className="grid gap-4 lg:grid-cols-[1.6fr,1fr]">
+        <div className={`${cardBase} hero bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
+          <div className="hero-content w-full flex-col items-start justify-between gap-4 px-6 py-6 sm:flex-row sm:items-center">
+            <div className="space-y-2">
               <p className={badge}>Dashboard do aluno</p>
-              <div className="mt-3 flex flex-col gap-3 text-left">
-                <h1 className="text-3xl font-semibold text-white">Bem-vindo, {aluno?.nome || 'Aluno'}!</h1>
-                <p className="text-bjj-gray-200/85">
-                  Acompanhe sua jornada, evolua suas graduações e visualize suas últimas presenças.
-                </p>
-              </div>
+              <h1 className="text-2xl font-semibold text-white leading-tight">Bem-vindo, {aluno?.nome || 'Aluno'}!</h1>
+              <p className="max-w-xl text-sm text-bjj-gray-200/85">
+                Acompanhe sua jornada e evolua suas graduações acompanhando presenças e progresso.
+              </p>
             </div>
             <HelperDropdown
               title="Ajuda"
@@ -129,23 +127,23 @@ function StudentDashboard() {
               ]}
             />
           </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 px-4 py-3">
+          <div className="grid w-full gap-3 border-t border-bjj-gray-800/60 bg-bjj-black/40 px-6 py-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/60 px-4 py-3 shadow-inner">
               <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Faixa</p>
               <p className="mt-1 text-lg font-semibold">{faixaAtual}</p>
             </div>
-            <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 px-4 py-3">
+            <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/60 px-4 py-3 shadow-inner">
               <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Grau atual</p>
               <p className="mt-1 text-lg font-semibold">{graus}º grau</p>
             </div>
-            <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 px-4 py-3">
+            <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/60 px-4 py-3 shadow-inner">
               <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Aulas</p>
               <p className="mt-1 text-lg font-semibold">{aluno?.aulasNoGrauAtual || 0} aulas</p>
             </div>
           </div>
         </div>
 
-        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-6`}>
+        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-5`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">Sua faixa</p>
@@ -157,10 +155,10 @@ function StudentDashboard() {
             <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3">
               <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="xl" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 space-y-2">
               <p className="text-sm text-bjj-gray-200/90">{progressoProximoGrau.percent}% do próximo grau</p>
               <ProgressBar percent={progressoProximoGrau.percent} />
-              <p className="mt-2 text-xs text-bjj-gray-300/80">
+              <p className="text-xs text-bjj-gray-300/80">
                 {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
               </p>
             </div>
@@ -285,11 +283,11 @@ function ProfessorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-6`}>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
+      <div className={`${cardBase} hero bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
+        <div className="hero-content w-full flex-col items-start justify-between gap-4 px-6 py-6 sm:flex-row sm:items-center">
+          <div className="space-y-2">
             <p className={badge}>Visão geral</p>
-            <h1 className="text-3xl font-semibold text-white">Painel principal da BJJ Academy</h1>
+            <h1 className="text-2xl font-semibold text-white leading-tight">Painel principal da BJJ Academy</h1>
             <p className="text-sm text-bjj-gray-200/85">Monitore os módulos críticos e escolha a visão detalhada desejada.</p>
           </div>
           <div className="flex flex-col items-end gap-3 sm:w-[380px]">

@@ -176,6 +176,9 @@ export default function RegrasGraduacaoPage() {
     closeModal();
   };
 
+  const actionButtonClasses =
+    'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red';
+
   return (
     <div className="space-y-6">
       <header className="card space-y-3">
@@ -207,24 +210,22 @@ export default function RegrasGraduacaoPage() {
               <tr key={belt} className="align-middle text-sm text-bjj-gray-200">
                 <td className="px-4 py-4">
                   <div className="flex items-center justify-center gap-2">
-                    <Button
+                    <button
                       type="button"
-                      variant="secondary"
-                      className="btn-xs h-10 w-10 rounded-lg border border-bjj-gray-800 bg-bjj-gray-900 text-bjj-gray-100 hover:border-bjj-red/70 hover:text-bjj-white"
+                      className={actionButtonClasses}
                       aria-label={`Editar ${belt}`}
                       onClick={() => openEditModal(belt, rule)}
                     >
                       <Edit3 size={14} />
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       type="button"
-                      variant="secondary"
-                      className="btn-xs h-10 w-10 rounded-lg border border-bjj-gray-800 bg-bjj-gray-900 text-bjj-gray-100 hover:border-bjj-red/70 hover:text-bjj-white"
+                      className={actionButtonClasses}
                       aria-label={`Excluir ${belt}`}
                       onClick={() => handleDelete(belt)}
                     >
                       <Trash2 size={14} />
-                    </Button>
+                    </button>
                   </div>
                 </td>
                 <td className="px-4 py-4 align-middle">
