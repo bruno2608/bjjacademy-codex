@@ -13,7 +13,9 @@ import {
   ShieldCheck,
   TrendingUp,
   Users,
-  ArrowRight
+  ArrowRight,
+  LineChart,
+  Target
 } from 'lucide-react';
 
 import FaixaVisual from '../../components/graduacoes/FaixaVisual';
@@ -103,6 +105,37 @@ function ProfileBadge({ name, faixa, grau, aulas, avatarUrl }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function Sparkline({ points }) {
+  if (!points?.length) return null;
+  const maxY = Math.max(...points.map((p) => p.y));
+  const minY = Math.min(...points.map((p) => p.y));
+  const height = 80;
+  const width = 320;
+  const scaled = points.map((p, idx) => ({
+    x: (idx / Math.max(points.length - 1, 1)) * width,
+    y: height - ((p.y - minY) / Math.max(maxY - minY || 1, 1)) * height
+  }));
+  const d = scaled
+    .map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+    .join(' ');
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="h-20 w-full" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="spark" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#ef4444" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#ef4444" stopOpacity="0.05" />
+        </linearGradient>
+      </defs>
+      <path
+        d={`${d} V ${height} H 0 Z`}
+        fill="url(#spark)"
+        className="opacity-70"
+      />
+      <path d={d} stroke="#fca5a5" strokeWidth="2" fill="none" strokeLinecap="round" />
+    </svg>
   );
 }
 
@@ -368,246 +401,222 @@ function ProfessorDashboard() {
     [alunos, metrics, presencas]
   );
 
+  const weeklySeries = useMemo(() => {
+    const byDay = new Map();
+    presencas.forEach((p) => {
+      const key = p.data || '2024-01-01';
+      const current = byDay.get(key) || { confirmed: 0, pending: 0, absent: 0 };
+      if (p.status === 'CONFIRMADO') current.confirmed += 1;
+      else if (p.status === 'CHECKIN' || p.status === 'PENDENTE') current.pending += 1;
+      else current.absent += 1;
+      byDay.set(key, current);
+    });
+    const entries = Array.from(byDay.entries()).slice(-7);
+    return entries.map(([key, value], idx) => ({
+      x: idx,
+      y: value.confirmed + value.pending * 0.6,
+      label: key,
+      pending: value.pending,
+      confirmed: value.confirmed,
+      absent: value.absent
+    }));
+  }, [presencas]);
+
+  const pendingCheckins = useMemo(
+    () =>
+      presencas
+        .filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN')
+        .slice(0, 5),
+    [presencas]
+  );
+
   return (
     <div className="space-y-6">
-      <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
-        <div className="grid gap-6 px-5 py-5 lg:grid-cols-[1.15fr,1fr]">
-          <div className="flex flex-col gap-4">
+      <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-5`}>
+        <div className="grid gap-5 lg:grid-cols-[1.2fr,1fr]">
+          <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className={badge}>Visão geral</p>
-                <h1 className="text-xl font-semibold text-white leading-tight">{instructorName}</h1>
-                <p className="text-xs text-bjj-gray-300/90">Painel compacto com atalhos para aprovar presenças e gerenciar alunos.</p>
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-2">
-                <div className="avatar">
-                  <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
-                    <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
+              <div>
+                <p className={badge}>Painel do professor</p>
+                <div className="flex items-center gap-3">
+                  <div className="avatar">
+                    <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
+                      <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
+                    </div>
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-semibold text-white leading-tight">{instructorName}</h1>
+                    <p className="text-[11px] uppercase tracking-[0.25em] text-bjj-gray-400">Instrutor</p>
                   </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
-                </div>
-                <HelperDropdown
-                  title="Ajuda"
-                  items={[
-                    { label: 'Visões rápidas', description: 'Altere entre visões gerais, alunos, presenças e graduações.' },
-                    { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
-                    { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
-                  ]}
-                />
               </div>
+              <HelperDropdown
+                title="Ajuda"
+                items={[
+                  { label: 'Aprovações', description: 'Priorize check-ins fora da janela antes de fechar o treino.' },
+                  { label: 'Relatórios', description: 'Use a visão de relatórios para conversar com a equipe.' }
+                ]}
+              />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[{ label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' },
-                { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
-                { label: 'Graduações', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' }
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {[
+                { title: 'Pendentes', value: metrics.pendentes, icon: Clock3, tone: 'from-bjj-gray-900 to-bjj-black' },
+                { title: 'Confirmados', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'from-green-900/40 to-green-700/30' },
+                { title: 'Alunos ativos', value: metrics.ativos, icon: Users, tone: 'from-bjj-gray-900 to-bjj-black' },
+                { title: 'Faixas avançadas', value: metrics.graduados, icon: Medal, tone: 'from-bjj-gray-900 to-bjj-black' }
               ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="group flex items-center justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-4 py-3 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_14px_32px_rgba(0,0,0,0.35)]"
+                <div
+                  key={item.title}
+                  className={`${cardBase} group flex items-center justify-between gap-3 border-bjj-gray-800/80 bg-gradient-to-br ${item.tone} p-4`}
                 >
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="text-2xl font-bold text-white leading-tight">{item.value}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">{item.title}</p>
+                    <p className="text-3xl font-bold text-white">{item.value}</p>
                   </div>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
-                    <item.icon size={18} />
-                  </span>
-                </Link>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-bjj-black/50 text-white">
+                    <item.icon size={18} className="text-bjj-red" />
+                  </div>
+                </div>
               ))}
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-4">
-              {[{ label: 'Presenças', href: '/presencas', icon: CalendarCheck },
-                { label: 'Alunos', href: '/alunos', icon: Users },
-                { label: 'Relatórios', href: '/relatorios', icon: PieChart },
-                { label: 'Histórico', href: '/historico-presencas', icon: BarChart2 }
+            <div className="flex flex-wrap items-center gap-3 text-sm text-bjj-gray-300/85">
+              {[
+                { label: 'Presenças', href: '/presencas' },
+                { label: 'Alunos', href: '/alunos' },
+                { label: 'Relatórios', href: '/relatorios' },
+                { label: 'Histórico', href: '/historico-presencas' }
               ].map((item) => (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="flex items-center justify-between rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/50 px-3 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:text-bjj-red"
+                  className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/50 px-4 py-2 font-semibold text-white shadow-inner transition hover:-translate-y-0.5 hover:border-bjj-red/60"
                 >
-                  <span className="flex items-center gap-2">
-                    <item.icon size={16} />
-                    {item.label}
-                  </span>
-                  <ArrowRight size={14} />
+                  {item.label}
                 </Link>
               ))}
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {[{ label: 'Aulas na semana', value: metrics.presentesSemana, icon: CalendarCheck, href: '/presencas' },
-              { label: 'Histórico na semana', value: presencas.length, icon: BarChart3, href: '/historico-presencas' },
-              { label: 'Total de alunos', value: metrics.totalAlunos, icon: Users, href: '/alunos' },
-              { label: 'Check-ins registrados', value: presencas.length, icon: Activity, href: '/presencas' }
-            ].map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="group rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="mt-2 text-3xl font-bold text-white leading-none">{item.value}</p>
-                  </div>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
-                    <item.icon size={18} />
-                  </span>
+
+          <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-black/50 p-4`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={badge}>Evolução semanal</p>
+                <h3 className="text-lg font-semibold text-white">Check-ins e aprovações</h3>
+              </div>
+              <LineChart size={18} className="text-bjj-red" />
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {[{ label: 'Aguardando', value: metrics.pendentes, tone: 'text-yellow-300' }, { label: 'Confirmados', value: metrics.presentesSemana, tone: 'text-green-300' }].map((item) => (
+                <div key={item.label} className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/40 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
+                  <p className={`text-2xl font-bold text-white ${item.tone}`}>{item.value}</p>
                 </div>
-                <div className="mt-3 h-1.5 rounded-full bg-bjj-gray-800">
-                  <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: `${Math.min(100, Number(item.value) || 0)}%` }} />
-                </div>
-              </Link>
-            ))}
+              ))}
+            </div>
+            <div className="mt-4 rounded-2xl border border-bjj-gray-800/70 bg-gradient-to-r from-bjj-gray-900/80 to-bjj-black p-4">
+              <Sparkline points={weeklySeries} />
+              <div className="mt-2 flex items-center justify-between text-xs text-bjj-gray-300/80">
+                <span>Trend 7d</span>
+                <span className="flex items-center gap-1 text-green-300">
+                  <Target size={14} /> {metrics.presentesSemana} confirmações
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
-          <div className={`${cardBase} p-5`}>
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Visão analítica</h3>
-              <span className="badge badge-ghost badge-sm text-[11px] tracking-[0.15em] text-bjj-gray-200">Atualizado</span>
-            </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-bjj-gray-200/90">Check-ins por status</p>
-                  <Clock3 size={16} className="text-bjj-gray-200" />
-                </div>
-                <div className="mt-4 space-y-3">
-                  {[{ label: 'Confirmados', value: presencas.filter((p) => p.status === 'CONFIRMADO').length, tone: 'bg-green-500' },
-                    { label: 'Pendentes', value: metrics.pendentes, tone: 'bg-yellow-400' },
-                    { label: 'Ausentes', value: presencas.filter((p) => p.status === 'AUSENTE' || p.status === 'AUSENTE_JUSTIFICADA').length, tone: 'bg-bjj-red' }
-                  ].map((row) => (
-                    <div key={row.label} className="space-y-2">
-                      <div className="flex items-center justify-between text-sm text-bjj-gray-200">
-                        <span>{row.label}</span>
-                        <span className="font-semibold text-white">{row.value}</span>
-                      </div>
-                      <div className="h-2 rounded-full bg-bjj-gray-800">
-                        <div className={`h-full rounded-full ${row.tone}`} style={{ width: `${Math.min(100, row.value * 10)}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-bjj-gray-200/90">Presenças na semana</p>
-                  <BarChart2 size={16} className="text-bjj-gray-200" />
-                </div>
-                <div className="mt-4 flex items-end gap-3">
-                  {[5, 8, 6, 9, 7, 10, 4].map((value, idx) => (
-                    <div key={idx} className="flex flex-1 flex-col items-center gap-2">
-                      <div className="w-full rounded-t-xl bg-gradient-to-t from-bjj-red to-red-400" style={{ height: `${value * 6}px` }} />
-                      <span className="text-[11px] text-bjj-gray-300">D{idx + 1}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+      <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-black/60 p-5`}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className={badge}>Visões principais</p>
+            <h3 className="text-xl font-semibold text-white">{activeTab === 'graduacoes' ? 'Graduações' : activeTab === 'presencas' ? 'Presenças' : activeTab === 'alunos' ? 'Alunos' : 'Visão geral'}</h3>
           </div>
-
-          <div className={`${cardBase} p-6`}>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className={badge}>Painel da academia</p>
-                <h3 className="text-xl font-semibold text-white">Resumo detalhado</h3>
+          <HelperDropdown
+            title="Visões"
+            items={[
+              { label: 'Visão geral', description: 'Resumo de matrículas, presenças e graduações.' },
+              { label: 'Alunos', description: 'Acesso direto ao cadastro e evolução.' },
+              { label: 'Presenças', description: 'Gerencie aprovações e fechamentos.' }
+            ]}
+          />
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {tabCards[activeTab].map((item) => (
+            <div
+              key={item.title}
+              className={`${cardBase} group flex flex-col gap-3 border-bjj-gray-800/80 bg-bjj-gray-900/60 p-4 transition hover:-translate-y-1 hover:border-bjj-red/60 hover:shadow-[0_18px_45px_rgba(225,6,0,0.18)]`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.title}</p>
+                  <p className="text-3xl font-bold text-white">{item.value}</p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/50 text-white">
+                  <item.icon size={18} className={item.tone} />
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2 rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 p-1">
-                {[{ key: 'visao', label: 'Visão Geral' }, { key: 'alunos', label: 'Alunos' }, { key: 'presencas', label: 'Presenças' }, { key: 'graduacoes', label: 'Graduações' }].map((tab) => (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      activeTab === tab.key
-                        ? 'bg-bjj-red text-white shadow-[0_12px_30px_rgba(225,6,0,0.25)]'
-                        : 'text-bjj-gray-200 hover:bg-bjj-gray-800'
-                    }`}
-                    onClick={() => setActiveTab(tab.key)}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+              <div className="flex items-center justify-between text-xs text-bjj-gray-300/80">
+                <span>Atualizado agora</span>
+                <ArrowRight size={14} className="opacity-50" />
               </div>
             </div>
+          ))}
+        </div>
+      </div>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {tabCards[activeTab].map((card) => {
-                const Icon = card.icon;
-                return (
-                  <div
-                    key={card.title}
-                    className="rounded-2xl border border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-bjj-gray-200/90">{card.title}</p>
-                        <p className="mt-1 text-3xl font-bold text-white">{card.value}</p>
-                      </div>
-                      <span className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-900/80 ${card.tone}`}>
-                        <Icon size={18} />
-                      </span>
-                    </div>
-                    <div className="mt-3 h-1.5 rounded-full bg-bjj-gray-800">
-                      <div className="h-full rounded-full bg-bjj-red/70" style={{ width: '75%' }} />
-                    </div>
-                  </div>
-                );
-              })}
+      <div className="grid gap-4 lg:grid-cols-[1.3fr,1fr]">
+        <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-black/50 p-5`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={badge}>Distribuição</p>
+              <h3 className="text-xl font-semibold text-white">Academia em números</h3>
             </div>
+            <BarChart3 size={18} className="text-bjj-red" />
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <StatPill icon={Activity} title="Ativos" value={metrics.ativos} accent="text-green-300" />
+            <StatPill icon={Users} title="Total" value={metrics.totalAlunos} accent="text-white" />
+            <StatPill icon={BarChart2} title="Inativos" value={metrics.inativos} accent="text-yellow-300" />
+            <StatPill icon={Medal} title="Graduados" value={metrics.graduados} accent="text-bjj-red" />
           </div>
         </div>
 
-        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-b from-bjj-gray-900 to-bjj-black p-5`}>
+        <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-black/50 p-5`}>
           <div className="flex items-center justify-between">
             <div>
               <p className={badge}>Pendências</p>
-              <h3 className="text-lg font-semibold text-white">Check-ins em análise</h3>
+              <h3 className="text-xl font-semibold text-white">Check-ins aguardando</h3>
             </div>
-            <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-950 shadow">
-              {metrics.pendentes} aguardando
-            </span>
+            <Clock3 size={18} className="text-yellow-300" />
           </div>
-          <div className="space-y-3">
-            {presencas
-              .filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN')
-              .slice(0, 5)
-              .map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-start justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome || 'Aluno'}</p>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.tipoTreino}</p>
-                  </div>
-                  <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
-                    Aguardando
-                  </span>
+          <div className="mt-4 space-y-3 text-sm text-bjj-gray-200/90">
+            {pendingCheckins.map((p) => (
+              <div
+                key={p.id}
+                className="flex items-center justify-between rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/40 p-3"
+              >
+                <div>
+                  <p className="font-semibold text-white">{p.alunoNome}</p>
+                  <p className="text-xs text-bjj-gray-300/80">{p.data} · {p.tipoTreino}</p>
                 </div>
-              ))}
-            {metrics.pendentes === 0 && (
-              <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/50 p-4 text-sm text-bjj-gray-300">
-                Nenhum check-in pendente no momento. Acompanhe novos envios em tempo real.
-              </p>
-            )}
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-yellow-500/20 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
+                    {p.status === 'CHECKIN' ? 'Check-in' : 'Pendente'}
+                  </span>
+                  <Link
+                    href="/presencas"
+                    className="btn btn-sm rounded-full border border-bjj-red/60 bg-bjj-red/10 text-xs font-semibold text-white"
+                  >
+                    Abrir
+                  </Link>
+                </div>
+              </div>
+            ))}
+            {!pendingCheckins.length && <p className="text-xs text-bjj-gray-400">Nenhum check-in pendente.</p>}
           </div>
-          <Link
-            href="/presencas"
-            className="btn btn-sm rounded-full border-none bg-bjj-red text-white shadow-lg hover:bg-red-600"
-          >
-            Ir para presenças
-          </Link>
         </div>
       </div>
     </div>
