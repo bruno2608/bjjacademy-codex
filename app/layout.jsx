@@ -3,6 +3,7 @@
  * Applies the global Tailwind styles and defines metadata used for the PWA install prompt.
  */
 import '../styles/globals.css';
+import AppShell from '../components/ui/AppShell';
 
 export const metadata = {
   title: 'BJJ Academy',
@@ -25,7 +26,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="font-sans bg-bjj-black text-bjj-white">
         {/* Todas as páginas do App são renderizadas aqui. */}
-        {children}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

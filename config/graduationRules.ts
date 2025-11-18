@@ -265,7 +265,7 @@ export const GRADUATION_RULES: GraduationRules = {
     descricao: 'Entrada no sistema adulto com construção de base e disciplina diária.',
     corFaixa: '#FFFFFF',
     corBarra: '#000000',
-    corPonteira: '#E10600',
+    corPonteira: '#000000',
     graus: [
       { numero: 1, tempoMinimoMeses: 3, aulasMinimas: 24 },
       { numero: 2, tempoMinimoMeses: 6, aulasMinimas: 48 },
@@ -284,7 +284,7 @@ export const GRADUATION_RULES: GraduationRules = {
     descricao: 'Consolidação de fundamentos ofensivos e defesas em situações reais.',
     corFaixa: '#0D47A1',
     corBarra: '#000000',
-    corPonteira: '#E10600',
+    corPonteira: '#000000',
     graus: [
       { numero: 1, tempoMinimoMeses: 6, aulasMinimas: 30 },
       { numero: 2, tempoMinimoMeses: 12, aulasMinimas: 60 },
@@ -303,7 +303,7 @@ export const GRADUATION_RULES: GraduationRules = {
     descricao: 'Fase avançada com foco em refinamento técnico e domínio de ritmo.',
     corFaixa: '#673AB7',
     corBarra: '#000000',
-    corPonteira: '#E10600',
+    corPonteira: '#000000',
     graus: [
       { numero: 1, tempoMinimoMeses: 6, aulasMinimas: 35 },
       { numero: 2, tempoMinimoMeses: 12, aulasMinimas: 70 },
@@ -322,7 +322,7 @@ export const GRADUATION_RULES: GraduationRules = {
     descricao: 'Transição para a faixa preta com foco em estratégia e liderança.',
     corFaixa: '#5D4037',
     corBarra: '#000000',
-    corPonteira: '#E10600',
+    corPonteira: '#000000',
     graus: [
       { numero: 1, tempoMinimoMeses: 6, aulasMinimas: 40 },
       { numero: 2, tempoMinimoMeses: 12, aulasMinimas: 80 },
