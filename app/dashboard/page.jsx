@@ -16,7 +16,6 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-import FaixaVisual from '../../components/graduacoes/FaixaVisual';
 import useRole from '../../hooks/useRole';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
@@ -214,13 +213,39 @@ function StudentDashboard() {
             </div>
             <ShieldCheck className="text-bjj-red" size={18} />
           </div>
-          <div className="flex items-center gap-4">
-            <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3">
-              <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="xl" />
-            </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">
+            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">Faixa: {faixaAtual}</span>
+            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">Grau: {graus}º</span>
+            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">
+              {progressoProximoGrau.aulasNoGrau} aulas no grau
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
             <div className="flex-1 space-y-2">
-              <p className="text-sm text-bjj-gray-200/90">{progressoProximoGrau.percent}% do próximo grau</p>
-              <ProgressBar percent={progressoProximoGrau.percent} />
+              <div className="relative h-4 overflow-hidden rounded-full bg-bjj-gray-800">
+                <div
+                  className={`absolute inset-0 h-full rounded-full bg-gradient-to-r ${
+                    {
+                      Branca: 'from-gray-200 to-gray-400',
+                      Azul: 'from-blue-500 to-blue-700',
+                      Roxa: 'from-purple-500 to-purple-700',
+                      Marrom: 'from-amber-600 to-orange-700',
+                      Preta: 'from-neutral-500 to-neutral-700'
+                    }[faixaAtual] || 'from-bjj-red to-red-500'
+                  }`}
+                  style={{ width: `${progressoProximoGrau.percent}%` }}
+                />
+                <div className="absolute inset-0 grid grid-cols-10 opacity-20">
+                  {Array.from({ length: 10 }).map((_, index) => (
+                    <div key={index} className="border-l border-bjj-gray-950/60" />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="w-full shrink-0 space-y-1 text-right text-bjj-gray-200/90 sm:w-48">
+              <p className="text-sm font-semibold">{progressoProximoGrau.percent}% do próximo grau</p>
               <p className="text-xs text-bjj-gray-300/80">
                 {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
               </p>
