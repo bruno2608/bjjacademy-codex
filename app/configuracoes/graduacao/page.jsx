@@ -28,7 +28,7 @@ const DEFAULT_RULE = {
   descricao: '',
   corFaixa: '#FFFFFF',
   corBarra: '#000000',
-  corPonteira: '#E10600',
+  corPonteira: '#000000',
   proximaFaixa: null,
   graus: []
 };
@@ -55,7 +55,7 @@ const buildFormFromRule = (nome, rule) => ({
   descricao: rule.descricao ?? '',
   corFaixa: rule.corFaixa ?? '#FFFFFF',
   corBarra: rule.corBarra ?? '#000000',
-  corPonteira: rule.corPonteira ?? '#E10600',
+  corPonteira: rule.corPonteira ?? '#000000',
   proximaFaixa: rule.proximaFaixa ?? null,
   graus: Array.isArray(rule.graus)
     ? rule.graus.map((grau, index) => ({
@@ -268,156 +268,170 @@ export default function RegrasGraduacaoPage() {
         title={mode === 'create' ? 'Adicionar nova faixa' : `Editar faixa ${selectedBelt || ''}`}
       >
         {form && (
-          <form className="space-y-4 text-sm" onSubmit={handleSubmit}>
+          <form className="space-y-6 text-sm" onSubmit={handleSubmit}>
             {mode === 'create' && (
               <label className="flex flex-col gap-1 text-xs">
                 <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Nome da faixa</span>
                 <Input value={form.nome} onChange={(event) => updateField('nome', event.target.value)} />
               </label>
             )}
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <label className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Categoria</span>
-                <Select value={form.categoria} onChange={(event) => updateField('categoria', event.target.value)}>
-                  <option value="Adulto">Adulto</option>
-                  <option value="Infantil">Infantil</option>
-                </Select>
-              </label>
-              <label className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Método de graus</span>
-                <Select value={form.metodoGraus} onChange={(event) => updateField('metodoGraus', event.target.value)}>
-                  <option value="manual">Manual</option>
-                  <option value="mensal">Mensal</option>
-                </Select>
-              </label>
-            </div>
-            <label className="flex flex-col gap-1 text-xs">
-              <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Próxima faixa</span>
-              <Select
-                value={form.proximaFaixa ?? ''}
-                onChange={(event) =>
-                  updateField('proximaFaixa', event.target.value ? event.target.value : null)
-                }
-              >
-                <option value="">Sem próxima</option>
-                {beltNames
-                  .filter((name) => name !== (mode === 'edit' ? selectedBelt : form.nome))
-                  .map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
-                  ))}
-              </Select>
-            </label>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <label className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Tempo de faixa (meses)</span>
-                <Input
-                  type="number"
-                  min="0"
-                  value={form.tempoFaixaMeses}
-                  onChange={(event) => updateField('tempoFaixaMeses', event.target.value)}
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Tempo mínimo (meses)</span>
-                <Input
-                  type="number"
-                  min="0"
-                  value={form.tempoMinimoMeses}
-                  onChange={(event) => updateField('tempoMinimoMeses', event.target.value)}
-                />
-              </label>
-            </div>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              <label className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Idade mínima</span>
-                <Input
-                  type="number"
-                  min="0"
-                  value={form.idadeMinima}
-                  onChange={(event) => updateField('idadeMinima', event.target.value)}
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Aulas mínimas (faixa)</span>
-                <Input
-                  type="number"
-                  min="0"
-                  value={form.aulasMinimasFaixa}
-                  onChange={(event) => updateField('aulasMinimasFaixa', event.target.value)}
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Descrição</span>
-                <textarea
-                  className="textarea textarea-bordered w-full bg-bjj-gray-900/40 text-sm text-bjj-gray-200"
-                  rows={3}
-                  value={form.descricao}
-                  onChange={(event) => updateField('descricao', event.target.value)}
-                />
-              </label>
-            </div>
 
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-              <label className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Cor da faixa</span>
-                <input
-                  type="color"
-                  className="h-12 w-full cursor-pointer rounded-lg border border-bjj-gray-800 bg-transparent"
-                  value={form.corFaixa}
-                  onChange={(event) => updateField('corFaixa', event.target.value)}
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Cor da barra</span>
-                <input
-                  type="color"
-                  className="h-12 w-full cursor-pointer rounded-lg border border-bjj-gray-800 bg-transparent"
-                  value={form.corBarra}
-                  onChange={(event) => updateField('corBarra', event.target.value)}
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Cor da ponteira</span>
-                <input
-                  type="color"
-                  className="h-12 w-full cursor-pointer rounded-lg border border-bjj-gray-800 bg-transparent"
-                  value={form.corPonteira}
-                  onChange={(event) => updateField('corPonteira', event.target.value)}
-                />
-              </label>
-              <div className="flex flex-col gap-1 text-xs">
-                <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Pré-visualização</span>
-                <FaixaVisual
-                  corBase={form.corFaixa}
-                  corLinha={form.corBarra}
-                  corPonteira={form.corPonteira}
-                  graus={form.graus.length}
-                  categoria={form.categoria}
-                  className="w-full max-w-[11rem]"
-                />
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="space-y-4 rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
+                <p className="text-[0.7rem] uppercase tracking-[0.25em] text-bjj-gray-200/70">Requisitos básicos</p>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Categoria</span>
+                    <Select value={form.categoria} onChange={(event) => updateField('categoria', event.target.value)}>
+                      <option value="Adulto">Adulto</option>
+                      <option value="Infantil">Infantil</option>
+                    </Select>
+                  </label>
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Método de graus</span>
+                    <Select value={form.metodoGraus} onChange={(event) => updateField('metodoGraus', event.target.value)}>
+                      <option value="manual">Manual</option>
+                      <option value="mensal">Mensal</option>
+                    </Select>
+                  </label>
+                </div>
+
+                <label className="flex flex-col gap-1 text-xs">
+                  <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Próxima faixa</span>
+                  <Select
+                    value={form.proximaFaixa ?? ''}
+                    onChange={(event) =>
+                      updateField('proximaFaixa', event.target.value ? event.target.value : null)
+                    }
+                  >
+                    <option value="">Sem próxima</option>
+                    {beltNames
+                      .filter((name) => name !== (mode === 'edit' ? selectedBelt : form.nome))
+                      .map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                  </Select>
+                </label>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Tempo de faixa (meses)</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={form.tempoFaixaMeses}
+                      onChange={(event) => updateField('tempoFaixaMeses', event.target.value)}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Tempo mínimo (meses)</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={form.tempoMinimoMeses}
+                      onChange={(event) => updateField('tempoMinimoMeses', event.target.value)}
+                    />
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Idade mínima</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={form.idadeMinima}
+                      onChange={(event) => updateField('idadeMinima', event.target.value)}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Aulas mínimas (faixa)</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={form.aulasMinimasFaixa}
+                      onChange={(event) => updateField('aulasMinimasFaixa', event.target.value)}
+                    />
+                  </label>
+                </div>
+
+                <label className="flex flex-col gap-1 text-xs">
+                  <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Observações</span>
+                  <textarea
+                    className="textarea textarea-bordered w-full bg-bjj-gray-900/40 text-sm text-bjj-gray-200"
+                    rows={3}
+                    placeholder="Ex.: Entrada no sistema adulto com construção de base."
+                    value={form.descricao}
+                    onChange={(event) => updateField('descricao', event.target.value)}
+                  />
+                </label>
+              </div>
+
+              <div className="space-y-4 rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
+                <p className="text-[0.7rem] uppercase tracking-[0.25em] text-bjj-gray-200/70">Paleta e pré-visualização</p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Cor da faixa</span>
+                    <input
+                      type="color"
+                      className="h-12 w-full cursor-pointer rounded-lg border border-bjj-gray-800 bg-transparent"
+                      value={form.corFaixa}
+                      onChange={(event) => updateField('corFaixa', event.target.value)}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Cor da barra</span>
+                    <input
+                      type="color"
+                      className="h-12 w-full cursor-pointer rounded-lg border border-bjj-gray-800 bg-transparent"
+                      value={form.corBarra}
+                      onChange={(event) => updateField('corBarra', event.target.value)}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Cor da ponteira</span>
+                    <input
+                      type="color"
+                      className="h-12 w-full cursor-pointer rounded-lg border border-bjj-gray-800 bg-transparent"
+                      value={form.corPonteira}
+                      onChange={(event) => updateField('corPonteira', event.target.value)}
+                    />
+                  </label>
+                  <div className="flex flex-col gap-2 text-xs">
+                    <span className="uppercase tracking-[0.2em] text-bjj-gray-200/70">Pré-visualização</span>
+                    <FaixaVisual
+                      corBase={form.corFaixa}
+                      corLinha={form.corBarra}
+                      corPonteira={form.corPonteira}
+                      graus={form.graus.length}
+                      categoria={form.categoria}
+                      className="w-full max-w-[12rem]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/70">Graus</p>
+            <div className="space-y-4 rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs uppercase tracking-[0.25em] text-bjj-gray-200/70">Graus</p>
                 <Button type="button" variant="secondary" onClick={handleAddStripe} className="btn-sm">
                   Adicionar grau
                 </Button>
               </div>
               {form.graus.length ? (
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                   {form.graus.map((grau, index) => (
                     <div
                       key={`${grau.numero}-${index}`}
-                      className="grid grid-cols-1 gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 md:grid-cols-4"
+                      className="grid grid-cols-1 gap-3 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-950/80 p-4 md:grid-cols-3"
                     >
                       <div className="text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/70">
                         {grau.numero}º grau
                       </div>
-                      <label className="flex flex-col gap-1 text-xs md:col-span-1">
+                      <label className="flex flex-col gap-1 text-xs">
                         <span>Tempo mínimo (meses)</span>
                         <Input
                           type="number"
@@ -426,20 +440,20 @@ export default function RegrasGraduacaoPage() {
                           onChange={(event) => updateStripeField(index, 'tempoMinimoMeses', event.target.value)}
                         />
                       </label>
-                      <label className="flex flex-col gap-1 text-xs md:col-span-1">
-                        <span>Aulas mínimas</span>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={grau.aulasMinimas}
-                          onChange={(event) => updateStripeField(index, 'aulasMinimas', event.target.value)}
-                        />
-                      </label>
-                      <div className="flex items-start justify-end md:items-center">
+                      <div className="grid grid-cols-[1fr_auto] gap-2 md:grid-cols-1 md:items-center md:justify-end">
+                        <label className="flex flex-col gap-1 text-xs">
+                          <span>Aulas mínimas</span>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={grau.aulasMinimas}
+                            onChange={(event) => updateStripeField(index, 'aulasMinimas', event.target.value)}
+                          />
+                        </label>
                         <Button
                           type="button"
                           variant="secondary"
-                          className="btn-xs"
+                          className="btn-xs self-end md:self-center"
                           onClick={() => handleRemoveStripe(index)}
                         >
                           Remover
