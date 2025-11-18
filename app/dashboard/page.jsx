@@ -371,42 +371,81 @@ function ProfessorDashboard() {
   return (
     <div className="space-y-6">
       <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
-        <div className="grid gap-6 px-6 py-6 lg:grid-cols-[1.3fr,1fr]">
-          <div className="flex flex-col justify-between gap-4">
-            <div className="space-y-2">
-              <p className={badge}>Visão geral</p>
-              <h1 className="text-2xl font-semibold text-white leading-tight">{instructorName}</h1>
-              <p className="text-sm text-bjj-gray-300/90">
-                Consolide check-ins, aprovações e graduações em um painel único com atalhos rápidos para cada módulo.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="avatar">
-                <div className="w-14 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
-                  <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
+        <div className="grid gap-6 px-5 py-5 lg:grid-cols-[1.15fr,1fr]">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="space-y-1">
+                <p className={badge}>Visão geral</p>
+                <h1 className="text-xl font-semibold text-white leading-tight">{instructorName}</h1>
+                <p className="text-xs text-bjj-gray-300/90">Painel compacto com atalhos para aprovar presenças e gerenciar alunos.</p>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-2">
+                <div className="avatar">
+                  <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
+                    <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
+                  </div>
                 </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
+                </div>
+                <HelperDropdown
+                  title="Ajuda"
+                  items={[
+                    { label: 'Visões rápidas', description: 'Altere entre visões gerais, alunos, presenças e graduações.' },
+                    { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
+                    { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
+                  ]}
+                />
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
-              </div>
-              <HelperDropdown
-                title="Ajuda"
-                items={[
-                  { label: 'Visões rápidas', description: 'Altere entre visões gerais, alunos, presenças e graduações.' },
-                  { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
-                  { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
-                ]}
-              />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[{ label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' },
+                { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
+                { label: 'Graduações', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' }
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="group flex items-center justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-4 py-3 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_14px_32px_rgba(0,0,0,0.35)]"
+                >
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
+                    <p className="text-2xl font-bold text-white leading-tight">{item.value}</p>
+                  </div>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
+                    <item.icon size={18} />
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-4">
+              {[{ label: 'Presenças', href: '/presencas', icon: CalendarCheck },
+                { label: 'Alunos', href: '/alunos', icon: Users },
+                { label: 'Relatórios', href: '/relatorios', icon: PieChart },
+                { label: 'Histórico', href: '/historico-presencas', icon: BarChart2 }
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center justify-between rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/50 px-3 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:text-bjj-red"
+                >
+                  <span className="flex items-center gap-2">
+                    <item.icon size={16} />
+                    {item.label}
+                  </span>
+                  <ArrowRight size={14} />
+                </Link>
+              ))}
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {[{ label: 'Aulas na semana', value: metrics.presentesSemana, icon: CalendarCheck, href: '/presencas' },
               { label: 'Histórico na semana', value: presencas.length, icon: BarChart3, href: '/historico-presencas' },
               { label: 'Total de alunos', value: metrics.totalAlunos, icon: Users, href: '/alunos' },
-              { label: 'Graduados', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' },
-              { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
-              { label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' }
+              { label: 'Check-ins registrados', value: presencas.length, icon: Activity, href: '/presencas' }
             ].map((item) => (
               <Link
                 key={item.label}
