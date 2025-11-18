@@ -18,6 +18,7 @@ type UserState = {
 const TOKEN_KEY = 'bjj_token';
 const ROLES_KEY = 'bjj_roles';
 const DEFAULT_ALUNO_ID = '1';
+const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80';
 
 const deriveRolesFromEmail = (email: string): UserRole[] => {
   const normalized = email.toLowerCase();
@@ -63,7 +64,7 @@ export const useUserStore = create<UserState>((set) => ({
       name: email.split('@')[0] || 'Instrutor',
       email,
       roles: finalRoles.length ? finalRoles : ALL_ROLES,
-      avatarUrl: null,
+      avatarUrl: DEFAULT_AVATAR,
       telefone: null,
       alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null
     };
@@ -128,7 +129,7 @@ export const useUserStore = create<UserState>((set) => ({
     const fallbackUser: AuthUser = {
       name: parsedRoles.includes(ROLE_KEYS.aluno) ? 'Aluno' : 'Instrutor',
       email: parsedRoles.includes(ROLE_KEYS.aluno) ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
-      avatarUrl: null,
+      avatarUrl: DEFAULT_AVATAR,
       telefone: null,
       roles: parsedRoles,
       alunoId: parsedRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null

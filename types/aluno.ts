@@ -12,6 +12,7 @@ export type Aluno = {
   faixa: string;
   graus: number;
   mesesNaFaixa: number;
+  avatarUrl?: string | null;
   dataInicio: string;
   dataNascimento?: string | null;
   dataUltimaGraduacao?: string | null;

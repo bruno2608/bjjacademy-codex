@@ -23,6 +23,7 @@ import { ROLE_KEYS } from '../../config/roles';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
+const defaultAvatar = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80';
 
 function HelperDropdown({ title, items }) {
   return (
@@ -72,6 +73,34 @@ function ProgressBar({ percent }) {
   );
 }
 
+function ProfileBadge({ name, faixa, grau, aulas, avatarUrl }) {
+  const label = grau ? `${faixa} · ${grau}º grau` : faixa;
+  return (
+    <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner sm:max-w-sm">
+      <div className="flex items-center gap-4">
+        <div className="avatar">
+          <div className="w-16 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
+            <img src={avatarUrl || defaultAvatar} alt={`Avatar de ${name}`} loading="lazy" />
+          </div>
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-white leading-tight">{name}</p>
+          <p className="text-xs text-bjj-gray-300/80">{label}</p>
+        </div>
+      </div>
+      <div>
+        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">
+          <span>Progresso</span>
+          <span>{aulas} aulas</span>
+        </div>
+        <div className="mt-2 h-2.5 rounded-full bg-bjj-gray-800">
+          <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: '65%' }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StudentDashboard() {
   const { user } = useUserStore();
   const alunoId = user?.alunoId;
@@ -81,6 +110,7 @@ function StudentDashboard() {
   const aluno = useMemo(() => alunos.find((item) => item.id === alunoId) || alunos[0], [alunoId, alunos]);
   const faixaAtual = aluno?.faixa || 'Branca';
   const graus = aluno?.graus || 0;
+  const avatarUrl = aluno?.avatarUrl || user?.avatarUrl || defaultAvatar;
 
   const stats = useMemo(() => {
     const registrosAluno = presencas.filter((item) => item.alunoId === aluno?.id);
@@ -124,36 +154,56 @@ function StudentDashboard() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-[1.6fr,1fr]">
-        <div className={`${cardBase} hero bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
-          <div className="hero-content w-full flex-col items-start justify-between gap-4 px-6 py-6 sm:flex-row sm:items-center">
-            <div className="space-y-2">
-              <p className={badge}>Dashboard do aluno</p>
-              <h1 className="text-2xl font-semibold text-white leading-tight">Bem-vindo, {aluno?.nome || 'Aluno'}!</h1>
-              <p className="max-w-xl text-sm text-bjj-gray-200/85">
-                Acompanhe sua jornada e evolua suas graduações acompanhando presenças e progresso.
-              </p>
+        <div
+          className={`${cardBase} relative overflow-hidden hero bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/70 to-bjj-black p-0`}
+          style={{
+            backgroundImage:
+              "linear-gradient(135deg, rgba(16,16,16,0.75), rgba(16,16,16,0.2)), url('https://images.unsplash.com/photo-1544916473-7e04c8b4b51d?auto=format&fit=crop&w=1200&q=80')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-bjj-black/85 via-bjj-black/40 to-transparent" />
+          <div className="hero-content relative w-full flex-col items-start justify-between gap-4 px-6 py-6">
+            <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-2">
+                <p className={badge}>Dashboard do aluno</p>
+                <h1 className="text-2xl font-semibold text-white leading-tight">Bem-vindo, {aluno?.nome || 'Aluno'}!</h1>
+                <p className="max-w-xl text-sm text-bjj-gray-200/85">
+                  Acompanhe sua jornada e evolua suas graduações acompanhando presenças e progresso.
+                </p>
+              </div>
+              <HelperDropdown
+                title="Ajuda"
+                items={[
+                  { label: 'Check-in', description: 'Registre antes de iniciar a aula para liberar o histórico automaticamente.' },
+                  { label: 'Faixa e grau', description: 'Campos bloqueados: apenas o instrutor pode alterá-los.' },
+                  { label: 'Evolução', description: 'Complete as aulas mínimas para avançar para o próximo grau.' }
+                ]}
+              />
             </div>
-            <HelperDropdown
-              title="Ajuda"
-              items={[
-                { label: 'Check-in', description: 'Registre antes de iniciar a aula para liberar o histórico automaticamente.' },
-                { label: 'Faixa e grau', description: 'Campos bloqueados: apenas o instrutor pode alterá-los.' },
-                { label: 'Evolução', description: 'Complete as aulas mínimas para avançar para o próximo grau.' }
-              ]}
-            />
-          </div>
-          <div className="grid w-full gap-3 border-t border-bjj-gray-800/60 bg-bjj-black/40 px-6 py-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/60 px-4 py-3 shadow-inner">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Faixa</p>
-              <p className="mt-1 text-lg font-semibold">{faixaAtual}</p>
-            </div>
-            <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/60 px-4 py-3 shadow-inner">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Grau atual</p>
-              <p className="mt-1 text-lg font-semibold">{graus}º grau</p>
-            </div>
-            <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/60 px-4 py-3 shadow-inner">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Aulas</p>
-              <p className="mt-1 text-lg font-semibold">{aluno?.aulasNoGrauAtual || 0} aulas</p>
+            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:gap-6">
+              <ProfileBadge
+                name={aluno?.nome || 'Aluno'}
+                faixa={faixaAtual}
+                grau={graus}
+                aulas={aluno?.aulasNoGrauAtual || 0}
+                avatarUrl={avatarUrl}
+              />
+              <div className="grid flex-1 gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 px-4 py-3 shadow-inner">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Faixa</p>
+                  <p className="mt-1 text-lg font-semibold">{faixaAtual}</p>
+                </div>
+                <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 px-4 py-3 shadow-inner">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Grau atual</p>
+                  <p className="mt-1 text-lg font-semibold">{graus}º grau</p>
+                </div>
+                <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 px-4 py-3 shadow-inner">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Aulas</p>
+                  <p className="mt-1 text-lg font-semibold">{aluno?.aulasNoGrauAtual || 0} aulas</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -249,9 +299,12 @@ function StudentDashboard() {
 }
 
 function ProfessorDashboard() {
+  const { user } = useUserStore();
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
   const [activeTab, setActiveTab] = useState('visao');
+  const instructorName = user?.name || 'Instrutor';
+  const instructorAvatar = user?.avatarUrl || defaultAvatar;
 
   const metrics = useMemo(() => {
     const totalAlunos = alunos.length;
@@ -311,6 +364,17 @@ function ProfessorDashboard() {
                 { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
               ]}
             />
+            <div className="flex w-full items-center gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/50 px-4 py-3 shadow-inner">
+              <div className="avatar">
+                <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
+                  <img src={instructorAvatar} alt={`Avatar de ${instructorName}`} loading="lazy" />
+                </div>
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
+              </div>
+            </div>
             <div className="grid w-full grid-cols-2 gap-3">
               <StatPill icon={CalendarCheck} title="Aulas na semana" value={metrics.presentesSemana} accent="text-green-300" />
               <StatPill icon={BarChart3} title="Histórico na semana" value={presencas.length} accent="text-yellow-300" />
