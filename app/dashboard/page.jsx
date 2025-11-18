@@ -217,22 +217,6 @@ function StudentDashboard() {
                 aulas={aluno?.aulasNoGrauAtual || 0}
                 avatarUrl={avatarUrl}
               />
-              <div className="grid flex-1 gap-3 sm:grid-cols-3">
-                {[{ label: 'Faixa', value: faixaAtual }, { label: 'Grau atual', value: `${graus}º grau` }].map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 px-4 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.25)]"
-                  >
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
-                  </div>
-                ))}
-                <div className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 px-4 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.25)]">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Aulas no grau</p>
-                  <p className="mt-1 text-lg font-semibold text-white">{progressoProximoGrau.aulasNoGrau}</p>
-                  <ProgressBar percent={progressoProximoGrau.percent} />
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -245,7 +229,14 @@ function StudentDashboard() {
             </div>
             <ShieldCheck className="text-bjj-red" size={18} />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="badge badge-outline border-bjj-gray-700 bg-bjj-black/40 text-bjj-gray-200">Faixa: {faixaAtual}</span>
+            <span className="badge badge-outline border-bjj-gray-700 bg-bjj-black/40 text-bjj-gray-200">Grau: {graus}º</span>
+            <span className="badge badge-outline border-bjj-gray-700 bg-bjj-black/40 text-bjj-gray-200">
+              {progressoProximoGrau.aulasNoGrau} aulas no grau
+            </span>
+          </div>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
             <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3">
               <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="xl" />
             </div>
