@@ -82,18 +82,18 @@ function ProgressBar({ percent }) {
   );
 }
 
-function ProfileBadge({ name, faixa, grau, aulas, avatarUrl }) {
+function ProfileBadge({ name, faixa, grau, aulas, avatarUrl, progressPercent }) {
   const label = grau ? `${faixa} · ${grau}º grau` : faixa;
   return (
-    <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner sm:max-w-sm">
+    <div className="flex w-full flex-col gap-4 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-5 shadow-inner">
       <div className="flex items-center gap-4">
         <div className="avatar">
           <div className="w-16 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
             <img src={avatarUrl || defaultAvatar} alt={`Avatar de ${name}`} loading="lazy" />
           </div>
         </div>
-        <div>
-          <p className="text-sm font-semibold text-white leading-tight">{name}</p>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold leading-tight text-white">{name}</p>
           <p className="text-xs text-bjj-gray-300/80">{label}</p>
         </div>
       </div>
@@ -103,7 +103,10 @@ function ProfileBadge({ name, faixa, grau, aulas, avatarUrl }) {
           <span>{aulas} aulas</span>
         </div>
         <div className="mt-2 h-2.5 rounded-full bg-bjj-gray-800">
-          <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: '65%' }} />
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500"
+            style={{ width: `${Math.max(6, Math.min(100, progressPercent || 0))}%` }}
+          />
         </div>
       </div>
     </div>
@@ -245,61 +248,61 @@ function StudentDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-[1.6fr,1fr]">
-        <div className={`${cardBase} relative overflow-hidden bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/70 to-bjj-black p-0`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-bjj-black/80 via-bjj-black/35 to-transparent" />
-          <div className="relative flex w-full flex-col gap-4 px-6 py-6">
-            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="space-y-1">
-                <p className={badge}>Dashboard do aluno</p>
-                <h1 className="text-xl font-semibold text-white leading-tight">{aluno?.nome || 'Aluno'}</h1>
-              </div>
-              <HelperDropdown
-                title="Ajuda"
-                items={[
-                  { label: 'Check-in', description: 'Registre antes de iniciar a aula para liberar o histórico automaticamente.' },
-                  { label: 'Faixa e grau', description: 'Campos bloqueados: apenas o instrutor pode alterá-los.' },
-                  { label: 'Evolução', description: 'Complete as aulas mínimas para avançar para o próximo grau.' }
-                ]}
-              />
+      <div className={`${cardBase} relative overflow-hidden bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/70 to-bjj-black p-0`}>
+        <div className="absolute inset-0 bg-gradient-to-r from-bjj-black/80 via-bjj-black/35 to-transparent" />
+        <div className="relative flex w-full flex-col gap-6 px-6 py-6">
+          <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-1">
+              <p className={badge}>Dashboard do aluno</p>
+              <h1 className="text-xl font-semibold leading-tight text-white">{aluno?.nome || 'Aluno'}</h1>
             </div>
-            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:gap-6">
-              <ProfileBadge
-                name={aluno?.nome || 'Aluno'}
-                faixa={faixaAtual}
-                grau={graus}
-                aulas={aluno?.aulasNoGrauAtual || 0}
-                avatarUrl={avatarUrl}
-              />
-            </div>
+            <HelperDropdown
+              title="Ajuda"
+              items={[
+                { label: 'Check-in', description: 'Registre antes de iniciar a aula para liberar o histórico automaticamente.' },
+                { label: 'Faixa e grau', description: 'Campos bloqueados: apenas o instrutor pode alterá-los.' },
+                { label: 'Evolução', description: 'Complete as aulas mínimas para avançar para o próximo grau.' }
+              ]}
+            />
           </div>
-        </div>
 
-        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-5`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">Sua faixa</p>
-              <p className="text-lg font-semibold">Progresso do próximo grau</p>
-            </div>
-            <ShieldCheck className="text-bjj-red" size={18} />
-          </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="badge badge-outline border-bjj-gray-700 bg-bjj-black/40 text-bjj-gray-200">Faixa: {faixaAtual}</span>
-            <span className="badge badge-outline border-bjj-gray-700 bg-bjj-black/40 text-bjj-gray-200">Grau: {graus}º</span>
-            <span className="badge badge-outline border-bjj-gray-700 bg-bjj-black/40 text-bjj-gray-200">
-              {progressoProximoGrau.aulasNoGrau} aulas no grau
-            </span>
-          </div>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
-            <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3">
-              <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="xl" />
-            </div>
-            <div className="flex-1 space-y-2">
-              <p className="text-sm text-bjj-gray-200/90">{progressoProximoGrau.percent}% do próximo grau</p>
-              <ProgressBar percent={progressoProximoGrau.percent} />
-              <p className="text-xs text-bjj-gray-300/80">
-                {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
-              </p>
+          <div className="grid gap-6 lg:grid-cols-[1.2fr,1fr] lg:items-center">
+            <ProfileBadge
+              name={aluno?.nome || 'Aluno'}
+              faixa={faixaAtual}
+              grau={graus}
+              aulas={aluno?.aulasNoGrauAtual || 0}
+              avatarUrl={avatarUrl}
+              progressPercent={progressoProximoGrau.percent}
+            />
+
+            <div className="flex flex-col gap-4 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/50 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">Sua faixa</p>
+                  <p className="text-lg font-semibold">Progresso do próximo grau</p>
+                </div>
+                <ShieldCheck className="text-bjj-red" size={18} />
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="badge badge-outline border-bjj-gray-700 bg-bjj-black/40 text-bjj-gray-200">Faixa: {faixaAtual}</span>
+                <span className="badge badge-outline border-bjj-gray-700 bg-bjj-black/40 text-bjj-gray-200">Grau: {graus}º</span>
+                <span className="badge badge-outline border-bjj-gray-700 bg-bjj-black/40 text-bjj-gray-200">
+                  {progressoProximoGrau.aulasNoGrau} aulas no grau
+                </span>
+              </div>
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
+                <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3">
+                  <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="xl" />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <p className="text-sm text-bjj-gray-200/90">{progressoProximoGrau.percent}% do próximo grau</p>
+                  <ProgressBar percent={progressoProximoGrau.percent} />
+                  <p className="text-xs text-bjj-gray-300/80">
+                    {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
