@@ -78,8 +78,9 @@ function ProgressBar({ percent }) {
   );
 }
 
-function ProfileBadge({ name, faixa, grau, aulas, avatarUrl }) {
+function ProfileBadge({ name, faixa, grau, aulas, alvo = 20, avatarUrl }) {
   const label = grau ? `${faixa} · ${grau}º grau` : faixa;
+  const percent = Math.min(100, Math.round(((aulas || 0) / alvo) * 100));
   return (
     <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner sm:max-w-sm">
       <div className="flex items-center gap-4">
@@ -99,7 +100,7 @@ function ProfileBadge({ name, faixa, grau, aulas, avatarUrl }) {
           <span>{aulas} aulas</span>
         </div>
         <div className="mt-2 h-2.5 rounded-full bg-bjj-gray-800">
-          <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: '65%' }} />
+          <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: `${percent}%` }} />
         </div>
       </div>
     </div>
@@ -182,6 +183,7 @@ function StudentDashboard() {
                 faixa={faixaAtual}
                 grau={graus}
                 aulas={aluno?.aulasNoGrauAtual || 0}
+                alvo={progressoProximoGrau.alvo}
                 avatarUrl={avatarUrl}
               />
               <div className="grid flex-1 gap-3 sm:grid-cols-3">
