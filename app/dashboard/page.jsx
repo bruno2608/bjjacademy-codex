@@ -29,32 +29,6 @@ const defaultAvatar = 'https://ui-avatars.com/api/?background=1b1b1b&color=fff&n
 const ensureAvatar = (name, avatarUrl) =>
   avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
 
-function HelperDropdown({ title, items }) {
-  return (
-    <div className="dropdown dropdown-end">
-      <label tabIndex={0} className="btn btn-ghost btn-sm rounded-full border border-bjj-gray-800 text-xs text-bjj-gray-100">
-        {title}
-      </label>
-      <ul
-        tabIndex={0}
-        className="dropdown-content menu menu-sm z-20 w-72 rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900 p-3 text-xs text-bjj-gray-200 shadow-xl"
-      >
-        {items.map((item) => (
-          <li key={item.label} className="py-1">
-            <div className="flex items-start gap-3 rounded-xl bg-bjj-black/60 p-3">
-              <div className="mt-0.5 h-2.5 w-2.5 rounded-full bg-bjj-red" />
-              <div>
-                <p className="font-semibold text-white">{item.label}</p>
-                <p className="text-[11px] text-bjj-gray-300/80">{item.description}</p>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function StatPill({ icon: Icon, title, value, accent }) {
   return (
     <div className={`${cardBase} flex items-center gap-4 border-bjj-gray-800/80 p-4`}>
@@ -167,14 +141,6 @@ function StudentDashboard() {
                 <p className={badge}>Dashboard do aluno</p>
                 <h1 className="text-xl font-semibold text-white leading-tight">{aluno?.nome || 'Aluno'}</h1>
               </div>
-              <HelperDropdown
-                title="Ajuda"
-                items={[
-                  { label: 'Check-in', description: 'Registre antes de iniciar a aula para liberar o histórico automaticamente.' },
-                  { label: 'Faixa e grau', description: 'Campos bloqueados: apenas o instrutor pode alterá-los.' },
-                  { label: 'Evolução', description: 'Complete as aulas mínimas para avançar para o próximo grau.' }
-                ]}
-              />
             </div>
             <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:gap-6">
               <ProfileBadge
@@ -416,14 +382,6 @@ function ProfessorDashboard() {
                   <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
                 </div>
-                <HelperDropdown
-                  title="Ajuda"
-                  items={[
-                    { label: 'Visões rápidas', description: 'Altere entre visões gerais, alunos, presenças e graduações.' },
-                    { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
-                    { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
-                  ]}
-                />
               </div>
             </div>
 
@@ -448,25 +406,6 @@ function ProfessorDashboard() {
               ))}
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-4">
-              {[{ label: 'Presenças', href: '/presencas', icon: CalendarCheck },
-                { label: 'Alunos', href: '/alunos', icon: Users },
-                { label: 'Relatórios', href: '/relatorios', icon: PieChart },
-                { label: 'Histórico', href: '/historico-presencas', icon: BarChart2 }
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center justify-between rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/50 px-3 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:text-bjj-red"
-                >
-                  <span className="flex items-center gap-2">
-                    <item.icon size={16} />
-                    {item.label}
-                  </span>
-                  <ArrowRight size={14} />
-                </Link>
-              ))}
-            </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {[{ label: 'Aulas na semana', value: metrics.presentesSemana, icon: CalendarCheck, href: '/presencas' },
@@ -499,11 +438,13 @@ function ProfessorDashboard() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <div className={`${cardBase} p-5`}>
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Visão analítica</h3>
-              <span className="badge badge-ghost badge-sm text-[11px] tracking-[0.15em] text-bjj-gray-200">Atualizado</span>
-            </div>
+            <div className={`${cardBase} p-5`}>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">Visão analítica</h3>
+                <span className="rounded-full bg-bjj-gray-800/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-white shadow-inner">
+                  Atualizado
+                </span>
+              </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
                 <div className="flex items-center justify-between">
