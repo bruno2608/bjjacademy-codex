@@ -19,7 +19,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 2,
     data: '2024-05-06',
     hora: '07:55',
-    status: 'Presente',
+    status: 'CONFIRMADO',
     ...getTreinoMeta('t1')
   },
   {
@@ -30,7 +30,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 2,
     data: '2024-05-06',
     hora: '19:05',
-    status: 'Presente',
+    status: 'CONFIRMADO',
     ...getTreinoMeta('t2')
   },
   {
@@ -41,7 +41,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 3,
     data: '2024-05-06',
     hora: null,
-    status: 'Ausente',
+    status: 'AUSENTE',
     ...getTreinoMeta('t2')
   },
   {
@@ -52,7 +52,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 1,
     data: '2024-05-04',
     hora: '08:12',
-    status: 'Presente',
+    status: 'CONFIRMADO',
     ...getTreinoMeta('t3')
   },
   {
@@ -63,7 +63,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 1,
     data: '2024-05-04',
     hora: '08:05',
-    status: 'Presente',
+    status: 'CONFIRMADO',
     ...getTreinoMeta('t1')
   },
   {
@@ -74,7 +74,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 0,
     data: '2024-05-03',
     hora: '07:48',
-    status: 'Presente',
+    status: 'CONFIRMADO',
     ...getTreinoMeta('t1')
   },
   {
@@ -85,7 +85,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 3,
     data: '2024-05-03',
     hora: '09:10',
-    status: 'Presente',
+    status: 'CONFIRMADO',
     ...getTreinoMeta('t6')
   },
   {
@@ -96,7 +96,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 2,
     data: '2024-05-02',
     hora: null,
-    status: 'Ausente',
+    status: 'AUSENTE',
     ...getTreinoMeta('t2')
   },
   {
@@ -107,7 +107,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 0,
     data: '2024-05-02',
     hora: '08:22',
-    status: 'Presente',
+    status: 'CONFIRMADO',
     ...getTreinoMeta('t1')
   },
   {
@@ -118,7 +118,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 1,
     data: '2024-05-01',
     hora: '07:40',
-    status: 'Presente',
+    status: 'CONFIRMADO',
     ...getTreinoMeta('t3')
   },
   {
@@ -129,7 +129,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 0,
     data: '2024-05-01',
     hora: '08:30',
-    status: 'Presente',
+    status: 'CONFIRMADO',
     ...getTreinoMeta('t6')
   },
   {
@@ -151,7 +151,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 0,
     data: '2024-05-06',
     hora: null,
-    status: 'Ausente',
+    status: 'AUSENTE',
     ...getTreinoMeta('t4')
   },
   {
@@ -162,7 +162,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     graus: 2,
     data: '2024-05-04',
     hora: '10:05',
-    status: 'Presente',
+    status: 'CONFIRMADO',
     ...getTreinoMeta('t5')
   }
 ];

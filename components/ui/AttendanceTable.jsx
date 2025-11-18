@@ -16,15 +16,18 @@ export default function AttendanceTable({
   onRequestSession,
   isLoading = false
 }) {
+  const actionButtonClasses =
+    'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40';
+
   return (
     <div
       className="relative overflow-hidden rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 shadow-[0_12px_28px_-20px_rgba(0,0,0,0.45)]"
       aria-busy={isLoading}
     >
       <div className="absolute right-[-18%] top-[-18%] h-24 w-24 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-      <div className="hidden md:grid md:grid-cols-[minmax(0,0.55fr)_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
-        {['Ações', 'Aluno', 'Graduação', 'Data / Treino', 'Status'].map((header) => (
-          <div key={header} className="px-3 py-3">
+      <div className="hidden md:grid md:grid-cols-[200px_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
+        {['Ações', 'Aluno', 'Graduação', 'Data / Treino', 'Status'].map((header, index) => (
+          <div key={header} className={`px-3 py-3 ${index === 0 ? 'text-center' : ''}`}>
             {header}
           </div>
         ))}
@@ -85,29 +88,19 @@ export default function AttendanceTable({
                   <div>
                     <p className="font-semibold text-bjj-gray-200/90">Ação rápida</p>
                     <div className="mt-1 inline-flex items-center gap-2">
-                      <button
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                        onClick={handleToggle}
-                      >
+                      <button className={actionButtonClasses} onClick={handleToggle}>
                         {record.status === 'Presente' ? <RotateCcw size={16} /> : <CheckCircle2 size={16} />}
                         <span className="sr-only">
                           {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
                         </span>
                       </button>
                       {!isPlaceholder && (
-                        <button
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                          onClick={() => onAddSession?.(record)}
-                        >
+                        <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
                           <Plus size={16} />
                           <span className="sr-only">Adicionar outra sessão</span>
                         </button>
                       )}
-                      <button
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
-                        onClick={() => onDelete?.(record)}
-                        disabled={isPlaceholder}
-                      >
+                      <button className={actionButtonClasses} onClick={() => onDelete?.(record)} disabled={isPlaceholder}>
                         <Trash2 size={15} />
                         <span className="sr-only">Remover registro</span>
                       </button>
@@ -115,19 +108,16 @@ export default function AttendanceTable({
                   </div>
                 </div>
                 {!isPlaceholder && (
-                  <button
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                    onClick={() => onEdit?.(record)}
-                  >
+                  <button className={actionButtonClasses} onClick={() => onEdit?.(record)}>
                     <Pencil size={15} />
                     <span className="sr-only">Corrigir presença</span>
                   </button>
                 )}
                 </div>
-                <div className="hidden md:grid md:grid-cols-[minmax(0,0.55fr)_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)]">
-                  <div className="flex items-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
+                <div className="hidden md:grid md:grid-cols-[200px_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)]">
+                  <div className="flex items-center justify-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
                     <button
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
+                      className={actionButtonClasses}
                       onClick={handleToggle}
                       disabled={isPlaceholder && record.status === 'Presente'}
                     >
@@ -137,25 +127,19 @@ export default function AttendanceTable({
                       </span>
                     </button>
                     {!isPlaceholder && (
-                      <button
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                        onClick={() => onAddSession?.(record)}
-                      >
+                      <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
                         <Plus size={14} />
                         <span className="sr-only">Adicionar outra sessão</span>
                       </button>
                     )}
                     {!isPlaceholder && (
-                      <button
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red"
-                        onClick={() => onEdit?.(record)}
-                      >
+                      <button className={actionButtonClasses} onClick={() => onEdit?.(record)}>
                         <Pencil size={14} />
                         <span className="sr-only">Corrigir presença</span>
                       </button>
                     )}
                     <button
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40"
+                      className={actionButtonClasses}
                       onClick={() => onDelete?.(record)}
                       disabled={isPlaceholder}
                     >

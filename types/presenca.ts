@@ -1,4 +1,10 @@
-export type PresencaStatus = 'Presente' | 'Ausente' | 'Pendente' | 'Cancelado';
+export type StatusPresenca =
+  | 'CHECKIN'
+  | 'PENDENTE'
+  | 'CONFIRMADO'
+  | 'AUSENTE'
+  | 'AUSENTE_JUSTIFICADA'
+  | 'CANCELADO';
 
 export type Presenca = {
   id: string;
@@ -8,8 +14,9 @@ export type Presenca = {
   graus: number;
   data: string;
   hora: string | null;
-  status: PresencaStatus;
+  status: StatusPresenca;
   treinoId: string | null;
   tipoTreino: string;
   treinoModalidade?: string;
+  origem?: 'ALUNO' | 'PROFESSOR';
 };

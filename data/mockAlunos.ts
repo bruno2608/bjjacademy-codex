@@ -34,6 +34,7 @@ const BASE_MOCK_ALUNOS: Aluno[] = [
     faixa: 'Roxa',
     graus: 2,
     mesesNaFaixa: 14,
+    avatarUrl: 'https://images.unsplash.com/photo-1593104547489-e03a09fd1ccb?auto=format&fit=crop&w=320&q=80',
     dataInicio: '2018-02-12',
     dataUltimaGraduacao: '2023-03-10',
     historicoGraduacoes: [
@@ -75,6 +76,7 @@ const BASE_MOCK_ALUNOS: Aluno[] = [
     faixa: 'Azul',
     graus: 3,
     mesesNaFaixa: 20,
+    avatarUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80',
     dataInicio: '2019-05-01',
     dataUltimaGraduacao: '2022-12-01',
     historicoGraduacoes: [

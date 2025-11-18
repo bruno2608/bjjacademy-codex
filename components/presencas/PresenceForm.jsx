@@ -11,7 +11,7 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 
-const statusOptions = ['Presente', 'Ausente'];
+const statusOptions = ['CONFIRMADO', 'CHECKIN', 'PENDENTE', 'AUSENTE', 'AUSENTE_JUSTIFICADA'];
 
 const obterHoraAtual = () =>
   new Date()

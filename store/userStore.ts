@@ -18,13 +18,14 @@ type UserState = {
 const TOKEN_KEY = 'bjj_token';
 const ROLES_KEY = 'bjj_roles';
 const DEFAULT_ALUNO_ID = '1';
+const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80';
 
 const deriveRolesFromEmail = (email: string): UserRole[] => {
   const normalized = email.toLowerCase();
-  const baseRoles = new Set<UserRole>([ROLE_KEYS.instructor, ROLE_KEYS.teacher]);
+  const baseRoles = new Set<UserRole>([ROLE_KEYS.instrutor, ROLE_KEYS.professor]);
   if (normalized.includes('admin')) baseRoles.add(ROLE_KEYS.admin);
   if (normalized.includes('ti')) baseRoles.add(ROLE_KEYS.ti);
-  if (normalized.includes('aluno') || normalized.includes('student')) baseRoles.add(ROLE_KEYS.student);
+  if (normalized.includes('aluno') || normalized.includes('student')) baseRoles.add(ROLE_KEYS.aluno);
   return Array.from(baseRoles);
 };
 
@@ -63,15 +64,15 @@ export const useUserStore = create<UserState>((set) => ({
       name: email.split('@')[0] || 'Instrutor',
       email,
       roles: finalRoles.length ? finalRoles : ALL_ROLES,
-      avatarUrl: null,
+      avatarUrl: DEFAULT_AVATAR,
       telefone: null,
-      alunoId: finalRoles.includes(ROLE_KEYS.student) ? DEFAULT_ALUNO_ID : null
+      alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null
     };
 
     persistRoles(finalUser.roles);
     window.localStorage.setItem(
       'bjj_user',
-      JSON.stringify({ ...finalUser, alunoId: finalRoles.includes(ROLE_KEYS.student) ? DEFAULT_ALUNO_ID : null })
+      JSON.stringify({ ...finalUser, alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null })
     );
     set({ user: finalUser, token: fakeToken, hydrated: true });
   },
@@ -126,12 +127,12 @@ export const useUserStore = create<UserState>((set) => ({
     }
 
     const fallbackUser: AuthUser = {
-      name: parsedRoles.includes(ROLE_KEYS.student) ? 'Aluno' : 'Instrutor',
-      email: parsedRoles.includes(ROLE_KEYS.student) ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
-      avatarUrl: null,
+      name: parsedRoles.includes(ROLE_KEYS.aluno) ? 'Aluno' : 'Instrutor',
+      email: parsedRoles.includes(ROLE_KEYS.aluno) ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
+      avatarUrl: DEFAULT_AVATAR,
       telefone: null,
       roles: parsedRoles,
-      alunoId: parsedRoles.includes(ROLE_KEYS.student) ? DEFAULT_ALUNO_ID : null
+      alunoId: parsedRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null
     };
 
     set({
