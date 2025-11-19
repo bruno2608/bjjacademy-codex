@@ -5,7 +5,7 @@
  * alternar status rapidamente, mantendo o novo visual gamificado e
  * preparado para mobile-first.
  */
-import { CheckCircle2, Loader2, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { CheckCircle2, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 import Badge from '../ui/Badge';
 
 const actionButtonClasses =
@@ -15,7 +15,6 @@ export default function AttendanceTable({
   records,
   onConfirm,
   onMarkAbsent,
-  onMarkJustified,
   onDelete,
   onEdit,
   onAddSession,
@@ -89,8 +88,6 @@ export default function AttendanceTable({
           };
 
           const handleAbsent = () => onMarkAbsent?.(record);
-          const handleJustified = () => onMarkJustified?.(record);
-
           return (
             <div
               key={record.id || `${record.alunoId}-${record.treinoId || record.data}`}
@@ -140,12 +137,6 @@ export default function AttendanceTable({
                         <Trash2 size={15} />
                         <span className="sr-only">Marcar falta</span>
                       </button>
-                      {!isPlaceholder && (
-                        <button className={actionButtonClasses} onClick={handleJustified}>
-                          <RotateCcw size={15} />
-                          <span className="sr-only">Justificar falta</span>
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -177,12 +168,6 @@ export default function AttendanceTable({
                     <button className={actionButtonClasses} onClick={() => onEdit?.(record)}>
                       <Pencil size={14} />
                       <span className="sr-only">Corrigir presença</span>
-                    </button>
-                  )}
-                  {!isPlaceholder && (
-                    <button className={actionButtonClasses} onClick={handleJustified}>
-                      <RotateCcw size={14} />
-                      <span className="sr-only">Justificar falta</span>
                     </button>
                   )}
                   <button className={actionButtonClasses} onClick={() => onDelete?.(record)} disabled={isPlaceholder}>
