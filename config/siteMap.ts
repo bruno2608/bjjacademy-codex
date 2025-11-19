@@ -8,7 +8,8 @@ export const siteMap = {
     '/treinos',
     '/evolucao',
     '/historico-presencas',
-    '/perfil'
+    '/perfil',
+    '/relatorios'
   ],
   instrutor: [
     '/dashboard',
