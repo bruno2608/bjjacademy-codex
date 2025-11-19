@@ -58,7 +58,7 @@ function StatPill({ icon: Icon, title, value, accent }) {
 function ProfileBadge({ name, faixa, grau, avatarUrl }) {
   const label = grau ? `${faixa} · ${grau}º grau` : faixa;
   return (
-    <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner sm:max-w-sm">
+    <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner">
       <div className="flex items-center gap-4">
         <div className="avatar">
           <div className="w-16 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
@@ -109,6 +109,8 @@ function StudentDashboard() {
     [aluno?.id, presencas]
   );
 
+  const ultimaPresenca = ultimasPresencas[0];
+
   const formatStatus = (status) => {
     switch (status) {
       case 'CONFIRMADO':
@@ -126,7 +128,7 @@ function StudentDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-[1.6fr,1fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
         <div className={`${cardBase} relative overflow-hidden bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/70 to-bjj-black p-0`}>
           <div className="absolute inset-0 bg-gradient-to-r from-bjj-black/80 via-bjj-black/35 to-transparent" />
           <div className="relative flex w-full flex-col gap-4 px-6 py-6">
@@ -143,6 +145,17 @@ function StudentDashboard() {
                 grau={graus}
                 avatarUrl={avatarUrl}
               />
+            </div>
+            <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-300">
+              <span className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-1 font-semibold text-white">
+                Status: {aluno?.status || 'Ativo'}
+              </span>
+              <span className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-1 font-semibold text-white">
+                Última presença: {ultimaPresenca ? `${ultimaPresenca.data}${ultimaPresenca.hora ? ` · ${ultimaPresenca.hora}` : ''}` : 'Sem registro'}
+              </span>
+              <span className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-1 font-semibold text-white">
+                Pendentes: {stats.pendentes}
+              </span>
             </div>
           </div>
         </div>
