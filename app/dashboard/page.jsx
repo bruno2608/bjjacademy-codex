@@ -312,10 +312,17 @@ function ProfessorDashboard() {
   const { user } = useUserStore();
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
+  const treinos = useTreinosStore((state) => state.treinos);
   const [activeTab, setActiveTab] = useState('visao');
   const [updatingId, setUpdatingId] = useState(null);
   const instructorName = user?.name || 'Instrutor';
   const instructorAvatar = user?.avatarUrl || defaultAvatar;
+
+  const horariosPorTreino = useMemo(() => {
+    const map = new Map();
+    treinos.forEach((treino) => map.set(treino.id, treino.hora));
+    return map;
+  }, [treinos]);
 
   const metrics = useMemo(() => {
     const totalAlunos = alunos.length;
