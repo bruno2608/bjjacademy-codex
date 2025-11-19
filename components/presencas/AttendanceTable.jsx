@@ -9,7 +9,7 @@ import { CheckCircle2, Loader2, Pencil, Plus, Trash2, XCircle } from 'lucide-rea
 import Badge from '../ui/Badge';
 
 const baseActionButtonClasses =
-  'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-800/80 bg-bjj-gray-900/80 text-bjj-gray-200 shadow-[0_6px_24px_-16px_rgba(0,0,0,0.45)] transition disabled:cursor-not-allowed disabled:opacity-40';
+  'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-bjj-gray-800/80 bg-bjj-gray-900/80 text-bjj-gray-200 shadow-[0_6px_24px_-16px_rgba(0,0,0,0.45)] transition disabled:cursor-not-allowed disabled:opacity-40';
 
 const actionTone = {
   confirm: 'hover:border-green-400/80 hover:text-green-300 focus-visible:ring-1 focus-visible:ring-green-400/70',
@@ -70,7 +70,7 @@ export default function AttendanceTable({
       aria-busy={isLoading}
     >
       <div className="absolute right-[-18%] top-[-18%] h-24 w-24 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-      <div className="hidden md:grid md:grid-cols-[minmax(0,0.55fr)_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
+      <div className="hidden md:grid md:grid-cols-[minmax(0,0.75fr)_minmax(0,1.1fr)_minmax(0,0.7fr)_minmax(0,1.5fr)_minmax(0,0.55fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
         {['Ações', 'Aluno', 'Graduação', 'Data / Treino', 'Status'].map((header) => (
           <div key={header} className="px-3 py-3">
             {header}
@@ -166,14 +166,14 @@ export default function AttendanceTable({
                 )}
               </div>
 
-              <div className="hidden md:grid md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)]">
-                <div className="flex flex-wrap items-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
+              <div className="hidden md:grid md:grid-cols-[minmax(0,0.75fr)_minmax(0,1.1fr)_minmax(0,0.7fr)_minmax(0,1.5fr)_minmax(0,0.55fr)]">
+                <div className="flex flex-nowrap items-center gap-1.5 border-b border-bjj-gray-800/60 px-2.5 py-2">
                   <button
                     className={actionButtonClasses('confirm')}
                     onClick={handleConfirm}
                     disabled={!canConfirm(record.status)}
                   >
-                    <CheckCircle2 size={15} />
+                    <CheckCircle2 size={14} />
                     <span className="sr-only">Confirmar presença</span>
                   </button>
                   <button
@@ -181,23 +181,23 @@ export default function AttendanceTable({
                     onClick={handleAbsent}
                     disabled={!canAbsent(record.status)}
                   >
-                    <XCircle size={14} />
+                    <XCircle size={13} />
                     <span className="sr-only">Registrar falta</span>
                   </button>
                   {!isPlaceholder && (
                     <button className={actionButtonClasses('add')} onClick={() => onAddSession?.(record)}>
-                      <Plus size={14} />
+                      <Plus size={13} />
                       <span className="sr-only">Adicionar outra sessão</span>
                     </button>
                   )}
                   {!isPlaceholder && (
                     <button className={actionButtonClasses('edit')} onClick={() => onEdit?.(record)}>
-                      <Pencil size={14} />
+                      <Pencil size={13} />
                       <span className="sr-only">Corrigir presença</span>
                     </button>
                   )}
                   <button className={actionButtonClasses('delete')} onClick={() => onDelete?.(record)} disabled={isPlaceholder}>
-                    <Trash2 size={14} />
+                    <Trash2 size={13} />
                     <span className="sr-only">Remover registro</span>
                   </button>
                 </div>
