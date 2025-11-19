@@ -5,7 +5,7 @@
  * alternar status rapidamente, mantendo o novo visual gamificado e
  * preparado para mobile-first.
  */
-import { CheckCircle2, Circle, Loader2, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { CheckCircle2, Circle, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 
 export default function AttendanceTable({
   records,
@@ -42,10 +42,11 @@ export default function AttendanceTable({
           const horarioLabel = hora !== '—' ? `${hora}h` : 'Sem horário';
           const dataTreinoLabel = `${formattedDate} · ${horarioLabel} · ${treinoLabel}`;
           const isPlaceholder = Boolean(record.isPlaceholder);
+          const isConfirmed = record.status === 'Presente';
           const handleToggle = () => {
             if (isPlaceholder) {
               onRequestSession?.(record);
-            } else {
+            } else if (!isConfirmed) {
               onToggle?.(record);
             }
           };
@@ -88,11 +89,13 @@ export default function AttendanceTable({
                   <div>
                     <p className="font-semibold text-bjj-gray-200/90">Ação rápida</p>
                     <div className="mt-1 inline-flex items-center gap-2">
-                      <button className={actionButtonClasses} onClick={handleToggle}>
-                        {record.status === 'Presente' ? <RotateCcw size={16} /> : <CheckCircle2 size={16} />}
-                        <span className="sr-only">
-                          {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
-                        </span>
+                      <button
+                        className={actionButtonClasses}
+                        onClick={handleToggle}
+                        disabled={isConfirmed && !isPlaceholder}
+                      >
+                        <CheckCircle2 size={16} />
+                        <span className="sr-only">Marcar presença</span>
                       </button>
                       {!isPlaceholder && (
                         <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
@@ -119,12 +122,10 @@ export default function AttendanceTable({
                     <button
                       className={actionButtonClasses}
                       onClick={handleToggle}
-                      disabled={isPlaceholder && record.status === 'Presente'}
+                      disabled={isConfirmed && !isPlaceholder}
                     >
-                      {record.status === 'Presente' ? <RotateCcw size={15} /> : <CheckCircle2 size={15} />}
-                      <span className="sr-only">
-                        {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
-                      </span>
+                      <CheckCircle2 size={15} />
+                      <span className="sr-only">Marcar presença</span>
                     </button>
                     {!isPlaceholder && (
                       <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
