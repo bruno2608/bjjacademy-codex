@@ -271,15 +271,15 @@ export default function AlunosPage() {
         </article>
 
         <article className="card space-y-3">
-          <header className="flex flex-col gap-1">
-            <h2 className="text-base font-semibold text-bjj-white">Lista de alunos</h2>
-            <p className="text-sm text-bjj-gray-200/70">Monitore faixa atual, tempo dedicado e status de cada membro da academia.</p>
-          </header>
-          <div className="flex justify-end">
-            <Button type="button" onClick={() => setIsCreateOpen(true)}>
+          <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            <div className="space-y-1">
+              <h2 className="text-base font-semibold text-bjj-white">Lista de alunos</h2>
+              <p className="text-sm text-bjj-gray-200/70">Monitore faixa atual, tempo dedicado e status de cada membro da academia.</p>
+            </div>
+            <Button type="button" onClick={() => setIsCreateOpen(true)} className="self-start sm:self-auto">
               <UserPlus2 size={16} /> Novo aluno
             </Button>
-          </div>
+          </header>
           <Table
             headers={['Ações', 'Aluno', 'Graduação', 'Plano', 'Status', 'Contato']}
             data={alunosFiltrados}

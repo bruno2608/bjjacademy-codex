@@ -5,7 +5,7 @@
  * alternar status rapidamente, mantendo o novo visual gamificado e
  * preparado para mobile-first.
  */
-import { CheckCircle2, Circle, Loader2, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { CheckCircle2, Circle, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 
 export default function AttendanceTable({
   records,
@@ -25,7 +25,7 @@ export default function AttendanceTable({
       aria-busy={isLoading}
     >
       <div className="absolute right-[-18%] top-[-18%] h-24 w-24 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-      <div className="hidden md:grid md:grid-cols-[200px_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
+      <div className="hidden md:grid md:grid-cols-[140px_minmax(0,1.1fr)_minmax(0,0.8fr)_minmax(0,1.4fr)_minmax(0,0.6fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
         {['Ações', 'Aluno', 'Graduação', 'Data / Treino', 'Status'].map((header, index) => (
           <div key={header} className={`px-3 py-3 ${index === 0 ? 'text-center' : ''}`}>
             {header}
@@ -42,10 +42,11 @@ export default function AttendanceTable({
           const horarioLabel = hora !== '—' ? `${hora}h` : 'Sem horário';
           const dataTreinoLabel = `${formattedDate} · ${horarioLabel} · ${treinoLabel}`;
           const isPlaceholder = Boolean(record.isPlaceholder);
+          const isConfirmed = record.status === 'Presente';
           const handleToggle = () => {
             if (isPlaceholder) {
               onRequestSession?.(record);
-            } else {
+            } else if (!isConfirmed) {
               onToggle?.(record);
             }
           };
@@ -88,11 +89,13 @@ export default function AttendanceTable({
                   <div>
                     <p className="font-semibold text-bjj-gray-200/90">Ação rápida</p>
                     <div className="mt-1 inline-flex items-center gap-2">
-                      <button className={actionButtonClasses} onClick={handleToggle}>
-                        {record.status === 'Presente' ? <RotateCcw size={16} /> : <CheckCircle2 size={16} />}
-                        <span className="sr-only">
-                          {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
-                        </span>
+                      <button
+                        className={actionButtonClasses}
+                        onClick={handleToggle}
+                        disabled={isConfirmed && !isPlaceholder}
+                      >
+                        <CheckCircle2 size={16} />
+                        <span className="sr-only">Marcar presença</span>
                       </button>
                       {!isPlaceholder && (
                         <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
@@ -114,17 +117,15 @@ export default function AttendanceTable({
                   </button>
                 )}
                 </div>
-                <div className="hidden md:grid md:grid-cols-[200px_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)]">
+                <div className="hidden md:grid md:grid-cols-[140px_minmax(0,1.1fr)_minmax(0,0.8fr)_minmax(0,1.4fr)_minmax(0,0.6fr)]">
                   <div className="flex items-center justify-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
                     <button
                       className={actionButtonClasses}
                       onClick={handleToggle}
-                      disabled={isPlaceholder && record.status === 'Presente'}
+                      disabled={isConfirmed && !isPlaceholder}
                     >
-                      {record.status === 'Presente' ? <RotateCcw size={15} /> : <CheckCircle2 size={15} />}
-                      <span className="sr-only">
-                        {record.status === 'Presente' ? 'Desfazer presença' : 'Marcar presença'}
-                      </span>
+                      <CheckCircle2 size={15} />
+                      <span className="sr-only">Marcar presença</span>
                     </button>
                     {!isPlaceholder && (
                       <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
