@@ -85,11 +85,31 @@ styles/
 - **Admin/TI (`admin`/`ti`):** têm acesso total, incluindo as configurações da academia e cadastros avançados.
 - **Site map + middleware:** `config/siteMap.ts`, `config/roles.ts` e `middleware.ts` filtram links e protegem as rotas com RBAC centralizado baseado no papel salvo via Zustand.
 
+## 📌 Funções por perfil, telas e ações
+
+| Perfil | Telas liberadas | Ações permitidas |
+| --- | --- | --- |
+| **Aluno (`aluno`/`student`)** | `/dashboard-aluno`, `/checkin`, `/treinos`, `/evolucao`, `/historico-presencas`, `/perfil`, `/relatorios` | Check-in próprio (status automático ou pendente), visualizar treinos do dia, acompanhar evolução e progresso de faixas, consultar histórico e relatórios pessoais, editar informações básicas do perfil. |
+| **Instrutor (`instrutor`/`instructor`)** | Tudo do aluno + `/dashboard`, `/presencas`, `/alunos`, `/relatorios` | Registrar/editar presenças de qualquer aluno, aprovar/recusar check-ins pendentes, lançar ausências justificadas, cadastrar/editar alunos via modal, acessar relatórios e visão geral do painel staff. |
+| **Professor (`professor`/`teacher`)** | Tudo do instrutor + `/configuracoes`, `/configuracoes/graduacao`, `/configuracoes/treinos`, `/configuracoes/tipos-treino`, `/graduacoes` | Fechar treinos do dia, configurar regras de graduação, horários e tipos de treino, criar/editar agendamentos de graduação, marcar treinos como fechados para impedir check-ins tardios. |
+| **Admin/TI (`admin`/`ti`)** | Acesso total (qualquer rota) | Todas as ações anteriores, além de manutenção ampla de dados mockados, testes de RBAC e navegação irrestrita para QA. |
+
+> As permissões são derivadas de `config/siteMap.ts` e normalizadas em `config/roles.ts`, garantindo coerência entre a navegação (sidebar, mobile e hero links) e o middleware de rota.
+
 ### Check-in do aluno (mock)
 
 - **Treinos do dia** são carregados da store de presenças com horário, professor e tipo (Gi/No-Gi).
 - **Regras de horário:** check-in automático até o início do treino ou +30min; fora desse intervalo abre modal de confirmação e registra status **pendente** para aprovação do professor.
 - **Limites:** um registro por treino, com status exibido no histórico do aluno e na tela de presenças do professor.
+
+## 🧾 Regras de negócios principais
+
+- **RBAC centralizado:** papéis são normalizados (`config/roles.ts`) e persistidos no `localStorage`/cookies pela `userStore`, aplicando o filtro de rotas no `middleware.ts` e nos componentes de navegação.
+- **Janela de check-in do aluno:** a store `presencasStore` considera uma janela de **30 minutos** a partir do horário do treino; dentro dela o status é `CHECKIN` com hora registrada, fora dela o registro fica como `PENDENTE` para aprovação docente. Check-ins duplicados são ignorados para o mesmo aluno/treino/data.
+- **Fechamento de treino:** ao usar **fechamento rápido** (`presencasStore.fecharTreinoRapido`), todos os check-ins viram `CONFIRMADO`, ausências são criadas automaticamente para alunos ativos sem registro e o treino fica marcado como fechado, bloqueando novos check-ins.
+- **Controle de status de presenças:** professores/instrutores podem aprovar (`CONFIRMADO`), rejeitar (`AUSENTE`) ou justificar (`AUSENTE_JUSTIFICADA`) registros, inclusive cancelar treinos específicos do dia.
+- **Regras de graduação configuráveis:** matriz completa em `config/graduationRules.ts` com requisitos de idade mínima, tempo de faixa, aulas mínimas e faixas seguintes. A `graduationRulesStore` permite ajustes por faixa ou por grau (stripe) com persistência local.
+- **Sincronização de alunos:** toda alteração de presença recalcula progressão de alunos (`presencasStore` → `alunosStore`), mantendo contadores de aulas no grau/faixa atual para dashboards e timelines.
 
 ### Componentes compartilhados de UI
 
