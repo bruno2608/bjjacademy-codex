@@ -65,15 +65,31 @@ export default function HistoricoPresencasPage() {
   const statusTone = (status) => {
     switch (status) {
       case 'CONFIRMADO':
-        return { label: 'Presente', tone: 'bg-green-600/20 text-green-300' };
+        return {
+          label: 'Presente',
+          tone: 'bg-green-600/15 text-green-200 ring-1 ring-inset ring-green-500/40',
+          marker: 'bg-gradient-to-br from-green-400 to-emerald-500 text-bjj-gray-950'
+        };
       case 'CHECKIN':
       case 'PENDENTE':
-        return { label: 'Pendente', tone: 'bg-yellow-500/20 text-yellow-300' };
+        return {
+          label: 'Pendente',
+          tone: 'bg-amber-500/15 text-amber-100 ring-1 ring-inset ring-amber-400/40',
+          marker: 'bg-gradient-to-br from-amber-300 to-orange-400 text-bjj-gray-950'
+        };
       case 'AUSENTE':
       case 'AUSENTE_JUSTIFICADA':
-        return { label: 'Ausente', tone: 'bg-bjj-red/20 text-bjj-red' };
+        return {
+          label: 'Ausente',
+          tone: 'bg-bjj-red/15 text-bjj-red ring-1 ring-inset ring-bjj-red/50',
+          marker: 'bg-gradient-to-br from-bjj-red to-rose-500 text-white'
+        };
       default:
-        return { label: 'Sem registro', tone: 'bg-bjj-gray-700 text-bjj-gray-200' };
+        return {
+          label: 'Sem registro',
+          tone: 'bg-bjj-gray-800 text-bjj-gray-100 ring-1 ring-inset ring-bjj-gray-700',
+          marker: 'bg-gradient-to-br from-bjj-gray-600 to-bjj-gray-500 text-white'
+        };
     }
   };
 
@@ -98,13 +114,15 @@ export default function HistoricoPresencasPage() {
   return (
     <div className="space-y-4">
       <header className="flex flex-col gap-1">
-        <p className="text-xs uppercase tracking-[0.25em] text-bjj-gray-400">Histórico</p>
-        <h1 className="text-2xl font-semibold">Presenças</h1>
-        <p className="text-sm text-bjj-gray-300/80">Visualize presenças confirmadas, pendentes e ausências com filtros por mês.</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-bjj-gray-300">Histórico</p>
+        <h1 className="text-2xl font-semibold text-white">Presenças</h1>
+        <p className="text-sm text-bjj-gray-100/90">
+          Visualize presenças confirmadas, pendentes e ausências com filtros por mês.
+        </p>
       </header>
 
       <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
-        <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-4 text-sm text-bjj-gray-200">
+        <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-4 text-sm text-bjj-gray-100">
           <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-bjj-gray-400">
             <CalendarRange size={16} /> Meses
             <MultiSelectDropdown
@@ -138,15 +156,15 @@ export default function HistoricoPresencasPage() {
           {[{
             label: 'Presenças',
             value: totais.presentes,
-            tone: 'from-green-600/20 to-green-500/10 text-green-200'
+            tone: 'from-green-600/30 via-green-500/10 to-emerald-400/5 text-green-100'
           }, {
             label: 'Pendentes',
             value: totais.pendentes,
-            tone: 'from-amber-500/25 to-amber-500/10 text-amber-100'
+            tone: 'from-amber-500/25 via-orange-400/15 to-amber-500/5 text-amber-50'
           }, {
             label: 'Ausências',
             value: totais.ausencias,
-            tone: 'from-bjj-red/25 to-bjj-red/10 text-bjj-red'
+            tone: 'from-bjj-red/25 via-rose-500/15 to-bjj-red/5 text-rose-100'
           }].map((item) => (
             <div
               key={item.label}
@@ -159,40 +177,60 @@ export default function HistoricoPresencasPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70">
+      <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-950/80">
         <div className="flex items-center justify-between border-b border-bjj-gray-800 px-4 py-3 text-sm font-semibold text-white">
           <div className="flex items-center gap-2">
             <History size={16} className="text-bjj-red" />
             Histórico recente
           </div>
-          <span className="text-xs text-bjj-gray-300/80">Exibe os 80 registros mais recentes</span>
+          <span className="text-xs text-bjj-gray-100/70">Exibe os 80 registros mais recentes</span>
         </div>
 
         {registros.length === 0 ? (
-          <div className="p-6 text-sm text-bjj-gray-300">Nenhum registro encontrado para os filtros atuais.</div>
+          <div className="p-6 text-sm text-bjj-gray-100/80">Nenhum registro encontrado para os filtros atuais.</div>
         ) : (
-          <ul className="timeline timeline-vertical px-6 py-4 text-sm">
+          <ul className="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical px-6 py-6 text-sm text-bjj-gray-100">
             {registros.map((item, idx) => {
               const tone = statusTone(item.status);
               return (
                 <li key={item.id}>
                   <div className="timeline-middle">
-                    <span
-                      className={`badge badge-sm border-0 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide ${tone.tone}`}
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-full text-xs font-semibold uppercase tracking-wide shadow-[0_10px_25px_rgba(0,0,0,0.35)] ${tone.marker}`}
                     >
                       {tone.label}
-                    </span>
-                  </div>
-                  <div className={`timeline-${idx % 2 === 0 ? 'start' : 'end'} mb-6 flex flex-col gap-1 rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-950/70 p-4 shadow-[0_12px_30px_rgba(0,0,0,0.3)]`}>
-                    <p className="text-[11px] uppercase tracking-[0.25em] text-bjj-gray-400">{item.data}</p>
-                    <p className="text-base font-semibold text-white">{item.tipoTreino}</p>
-                    <p className="text-xs text-bjj-gray-300/80">{item.hora || 'Horário a confirmar'}</p>
-                    <div className="flex flex-wrap gap-2 text-xs text-bjj-gray-300/80">
-                      {item.treinoModalidade && <span className="badge badge-ghost border-bjj-gray-800 bg-bjj-gray-900/80">{item.treinoModalidade}</span>}
-                      {item.origem && <span className="badge badge-ghost border-bjj-gray-800 bg-bjj-gray-900/80">Origem: {item.origem}</span>}
                     </div>
                   </div>
-                  <hr className="border-bjj-gray-800" />
+                  <div
+                    className={`timeline-${idx % 2 === 0 ? 'start' : 'end'} timeline-box mb-6 flex flex-col gap-2 rounded-2xl border border-bjj-gray-800/90 bg-bjj-gray-950/90 p-4 shadow-[0_12px_30px_rgba(0,0,0,0.3)]`}
+                  >
+                    <div className="flex items-center justify-between gap-2 text-[11px] uppercase tracking-[0.25em] text-bjj-gray-200/80">
+                      <div className="flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-bjj-gray-200" />
+                        {item.data}
+                      </div>
+                      <span
+                        className={`badge border-0 px-3 py-2 text-[10px] font-semibold uppercase tracking-wide ${tone.tone}`}
+                      >
+                        {tone.label}
+                      </span>
+                    </div>
+                    <p className="text-base font-semibold text-white">{item.tipoTreino}</p>
+                    <p className="text-xs text-bjj-gray-100/80">{item.hora || 'Horário a confirmar'}</p>
+                    <div className="flex flex-wrap gap-2 text-xs text-bjj-gray-100/80">
+                      {item.treinoModalidade && (
+                        <span className="badge badge-ghost border-bjj-gray-800 bg-bjj-gray-900/80 text-bjj-gray-100/90">
+                          {item.treinoModalidade}
+                        </span>
+                      )}
+                      {item.origem && (
+                        <span className="badge badge-ghost border-bjj-gray-800 bg-bjj-gray-900/80 text-bjj-gray-100/90">
+                          Origem: {item.origem}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <hr className="border-bjj-gray-800/70" />
                 </li>
               );
             })}
