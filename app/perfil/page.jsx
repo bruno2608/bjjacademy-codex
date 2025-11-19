@@ -6,6 +6,7 @@ import ValidatedField from '../../components/ui/ValidatedField';
 import { ROLE_KEYS } from '../../config/roles';
 import useUserStore from '../../store/userStore';
 import { useAlunosStore } from '../../store/alunosStore';
+import StudentHero from '../../components/student/StudentHero';
 
 export default function PerfilAlunoPage() {
   const { user, updateUser } = useUserStore();
@@ -32,6 +33,12 @@ export default function PerfilAlunoPage() {
   const [form, setForm] = useState(deriveInitialForm);
   const [fileName, setFileName] = useState('');
   const [saved, setSaved] = useState(false);
+
+  const statusLabel = useMemo(() => {
+    if (!isAluno) return 'Ativo';
+    const raw = aluno?.status || 'Ativo';
+    return typeof raw === 'string' ? raw.charAt(0).toUpperCase() + raw.slice(1) : 'Ativo';
+  }, [aluno?.status, isAluno]);
 
   useEffect(() => {
     setForm(deriveInitialForm());
@@ -71,6 +78,15 @@ export default function PerfilAlunoPage() {
 
   return (
     <div className="space-y-4">
+      <StudentHero
+        name={form.nome || user?.name || 'Aluno'}
+        faixa={isAluno ? aluno?.faixa : undefined}
+        graus={isAluno ? aluno?.graus : undefined}
+        statusLabel={statusLabel}
+        avatarUrl={form.avatarUrl}
+        subtitle={isAluno ? 'Perfil do aluno' : 'Perfil do professor'}
+      />
+
       <header className="flex flex-col gap-1">
         <p className="text-xs uppercase tracking-[0.25em] text-bjj-gray-400">Perfil</p>
         <h1 className="text-2xl font-semibold">{isAluno ? 'Dados do aluno' : 'Perfil do professor'}</h1>

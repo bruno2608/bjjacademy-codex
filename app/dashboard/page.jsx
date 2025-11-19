@@ -23,7 +23,7 @@ import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
-import FaixaVisual from '../../components/graduacoes/FaixaVisual';
+import StudentHero from '../../components/student/StudentHero';
 import { useTreinosStore } from '../../store/treinosStore';
 import { confirmarPresenca, marcarAusencia } from '../../services/presencasService';
 
@@ -34,38 +34,8 @@ const defaultAvatar = 'https://ui-avatars.com/api/?background=1b1b1b&color=fff&n
 const ensureAvatar = (name, avatarUrl) =>
   avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
 
-const getFaixaPalette = (faixa) => {
-  const palette = {
-    Branca: { from: '#e5e7eb', to: '#d1d5db', stripe: '#f3f4f6' },
-    Azul: { from: '#3b82f6', to: '#1d4ed8', stripe: '#dbeafe' },
-    Roxa: { from: '#8b5cf6', to: '#6d28d9', stripe: '#ede9fe' },
-    Marrom: { from: '#d97706', to: '#92400e', stripe: '#fef3c7' },
-    Preta: { from: '#737373', to: '#171717', stripe: '#e5e5e5' }
-  };
-  return palette[faixa] || { from: '#f31212', to: '#b91c1c', stripe: '#fee2e2' };
-};
-
 const formatDate = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
-
-function ProfileBadge({ name, faixa, grau, avatarUrl }) {
-  const label = grau ? `${faixa} · ${grau}º grau` : faixa;
-  return (
-    <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner">
-      <div className="flex items-center gap-4">
-        <div className="avatar">
-          <div className="w-16 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
-            <img src={avatarUrl || defaultAvatar} alt={`Avatar de ${name}`} loading="lazy" />
-          </div>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-white leading-tight">{name}</p>
-          <p className="text-xs text-bjj-gray-300/80">{label}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function StudentDashboard() {
   const { user } = useUserStore();
@@ -131,90 +101,14 @@ function StudentDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
-        <div className={`${cardBase} relative overflow-hidden bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/70 to-bjj-black p-0`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-bjj-black/80 via-bjj-black/35 to-transparent" />
-          <div className="relative flex w-full flex-col gap-4 px-6 py-6">
-            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="space-y-1">
-                <p className={badge}>Dashboard do aluno</p>
-                <h1 className="text-xl font-semibold text-white leading-tight">{aluno?.nome || 'Aluno'}</h1>
-              </div>
-            </div>
-            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:gap-6">
-              <ProfileBadge
-                name={aluno?.nome || 'Aluno'}
-                faixa={faixaAtual}
-                grau={graus}
-                avatarUrl={avatarUrl}
-              />
-            </div>
-            <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-300">
-              <span className="rounded-full border border-green-500/40 bg-green-600/15 px-3 py-1 font-semibold text-green-200 shadow-[0_0_0_1px_rgba(74,222,128,0.25)]">
-                {statusLabel}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-5`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">Sua faixa</p>
-              <p className="text-lg font-semibold">Progresso do próximo grau</p>
-            </div>
-            <ShieldCheck className="text-bjj-red" size={18} />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">
-            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">Faixa: {faixaAtual}</span>
-            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">Grau: {graus}º</span>
-            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">
-              {progressoProximoGrau.aulasNoGrau} aulas no grau
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-            <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3 shadow-inner">
-              <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="lg" />
-            </div>
-            <div className="flex-1 space-y-2">
-              <div className="flex flex-col gap-1 text-bjj-gray-200/90 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm font-semibold">{progressoProximoGrau.percent}% do próximo grau</p>
-                <p className="text-xs text-bjj-gray-300/80">
-                  {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
-                </p>
-              </div>
-              <div className="relative h-6 overflow-hidden rounded-full bg-bjj-gray-900/70 ring-1 ring-inset ring-bjj-gray-800/80">
-                <div
-                  className="absolute inset-0 opacity-30"
-                  style={{
-                    background:
-                      'repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 10px, transparent 10px, transparent 20px)'
-                  }}
-                />
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full shadow-[0_0_0_1px_rgba(0,0,0,0.45)]"
-                  style={{
-                    width: `${Math.max(progressoProximoGrau.percent, 12)}%`,
-                    background: `linear-gradient(to right, ${getFaixaPalette(faixaAtual).from}, ${getFaixaPalette(faixaAtual).to})`
-                  }}
-                />
-                {Array.from({ length: Math.min(graus || 0, 4) }).map((_, index) => (
-                  <span
-                    key={index}
-                    className="absolute top-1 bottom-1 w-2 rounded-sm shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
-                    style={{
-                      left: `calc(${Math.min(Math.max(progressoProximoGrau.percent, 12), 96)}% - ${(index + 1) * 12}px)`,
-                      background: `linear-gradient(to bottom, ${getFaixaPalette(faixaAtual).stripe}, #d1d5db)`
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StudentHero
+        name={aluno?.nome || 'Aluno'}
+        faixa={faixaAtual}
+        graus={graus}
+        statusLabel={statusLabel}
+        avatarUrl={avatarUrl}
+        subtitle="Dashboard do aluno"
+      />
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {[
@@ -385,50 +279,50 @@ function ProfessorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
-        <div className="grid gap-6 px-5 py-5 lg:grid-cols-[1.15fr,1fr]">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className={badge}>Visão geral</p>
-                <h1 className="text-xl font-semibold text-white leading-tight">{instructorName}</h1>
-                <p className="text-xs text-bjj-gray-300/90">Painel compacto com atalhos para aprovar presenças e gerenciar alunos.</p>
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-2">
-                <div className="avatar">
-                  <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
-                    <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
-                </div>
-              </div>
-            </div>
+      <StudentHero
+        name={instructorName}
+        statusLabel="Professor"
+        avatarUrl={ensureAvatar(instructorName, instructorAvatar)}
+        subtitle="Dashboard do professor"
+        className="border-bjj-gray-800/90"
+      />
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[{ label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' },
-                { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
-                { label: 'Graduações', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' }
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="group flex items-center justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-4 py-3 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_14px_32px_rgba(0,0,0,0.35)]"
-                >
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="text-2xl font-bold text-white leading-tight">{item.value}</p>
-                  </div>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
-                    <item.icon size={18} />
-                  </span>
-                </Link>
-              ))}
+      <div className="grid gap-4 lg:grid-cols-[1.15fr,1fr]">
+        <div className={`${cardBase} border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-950/80 via-bjj-gray-900/60 to-bjj-black p-5`}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="space-y-1">
+              <p className={badge}>Visão geral</p>
+              <h1 className="text-xl font-semibold leading-tight text-white">{instructorName}</h1>
+              <p className="text-xs text-bjj-gray-300/90">Painel compacto com atalhos para aprovar presenças e gerenciar alunos.</p>
             </div>
-
+            <span className="badge badge-outline border-green-500/70 bg-green-600/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-green-200 shadow-[0_0_0_1px_rgba(74,222,128,0.25)]">
+              Ativo
+            </span>
           </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {[{ label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' },
+              { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
+              { label: 'Graduações', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' }
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="group flex items-center justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-4 py-3 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_14px_32px_rgba(0,0,0,0.35)]"
+              >
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
+                  <p className="text-2xl font-bold leading-tight text-white">{item.value}</p>
+                </div>
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
+                  <item.icon size={18} />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-gray-900/60 p-5`}>
           <div className="grid gap-3 sm:grid-cols-2">
             {[{ label: 'Aulas na semana', value: metrics.presentesSemana, icon: CalendarCheck, href: '/presencas' },
               { label: 'Histórico na semana', value: presencas.length, icon: BarChart3, href: '/historico-presencas' },
@@ -443,7 +337,7 @@ function ProfessorDashboard() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="mt-2 text-3xl font-bold text-white leading-none">{item.value}</p>
+                    <p className="mt-2 text-3xl font-bold leading-none text-white">{item.value}</p>
                   </div>
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
                     <item.icon size={18} />
