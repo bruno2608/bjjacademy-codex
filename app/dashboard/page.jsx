@@ -4,16 +4,18 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   Activity,
+  ArrowRight,
   BarChart2,
   BarChart3,
   CalendarCheck,
+  CheckCircle2,
   Clock3,
   Medal,
   PieChart,
   ShieldCheck,
   TrendingUp,
   Users,
-  ArrowRight
+  XCircle
 } from 'lucide-react';
 
 import useRole from '../../hooks/useRole';
@@ -23,6 +25,7 @@ import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
 import FaixaVisual from '../../components/graduacoes/FaixaVisual';
 import { useTreinosStore } from '../../store/treinosStore';
+import { confirmarPresenca, marcarAusencia } from '../../services/presencasService';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -345,6 +348,7 @@ function ProfessorDashboard() {
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
   const [activeTab, setActiveTab] = useState('visao');
+  const [updatingId, setUpdatingId] = useState(null);
   const instructorName = user?.name || 'Instrutor';
   const instructorAvatar = user?.avatarUrl || defaultAvatar;
 
@@ -392,6 +396,20 @@ function ProfessorDashboard() {
     }),
     [alunos, metrics, presencas]
   );
+
+  const handleStatusChange = async (id, action) => {
+    if (!id) return;
+    setUpdatingId(id);
+    try {
+      if (action === 'approve') {
+        await confirmarPresenca(id);
+      } else {
+        await marcarAusencia(id);
+      }
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -582,23 +600,48 @@ function ProfessorDashboard() {
             {presencas
               .filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN')
               .slice(0, 5)
-              .map((item) => (
+              .map((item) => {
+                const isPending = item.status === 'PENDENTE';
+                const badgeTone = isPending
+                  ? 'bg-amber-500/20 text-amber-200'
+                  : 'bg-yellow-500/20 text-yellow-200';
+
+                return (
                 <div
                   key={item.id}
                   className="flex items-start justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
                 >
-                  <div>
+                  <div className="space-y-1">
                     <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome || 'Aluno'}</p>
                     <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.tipoTreino}</p>
                     <p className="text-[11px] text-bjj-gray-400">
                       {item.data ? `${formatDate(item.data)} · ${item.hora || horariosPorTreino.get(item.treinoId) || '--:--'}` : 'Sem data'}
                     </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-600/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-100 transition hover:border-green-400/60 hover:text-green-50 disabled:opacity-50"
+                        onClick={() => handleStatusChange(item.id, 'approve')}
+                        disabled={updatingId === item.id}
+                      >
+                        <CheckCircle2 size={14} /> Confirmar
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-2 rounded-full border border-bjj-red/40 bg-bjj-red/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-100 transition hover:border-bjj-red hover:text-white disabled:opacity-50"
+                        onClick={() => handleStatusChange(item.id, 'reject')}
+                        disabled={updatingId === item.id}
+                      >
+                        <XCircle size={14} /> Marcar falta
+                      </button>
+                    </div>
                   </div>
-                  <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
-                    Aguardando
+                  <span className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${badgeTone}`}>
+                    {isPending ? 'Pendente' : 'Check-in'}
                   </span>
                 </div>
-              ))}
+              );
+              })}
             {metrics.pendentes === 0 && (
               <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/50 p-4 text-sm text-bjj-gray-300">
                 Nenhum check-in pendente no momento. Acompanhe novos envios em tempo real.
