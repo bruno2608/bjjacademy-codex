@@ -55,17 +55,8 @@ function StatPill({ icon: Icon, title, value, accent }) {
   );
 }
 
-function ProgressBar({ percent }) {
-  return (
-    <div className="mt-3 h-2 rounded-full bg-bjj-gray-800">
-      <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: `${percent}%` }} />
-    </div>
-  );
-}
-
-function ProfileBadge({ name, faixa, grau, aulas, alvo = 20, avatarUrl }) {
+function ProfileBadge({ name, faixa, grau, avatarUrl }) {
   const label = grau ? `${faixa} · ${grau}º grau` : faixa;
-  const percent = Math.min(100, Math.round(((aulas || 0) / alvo) * 100));
   return (
     <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner sm:max-w-sm">
       <div className="flex items-center gap-4">
@@ -77,15 +68,6 @@ function ProfileBadge({ name, faixa, grau, aulas, alvo = 20, avatarUrl }) {
         <div>
           <p className="text-sm font-semibold text-white leading-tight">{name}</p>
           <p className="text-xs text-bjj-gray-300/80">{label}</p>
-        </div>
-      </div>
-      <div>
-        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">
-          <span>Progresso</span>
-          <span>{aulas} aulas</span>
-        </div>
-        <div className="mt-2 h-2.5 rounded-full bg-bjj-gray-800">
-          <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: `${percent}%` }} />
         </div>
       </div>
     </div>
@@ -159,8 +141,6 @@ function StudentDashboard() {
                 name={aluno?.nome || 'Aluno'}
                 faixa={faixaAtual}
                 grau={graus}
-                aulas={aluno?.aulasNoGrauAtual || 0}
-                alvo={progressoProximoGrau.alvo}
                 avatarUrl={avatarUrl}
               />
             </div>
@@ -226,20 +206,10 @@ function StudentDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatPill icon={Activity} title="Presenças recentes" value={stats.presentes} accent="text-green-400" />
         <StatPill icon={BarChart2} title="Faltas registradas" value={stats.faltas} accent="text-bjj-red" />
         <StatPill icon={Clock3} title="Check-ins pendentes" value={stats.pendentes} accent="text-yellow-300" />
-        <div className={`${cardBase} border-bjj-gray-800/80 p-4`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-bjj-gray-200/90">Progresso do próximo grau</p>
-              <p className="text-2xl font-bold text-white">{progressoProximoGrau.percent}%</p>
-            </div>
-            <Medal className="text-bjj-white" size={20} />
-          </div>
-          <ProgressBar percent={progressoProximoGrau.percent} />
-        </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
