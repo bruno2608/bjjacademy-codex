@@ -26,6 +26,7 @@ import { ROLE_KEYS } from '../../config/roles';
 import StudentHero from '../../components/student/StudentHero';
 import { useTreinosStore } from '../../store/treinosStore';
 import { confirmarPresenca, marcarAusencia } from '../../services/presencasService';
+import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -209,10 +210,11 @@ function ProfessorDashboard() {
   const treinos = useTreinosStore((state) => state.treinos);
   const [activeTab, setActiveTab] = useState('visao');
   const [updatingId, setUpdatingId] = useState(null);
-  const instructorName = user?.name || 'Vilmar';
-  const instructorFaixa = 'Preta';
-  const instructorGraus = 1;
-  const instructorAvatar = user?.avatarUrl || defaultAvatar;
+  const defaultInstrutor = useMemo(() => MOCK_INSTRUTORES[0], []);
+  const instructorName = user?.name || defaultInstrutor?.nome || 'Instrutor';
+  const instructorFaixa = defaultInstrutor?.faixa || 'Preta';
+  const instructorGraus = typeof defaultInstrutor?.graus === 'number' ? defaultInstrutor.graus : 0;
+  const instructorAvatar = user?.avatarUrl || defaultInstrutor?.avatarUrl || defaultAvatar;
 
   const horariosPorTreino = useMemo(() => {
     const map = new Map();
