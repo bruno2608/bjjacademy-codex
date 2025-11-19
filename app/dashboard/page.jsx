@@ -457,7 +457,7 @@ function ProfessorDashboard() {
         </div>
 
         <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-b from-bjj-gray-900 to-bjj-black p-5`}>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className={badge}>Pendências</p>
               <h3 className="text-lg font-semibold text-white">Check-ins em análise</h3>
