@@ -81,7 +81,7 @@ export default function EditarAlunoPage() {
 
         <button
           type="button"
-          className="btn btn-secondary btn-sm absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full text-bjj-white shadow-lg"
+          className="btn btn-sm btn-ghost absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-bjj-gray-600/80 bg-bjj-gray-900/80 text-bjj-gray-100 shadow-lg transition hover:border-bjj-gray-400 hover:text-white"
           aria-label="Voltar para a lista de alunos"
           onClick={() => router.push('/alunos')}
         >

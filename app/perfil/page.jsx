@@ -40,6 +40,9 @@ export default function PerfilAlunoPage() {
     setSaved(true);
   };
 
+  const disabledFieldClass =
+    'input input-bordered input-primary w-full border border-bjj-gray-500/80 bg-bjj-gray-800/90 text-sm font-semibold text-bjj-gray-100/90 placeholder:text-bjj-gray-200 disabled:cursor-not-allowed disabled:border-bjj-gray-500 disabled:bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.06)_0,rgba(255,255,255,0.06)_12px,rgba(255,255,255,0.03)_12px,rgba(255,255,255,0.03)_24px)]';
+
   return (
     <div className="space-y-4">
       <header className="flex flex-col gap-1">
@@ -114,7 +117,7 @@ export default function PerfilAlunoPage() {
             <input
               disabled
               value={aluno?.faixa || '—'}
-              className="input input-bordered input-primary w-full border border-bjj-gray-600/70 bg-gradient-to-r from-bjj-gray-700/90 via-bjj-gray-800/90 to-bjj-gray-950 text-sm font-semibold text-white placeholder:text-bjj-gray-100 shadow-[0_6px_24px_rgba(0,0,0,0.32)] disabled:border-bjj-gray-500/80 disabled:bg-bjj-gray-800"
+              className={disabledFieldClass}
               readOnly
             />
             <div className="label pt-1">
@@ -128,7 +131,7 @@ export default function PerfilAlunoPage() {
             <input
               disabled
               value={`${aluno?.graus || 0}º`}
-              className="input input-bordered input-primary w-full border border-bjj-gray-600/70 bg-gradient-to-r from-bjj-gray-700/90 via-bjj-gray-800/90 to-bjj-gray-950 text-sm font-semibold text-white placeholder:text-bjj-gray-100 shadow-[0_6px_24px_rgba(0,0,0,0.32)] disabled:border-bjj-gray-500/80 disabled:bg-bjj-gray-800"
+              className={disabledFieldClass}
               readOnly
             />
             <div className="label pt-1">
@@ -142,7 +145,7 @@ export default function PerfilAlunoPage() {
             <input
               disabled
               value={aluno?.plano || 'Mensal'}
-              className="input input-bordered input-primary w-full border border-bjj-gray-600/70 bg-gradient-to-r from-bjj-gray-700/90 via-bjj-gray-800/90 to-bjj-gray-950 text-sm font-semibold text-white placeholder:text-bjj-gray-100 shadow-[0_6px_24px_rgba(0,0,0,0.32)] disabled:border-bjj-gray-500/80 disabled:bg-bjj-gray-800"
+              className={disabledFieldClass}
               readOnly
             />
             <div className="label pt-1">
