@@ -29,6 +29,17 @@ const defaultAvatar = 'https://ui-avatars.com/api/?background=1b1b1b&color=fff&n
 const ensureAvatar = (name, avatarUrl) =>
   avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
 
+const getFaixaPalette = (faixa) => {
+  const palette = {
+    Branca: { from: '#e5e7eb', to: '#d1d5db', stripe: '#f3f4f6' },
+    Azul: { from: '#3b82f6', to: '#1d4ed8', stripe: '#dbeafe' },
+    Roxa: { from: '#8b5cf6', to: '#6d28d9', stripe: '#ede9fe' },
+    Marrom: { from: '#d97706', to: '#92400e', stripe: '#fef3c7' },
+    Preta: { from: '#737373', to: '#171717', stripe: '#e5e5e5' }
+  };
+  return palette[faixa] || { from: '#f31212', to: '#b91c1c', stripe: '#fee2e2' };
+};
+
 function StatPill({ icon: Icon, title, value, accent }) {
   return (
     <div className={`${cardBase} flex items-center gap-4 border-bjj-gray-800/80 p-4`}>
@@ -190,24 +201,31 @@ function StudentDashboard() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
             <div className="flex-1 space-y-2">
-              <div className="relative h-4 overflow-hidden rounded-full bg-bjj-gray-800">
+              <div className="relative h-5 overflow-hidden rounded-full bg-bjj-gray-900/70 ring-1 ring-inset ring-bjj-gray-800/80">
                 <div
-                  className={`absolute inset-0 h-full rounded-full bg-gradient-to-r ${
-                    {
-                      Branca: 'from-gray-200 to-gray-400',
-                      Azul: 'from-blue-500 to-blue-700',
-                      Roxa: 'from-purple-500 to-purple-700',
-                      Marrom: 'from-amber-600 to-orange-700',
-                      Preta: 'from-neutral-500 to-neutral-700'
-                    }[faixaAtual] || 'from-bjj-red to-red-500'
-                  }`}
-                  style={{ width: `${progressoProximoGrau.percent}%` }}
+                  className="absolute inset-0 opacity-40"
+                  style={{
+                    background:
+                      'repeating-linear-gradient(90deg, rgba(255,255,255,0.07) 0, rgba(255,255,255,0.07) 10px, transparent 10px, transparent 20px)'
+                  }}
                 />
-                <div className="absolute inset-0 grid grid-cols-10 opacity-20">
-                  {Array.from({ length: 10 }).map((_, index) => (
-                    <div key={index} className="border-l border-bjj-gray-950/60" />
-                  ))}
-                </div>
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full shadow-[0_0_0_1px_rgba(0,0,0,0.45)]"
+                  style={{
+                    width: `${Math.max(progressoProximoGrau.percent, 12)}%`,
+                    background: `linear-gradient(to right, ${getFaixaPalette(faixaAtual).from}, ${getFaixaPalette(faixaAtual).to})`
+                  }}
+                />
+                {Array.from({ length: Math.min(graus || 0, 4) }).map((_, index) => (
+                  <span
+                    key={index}
+                    className="absolute top-1 bottom-1 w-2 rounded-sm shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
+                    style={{
+                      left: `calc(${Math.min(Math.max(progressoProximoGrau.percent, 12), 96)}% - ${(index + 1) * 12}px)`,
+                      background: `linear-gradient(to bottom, ${getFaixaPalette(faixaAtual).stripe}, #d1d5db)`
+                    }}
+                  />
+                ))}
               </div>
             </div>
             <div className="w-full shrink-0 space-y-1 text-right text-bjj-gray-200/90 sm:w-48">
