@@ -21,6 +21,7 @@ import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
+import FaixaVisual from '../../components/graduacoes/FaixaVisual';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -199,14 +200,23 @@ function StudentDashboard() {
             </span>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+            <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3 shadow-inner">
+              <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="lg" />
+            </div>
             <div className="flex-1 space-y-2">
-              <div className="relative h-5 overflow-hidden rounded-full bg-bjj-gray-900/70 ring-1 ring-inset ring-bjj-gray-800/80">
+              <div className="flex flex-col gap-1 text-bjj-gray-200/90 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm font-semibold">{progressoProximoGrau.percent}% do próximo grau</p>
+                <p className="text-xs text-bjj-gray-300/80">
+                  {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
+                </p>
+              </div>
+              <div className="relative h-6 overflow-hidden rounded-full bg-bjj-gray-900/70 ring-1 ring-inset ring-bjj-gray-800/80">
                 <div
-                  className="absolute inset-0 opacity-40"
+                  className="absolute inset-0 opacity-30"
                   style={{
                     background:
-                      'repeating-linear-gradient(90deg, rgba(255,255,255,0.07) 0, rgba(255,255,255,0.07) 10px, transparent 10px, transparent 20px)'
+                      'repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 10px, transparent 10px, transparent 20px)'
                   }}
                 />
                 <div
@@ -227,12 +237,6 @@ function StudentDashboard() {
                   />
                 ))}
               </div>
-            </div>
-            <div className="w-full shrink-0 space-y-1 text-right text-bjj-gray-200/90 sm:w-48">
-              <p className="text-sm font-semibold">{progressoProximoGrau.percent}% do próximo grau</p>
-              <p className="text-xs text-bjj-gray-300/80">
-                {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
-              </p>
             </div>
           </div>
         </div>
