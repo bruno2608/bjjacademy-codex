@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarRange, History, UserRound } from 'lucide-react';
+import { CalendarRange, Check, Clock3, History, UserRound, X } from 'lucide-react';
 import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
@@ -68,27 +68,31 @@ export default function HistoricoPresencasPage() {
         return {
           label: 'Presente',
           tone: 'bg-green-600/15 text-green-200 ring-1 ring-inset ring-green-500/40',
-          marker: 'bg-gradient-to-br from-green-400 to-emerald-500 text-bjj-gray-950'
+          marker: 'bg-gradient-to-br from-green-400 to-emerald-500 text-bjj-gray-950',
+          icon: Check
         };
       case 'CHECKIN':
       case 'PENDENTE':
         return {
           label: 'Pendente',
           tone: 'bg-amber-500/15 text-amber-100 ring-1 ring-inset ring-amber-400/40',
-          marker: 'bg-gradient-to-br from-amber-300 to-orange-400 text-bjj-gray-950'
+          marker: 'bg-gradient-to-br from-amber-300 to-orange-400 text-bjj-gray-950',
+          icon: Clock3
         };
       case 'AUSENTE':
       case 'AUSENTE_JUSTIFICADA':
         return {
           label: 'Ausente',
           tone: 'bg-bjj-red/15 text-bjj-red ring-1 ring-inset ring-bjj-red/50',
-          marker: 'bg-gradient-to-br from-bjj-red to-rose-500 text-white'
+          marker: 'bg-gradient-to-br from-bjj-red to-rose-500 text-white',
+          icon: X
         };
       default:
         return {
           label: 'Sem registro',
           tone: 'bg-bjj-gray-800 text-bjj-gray-100 ring-1 ring-inset ring-bjj-gray-700',
-          marker: 'bg-gradient-to-br from-bjj-gray-600 to-bjj-gray-500 text-white'
+          marker: 'bg-gradient-to-br from-bjj-gray-600 to-bjj-gray-500 text-white',
+          icon: Clock3
         };
     }
   };
@@ -189,23 +193,23 @@ export default function HistoricoPresencasPage() {
         {registros.length === 0 ? (
           <div className="p-6 text-sm text-bjj-gray-100/90">Nenhum registro encontrado para os filtros atuais.</div>
         ) : (
-          <ul className="timeline timeline-snap-icon timeline-vertical md:timeline-compact px-6 py-6 text-sm text-bjj-gray-50">
-            {registros.map((item) => {
-              const tone = statusTone(item.status);
-              return (
-                <li key={item.id}>
-                  <div className="timeline-middle">
+          <div className="relative px-4 pb-6 pt-4 text-sm text-bjj-gray-50">
+            <div className="absolute left-[27px] top-6 h-[calc(100%-3rem)] w-[2px] bg-gradient-to-b from-emerald-400 via-amber-400 to-bjj-red/80 opacity-80" />
+            <ul className="space-y-6">
+              {registros.map((item) => {
+                const tone = statusTone(item.status);
+                const Icon = tone.icon;
+                return (
+                  <li key={item.id} className="relative pl-16">
                     <div
-                      className={`flex h-11 w-11 items-center justify-center rounded-full text-[11px] font-semibold uppercase tracking-wide shadow-[0_12px_30px_rgba(0,0,0,0.45)] ${tone.marker}`}
+                      className={`absolute left-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-white shadow-[0_12px_30px_rgba(0,0,0,0.45)] ${tone.marker}`}
                     >
-                      {tone.label}
+                      <Icon size={18} strokeWidth={3} />
                     </div>
-                  </div>
-                  <div className="timeline-start md:timeline-box md:max-w-3xl">
-                    <div className="mb-6 flex flex-col gap-2 rounded-2xl border border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-950 to-bjj-gray-925 p-4 shadow-[0_14px_40px_rgba(0,0,0,0.35)]">
-                      <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-bjj-gray-100/80">
+                    <div className="rounded-2xl border border-bjj-gray-800/70 bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-950 to-bjj-gray-900/85 p-4 shadow-[0_14px_40px_rgba(0,0,0,0.35)]">
+                      <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-bjj-gray-50/80">
                         <div className="flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 rounded-full bg-bjj-gray-100" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
                           {item.data}
                         </div>
                         <span
@@ -214,29 +218,28 @@ export default function HistoricoPresencasPage() {
                           {tone.label}
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-base font-semibold text-white">{item.tipoTreino}</p>
-                        <p className="text-xs text-bjj-gray-100/90">{item.hora || 'Horário a confirmar'}</p>
+
+                      <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="text-base font-semibold text-white">{item.tipoTreino}</p>
+                          <p className="text-xs text-bjj-gray-100/85">{item.treinoModalidade || 'Treino livre'}</p>
+                        </div>
+                        <div className="flex flex-col items-end text-right text-xs text-bjj-gray-100/85">
+                          <span className="font-semibold text-white">{item.hora || 'Horário a confirmar'}</span>
+                          {item.origem && <span className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-200/80">{item.origem}</span>}
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-2 text-xs text-bjj-gray-100/90">
-                        {item.treinoModalidade && (
-                          <span className="badge badge-ghost border-bjj-gray-800 bg-bjj-gray-900/80 text-bjj-gray-50">
-                            {item.treinoModalidade}
-                          </span>
-                        )}
-                        {item.origem && (
-                          <span className="badge badge-ghost border-bjj-gray-800 bg-bjj-gray-900/80 text-bjj-gray-50">
-                            Origem: {item.origem}
-                          </span>
-                        )}
+
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-bjj-gray-50">
+                        <span className="rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/85">{item.alunoNome || 'Aluno(a)'}</span>
+                        <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-emerald-100">{item.turmaId ? `Turma ${item.turmaId}` : 'Sem turma'}</span>
                       </div>
                     </div>
-                  </div>
-                  <hr className="border-bjj-gray-800/70" />
-                </li>
-              );
-            })}
-          </ul>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         )}
       </div>
     </div>
