@@ -73,9 +73,8 @@ export async function deletePresenca(id) {
 
 export async function updatePresenca(id, payload) {
   const treino = resolverTreino(payload.data, payload.treinoId);
-  usePresencasStore.getState().updatePresenca(id, { ...payload, ...treino });
-  const registro = usePresencasStore.getState().presencas.find((item) => item.id === id);
-  return mockRequest(registro);
+  const registroAtualizado = usePresencasStore.getState().updatePresenca(id, { ...payload, ...treino });
+  return mockRequest(registroAtualizado);
 }
 
 export async function confirmarPresenca(id) {
