@@ -216,16 +216,25 @@ function StudentDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {[
           {
-            title: 'Presenças recentes',
+            title: 'Aulas no grau',
+            value: progressoProximoGrau.aulasNoGrau,
+            helper: `meta de ${progressoProximoGrau.alvo} aulas`,
+            href: '/evolucao',
+            tone: 'from-bjj-gray-900/80 to-bjj-black/90',
+            badgeTone: 'text-bjj-gray-300',
+            icon: Activity
+          },
+          {
+            title: 'Presenças',
             value: stats.presentes,
             helper: 'últimos registros confirmados',
             href: '/historico-presencas',
-            tone: 'from-bjj-gray-900/85 to-bjj-black/85',
+            tone: 'from-bjj-gray-900/85 to-bjj-black/80',
             badgeTone: 'text-green-300',
-            icon: Activity
+            icon: CheckCircle2
           },
           {
             title: 'Faltas registradas',
@@ -246,7 +255,7 @@ function StudentDashboard() {
             icon: Clock3
           }
         ].map((item) => {
-          const Icon = item.icon;
+          const Icon = item.icon || ArrowRight;
           return (
             <Link
               key={item.title}
@@ -255,7 +264,7 @@ function StudentDashboard() {
             >
               <div className="min-w-0 space-y-1">
                 <p className="text-sm font-semibold text-bjj-gray-200/90">{item.title}</p>
-                <p className="text-3xl font-bold text-white leading-none">{item.value}</p>
+                <p className="text-3xl font-bold leading-none text-white">{item.value}</p>
                 <p className={`text-xs ${item.badgeTone}`}>{item.helper}</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-800/80 text-white group-hover:bg-bjj-red group-hover:text-white">
@@ -264,50 +273,6 @@ function StudentDashboard() {
             </Link>
           );
         })}
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-3">
-        {[
-          {
-            title: 'Aulas no grau',
-            value: progressoProximoGrau.aulasNoGrau,
-            helper: `meta de ${progressoProximoGrau.alvo} aulas`,
-            href: '/evolucao',
-            tone: 'from-bjj-gray-900/80 to-bjj-black/90',
-            badgeTone: 'text-bjj-gray-300'
-          },
-          {
-            title: 'Presenças',
-            value: stats.presentes,
-            helper: 'últimos registros confirmados',
-            href: '/historico-presencas',
-            tone: 'from-bjj-gray-900/85 to-bjj-black/80',
-            badgeTone: 'text-green-300'
-          },
-          {
-            title: 'Pendências',
-            value: stats.pendentes,
-            helper: 'aguardando aprovação',
-            href: '/checkin',
-            tone: 'from-bjj-gray-900/80 to-bjj-black/85',
-            badgeTone: 'text-yellow-300'
-          }
-        ].map((item) => (
-          <Link
-            key={item.title}
-            href={item.href}
-            className={`${cardBase} group flex items-center justify-between gap-4 border-bjj-gray-800/80 bg-gradient-to-br ${item.tone} p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_18px_45px_rgba(225,6,0,0.18)]`}
-          >
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-bjj-gray-200/90">{item.title}</p>
-              <p className="text-3xl font-bold text-white">{item.value}</p>
-              <p className={`text-xs ${item.badgeTone}`}>{item.helper}</p>
-            </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-800/80 text-white group-hover:bg-bjj-red group-hover:text-white">
-              <ArrowRight size={16} />
-            </div>
-          </Link>
-        ))}
       </div>
 
       <div className={`${cardBase} p-6`}>
