@@ -4,24 +4,28 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   Activity,
+  ArrowRight,
   BarChart2,
   BarChart3,
   CalendarCheck,
+  CheckCircle2,
   Clock3,
   Medal,
   PieChart,
   ShieldCheck,
   TrendingUp,
   Users,
-  ArrowRight
+  XCircle
 } from 'lucide-react';
 
-import FaixaVisual from '../../components/graduacoes/FaixaVisual';
 import useRole from '../../hooks/useRole';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
+import FaixaVisual from '../../components/graduacoes/FaixaVisual';
+import { useTreinosStore } from '../../store/treinosStore';
+import { confirmarPresenca, marcarAusencia } from '../../services/presencasService';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -30,58 +34,24 @@ const defaultAvatar = 'https://ui-avatars.com/api/?background=1b1b1b&color=fff&n
 const ensureAvatar = (name, avatarUrl) =>
   avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
 
-function HelperDropdown({ title, items }) {
-  return (
-    <div className="dropdown dropdown-end">
-      <label tabIndex={0} className="btn btn-ghost btn-sm rounded-full border border-bjj-gray-800 text-xs text-bjj-gray-100">
-        {title}
-      </label>
-      <ul
-        tabIndex={0}
-        className="dropdown-content menu menu-sm z-20 w-72 rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900 p-3 text-xs text-bjj-gray-200 shadow-xl"
-      >
-        {items.map((item) => (
-          <li key={item.label} className="py-1">
-            <div className="flex items-start gap-3 rounded-xl bg-bjj-black/60 p-3">
-              <div className="mt-0.5 h-2.5 w-2.5 rounded-full bg-bjj-red" />
-              <div>
-                <p className="font-semibold text-white">{item.label}</p>
-                <p className="text-[11px] text-bjj-gray-300/80">{item.description}</p>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+const getFaixaPalette = (faixa) => {
+  const palette = {
+    Branca: { from: '#e5e7eb', to: '#d1d5db', stripe: '#f3f4f6' },
+    Azul: { from: '#3b82f6', to: '#1d4ed8', stripe: '#dbeafe' },
+    Roxa: { from: '#8b5cf6', to: '#6d28d9', stripe: '#ede9fe' },
+    Marrom: { from: '#d97706', to: '#92400e', stripe: '#fef3c7' },
+    Preta: { from: '#737373', to: '#171717', stripe: '#e5e5e5' }
+  };
+  return palette[faixa] || { from: '#f31212', to: '#b91c1c', stripe: '#fee2e2' };
+};
 
-function StatPill({ icon: Icon, title, value, accent }) {
-  return (
-    <div className={`${cardBase} flex items-center gap-4 border-bjj-gray-800/80 p-4`}>
-      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-bjj-gray-900/90 ${accent}`}>
-        <Icon size={18} />
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm font-semibold text-bjj-gray-200/90">{title}</p>
-        <p className="text-2xl font-bold text-white">{value}</p>
-      </div>
-    </div>
-  );
-}
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
 
-function ProgressBar({ percent }) {
-  return (
-    <div className="mt-3 h-2 rounded-full bg-bjj-gray-800">
-      <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: `${percent}%` }} />
-    </div>
-  );
-}
-
-function ProfileBadge({ name, faixa, grau, aulas, avatarUrl }) {
+function ProfileBadge({ name, faixa, grau, avatarUrl }) {
   const label = grau ? `${faixa} · ${grau}º grau` : faixa;
   return (
-    <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner sm:max-w-sm">
+    <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner">
       <div className="flex items-center gap-4">
         <div className="avatar">
           <div className="w-16 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
@@ -93,15 +63,6 @@ function ProfileBadge({ name, faixa, grau, aulas, avatarUrl }) {
           <p className="text-xs text-bjj-gray-300/80">{label}</p>
         </div>
       </div>
-      <div>
-        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">
-          <span>Progresso</span>
-          <span>{aulas} aulas</span>
-        </div>
-        <div className="mt-2 h-2.5 rounded-full bg-bjj-gray-800">
-          <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: '65%' }} />
-        </div>
-      </div>
     </div>
   );
 }
@@ -111,6 +72,7 @@ function StudentDashboard() {
   const alunoId = user?.alunoId;
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
+  const treinos = useTreinosStore((state) => state.treinos);
 
   const aluno = useMemo(() => alunos.find((item) => item.id === alunoId) || alunos[0], [alunoId, alunos]);
   const faixaAtual = aluno?.faixa || 'Branca';
@@ -141,6 +103,17 @@ function StudentDashboard() {
     [aluno?.id, presencas]
   );
 
+  const statusLabel = useMemo(() => {
+    const raw = aluno?.status || 'ativo';
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
+  }, [aluno?.status]);
+
+  const horariosPorTreino = useMemo(() => {
+    const map = new Map();
+    treinos.forEach((treino) => map.set(treino.id, treino.hora));
+    return map;
+  }, [treinos]);
+
   const formatStatus = (status) => {
     switch (status) {
       case 'CONFIRMADO':
@@ -158,7 +131,7 @@ function StudentDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-[1.6fr,1fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
         <div className={`${cardBase} relative overflow-hidden bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/70 to-bjj-black p-0`}>
           <div className="absolute inset-0 bg-gradient-to-r from-bjj-black/80 via-bjj-black/35 to-transparent" />
           <div className="relative flex w-full flex-col gap-4 px-6 py-6">
@@ -167,39 +140,19 @@ function StudentDashboard() {
                 <p className={badge}>Dashboard do aluno</p>
                 <h1 className="text-xl font-semibold text-white leading-tight">{aluno?.nome || 'Aluno'}</h1>
               </div>
-              <HelperDropdown
-                title="Ajuda"
-                items={[
-                  { label: 'Check-in', description: 'Registre antes de iniciar a aula para liberar o histórico automaticamente.' },
-                  { label: 'Faixa e grau', description: 'Campos bloqueados: apenas o instrutor pode alterá-los.' },
-                  { label: 'Evolução', description: 'Complete as aulas mínimas para avançar para o próximo grau.' }
-                ]}
-              />
             </div>
             <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:gap-6">
               <ProfileBadge
                 name={aluno?.nome || 'Aluno'}
                 faixa={faixaAtual}
                 grau={graus}
-                aulas={aluno?.aulasNoGrauAtual || 0}
                 avatarUrl={avatarUrl}
               />
-              <div className="grid flex-1 gap-3 sm:grid-cols-3">
-                {[{ label: 'Faixa', value: faixaAtual }, { label: 'Grau atual', value: `${graus}º grau` }].map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 px-4 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.25)]"
-                  >
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
-                  </div>
-                ))}
-                <div className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 px-4 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.25)]">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Aulas no grau</p>
-                  <p className="mt-1 text-lg font-semibold text-white">{progressoProximoGrau.aulasNoGrau}</p>
-                  <ProgressBar percent={progressoProximoGrau.percent} />
-                </div>
-              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-300">
+              <span className="rounded-full border border-green-500/40 bg-green-600/15 px-3 py-1 font-semibold text-green-200 shadow-[0_0_0_1px_rgba(74,222,128,0.25)]">
+                {statusLabel}
+              </span>
             </div>
           </div>
         </div>
@@ -212,38 +165,58 @@ function StudentDashboard() {
             </div>
             <ShieldCheck className="text-bjj-red" size={18} />
           </div>
-          <div className="flex items-center gap-4">
-            <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3">
-              <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="xl" />
+
+          <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">
+            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">Faixa: {faixaAtual}</span>
+            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">Grau: {graus}º</span>
+            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">
+              {progressoProximoGrau.aulasNoGrau} aulas no grau
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+            <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3 shadow-inner">
+              <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="lg" />
             </div>
             <div className="flex-1 space-y-2">
-              <p className="text-sm text-bjj-gray-200/90">{progressoProximoGrau.percent}% do próximo grau</p>
-              <ProgressBar percent={progressoProximoGrau.percent} />
-              <p className="text-xs text-bjj-gray-300/80">
-                {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
-              </p>
+              <div className="flex flex-col gap-1 text-bjj-gray-200/90 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm font-semibold">{progressoProximoGrau.percent}% do próximo grau</p>
+                <p className="text-xs text-bjj-gray-300/80">
+                  {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
+                </p>
+              </div>
+              <div className="relative h-6 overflow-hidden rounded-full bg-bjj-gray-900/70 ring-1 ring-inset ring-bjj-gray-800/80">
+                <div
+                  className="absolute inset-0 opacity-30"
+                  style={{
+                    background:
+                      'repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 10px, transparent 10px, transparent 20px)'
+                  }}
+                />
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full shadow-[0_0_0_1px_rgba(0,0,0,0.45)]"
+                  style={{
+                    width: `${Math.max(progressoProximoGrau.percent, 12)}%`,
+                    background: `linear-gradient(to right, ${getFaixaPalette(faixaAtual).from}, ${getFaixaPalette(faixaAtual).to})`
+                  }}
+                />
+                {Array.from({ length: Math.min(graus || 0, 4) }).map((_, index) => (
+                  <span
+                    key={index}
+                    className="absolute top-1 bottom-1 w-2 rounded-sm shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
+                    style={{
+                      left: `calc(${Math.min(Math.max(progressoProximoGrau.percent, 12), 96)}% - ${(index + 1) * 12}px)`,
+                      background: `linear-gradient(to bottom, ${getFaixaPalette(faixaAtual).stripe}, #d1d5db)`
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatPill icon={Activity} title="Presenças recentes" value={stats.presentes} accent="text-green-400" />
-        <StatPill icon={BarChart2} title="Faltas registradas" value={stats.faltas} accent="text-bjj-red" />
-        <StatPill icon={Clock3} title="Check-ins pendentes" value={stats.pendentes} accent="text-yellow-300" />
-        <div className={`${cardBase} border-bjj-gray-800/80 p-4`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-bjj-gray-200/90">Progresso do próximo grau</p>
-              <p className="text-2xl font-bold text-white">{progressoProximoGrau.percent}%</p>
-            </div>
-            <Medal className="text-bjj-white" size={20} />
-          </div>
-          <ProgressBar percent={progressoProximoGrau.percent} />
-        </div>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {[
           {
             title: 'Aulas no grau',
@@ -251,7 +224,8 @@ function StudentDashboard() {
             helper: `meta de ${progressoProximoGrau.alvo} aulas`,
             href: '/evolucao',
             tone: 'from-bjj-gray-900/80 to-bjj-black/90',
-            badgeTone: 'text-bjj-gray-300'
+            badgeTone: 'text-bjj-gray-300',
+            icon: Activity
           },
           {
             title: 'Presenças',
@@ -259,32 +233,46 @@ function StudentDashboard() {
             helper: 'últimos registros confirmados',
             href: '/historico-presencas',
             tone: 'from-bjj-gray-900/85 to-bjj-black/80',
-            badgeTone: 'text-green-300'
+            badgeTone: 'text-green-300',
+            icon: CheckCircle2
           },
           {
-            title: 'Pendências',
+            title: 'Faltas registradas',
+            value: stats.faltas,
+            helper: 'inclui ausências justificadas',
+            href: '/historico-presencas',
+            tone: 'from-bjj-gray-900/80 to-bjj-black/85',
+            badgeTone: 'text-bjj-red',
+            icon: BarChart2
+          },
+          {
+            title: 'Check-ins pendentes',
             value: stats.pendentes,
             helper: 'aguardando aprovação',
-            href: '/presencas',
-            tone: 'from-bjj-gray-900/80 to-bjj-black/85',
-            badgeTone: 'text-yellow-300'
+            href: '/checkin',
+            tone: 'from-bjj-gray-900/80 to-bjj-black/90',
+            badgeTone: 'text-yellow-300',
+            icon: Clock3
           }
-        ].map((item) => (
-          <Link
-            key={item.title}
-            href={item.href}
-            className={`${cardBase} group flex items-center justify-between gap-4 border-bjj-gray-800/80 bg-gradient-to-br ${item.tone} p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_18px_45px_rgba(225,6,0,0.18)]`}
-          >
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-bjj-gray-200/90">{item.title}</p>
-              <p className="text-3xl font-bold text-white">{item.value}</p>
-              <p className={`text-xs ${item.badgeTone}`}>{item.helper}</p>
-            </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-800/80 text-white group-hover:bg-bjj-red group-hover:text-white">
-              <ArrowRight size={16} />
-            </div>
-          </Link>
-        ))}
+        ].map((item) => {
+          const Icon = item.icon || ArrowRight;
+          return (
+            <Link
+              key={item.title}
+              href={item.href}
+              className={`${cardBase} group flex items-center justify-between gap-4 border-bjj-gray-800/80 bg-gradient-to-br ${item.tone} p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_18px_45px_rgba(225,6,0,0.18)]`}
+            >
+              <div className="min-w-0 space-y-1">
+                <p className="text-sm font-semibold text-bjj-gray-200/90">{item.title}</p>
+                <p className="text-3xl font-bold leading-none text-white">{item.value}</p>
+                <p className={`text-xs ${item.badgeTone}`}>{item.helper}</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-800/80 text-white group-hover:bg-bjj-red group-hover:text-white">
+                <Icon size={16} />
+              </div>
+            </Link>
+          );
+        })}
       </div>
 
       <div className={`${cardBase} p-6`}>
@@ -324,9 +312,17 @@ function ProfessorDashboard() {
   const { user } = useUserStore();
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
+  const treinos = useTreinosStore((state) => state.treinos);
   const [activeTab, setActiveTab] = useState('visao');
+  const [updatingId, setUpdatingId] = useState(null);
   const instructorName = user?.name || 'Instrutor';
   const instructorAvatar = user?.avatarUrl || defaultAvatar;
+
+  const horariosPorTreino = useMemo(() => {
+    const map = new Map();
+    treinos.forEach((treino) => map.set(treino.id, treino.hora));
+    return map;
+  }, [treinos]);
 
   const metrics = useMemo(() => {
     const totalAlunos = alunos.length;
@@ -355,7 +351,12 @@ function ProfessorDashboard() {
       presencas: [
         { title: 'Presenças na semana', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'text-green-300' },
         { title: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, tone: 'text-yellow-300' },
-        { title: 'Ausências', value: presencas.filter((p) => p.status === 'Ausente').length, icon: BarChart3, tone: 'text-bjj-red' },
+        {
+          title: 'Ausências',
+          value: presencas.filter((p) => p.status === 'AUSENTE' || p.status === 'AUSENTE_JUSTIFICADA').length,
+          icon: BarChart3,
+          tone: 'text-bjj-red'
+        },
         { title: 'Check-ins registrados', value: presencas.length, icon: Activity, tone: 'text-white' }
       ],
       graduacoes: [
@@ -367,6 +368,20 @@ function ProfessorDashboard() {
     }),
     [alunos, metrics, presencas]
   );
+
+  const handleStatusChange = async (id, action) => {
+    if (!id) return;
+    setUpdatingId(id);
+    try {
+      if (action === 'approve') {
+        await confirmarPresenca(id);
+      } else {
+        await marcarAusencia(id);
+      }
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -389,14 +404,6 @@ function ProfessorDashboard() {
                   <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
                 </div>
-                <HelperDropdown
-                  title="Ajuda"
-                  items={[
-                    { label: 'Visões rápidas', description: 'Altere entre visões gerais, alunos, presenças e graduações.' },
-                    { label: 'Pendentes', description: 'Acompanhe e aprove check-ins enviados fora do horário.' },
-                    { label: 'Relatórios', description: 'Use dados consolidados para conversas com instrutores e alunos.' }
-                  ]}
-                />
               </div>
             </div>
 
@@ -421,25 +428,6 @@ function ProfessorDashboard() {
               ))}
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-4">
-              {[{ label: 'Presenças', href: '/presencas', icon: CalendarCheck },
-                { label: 'Alunos', href: '/alunos', icon: Users },
-                { label: 'Relatórios', href: '/relatorios', icon: PieChart },
-                { label: 'Histórico', href: '/historico-presencas', icon: BarChart2 }
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center justify-between rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/50 px-3 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:text-bjj-red"
-                >
-                  <span className="flex items-center gap-2">
-                    <item.icon size={16} />
-                    {item.label}
-                  </span>
-                  <ArrowRight size={14} />
-                </Link>
-              ))}
-            </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {[{ label: 'Aulas na semana', value: metrics.presentesSemana, icon: CalendarCheck, href: '/presencas' },
@@ -472,11 +460,13 @@ function ProfessorDashboard() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <div className={`${cardBase} p-5`}>
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Visão analítica</h3>
-              <span className="badge badge-ghost badge-sm text-[11px] tracking-[0.15em] text-bjj-gray-200">Atualizado</span>
-            </div>
+            <div className={`${cardBase} p-5`}>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">Visão analítica</h3>
+                <span className="rounded-full bg-bjj-gray-800/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-white shadow-inner">
+                  Atualizado
+                </span>
+              </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
                 <div className="flex items-center justify-between">
@@ -578,24 +568,55 @@ function ProfessorDashboard() {
               {metrics.pendentes} aguardando
             </span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
             {presencas
               .filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN')
-              .slice(0, 5)
-              .map((item) => (
+              .map((item) => {
+                const isPending = item.status === 'PENDENTE';
+                const badgeTone = isPending
+                  ? 'bg-amber-500/20 text-amber-200'
+                  : 'bg-yellow-500/20 text-yellow-200';
+
+                return (
                 <div
                   key={item.id}
                   className="flex items-start justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
                 >
-                  <div>
+                  <div className="space-y-1">
                     <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome || 'Aluno'}</p>
                     <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.tipoTreino}</p>
+                    <p className="text-[11px] text-bjj-gray-400">
+                      {item.data ? `${formatDate(item.data)} · ${item.hora || horariosPorTreino.get(item.treinoId) || '--:--'}` : 'Sem data'}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-green-500/30 bg-green-600/15 text-green-100 transition hover:border-green-400/60 hover:text-green-50 disabled:opacity-50"
+                        onClick={() => handleStatusChange(item.id, 'approve')}
+                        disabled={updatingId === item.id}
+                        aria-label="Confirmar presença"
+                        title="Confirmar presença"
+                      >
+                        <CheckCircle2 size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-bjj-red/40 bg-bjj-red/15 text-red-100 transition hover:border-bjj-red hover:text-white disabled:opacity-50"
+                        onClick={() => handleStatusChange(item.id, 'reject')}
+                        disabled={updatingId === item.id}
+                        aria-label="Marcar falta"
+                        title="Marcar falta"
+                      >
+                        <XCircle size={16} />
+                      </button>
+                    </div>
                   </div>
-                  <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
-                    Aguardando
+                  <span className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${badgeTone}`}>
+                    {isPending ? 'Pendente' : 'Check-in'}
                   </span>
                 </div>
-              ))}
+              );
+              })}
             {metrics.pendentes === 0 && (
               <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/50 p-4 text-sm text-bjj-gray-300">
                 Nenhum check-in pendente no momento. Acompanhe novos envios em tempo real.
