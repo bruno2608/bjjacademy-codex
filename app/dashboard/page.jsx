@@ -41,20 +41,6 @@ const getFaixaPalette = (faixa) => {
   return palette[faixa] || { from: '#f31212', to: '#b91c1c', stripe: '#fee2e2' };
 };
 
-function StatPill({ icon: Icon, title, value, accent }) {
-  return (
-    <div className={`${cardBase} flex items-center gap-4 border-bjj-gray-800/80 p-4`}>
-      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-bjj-gray-900/90 ${accent}`}>
-        <Icon size={18} />
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm font-semibold text-bjj-gray-200/90">{title}</p>
-        <p className="text-2xl font-bold text-white">{value}</p>
-      </div>
-    </div>
-  );
-}
-
 function ProfileBadge({ name, faixa, grau, avatarUrl }) {
   const label = grau ? `${faixa} · ${grau}º grau` : faixa;
   return (
@@ -219,10 +205,54 @@ function StudentDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatPill icon={Activity} title="Presenças recentes" value={stats.presentes} accent="text-green-400" />
-        <StatPill icon={BarChart2} title="Faltas registradas" value={stats.faltas} accent="text-bjj-red" />
-        <StatPill icon={Clock3} title="Check-ins pendentes" value={stats.pendentes} accent="text-yellow-300" />
+      <div className="grid gap-3 md:grid-cols-3">
+        {[
+          {
+            title: 'Presenças recentes',
+            value: stats.presentes,
+            helper: 'últimos registros confirmados',
+            href: '/historico-presencas',
+            tone: 'from-bjj-gray-900/85 to-bjj-black/85',
+            badgeTone: 'text-green-300',
+            icon: Activity
+          },
+          {
+            title: 'Faltas registradas',
+            value: stats.faltas,
+            helper: 'inclui ausências justificadas',
+            href: '/historico-presencas',
+            tone: 'from-bjj-gray-900/80 to-bjj-black/85',
+            badgeTone: 'text-bjj-red',
+            icon: BarChart2
+          },
+          {
+            title: 'Check-ins pendentes',
+            value: stats.pendentes,
+            helper: 'aguardando aprovação',
+            href: '/presencas',
+            tone: 'from-bjj-gray-900/80 to-bjj-black/90',
+            badgeTone: 'text-yellow-300',
+            icon: Clock3
+          }
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.title}
+              href={item.href}
+              className={`${cardBase} group flex items-center justify-between gap-4 border-bjj-gray-800/80 bg-gradient-to-br ${item.tone} p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_18px_45px_rgba(225,6,0,0.18)]`}
+            >
+              <div className="min-w-0 space-y-1">
+                <p className="text-sm font-semibold text-bjj-gray-200/90">{item.title}</p>
+                <p className="text-3xl font-bold text-white leading-none">{item.value}</p>
+                <p className={`text-xs ${item.badgeTone}`}>{item.helper}</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-800/80 text-white group-hover:bg-bjj-red group-hover:text-white">
+                <Icon size={16} />
+              </div>
+            </Link>
+          );
+        })}
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
