@@ -10,7 +10,45 @@ const getTreinoMeta = (treinoId: string | null) => {
   };
 };
 
+const TODAY = new Date().toISOString().split('T')[0];
+
 export const MOCK_PRESENCAS: Presenca[] = [
+  {
+    id: 'p-today-joao',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: TODAY,
+    hora: '07:12',
+    status: 'CHECKIN',
+    origem: 'ALUNO',
+    ...getTreinoMeta('t1')
+  },
+  {
+    id: 'p-today-maria',
+    alunoId: '2',
+    alunoNome: 'Maria Souza',
+    faixa: 'Azul',
+    graus: 3,
+    data: TODAY,
+    hora: null,
+    status: 'PENDENTE',
+    origem: 'ALUNO',
+    ...getTreinoMeta('t2')
+  },
+  {
+    id: 'p-today-cancelado',
+    alunoId: '3',
+    alunoNome: 'Carlos Pereira',
+    faixa: 'Marrom',
+    graus: 1,
+    data: TODAY,
+    hora: null,
+    status: 'CANCELADO',
+    origem: 'PROFESSOR',
+    ...getTreinoMeta('t3')
+  },
   {
     id: 'p1',
     alunoId: '1',
