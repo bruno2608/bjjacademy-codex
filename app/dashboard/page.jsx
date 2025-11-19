@@ -209,7 +209,9 @@ function ProfessorDashboard() {
   const treinos = useTreinosStore((state) => state.treinos);
   const [activeTab, setActiveTab] = useState('visao');
   const [updatingId, setUpdatingId] = useState(null);
-  const instructorName = user?.name || 'Instrutor';
+  const instructorName = user?.name || 'Vilmar';
+  const instructorFaixa = 'Preta';
+  const instructorGraus = 1;
   const instructorAvatar = user?.avatarUrl || defaultAvatar;
 
   const horariosPorTreino = useMemo(() => {
@@ -281,6 +283,8 @@ function ProfessorDashboard() {
     <div className="space-y-6">
       <StudentHero
         name={instructorName}
+        faixa={instructorFaixa}
+        graus={instructorGraus}
         statusLabel="Professor"
         avatarUrl={ensureAvatar(instructorName, instructorAvatar)}
         subtitle="Dashboard do professor"
