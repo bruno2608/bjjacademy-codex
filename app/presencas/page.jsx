@@ -540,6 +540,7 @@ export default function PresencasPage() {
   const handleEditSubmit = async (dados) => {
     if (!selectedRecord?.id) return;
     const atualizado = await updatePresenca(selectedRecord.id, dados);
+    if (!atualizado) return;
     setPresencas((prev) => prev.map((item) => (item.id === atualizado.id ? atualizado : item)));
     fecharEdicao();
   };
@@ -676,7 +677,6 @@ export default function PresencasPage() {
         records={registrosFiltradosOrdenados}
         onConfirm={handleConfirm}
         onMarkAbsent={(registro) => handleMarkAbsent(registro, false)}
-        onMarkJustified={(registro) => handleMarkAbsent(registro, true)}
         onDelete={handleDelete}
         onEdit={abrirEdicao}
         onAddSession={abrirSessaoExtra}
