@@ -95,7 +95,10 @@ function StudentDashboard() {
     [aluno?.id, presencas]
   );
 
-  const ultimaPresenca = ultimasPresencas[0];
+  const statusLabel = useMemo(() => {
+    const raw = aluno?.status || 'ativo';
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
+  }, [aluno?.status]);
 
   const formatStatus = (status) => {
     switch (status) {
@@ -133,14 +136,8 @@ function StudentDashboard() {
               />
             </div>
             <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-300">
-              <span className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-1 font-semibold text-white">
-                Status: {aluno?.status || 'Ativo'}
-              </span>
-              <span className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-1 font-semibold text-white">
-                Última presença: {ultimaPresenca ? `${ultimaPresenca.data}${ultimaPresenca.hora ? ` · ${ultimaPresenca.hora}` : ''}` : 'Sem registro'}
-              </span>
-              <span className="rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-1 font-semibold text-white">
-                Pendentes: {stats.pendentes}
+              <span className="rounded-full border border-green-500/40 bg-green-600/15 px-3 py-1 font-semibold text-green-200 shadow-[0_0_0_1px_rgba(74,222,128,0.25)]">
+                {statusLabel}
               </span>
             </div>
           </div>
