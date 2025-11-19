@@ -104,13 +104,19 @@ export const useUserStore = create<UserState>((set) => ({
           ?.replace(`${ROLES_KEY}=`, '')
       : undefined;
 
-    const parsedRoles = normalizeRoles(
-      rawRoles
-        ? JSON.parse(rawRoles)
-        : cookieRoles
-        ? cookieRoles.split(',')
-        : []
-    );
+    let storedRoles: string[] = [];
+    if (rawRoles) {
+      try {
+        storedRoles = JSON.parse(rawRoles);
+      } catch (error) {
+        console.warn('Não foi possível ler os papéis salvos, usando cookie/local defaults.', error);
+        storedRoles = rawRoles.includes(',') ? rawRoles.split(',') : [];
+      }
+    } else if (cookieRoles) {
+      storedRoles = cookieRoles.split(',');
+    }
+
+    const parsedRoles = normalizeRoles(storedRoles);
 
     if (!hasToken && !parsedRoles.length) {
       set({ hydrated: true });
