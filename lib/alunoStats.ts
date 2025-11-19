@@ -67,7 +67,7 @@ const getLatestHistoryRecord = (
 
 const buildAttendanceStatsForAluno = (aluno: Aluno, presencas: Presenca[] = []) => {
   const registrosAluno = presencas.filter(
-    (item) => item.alunoId === aluno.id && item.status === 'Presente'
+    (item) => item.alunoId === aluno.id && item.status === 'CONFIRMADO'
   );
 
   const historico = Array.isArray(aluno.historicoGraduacoes)
