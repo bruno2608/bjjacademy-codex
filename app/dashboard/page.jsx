@@ -568,10 +568,9 @@ function ProfessorDashboard() {
               {metrics.pendentes} aguardando
             </span>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
             {presencas
               .filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN')
-              .slice(0, 5)
               .map((item) => {
                 const isPending = item.status === 'PENDENTE';
                 const badgeTone = isPending
@@ -592,19 +591,23 @@ function ProfessorDashboard() {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-600/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-100 transition hover:border-green-400/60 hover:text-green-50 disabled:opacity-50"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-green-500/30 bg-green-600/15 text-green-100 transition hover:border-green-400/60 hover:text-green-50 disabled:opacity-50"
                         onClick={() => handleStatusChange(item.id, 'approve')}
                         disabled={updatingId === item.id}
+                        aria-label="Confirmar presença"
+                        title="Confirmar presença"
                       >
-                        <CheckCircle2 size={14} /> Confirmar
+                        <CheckCircle2 size={16} />
                       </button>
                       <button
                         type="button"
-                        className="inline-flex items-center gap-2 rounded-full border border-bjj-red/40 bg-bjj-red/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-100 transition hover:border-bjj-red hover:text-white disabled:opacity-50"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-bjj-red/40 bg-bjj-red/15 text-red-100 transition hover:border-bjj-red hover:text-white disabled:opacity-50"
                         onClick={() => handleStatusChange(item.id, 'reject')}
                         disabled={updatingId === item.id}
+                        aria-label="Marcar falta"
+                        title="Marcar falta"
                       >
-                        <XCircle size={14} /> Marcar falta
+                        <XCircle size={16} />
                       </button>
                     </div>
                   </div>
