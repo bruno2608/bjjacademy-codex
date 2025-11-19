@@ -25,7 +25,7 @@ export default function AttendanceTable({
       aria-busy={isLoading}
     >
       <div className="absolute right-[-18%] top-[-18%] h-24 w-24 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-      <div className="hidden md:grid md:grid-cols-[200px_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
+      <div className="hidden md:grid md:grid-cols-[140px_minmax(0,1.1fr)_minmax(0,0.8fr)_minmax(0,1.4fr)_minmax(0,0.6fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
         {['Ações', 'Aluno', 'Graduação', 'Data / Treino', 'Status'].map((header, index) => (
           <div key={header} className={`px-3 py-3 ${index === 0 ? 'text-center' : ''}`}>
             {header}
@@ -117,7 +117,7 @@ export default function AttendanceTable({
                   </button>
                 )}
                 </div>
-                <div className="hidden md:grid md:grid-cols-[200px_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)]">
+                <div className="hidden md:grid md:grid-cols-[140px_minmax(0,1.1fr)_minmax(0,0.8fr)_minmax(0,1.4fr)_minmax(0,0.6fr)]">
                   <div className="flex items-center justify-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
                     <button
                       className={actionButtonClasses}
