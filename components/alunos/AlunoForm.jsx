@@ -16,6 +16,14 @@ import FormSection from '../ui/FormSection';
 
 const beltFallback = BELT_ORDER.filter((faixa) => faixa !== 'Vermelha');
 
+const formatTelefone = (raw) => {
+  const digits = raw.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6, 10)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+};
+
 export default function AlunoForm({ initialData, onSubmit, isSubmitting = false, submitLabel = 'Salvar' }) {
   const rules = useGraduationRulesStore((state) => state.rules);
 
@@ -38,12 +46,13 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
     dataUltimaGraduacao: ''
   });
   const [step, setStep] = useState(0);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (initialData) {
       setFormData({
         nome: initialData.nome || '',
-        telefone: initialData.telefone || '',
+        telefone: initialData.telefone ? formatTelefone(initialData.telefone) : '',
         plano: initialData.plano || planos[0],
         status: initialData.status || statusOptions[0],
         faixa: initialData.faixa || 'Branca',
@@ -83,16 +92,48 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
 
   const handleChange = (event) => {
     const { name, value, type } = event.target;
+    if (name === 'telefone') {
+      setFormData((prev) => ({ ...prev, telefone: formatTelefone(value) }));
+      setErrors((prev) => ({ ...prev, telefone: undefined }));
+      return;
+    }
+
     let parsed = value;
     if (name === 'graus' || type === 'number') {
-      parsed = Number(value);
+      parsed = Math.max(0, Number(value));
     }
+
     setFormData((prev) => ({ ...prev, [name]: parsed }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const validateForm = () => {
+    const nextErrors = {};
+    if (!formData.nome.trim()) {
+      nextErrors.nome = 'Informe o nome completo.';
+    }
+
+    const phoneDigits = formData.telefone.replace(/\D/g, '');
+    if (!phoneDigits || phoneDigits.length < 10) {
+      nextErrors.telefone = 'Use DDD + telefone (10 ou 11 dígitos).';
+    }
+
+    if (formData.mesesNaFaixa < 0) {
+      nextErrors.mesesNaFaixa = 'Valor inválido.';
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     if (isSubmitting) {
+      return;
+    }
+    if (!validateForm()) {
       return;
     }
     onSubmit({
@@ -150,7 +191,11 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
                 onChange={handleChange}
                 placeholder="Nome completo"
                 required
+                minLength={3}
+                autoComplete="name"
+                className={errors.nome ? 'border-bjj-red focus:border-bjj-red' : ''}
               />
+              {errors.nome && <p className="mt-1 text-xs text-bjj-red">{errors.nome}</p>}
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium">Telefone</label>
@@ -160,7 +205,13 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
                 onChange={handleChange}
                 placeholder="(11) 99999-9999"
                 required
+                type="tel"
+                inputMode="tel"
+                pattern="\(\d{2}\) \d{4,5}-\d{4}"
+                maxLength={16}
+                className={errors.telefone ? 'border-bjj-red focus:border-bjj-red' : ''}
               />
+              {errors.telefone && <p className="mt-1 text-xs text-bjj-red">{errors.telefone}</p>}
             </div>
           </div>
         </FormSection>
@@ -221,10 +272,13 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
                 name="mesesNaFaixa"
                 type="number"
                 min={0}
+                inputMode="numeric"
                 value={formData.mesesNaFaixa}
                 onChange={handleChange}
                 placeholder="Meses dedicados na faixa atual"
+                className={errors.mesesNaFaixa ? 'border-bjj-red focus:border-bjj-red' : ''}
               />
+              {errors.mesesNaFaixa && <p className="mt-1 text-xs text-bjj-red">{errors.mesesNaFaixa}</p>}
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium">Última graduação</label>
