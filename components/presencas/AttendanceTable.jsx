@@ -5,17 +5,26 @@
  * alternar status rapidamente, mantendo o novo visual gamificado e
  * preparado para mobile-first.
  */
-import { CheckCircle2, Loader2, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { CheckCircle2, Loader2, Pencil, Plus, Trash2, XCircle } from 'lucide-react';
 import Badge from '../ui/Badge';
 
-const actionButtonClasses =
-  'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-700 text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-40';
+const baseActionButtonClasses =
+  'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-bjj-gray-800/80 bg-bjj-gray-900/80 text-bjj-gray-200 shadow-[0_6px_24px_-16px_rgba(0,0,0,0.45)] transition disabled:cursor-not-allowed disabled:opacity-40';
+
+const actionTone = {
+  confirm: 'hover:border-green-400/80 hover:text-green-300 focus-visible:ring-1 focus-visible:ring-green-400/70',
+  absent: 'hover:border-red-400/80 hover:text-red-300 focus-visible:ring-1 focus-visible:ring-red-400/70',
+  add: 'hover:border-sky-400/80 hover:text-sky-300 focus-visible:ring-1 focus-visible:ring-sky-400/70',
+  edit: 'hover:border-amber-400/80 hover:text-amber-200 focus-visible:ring-1 focus-visible:ring-amber-300/70',
+  delete: 'hover:border-bjj-red hover:text-bjj-red focus-visible:ring-1 focus-visible:ring-bjj-red/70'
+};
+
+const actionButtonClasses = (tone) => `${baseActionButtonClasses} ${actionTone[tone] ?? ''}`;
 
 export default function AttendanceTable({
   records,
   onConfirm,
   onMarkAbsent,
-  onMarkJustified,
   onDelete,
   onEdit,
   onAddSession,
@@ -89,8 +98,6 @@ export default function AttendanceTable({
           };
 
           const handleAbsent = () => onMarkAbsent?.(record);
-          const handleJustified = () => onMarkJustified?.(record);
-
           return (
             <div
               key={record.id || `${record.alunoId}-${record.treinoId || record.data}`}
@@ -126,31 +133,33 @@ export default function AttendanceTable({
                   <div>
                     <p className="font-semibold text-bjj-gray-200/90">Ação rápida</p>
                     <div className="mt-1 inline-flex items-center gap-2">
-                      <button className={actionButtonClasses} onClick={handleConfirm} disabled={!canConfirm(record.status)}>
+                      <button
+                        className={actionButtonClasses('confirm')}
+                        onClick={handleConfirm}
+                        disabled={!canConfirm(record.status)}
+                      >
                         <CheckCircle2 size={16} />
                         <span className="sr-only">Confirmar presença</span>
                       </button>
                       {!isPlaceholder && (
-                        <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
+                        <button className={actionButtonClasses('add')} onClick={() => onAddSession?.(record)}>
                           <Plus size={16} />
                           <span className="sr-only">Adicionar outra sessão</span>
                         </button>
                       )}
-                      <button className={actionButtonClasses} onClick={handleAbsent} disabled={!canAbsent(record.status)}>
-                        <Trash2 size={15} />
-                        <span className="sr-only">Marcar falta</span>
+                      <button
+                        className={actionButtonClasses('absent')}
+                        onClick={handleAbsent}
+                        disabled={!canAbsent(record.status)}
+                      >
+                        <XCircle size={15} />
+                        <span className="sr-only">Registrar falta</span>
                       </button>
-                      {!isPlaceholder && (
-                        <button className={actionButtonClasses} onClick={handleJustified}>
-                          <RotateCcw size={15} />
-                          <span className="sr-only">Justificar falta</span>
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
                 {!isPlaceholder && (
-                  <button className={actionButtonClasses} onClick={() => onEdit?.(record)}>
+                  <button className={actionButtonClasses('edit')} onClick={() => onEdit?.(record)}>
                     <Pencil size={15} />
                     <span className="sr-only">Corrigir presença</span>
                   </button>
@@ -158,34 +167,36 @@ export default function AttendanceTable({
               </div>
 
               <div className="hidden md:grid md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1.8fr)_minmax(0,0.6fr)]">
-                <div className="flex items-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
-                  <button className={actionButtonClasses} onClick={handleConfirm} disabled={!canConfirm(record.status)}>
+                <div className="flex flex-wrap items-center gap-2 border-b border-bjj-gray-800/60 px-3 py-2.5">
+                  <button
+                    className={actionButtonClasses('confirm')}
+                    onClick={handleConfirm}
+                    disabled={!canConfirm(record.status)}
+                  >
                     <CheckCircle2 size={15} />
                     <span className="sr-only">Confirmar presença</span>
                   </button>
-                  <button className={actionButtonClasses} onClick={handleAbsent} disabled={!canAbsent(record.status)}>
-                    <Trash2 size={14} />
-                    <span className="sr-only">Marcar falta</span>
+                  <button
+                    className={actionButtonClasses('absent')}
+                    onClick={handleAbsent}
+                    disabled={!canAbsent(record.status)}
+                  >
+                    <XCircle size={14} />
+                    <span className="sr-only">Registrar falta</span>
                   </button>
                   {!isPlaceholder && (
-                    <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
+                    <button className={actionButtonClasses('add')} onClick={() => onAddSession?.(record)}>
                       <Plus size={14} />
                       <span className="sr-only">Adicionar outra sessão</span>
                     </button>
                   )}
                   {!isPlaceholder && (
-                    <button className={actionButtonClasses} onClick={() => onEdit?.(record)}>
+                    <button className={actionButtonClasses('edit')} onClick={() => onEdit?.(record)}>
                       <Pencil size={14} />
                       <span className="sr-only">Corrigir presença</span>
                     </button>
                   )}
-                  {!isPlaceholder && (
-                    <button className={actionButtonClasses} onClick={handleJustified}>
-                      <RotateCcw size={14} />
-                      <span className="sr-only">Justificar falta</span>
-                    </button>
-                  )}
-                  <button className={actionButtonClasses} onClick={() => onDelete?.(record)} disabled={isPlaceholder}>
+                  <button className={actionButtonClasses('delete')} onClick={() => onDelete?.(record)} disabled={isPlaceholder}>
                     <Trash2 size={14} />
                     <span className="sr-only">Remover registro</span>
                   </button>

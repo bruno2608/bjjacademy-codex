@@ -32,7 +32,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     faixa: 'Azul',
     graus: 3,
     data: TODAY,
-    hora: null,
+    hora: '19:30',
     status: 'PENDENTE',
     origem: 'ALUNO',
     ...getTreinoMeta('t2')
@@ -224,7 +224,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     faixa: 'Roxa',
     graus: 3,
     data: '2025-11-16',
-    hora: null,
+    hora: '16:00',
     status: 'PENDENTE',
     origem: 'ALUNO',
     ...getTreinoMeta('t6')
@@ -416,7 +416,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
     faixa: 'Azul',
     graus: 2,
     data: '2025-11-08',
-    hora: null,
+    hora: '16:00',
     status: 'PENDENTE',
     origem: 'ALUNO',
     ...getTreinoMeta('t6')

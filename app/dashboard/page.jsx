@@ -22,6 +22,7 @@ import { useAlunosStore } from '../../store/alunosStore';
 import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
 import FaixaVisual from '../../components/graduacoes/FaixaVisual';
+import { useTreinosStore } from '../../store/treinosStore';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -40,6 +41,9 @@ const getFaixaPalette = (faixa) => {
   };
   return palette[faixa] || { from: '#f31212', to: '#b91c1c', stripe: '#fee2e2' };
 };
+
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
 
 function ProfileBadge({ name, faixa, grau, avatarUrl }) {
   const label = grau ? `${faixa} · ${grau}º grau` : faixa;
@@ -65,6 +69,7 @@ function StudentDashboard() {
   const alunoId = user?.alunoId;
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
+  const treinos = useTreinosStore((state) => state.treinos);
 
   const aluno = useMemo(() => alunos.find((item) => item.id === alunoId) || alunos[0], [alunoId, alunos]);
   const faixaAtual = aluno?.faixa || 'Branca';
@@ -99,6 +104,12 @@ function StudentDashboard() {
     const raw = aluno?.status || 'ativo';
     return raw.charAt(0).toUpperCase() + raw.slice(1);
   }, [aluno?.status]);
+
+  const horariosPorTreino = useMemo(() => {
+    const map = new Map();
+    treinos.forEach((treino) => map.set(treino.id, treino.hora));
+    return map;
+  }, [treinos]);
 
   const formatStatus = (status) => {
     switch (status) {
@@ -364,7 +375,12 @@ function ProfessorDashboard() {
       presencas: [
         { title: 'Presenças na semana', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'text-green-300' },
         { title: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, tone: 'text-yellow-300' },
-        { title: 'Ausências', value: presencas.filter((p) => p.status === 'Ausente').length, icon: BarChart3, tone: 'text-bjj-red' },
+        {
+          title: 'Ausências',
+          value: presencas.filter((p) => p.status === 'AUSENTE' || p.status === 'AUSENTE_JUSTIFICADA').length,
+          icon: BarChart3,
+          tone: 'text-bjj-red'
+        },
         { title: 'Check-ins registrados', value: presencas.length, icon: Activity, tone: 'text-white' }
       ],
       graduacoes: [
@@ -574,6 +590,9 @@ function ProfessorDashboard() {
                   <div>
                     <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome || 'Aluno'}</p>
                     <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.tipoTreino}</p>
+                    <p className="text-[11px] text-bjj-gray-400">
+                      {item.data ? `${formatDate(item.data)} · ${item.hora || horariosPorTreino.get(item.treinoId) || '--:--'}` : 'Sem data'}
+                    </p>
                   </div>
                   <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
                     Aguardando
