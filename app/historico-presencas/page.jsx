@@ -194,7 +194,7 @@ export default function HistoricoPresencasPage() {
           <div className="p-6 text-sm text-bjj-gray-100/90">Nenhum registro encontrado para os filtros atuais.</div>
         ) : (
           <div className="relative px-4 pb-6 pt-4 text-sm text-bjj-gray-50">
-            <div className="absolute left-[27px] top-6 h-[calc(100%-3rem)] w-[2px] bg-gradient-to-b from-emerald-400 via-amber-400 to-bjj-red/80 opacity-80" />
+            <div className="absolute left-9 top-6 h-[calc(100%-3rem)] w-[2px] bg-gradient-to-b from-emerald-400 via-amber-400 to-bjj-red/80 opacity-80" />
             <ul className="space-y-6">
               {registros.map((item) => {
                 const tone = statusTone(item.status);
@@ -202,7 +202,7 @@ export default function HistoricoPresencasPage() {
                 return (
                   <li key={item.id} className="relative pl-16">
                     <div
-                      className={`absolute left-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-white shadow-[0_12px_30px_rgba(0,0,0,0.45)] ${tone.marker}`}
+                      className={`absolute left-9 top-1 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full text-white shadow-[0_12px_30px_rgba(0,0,0,0.45)] ${tone.marker}`}
                     >
                       <Icon size={18} strokeWidth={3} />
                     </div>
