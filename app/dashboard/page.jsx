@@ -124,10 +124,15 @@ function StudentDashboard() {
         />
 
         <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-5`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">Sua faixa</p>
-              <p className="text-lg font-semibold">Progresso do próximo grau</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+              <div className="w-full max-w-xs sm:max-w-[180px]">
+                <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="lg" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">Progresso do próximo grau</p>
+                <p className="text-lg font-semibold text-white">Rumo ao próximo nível</p>
+              </div>
             </div>
             <ShieldCheck className="text-bjj-red" size={18} />
           </div>
