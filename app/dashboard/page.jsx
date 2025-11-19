@@ -24,6 +24,7 @@ import { useAlunosStore } from '../../store/alunosStore';
 import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
 import FaixaVisual from '../../components/graduacoes/FaixaVisual';
+import StudentHero from '../../components/student/StudentHero';
 import { useTreinosStore } from '../../store/treinosStore';
 import { confirmarPresenca, marcarAusencia } from '../../services/presencasService';
 
@@ -47,25 +48,6 @@ const getFaixaPalette = (faixa) => {
 
 const formatDate = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
-
-function ProfileBadge({ name, faixa, grau, avatarUrl }) {
-  const label = grau ? `${faixa} · ${grau}º grau` : faixa;
-  return (
-    <div className="flex w-full flex-col gap-3 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/40 p-4 shadow-inner">
-      <div className="flex items-center gap-4">
-        <div className="avatar">
-          <div className="w-16 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
-            <img src={avatarUrl || defaultAvatar} alt={`Avatar de ${name}`} loading="lazy" />
-          </div>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-white leading-tight">{name}</p>
-          <p className="text-xs text-bjj-gray-300/80">{label}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function StudentDashboard() {
   const { user } = useUserStore();
@@ -132,30 +114,14 @@ function StudentDashboard() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
-        <div className={`${cardBase} relative overflow-hidden bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/70 to-bjj-black p-0`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-bjj-black/80 via-bjj-black/35 to-transparent" />
-          <div className="relative flex w-full flex-col gap-4 px-6 py-6">
-            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="space-y-1">
-                <p className={badge}>Dashboard do aluno</p>
-                <h1 className="text-xl font-semibold text-white leading-tight">{aluno?.nome || 'Aluno'}</h1>
-              </div>
-            </div>
-            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:gap-6">
-              <ProfileBadge
-                name={aluno?.nome || 'Aluno'}
-                faixa={faixaAtual}
-                grau={graus}
-                avatarUrl={avatarUrl}
-              />
-            </div>
-            <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-300">
-              <span className="rounded-full border border-green-500/40 bg-green-600/15 px-3 py-1 font-semibold text-green-200 shadow-[0_0_0_1px_rgba(74,222,128,0.25)]">
-                {statusLabel}
-              </span>
-            </div>
-          </div>
-        </div>
+        <StudentHero
+          name={aluno?.nome || 'Aluno'}
+          faixa={faixaAtual}
+          graus={graus}
+          statusLabel={statusLabel}
+          avatarUrl={avatarUrl}
+          subtitle="Dashboard do aluno"
+        />
 
         <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-5`}>
           <div className="flex items-center justify-between">
