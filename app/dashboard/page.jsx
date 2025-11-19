@@ -163,22 +163,6 @@ function StudentDashboard() {
                 alvo={progressoProximoGrau.alvo}
                 avatarUrl={avatarUrl}
               />
-              <div className="grid flex-1 gap-3 sm:grid-cols-3">
-                {[{ label: 'Faixa', value: faixaAtual }, { label: 'Grau atual', value: `${graus}º grau` }].map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 px-4 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.25)]"
-                  >
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
-                  </div>
-                ))}
-                <div className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/40 px-4 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.25)]">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Aulas no grau</p>
-                  <p className="mt-1 text-lg font-semibold text-white">{progressoProximoGrau.aulasNoGrau}</p>
-                  <ProgressBar percent={progressoProximoGrau.percent} />
-                </div>
-              </div>
             </div>
           </div>
         </div>
