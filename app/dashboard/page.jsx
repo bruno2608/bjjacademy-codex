@@ -23,7 +23,6 @@ import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
-import FaixaVisual from '../../components/graduacoes/FaixaVisual';
 import StudentHero from '../../components/student/StudentHero';
 import { useTreinosStore } from '../../store/treinosStore';
 import { confirmarPresenca, marcarAusencia } from '../../services/presencasService';
@@ -34,17 +33,6 @@ const defaultAvatar = 'https://ui-avatars.com/api/?background=1b1b1b&color=fff&n
 
 const ensureAvatar = (name, avatarUrl) =>
   avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
-
-const getFaixaPalette = (faixa) => {
-  const palette = {
-    Branca: { from: '#e5e7eb', to: '#d1d5db', stripe: '#f3f4f6' },
-    Azul: { from: '#3b82f6', to: '#1d4ed8', stripe: '#dbeafe' },
-    Roxa: { from: '#8b5cf6', to: '#6d28d9', stripe: '#ede9fe' },
-    Marrom: { from: '#d97706', to: '#92400e', stripe: '#fef3c7' },
-    Preta: { from: '#737373', to: '#171717', stripe: '#e5e5e5' }
-  };
-  return palette[faixa] || { from: '#f31212', to: '#b91c1c', stripe: '#fee2e2' };
-};
 
 const formatDate = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
@@ -113,79 +101,14 @@ function StudentDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
-        <StudentHero
-          name={aluno?.nome || 'Aluno'}
-          faixa={faixaAtual}
-          graus={graus}
-          statusLabel={statusLabel}
-          avatarUrl={avatarUrl}
-          subtitle="Dashboard do aluno"
-        />
-
-        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-5`}>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-              <div className="w-full max-w-xs sm:max-w-[180px]">
-                <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="lg" />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">Progresso do próximo grau</p>
-                <p className="text-lg font-semibold text-white">Rumo ao próximo nível</p>
-              </div>
-            </div>
-            <ShieldCheck className="text-bjj-red" size={18} />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">
-            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">Faixa: {faixaAtual}</span>
-            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">Grau: {graus}º</span>
-            <span className="rounded-full bg-bjj-gray-900/60 px-3 py-1 font-semibold text-white">
-              {progressoProximoGrau.aulasNoGrau} aulas no grau
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-            <div className="shrink-0 rounded-2xl border border-bjj-gray-800/80 bg-bjj-black/60 p-3 shadow-inner">
-              <FaixaVisual faixa={faixaAtual} graus={graus} tamanho="lg" />
-            </div>
-            <div className="flex-1 space-y-2">
-              <div className="flex flex-col gap-1 text-bjj-gray-200/90 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm font-semibold">{progressoProximoGrau.percent}% do próximo grau</p>
-                <p className="text-xs text-bjj-gray-300/80">
-                  {progressoProximoGrau.aulasNoGrau} de {progressoProximoGrau.alvo} aulas concluídas
-                </p>
-              </div>
-              <div className="relative h-6 overflow-hidden rounded-full bg-bjj-gray-900/70 ring-1 ring-inset ring-bjj-gray-800/80">
-                <div
-                  className="absolute inset-0 opacity-30"
-                  style={{
-                    background:
-                      'repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 10px, transparent 10px, transparent 20px)'
-                  }}
-                />
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full shadow-[0_0_0_1px_rgba(0,0,0,0.45)]"
-                  style={{
-                    width: `${Math.max(progressoProximoGrau.percent, 12)}%`,
-                    background: `linear-gradient(to right, ${getFaixaPalette(faixaAtual).from}, ${getFaixaPalette(faixaAtual).to})`
-                  }}
-                />
-                {Array.from({ length: Math.min(graus || 0, 4) }).map((_, index) => (
-                  <span
-                    key={index}
-                    className="absolute top-1 bottom-1 w-2 rounded-sm shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
-                    style={{
-                      left: `calc(${Math.min(Math.max(progressoProximoGrau.percent, 12), 96)}% - ${(index + 1) * 12}px)`,
-                      background: `linear-gradient(to bottom, ${getFaixaPalette(faixaAtual).stripe}, #d1d5db)`
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StudentHero
+        name={aluno?.nome || 'Aluno'}
+        faixa={faixaAtual}
+        graus={graus}
+        statusLabel={statusLabel}
+        avatarUrl={avatarUrl}
+        subtitle="Dashboard do aluno"
+      />
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {[
