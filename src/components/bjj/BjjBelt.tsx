@@ -71,13 +71,10 @@ export const BjjBeltStrip: React.FC<BjjBeltStripProps> = ({
   const textColor = config.textColorClass || "text-white";
   const stitchingClass = config.stitchingColorClass || "bg-black/10";
 
-  const beltContainerClasses =
-    "relative w-full h-14 rounded-md shadow-lg flex overflow-hidden group transition-transform hover:scale-[1.005] duration-500 border border-white/10";
-
   return (
-    <div className={beltContainerClasses}>
+    <div className="relative w-full h-14 rounded-md shadow-lg flex overflow-hidden group transition-transform hover:scale-[1.005] duration-500 border border-white/10">
       {/* Textura de tecido (Overlay global) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-black/10 pointer-events-none z-10 mix-blend-overlay opacity-50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-black/10 pointer-events-none z-10 mix-blend-overlay opacity-50"></div>
 
       {/* Corpo da Faixa */}
       <div
@@ -87,14 +84,16 @@ export const BjjBeltStrip: React.FC<BjjBeltStripProps> = ({
         {config.horizontalStripeClass && (
           <div
             className={`absolute w-full h-1/3 ${config.horizontalStripeClass} top-1/2 -translate-y-1/2 z-0 shadow-sm`}
-          />
+          ></div>
         )}
 
         {/* Costuras */}
-        <div className={`w-full h-[1px] ${stitchingClass} absolute top-2 z-10`} />
+        <div
+          className={`w-full h-[1px] ${stitchingClass} absolute top-2 z-10`}
+        ></div>
         <div
           className={`w-full h-[1px] ${stitchingClass} absolute bottom-2 z-10`}
-        />
+        ></div>
 
         {/* Texto "JIU-JITSU" */}
         <span
@@ -106,13 +105,18 @@ export const BjjBeltStrip: React.FC<BjjBeltStripProps> = ({
 
       {/* Ponteira */}
       <div
-        className={`relative h-full flex items-center justify-evenly z-20 shadow-[-2px_0_8px_rgba(0,0,0,0.25)] ${config.tipColorClass} min-w-[6rem] md:min-w-[8rem] px-1`}
+        className={`
+        relative h-full flex items-center justify-evenly z-20 
+        shadow-[-2px_0_8px_rgba(0,0,0,0.25)]
+        ${config.tipColorClass}
+        min-w-[6rem] md:min-w-[8rem] px-1
+      `}
       >
         {/* Bordas de Professor (apenas se config.tipoPreta === 'professor') */}
         {isProfessor && (
           <>
-            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-white z-30 shadow-sm" />
-            <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-white z-30 shadow-sm" />
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-white z-30 shadow-sm"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-white z-30 shadow-sm"></div>
           </>
         )}
 
