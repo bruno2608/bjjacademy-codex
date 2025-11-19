@@ -1,10 +1,36 @@
 # 🥋 **BJJ Academy — PWA (Next.js + Tailwind)**
 
-Bem-vindo à base do novo **BJJ Academy PWA**, plataforma web progressiva
-focada na gestão completa de academias de Jiu-Jitsu. O projeto une a
-identidade "Zenko Focus" com uma camada visual gamificada inspirada nas
-versões mobile [`bjjacademyapp`](https://github.com/bruno2608/bjjacademyapp)
-e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
+Bem-vindo à base do novo **BJJ Academy PWA**, plataforma web progressiva focada na gestão completa de academias de Jiu-Jitsu. O projeto une a identidade "Zenko Focus" com uma camada visual gamificada inspirada nas versões mobile [`bjjacademyapp`](https://github.com/bruno2608/bjjacademyapp) e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
+
+- PWA com cache inicial e ícones completos.
+- Rotas protegidas por middleware + RBAC centralizado.
+- Dados mockados em Zustand com persistência local para simular produção.
+
+## 🧩 **Requisitos**
+
+- **Node.js 18+**
+- **npm** (ou compatível)
+
+## 🛠️ **Como executar localmente**
+
+```bash
+npm install
+npm run dev
+# Acesse http://localhost:3000
+```
+
+### Comandos principais
+
+- `npm run dev`: ambiente de desenvolvimento com hot reload.
+- `npm run build`: build otimizado de produção (App Router).
+- `npm run start`: sobe o build gerado.
+- `npm run lint`: validações do Next.js + ESLint.
+
+## 🔐 **Autenticação mock e perfis**
+
+- Login em `/login` aceita qualquer e-mail/senha e gera token fake.
+- Papéis são inferidos pelo e-mail (campos contendo `admin`, `ti`, `aluno`/`student`) ou pela seleção manual.
+- Dados persistem em `localStorage`/cookies (`bjj_token`, `bjj_roles`, `bjj_user`), permitindo refresh sem perder sessão.
 
 ## 🚀 **Stack principal**
 
@@ -28,6 +54,19 @@ e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).
 | Área do Aluno | Layout separado com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`; histórico de presenças e relatórios pessoais acessíveis pelo menu do usuário. |
 | Check-in do Aluno | Tela dedicada com lógica automática/pendente conforme horário do treino e status visível ao professor. |
 | PWA | Manifesto completo, service worker com cache básico e ícones em múltiplos tamanhos. |
+
+## 🧪 **Mocks e persistência**
+
+- Seeds em `data/` abastecem stores do Zustand (`alunos`, `presenças`, `treinos`, `graduacoes`).
+- Alterações são guardadas em `localStorage` para simular ambiente real sem backend.
+- Middleware (`middleware.ts`) lê papéis persistidos para redirecionar usuários não autorizados.
+
+## 📍 **Rotas úteis**
+
+- `/login`: seleção de papel e acesso inicial.
+- `/dashboard`, `/dashboard-instrutor`: visões de staff.
+- `/dashboard-aluno`, `/checkin`: jornada do aluno com status em tempo real.
+- `/configuracoes/*`: gestão de regras de graduação, horários e tipos de treino.
 
 ## 🧭 **Mapa da estrutura**
 
@@ -65,7 +104,7 @@ services/
   presencasService.js
   graduacoesService.js
 store/
-  userStore.js
+  userStore.ts
   treinosStore.ts
   tiposTreinoStore.ts
   graduationRulesStore.ts
@@ -117,35 +156,6 @@ styles/
 - `Card`, `Table`, `AttendanceTable`, `Modal`, `PresenceForm`, `GraduationList`, `GraduationTimeline`.
 - Botões, inputs e cards seguem a mesma linguagem visual (bordas arredondadas, gradientes suaves, brilho vermelho).
 
-## 🛠️ **Como executar localmente**
-
-```bash
-npm install
-npm run dev
-# Acesse http://localhost:3000
-```
-
-### Fluxo sugerido de validação
-
-1. **Login mockado:** `http://localhost:3000/login` aceita qualquer
-   e-mail/senha e redireciona para o dashboard gamificado.
-2. **Dashboard:** explore o hero com métricas e alterne entre as visões Geral, Presenças e Graduações.
-3. **Cadastro de alunos:** use o modal “Novo aluno” para preencher faixa, graus e meses na faixa.
-4. **Presenças:** registre novas entradas; a visão de Presenças no dashboard reflete os indicadores ao vivo.
-5. **Graduações:** agende um grau ou faixa usando as regras de tempo mínimas e ajuste o status.
-6. **PWA:** instale pelo navegador ou teste o comportamento offline para
-   conferir o cache inicial de páginas.
-
-## 🎨 **Diretrizes de UI**
-
-- Layout responsivo com sidebar desktop e menu hamburger no mobile.
-- Componentes com espaçamentos generosos (`p-4`, `gap-4`).
-- Paleta exclusiva do BJJ Academy:
-  - Preto `#000000`
-  - Branco `#FFFFFF`
-  - Vermelho `#E10600`
-  - Cinzas `#1A1A1A`, `#2E2E2E`, `#D9D9D9`
-
 ## 🤝 **Contribuindo**
 
 1. `git checkout -b feature/nova-feature`
@@ -160,5 +170,4 @@ Projeto proprietário de **Bruno Alves França**.
 
 > **BJJ Academy — Evolve Your Training**
 >
-> Estrutura pronta para conectar com a API oficial e escalar o sistema
-de gestão da sua academia.
+> Estrutura pronta para conectar com a API oficial e escalar o sistema de gestão da sua academia.
