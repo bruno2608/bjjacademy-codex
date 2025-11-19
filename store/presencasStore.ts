@@ -33,6 +33,13 @@ const syncAlunos = (presencas: Presenca[]) => {
   useAlunosStore.getState().recalculateFromPresencas(presencas);
 };
 
+const buildTreinosFechadosMock = () => {
+  const hoje = new Date().toISOString().split('T')[0];
+  return {
+    [`${hoje}::t3`]: 'FECHADO_MANUAL'
+  } as const;
+};
+
 type PresencasState = {
   presencas: Presenca[];
   treinosFechados: Record<string, 'FECHADO_MANUAL'>;
@@ -61,7 +68,7 @@ type PresencasState = {
 
 export const usePresencasStore = create<PresencasState>((set) => ({
   presencas: normalizarPresencas(MOCK_PRESENCAS),
-  treinosFechados: {},
+  treinosFechados: buildTreinosFechadosMock(),
   setPresencas: (presencas) => {
     const normalizadas = normalizarPresencas(presencas);
     set({ presencas: normalizadas });
@@ -144,6 +151,17 @@ export const usePresencasStore = create<PresencasState>((set) => ({
       const existenteIndex = lista.findIndex(
         (item) => item.alunoId === payload.alunoId && item.data === payload.data && item.treinoId === payload.treinoId
       );
+
+      if (existenteIndex >= 0) {
+        const existente = lista[existenteIndex];
+        const statusElegivelDuplicado: StatusPresenca[] = ['CHECKIN', 'PENDENTE', 'CONFIRMADO'];
+        if (statusElegivelDuplicado.includes(existente.status)) {
+          status = 'duplicado';
+          registro = existente;
+          return { presencas: lista };
+        }
+      }
+
       const agora = new Date();
       const dataReferencia = payload.data ? new Date(`${payload.data}T${payload.horaInicio || '00:00'}`) : new Date();
       const inicio = dataReferencia.getTime();

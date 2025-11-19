@@ -10,7 +10,45 @@ const getTreinoMeta = (treinoId: string | null) => {
   };
 };
 
+const TODAY = new Date().toISOString().split('T')[0];
+
 export const MOCK_PRESENCAS: Presenca[] = [
+  {
+    id: 'p-today-joao',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: TODAY,
+    hora: '07:12',
+    status: 'CHECKIN',
+    origem: 'ALUNO',
+    ...getTreinoMeta('t1')
+  },
+  {
+    id: 'p-today-maria',
+    alunoId: '2',
+    alunoNome: 'Maria Souza',
+    faixa: 'Azul',
+    graus: 3,
+    data: TODAY,
+    hora: null,
+    status: 'PENDENTE',
+    origem: 'ALUNO',
+    ...getTreinoMeta('t2')
+  },
+  {
+    id: 'p-today-cancelado',
+    alunoId: '3',
+    alunoNome: 'Carlos Pereira',
+    faixa: 'Marrom',
+    graus: 1,
+    data: TODAY,
+    hora: null,
+    status: 'CANCELADO',
+    origem: 'PROFESSOR',
+    ...getTreinoMeta('t3')
+  },
   {
     id: 'p1',
     alunoId: '1',
@@ -22,6 +60,114 @@ export const MOCK_PRESENCAS: Presenca[] = [
     status: 'CONFIRMADO',
     origem: 'PROFESSOR',
     ...getTreinoMeta('t1')
+  },
+  {
+    id: 'p21',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: '2025-11-15',
+    hora: '07:52',
+    status: 'CONFIRMADO',
+    origem: 'PROFESSOR',
+    ...getTreinoMeta('t1')
+  },
+  {
+    id: 'p22',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: '2025-11-13',
+    hora: '07:57',
+    status: 'CONFIRMADO',
+    origem: 'ALUNO',
+    ...getTreinoMeta('t1')
+  },
+  {
+    id: 'p23',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: '2025-11-11',
+    hora: '08:05',
+    status: 'CONFIRMADO',
+    origem: 'ALUNO',
+    ...getTreinoMeta('t2')
+  },
+  {
+    id: 'p24',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: '2025-11-08',
+    hora: '07:49',
+    status: 'CONFIRMADO',
+    origem: 'PROFESSOR',
+    ...getTreinoMeta('t1')
+  },
+  {
+    id: 'p25',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: '2025-11-05',
+    hora: '18:20',
+    status: 'CONFIRMADO',
+    origem: 'PROFESSOR',
+    ...getTreinoMeta('t4')
+  },
+  {
+    id: 'p26',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: '2025-10-30',
+    hora: '07:55',
+    status: 'CONFIRMADO',
+    origem: 'ALUNO',
+    ...getTreinoMeta('t1')
+  },
+  {
+    id: 'p27',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: '2025-10-24',
+    hora: '19:02',
+    status: 'CONFIRMADO',
+    origem: 'ALUNO',
+    ...getTreinoMeta('t2')
+  },
+  {
+    id: 'p28',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: '2025-10-16',
+    hora: '08:10',
+    status: 'CONFIRMADO',
+    origem: 'PROFESSOR',
+    ...getTreinoMeta('t1')
+  },
+  {
+    id: 'p29',
+    alunoId: '1',
+    alunoNome: 'João Silva',
+    faixa: 'Roxa',
+    graus: 2,
+    data: '2025-10-08',
+    hora: '19:15',
+    status: 'CONFIRMADO',
+    origem: 'PROFESSOR',
+    ...getTreinoMeta('t2')
   },
   {
     id: 'p2',
