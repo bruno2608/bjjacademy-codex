@@ -11,6 +11,9 @@ import Modal from '../../components/ui/Modal';
 const normalizeWeekday = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '').toLowerCase();
 
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+
 export default function CheckinPage() {
   const { user } = useUserStore();
   const alunoId = user?.alunoId;
@@ -108,6 +111,8 @@ export default function CheckinPage() {
     () => checkinsDoAluno.filter((item) => item.status === 'CHECKIN' || item.status === 'PENDENTE'),
     [checkinsDoAluno]
   );
+
+  const horarioDoTreino = (treinoId) => treinos.find((treino) => treino.id === treinoId)?.hora || '--:--';
 
   const statusLabel = (status) => {
     switch (status) {
@@ -225,6 +230,7 @@ export default function CheckinPage() {
                     <div>
                       <p className="text-sm font-semibold text-white">{item.tipoTreino}</p>
                       <p className="text-xs text-bjj-gray-300/80">{item.treinoModalidade}</p>
+                      <p className="text-xs text-bjj-gray-400">{`${formatDate(item.data)} · ${item.hora || horarioDoTreino(item.treinoId)}`}</p>
                     </div>
                     <span className="rounded-full bg-yellow-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
                       Aguardando aprovação
