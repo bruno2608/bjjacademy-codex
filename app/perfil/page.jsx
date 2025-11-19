@@ -40,6 +40,9 @@ export default function PerfilAlunoPage() {
     setSaved(true);
   };
 
+  const disabledFieldClass =
+    'input input-bordered input-primary w-full border border-bjj-gray-500/80 bg-bjj-gray-800/90 text-sm font-semibold text-bjj-gray-100/90 placeholder:text-bjj-gray-200 disabled:cursor-not-allowed disabled:border-bjj-gray-500 disabled:bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.06)_0,rgba(255,255,255,0.06)_12px,rgba(255,255,255,0.03)_12px,rgba(255,255,255,0.03)_24px)]';
+
   return (
     <div className="space-y-4">
       <header className="flex flex-col gap-1">
@@ -109,44 +112,44 @@ export default function PerfilAlunoPage() {
         <div className="grid gap-4 sm:grid-cols-3">
           <label className="form-control">
             <div className="label pb-1">
-              <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/80">Faixa</span>
+              <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-100">Faixa</span>
             </div>
             <input
               disabled
               value={aluno?.faixa || '—'}
-              className="input input-bordered w-full border-bjj-gray-800 bg-bjj-gray-900 text-sm text-bjj-gray-400"
+              className={disabledFieldClass}
               readOnly
             />
             <div className="label pt-1">
-              <span className="label-text-alt text-[11px] text-bjj-gray-500">Gerenciado pelo instrutor</span>
+              <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Gerenciado pelo instrutor</span>
             </div>
           </label>
           <label className="form-control">
             <div className="label pb-1">
-              <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/80">Grau</span>
+              <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-100">Grau</span>
             </div>
             <input
               disabled
               value={`${aluno?.graus || 0}º`}
-              className="input input-bordered w-full border-bjj-gray-800 bg-bjj-gray-900 text-sm text-bjj-gray-400"
+              className={disabledFieldClass}
               readOnly
             />
             <div className="label pt-1">
-              <span className="label-text-alt text-[11px] text-bjj-gray-500">Controle exclusivo da academia</span>
+              <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Controle exclusivo da academia</span>
             </div>
           </label>
           <label className="form-control">
             <div className="label pb-1">
-              <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/80">Plano</span>
+              <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-100">Plano</span>
             </div>
             <input
               disabled
               value={aluno?.plano || 'Mensal'}
-              className="input input-bordered w-full border-bjj-gray-800 bg-bjj-gray-900 text-sm text-bjj-gray-400"
+              className={disabledFieldClass}
               readOnly
             />
             <div className="label pt-1">
-              <span className="label-text-alt text-[11px] text-bjj-gray-500">Alterações via secretaria</span>
+              <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Alterações via secretaria</span>
             </div>
           </label>
         </div>

@@ -1,14 +1,18 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { CheckCircle, Clock3, Timer } from 'lucide-react';
+import { CheckCircle, Clock3 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useTreinosStore } from '../../store/treinosStore';
 import useUserStore from '../../store/userStore';
+import Modal from '../../components/ui/Modal';
 
 const normalizeWeekday = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '').toLowerCase();
+
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
 
 export default function CheckinPage() {
   const { user } = useUserStore();
@@ -19,7 +23,7 @@ export default function CheckinPage() {
   const registerCheckin = usePresencasStore((state) => state.registerCheckin);
   const presencas = usePresencasStore((state) => state.presencas);
   const isTreinoFechado = usePresencasStore((state) => state.isTreinoFechado);
-  const [feedback, setFeedback] = useState('');
+  const [feedbackModal, setFeedbackModal] = useState({ open: false, title: '', message: '' });
 
   const diaSemana = normalizeWeekday(hoje);
   const treinosDoDia = useMemo(
@@ -85,15 +89,30 @@ export default function CheckinPage() {
     });
 
     if (resultado.status === 'fechado') {
-      setFeedback('Este treino já foi fechado pelo professor.');
+      setFeedbackModal({ open: true, title: 'Check-in indisponível', message: 'Este treino já foi fechado pelo professor.' });
     } else if (resultado.status === 'duplicado') {
-      setFeedback('Você já registrou presença para este treino.');
+      setFeedbackModal({ open: true, title: 'Check-in já registrado', message: 'Você já enviou presença para este treino.' });
     } else if (resultado.status === 'checkin') {
-      setFeedback('Check-in enviado. Aguardando confirmação do professor.');
+      setFeedbackModal({
+        open: true,
+        title: 'Deu certo! Check-in enviado',
+        message: 'Seu check-in foi enviado para análise do professor. Você será notificado após a aprovação.'
+      });
     } else {
-      setFeedback('Seu check-in foi enviado para análise do professor.');
+      setFeedbackModal({
+        open: true,
+        title: 'Deu certo! Enviado para análise',
+        message: 'Seu check-in foi enviado para análise do professor.'
+      });
     }
   };
+
+  const pendentesHoje = useMemo(
+    () => checkinsDoAluno.filter((item) => item.status === 'CHECKIN' || item.status === 'PENDENTE'),
+    [checkinsDoAluno]
+  );
+
+  const horarioDoTreino = (treinoId) => treinos.find((treino) => treino.id === treinoId)?.hora || '--:--';
 
   const statusLabel = (status) => {
     switch (status) {
@@ -119,12 +138,6 @@ export default function CheckinPage() {
           <p className="text-xs uppercase tracking-[0.25em] text-bjj-gray-400">Check-in</p>
           <h1 className="text-2xl font-semibold">Treinos de hoje</h1>
           <p className="text-sm text-bjj-gray-300/80">Registre sua presença até 30 minutos após o início.</p>
-        </div>
-        <div className="rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200">
-          <div className="flex items-center gap-2">
-            <Timer size={16} className="text-bjj-red" />
-            {hoje}
-          </div>
         </div>
       </header>
 
@@ -203,11 +216,45 @@ export default function CheckinPage() {
         </div>
       </div>
 
-      {feedback && (
-        <div className="flex items-center gap-2 rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-2 text-sm text-bjj-gray-200">
-          <CheckCircle size={16} className="text-bjj-red" /> {feedback}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="md:col-span-2">
+          {pendentesHoje.length > 0 && (
+            <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-4 text-sm text-bjj-gray-200">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">Check-ins em análise</h3>
+                <Clock3 size={16} className="text-yellow-300" />
+              </div>
+              <ul className="divide-y divide-bjj-gray-800/60">
+                {pendentesHoje.map((item) => (
+                  <li key={item.id} className="flex items-center justify-between py-2">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{item.tipoTreino}</p>
+                      <p className="text-xs text-bjj-gray-300/80">{item.treinoModalidade}</p>
+                      <p className="text-xs text-bjj-gray-400">{`${formatDate(item.data)} · ${item.hora || horarioDoTreino(item.treinoId)}`}</p>
+                    </div>
+                    <span className="rounded-full bg-yellow-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
+                      Aguardando aprovação
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-      )}
+      </div>
+
+      <Modal
+        isOpen={feedbackModal.open}
+        title={feedbackModal.title}
+        onClose={() => setFeedbackModal({ open: false, title: '', message: '' })}
+      >
+        <div className="flex items-start gap-3 text-sm text-bjj-gray-100">
+          <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-bjj-red/10 text-bjj-red">
+            <CheckCircle size={16} />
+          </span>
+          <p className="leading-relaxed">{feedbackModal.message}</p>
+        </div>
+      </Modal>
 
       <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-black/60 p-4 text-sm text-bjj-gray-200/80">
         <h3 className="mb-2 text-sm font-semibold text-white">Regras do check-in</h3>
