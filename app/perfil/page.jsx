@@ -114,11 +114,11 @@ export default function PerfilAlunoPage() {
             <input
               disabled
               value={aluno?.faixa || '—'}
-              className="input input-bordered input-primary w-full border-bjj-gray-700 bg-gradient-to-r from-bjj-gray-800/90 to-bjj-gray-900 text-sm text-bjj-gray-100 shadow-[0_6px_24px_rgba(0,0,0,0.28)] disabled:border-bjj-gray-600 disabled:bg-bjj-gray-800/90"
+              className="input input-bordered input-primary w-full border border-bjj-gray-600/70 bg-gradient-to-r from-bjj-gray-700/90 via-bjj-gray-800/90 to-bjj-gray-950 text-sm font-semibold text-white placeholder:text-bjj-gray-100 shadow-[0_6px_24px_rgba(0,0,0,0.32)] disabled:border-bjj-gray-500/80 disabled:bg-bjj-gray-800"
               readOnly
             />
             <div className="label pt-1">
-              <span className="label-text-alt text-[11px] text-bjj-gray-200/80">Gerenciado pelo instrutor</span>
+              <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Gerenciado pelo instrutor</span>
             </div>
           </label>
           <label className="form-control">
@@ -128,11 +128,11 @@ export default function PerfilAlunoPage() {
             <input
               disabled
               value={`${aluno?.graus || 0}º`}
-              className="input input-bordered input-primary w-full border-bjj-gray-700 bg-gradient-to-r from-bjj-gray-800/90 to-bjj-gray-900 text-sm text-bjj-gray-100 shadow-[0_6px_24px_rgba(0,0,0,0.28)] disabled:border-bjj-gray-600 disabled:bg-bjj-gray-800/90"
+              className="input input-bordered input-primary w-full border border-bjj-gray-600/70 bg-gradient-to-r from-bjj-gray-700/90 via-bjj-gray-800/90 to-bjj-gray-950 text-sm font-semibold text-white placeholder:text-bjj-gray-100 shadow-[0_6px_24px_rgba(0,0,0,0.32)] disabled:border-bjj-gray-500/80 disabled:bg-bjj-gray-800"
               readOnly
             />
             <div className="label pt-1">
-              <span className="label-text-alt text-[11px] text-bjj-gray-200/80">Controle exclusivo da academia</span>
+              <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Controle exclusivo da academia</span>
             </div>
           </label>
           <label className="form-control">
@@ -142,11 +142,11 @@ export default function PerfilAlunoPage() {
             <input
               disabled
               value={aluno?.plano || 'Mensal'}
-              className="input input-bordered input-primary w-full border-bjj-gray-700 bg-gradient-to-r from-bjj-gray-800/90 to-bjj-gray-900 text-sm text-bjj-gray-100 shadow-[0_6px_24px_rgba(0,0,0,0.28)] disabled:border-bjj-gray-600 disabled:bg-bjj-gray-800/90"
+              className="input input-bordered input-primary w-full border border-bjj-gray-600/70 bg-gradient-to-r from-bjj-gray-700/90 via-bjj-gray-800/90 to-bjj-gray-950 text-sm font-semibold text-white placeholder:text-bjj-gray-100 shadow-[0_6px_24px_rgba(0,0,0,0.32)] disabled:border-bjj-gray-500/80 disabled:bg-bjj-gray-800"
               readOnly
             />
             <div className="label pt-1">
-              <span className="label-text-alt text-[11px] text-bjj-gray-200/80">Alterações via secretaria</span>
+              <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Alterações via secretaria</span>
             </div>
           </label>
         </div>

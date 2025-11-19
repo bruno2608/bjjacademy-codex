@@ -71,7 +71,7 @@ export default function EditarAlunoPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-3">
+      <div className="relative">
         <PageHero
           badge="Edição de cadastro"
           title={aluno.nome}
@@ -81,7 +81,7 @@ export default function EditarAlunoPage() {
 
         <button
           type="button"
-          className="btn btn-secondary btn-sm px-2 text-bjj-white"
+          className="btn btn-secondary btn-sm absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full text-bjj-white shadow-lg"
           aria-label="Voltar para a lista de alunos"
           onClick={() => router.push('/alunos')}
         >
