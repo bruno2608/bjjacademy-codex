@@ -229,7 +229,7 @@ function StudentDashboard() {
             title: 'Check-ins pendentes',
             value: stats.pendentes,
             helper: 'aguardando aprovação',
-            href: '/presencas',
+            href: '/checkin',
             tone: 'from-bjj-gray-900/80 to-bjj-black/90',
             badgeTone: 'text-yellow-300',
             icon: Clock3
@@ -277,7 +277,7 @@ function StudentDashboard() {
             title: 'Pendências',
             value: stats.pendentes,
             helper: 'aguardando aprovação',
-            href: '/presencas',
+            href: '/checkin',
             tone: 'from-bjj-gray-900/80 to-bjj-black/85',
             badgeTone: 'text-yellow-300'
           }
