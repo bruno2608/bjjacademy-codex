@@ -26,6 +26,7 @@ import { ROLE_KEYS } from '../../config/roles';
 import StudentHero from '../../components/student/StudentHero';
 import { useTreinosStore } from '../../store/treinosStore';
 import { confirmarPresenca, marcarAusencia } from '../../services/presencasService';
+import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -209,8 +210,11 @@ function ProfessorDashboard() {
   const treinos = useTreinosStore((state) => state.treinos);
   const [activeTab, setActiveTab] = useState('visao');
   const [updatingId, setUpdatingId] = useState(null);
-  const instructorName = user?.name || 'Instrutor';
-  const instructorAvatar = user?.avatarUrl || defaultAvatar;
+  const defaultInstrutor = useMemo(() => MOCK_INSTRUTORES[0], []);
+  const instructorName = user?.name || defaultInstrutor?.nome || 'Instrutor';
+  const instructorFaixa = defaultInstrutor?.faixa || 'Preta';
+  const instructorGraus = typeof defaultInstrutor?.graus === 'number' ? defaultInstrutor.graus : 0;
+  const instructorAvatar = user?.avatarUrl || defaultInstrutor?.avatarUrl || defaultAvatar;
 
   const horariosPorTreino = useMemo(() => {
     const map = new Map();
@@ -279,50 +283,52 @@ function ProfessorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className={`${cardBase} bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-900/60 to-bjj-black p-0`}>
-        <div className="grid gap-6 px-5 py-5 lg:grid-cols-[1.15fr,1fr]">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className={badge}>Visão geral</p>
-                <h1 className="text-xl font-semibold text-white leading-tight">{instructorName}</h1>
-                <p className="text-xs text-bjj-gray-300/90">Painel compacto com atalhos para aprovar presenças e gerenciar alunos.</p>
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-bjj-gray-800/80 bg-bjj-black/40 px-3 py-2">
-                <div className="avatar">
-                  <div className="w-12 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950">
-                    <img src={ensureAvatar(instructorName, instructorAvatar)} alt={`Avatar de ${instructorName}`} loading="lazy" />
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white leading-tight">{instructorName}</p>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">Professor</p>
-                </div>
-              </div>
-            </div>
+      <StudentHero
+        name={instructorName}
+        faixa={instructorFaixa}
+        graus={instructorGraus}
+        statusLabel="Professor"
+        avatarUrl={ensureAvatar(instructorName, instructorAvatar)}
+        subtitle="Dashboard do professor"
+        className="border-bjj-gray-800/90"
+      />
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[{ label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' },
-                { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
-                { label: 'Graduações', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' }
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="group flex items-center justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-4 py-3 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_14px_32px_rgba(0,0,0,0.35)]"
-                >
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="text-2xl font-bold text-white leading-tight">{item.value}</p>
-                  </div>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
-                    <item.icon size={18} />
-                  </span>
-                </Link>
-              ))}
+      <div className="grid gap-4 lg:grid-cols-[1.15fr,1fr]">
+        <div className={`${cardBase} border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-950/80 via-bjj-gray-900/60 to-bjj-black p-5`}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="space-y-1">
+              <p className={badge}>Visão geral</p>
+              <h1 className="text-xl font-semibold leading-tight text-white">{instructorName}</h1>
+              <p className="text-xs text-bjj-gray-300/90">Painel compacto com atalhos para aprovar presenças e gerenciar alunos.</p>
             </div>
-
+            <span className="badge badge-outline border-green-500/70 bg-green-600/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-green-200 shadow-[0_0_0_1px_rgba(74,222,128,0.25)]">
+              Ativo
+            </span>
           </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {[{ label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' },
+              { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
+              { label: 'Graduações', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' }
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="group flex items-center justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-4 py-3 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_14px_32px_rgba(0,0,0,0.35)]"
+              >
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
+                  <p className="text-2xl font-bold leading-tight text-white">{item.value}</p>
+                </div>
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
+                  <item.icon size={18} />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-gray-900/60 p-5`}>
           <div className="grid gap-3 sm:grid-cols-2">
             {[{ label: 'Aulas na semana', value: metrics.presentesSemana, icon: CalendarCheck, href: '/presencas' },
               { label: 'Histórico na semana', value: presencas.length, icon: BarChart3, href: '/historico-presencas' },
@@ -337,7 +343,7 @@ function ProfessorDashboard() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="mt-2 text-3xl font-bold text-white leading-none">{item.value}</p>
+                    <p className="mt-2 text-3xl font-bold leading-none text-white">{item.value}</p>
                   </div>
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
                     <item.icon size={18} />
@@ -453,7 +459,7 @@ function ProfessorDashboard() {
         </div>
 
         <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-b from-bjj-gray-900 to-bjj-black p-5`}>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className={badge}>Pendências</p>
               <h3 className="text-lg font-semibold text-white">Check-ins em análise</h3>

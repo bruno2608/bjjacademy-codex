@@ -7,12 +7,17 @@ import { ROLE_KEYS } from '../../config/roles';
 import useUserStore from '../../store/userStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import StudentHero from '../../components/student/StudentHero';
+import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
+
+const ensureAvatar = (name, avatarUrl) =>
+  avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
 
 export default function PerfilAlunoPage() {
   const { user, updateUser } = useUserStore();
   const alunos = useAlunosStore((state) => state.alunos);
   const updateAluno = useAlunosStore((state) => state.updateAluno);
   const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
+  const defaultInstrutor = useMemo(() => MOCK_INSTRUTORES[0], []);
   const aluno = useMemo(() => {
     if (!isAluno) return null;
     return alunos.find((item) => item.id === user?.alunoId) || alunos[0] || null;
@@ -24,10 +29,10 @@ export default function PerfilAlunoPage() {
   );
 
   const deriveInitialForm = () => ({
-    nome: (isAluno ? aluno?.nome : user?.name) || '',
+    nome: (isAluno ? aluno?.nome : user?.name || defaultInstrutor?.nome) || '',
     telefone: (isAluno ? aluno?.telefone : user?.telefone) || '',
     email: (isAluno ? aluno?.email : user?.email) || '',
-    avatarUrl: (isAluno ? aluno?.avatarUrl : user?.avatarUrl) || ''
+    avatarUrl: (isAluno ? aluno?.avatarUrl : user?.avatarUrl || defaultInstrutor?.avatarUrl) || ''
   });
 
   const [form, setForm] = useState(deriveInitialForm);
@@ -35,10 +40,10 @@ export default function PerfilAlunoPage() {
   const [saved, setSaved] = useState(false);
 
   const statusLabel = useMemo(() => {
-    if (!isAluno) return 'Ativo';
+    if (!isAluno) return defaultInstrutor?.status || 'Ativo';
     const raw = aluno?.status || 'Ativo';
     return typeof raw === 'string' ? raw.charAt(0).toUpperCase() + raw.slice(1) : 'Ativo';
-  }, [aluno?.status, isAluno]);
+  }, [aluno?.status, defaultInstrutor?.status, isAluno]);
 
   useEffect(() => {
     setForm(deriveInitialForm());
@@ -79,11 +84,11 @@ export default function PerfilAlunoPage() {
   return (
     <div className="space-y-4">
       <StudentHero
-        name={form.nome || user?.name || 'Aluno'}
-        faixa={isAluno ? aluno?.faixa : undefined}
-        graus={isAluno ? aluno?.graus : undefined}
+        name={form.nome || user?.name || defaultInstrutor?.nome || 'Aluno'}
+        faixa={isAluno ? aluno?.faixa : defaultInstrutor?.faixa}
+        graus={isAluno ? aluno?.graus : defaultInstrutor?.graus}
         statusLabel={statusLabel}
-        avatarUrl={form.avatarUrl}
+        avatarUrl={ensureAvatar(form.nome || defaultInstrutor?.nome, form.avatarUrl)}
         subtitle={isAluno ? 'Perfil do aluno' : 'Perfil do professor'}
       />
 
