@@ -45,7 +45,7 @@ type PresencasState = {
   treinosFechados: Record<string, 'FECHADO_MANUAL'>;
   setPresencas: (presencas: Presenca[]) => void;
   addPresenca: (presenca: Presenca) => void;
-  updatePresenca: (id: string, payload: Partial<Presenca>) => void;
+  updatePresenca: (id: string, payload: Partial<Presenca>) => Presenca | null;
   setStatus: (id: string, status: StatusPresenca) => Presenca | null;
   markJustified: (id: string) => Presenca | null;
   removePresenca: (id: string) => void;
@@ -93,11 +93,24 @@ export const usePresencasStore = create<PresencasState>((set) => ({
     });
   },
   updatePresenca: (id, payload) => {
+    let atualizada: Presenca | null = null;
     set((state) => {
-      const atualizadas = state.presencas.map((item) => (item.id === id ? { ...item, ...payload } : item));
+      const statusNormalizado = payload.status ? normalizarStatus(payload.status) : null;
+      const atualizadas = state.presencas.map((item) => {
+        if (item.id !== id) return item;
+        const status = statusNormalizado ?? item.status;
+        atualizada = {
+          ...item,
+          ...payload,
+          status,
+          hora: status === 'CONFIRMADO' ? item.hora || getCurrentTime() : item.hora
+        };
+        return atualizada;
+      });
       syncAlunos(atualizadas);
       return { presencas: atualizadas };
     });
+    return atualizada;
   },
   setStatus: (id, status) => {
     let atualizada: Presenca | null = null;

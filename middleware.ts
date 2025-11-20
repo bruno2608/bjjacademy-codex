@@ -9,8 +9,14 @@ const STATIC_PREFIXES = ['/_next', '/icons', '/service-worker.js', '/sw.js'];
 
 const parseRoles = (raw: string | undefined): UserRole[] => {
   if (!raw) return [] as UserRole[];
-  const parts = raw.includes('[') ? JSON.parse(raw) : raw.split(',');
-  return normalizeRoles(parts);
+
+  try {
+    const parts = raw.includes('[') ? JSON.parse(raw) : raw.split(',');
+    return normalizeRoles(parts);
+  } catch (error) {
+    console.warn('Invalid bjj_roles cookie, falling back to empty list.', error);
+    return [] as UserRole[];
+  }
 };
 
 export function middleware(request: NextRequest) {

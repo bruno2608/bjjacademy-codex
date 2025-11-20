@@ -1,24 +1,53 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Button from '../../components/ui/Button';
 import ValidatedField from '../../components/ui/ValidatedField';
+import { ROLE_KEYS } from '../../config/roles';
 import useUserStore from '../../store/userStore';
 import { useAlunosStore } from '../../store/alunosStore';
+import StudentHero from '../../components/student/StudentHero';
+import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
+
+const ensureAvatar = (name, avatarUrl) =>
+  avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
 
 export default function PerfilAlunoPage() {
-  const { user } = useUserStore();
+  const { user, updateUser } = useUserStore();
   const alunos = useAlunosStore((state) => state.alunos);
   const updateAluno = useAlunosStore((state) => state.updateAluno);
-  const aluno = useMemo(() => alunos.find((item) => item.id === user?.alunoId) || alunos[0], [alunos, user?.alunoId]);
-  const [form, setForm] = useState({
-    nome: aluno?.nome || '',
-    telefone: aluno?.telefone || '',
-    email: aluno?.email || '',
-    avatarUrl: aluno?.avatarUrl || ''
+  const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
+  const defaultInstrutor = useMemo(() => MOCK_INSTRUTORES[0], []);
+  const aluno = useMemo(() => {
+    if (!isAluno) return null;
+    return alunos.find((item) => item.id === user?.alunoId) || alunos[0] || null;
+  }, [alunos, isAluno, user?.alunoId]);
+
+  const professorRoles = useMemo(
+    () => (user?.roles || []).filter((role) => role !== ROLE_KEYS.aluno),
+    [user?.roles]
+  );
+
+  const deriveInitialForm = () => ({
+    nome: (isAluno ? aluno?.nome : user?.name || defaultInstrutor?.nome) || '',
+    telefone: (isAluno ? aluno?.telefone : user?.telefone) || '',
+    email: (isAluno ? aluno?.email : user?.email) || '',
+    avatarUrl: (isAluno ? aluno?.avatarUrl : user?.avatarUrl || defaultInstrutor?.avatarUrl) || ''
   });
+
+  const [form, setForm] = useState(deriveInitialForm);
   const [fileName, setFileName] = useState('');
   const [saved, setSaved] = useState(false);
+
+  const statusLabel = useMemo(() => {
+    if (!isAluno) return defaultInstrutor?.status || 'Ativo';
+    const raw = aluno?.status || 'Ativo';
+    return typeof raw === 'string' ? raw.charAt(0).toUpperCase() + raw.slice(1) : 'Ativo';
+  }, [aluno?.status, defaultInstrutor?.status, isAluno]);
+
+  useEffect(() => {
+    setForm(deriveInitialForm());
+  }, [aluno, user, isAluno]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -36,16 +65,41 @@ export default function PerfilAlunoPage() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    updateAluno(aluno.id, form);
+    if (isAluno && aluno) {
+      updateAluno(aluno.id, form);
+    } else {
+      updateUser?.({
+        name: form.nome,
+        telefone: form.telefone,
+        email: form.email,
+        avatarUrl: form.avatarUrl
+      });
+    }
     setSaved(true);
   };
 
+  const disabledFieldClass =
+    'input input-bordered input-primary w-full border border-bjj-gray-500/80 bg-bjj-gray-800/90 text-sm font-semibold text-bjj-gray-100/90 placeholder:text-bjj-gray-200 disabled:cursor-not-allowed disabled:border-bjj-gray-500 disabled:bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.06)_0,rgba(255,255,255,0.06)_12px,rgba(255,255,255,0.03)_12px,rgba(255,255,255,0.03)_24px)]';
+
   return (
     <div className="space-y-4">
+      <StudentHero
+        name={form.nome || user?.name || defaultInstrutor?.nome || 'Aluno'}
+        faixa={isAluno ? aluno?.faixa : defaultInstrutor?.faixa}
+        graus={isAluno ? aluno?.graus : defaultInstrutor?.graus}
+        statusLabel={statusLabel}
+        avatarUrl={ensureAvatar(form.nome || defaultInstrutor?.nome, form.avatarUrl)}
+        subtitle={isAluno ? 'Perfil do aluno' : 'Perfil do professor'}
+      />
+
       <header className="flex flex-col gap-1">
         <p className="text-xs uppercase tracking-[0.25em] text-bjj-gray-400">Perfil</p>
-        <h1 className="text-2xl font-semibold">Dados do aluno</h1>
-        <p className="text-sm text-bjj-gray-300/80">Altere apenas suas informações pessoais. Plano e faixa são somente leitura.</p>
+        <h1 className="text-2xl font-semibold">{isAluno ? 'Dados do aluno' : 'Perfil do professor'}</h1>
+        <p className="text-sm text-bjj-gray-300/80">
+          {isAluno
+            ? 'Altere apenas suas informações pessoais. Plano e faixa são somente leitura.'
+            : 'Mantenha seus contatos atualizados. Papéis e credenciais são controlados pela secretaria.'}
+        </p>
       </header>
 
       <form
@@ -106,50 +160,101 @@ export default function PerfilAlunoPage() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <label className="form-control">
-            <div className="label pb-1">
-              <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/80">Faixa</span>
-            </div>
-            <input
-              disabled
-              value={aluno?.faixa || '—'}
-              className="input input-bordered w-full border-bjj-gray-800 bg-bjj-gray-900 text-sm text-bjj-gray-400"
-              readOnly
-            />
-            <div className="label pt-1">
-              <span className="label-text-alt text-[11px] text-bjj-gray-500">Gerenciado pelo instrutor</span>
-            </div>
-          </label>
-          <label className="form-control">
-            <div className="label pb-1">
-              <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/80">Grau</span>
-            </div>
-            <input
-              disabled
-              value={`${aluno?.graus || 0}º`}
-              className="input input-bordered w-full border-bjj-gray-800 bg-bjj-gray-900 text-sm text-bjj-gray-400"
-              readOnly
-            />
-            <div className="label pt-1">
-              <span className="label-text-alt text-[11px] text-bjj-gray-500">Controle exclusivo da academia</span>
-            </div>
-          </label>
-          <label className="form-control">
-            <div className="label pb-1">
-              <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-200/80">Plano</span>
-            </div>
-            <input
-              disabled
-              value={aluno?.plano || 'Mensal'}
-              className="input input-bordered w-full border-bjj-gray-800 bg-bjj-gray-900 text-sm text-bjj-gray-400"
-              readOnly
-            />
-            <div className="label pt-1">
-              <span className="label-text-alt text-[11px] text-bjj-gray-500">Alterações via secretaria</span>
-            </div>
-          </label>
-        </div>
+        {isAluno ? (
+          <div className="grid gap-4 sm:grid-cols-3">
+            <label className="form-control">
+              <div className="label pb-1">
+                <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-100">Faixa</span>
+              </div>
+              <input
+                disabled
+                value={aluno?.faixa || '—'}
+                className={disabledFieldClass}
+                readOnly
+              />
+              <div className="label pt-1">
+                <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Gerenciado pelo instrutor</span>
+              </div>
+            </label>
+            <label className="form-control">
+              <div className="label pb-1">
+                <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-100">Grau</span>
+              </div>
+              <input
+                disabled
+                value={`${aluno?.graus || 0}º`}
+                className={disabledFieldClass}
+                readOnly
+              />
+              <div className="label pt-1">
+                <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Controle exclusivo da academia</span>
+              </div>
+            </label>
+            <label className="form-control">
+              <div className="label pb-1">
+                <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-100">Plano</span>
+              </div>
+              <input
+                disabled
+                value={aluno?.plano || 'Mensal'}
+                className={disabledFieldClass}
+                readOnly
+              />
+              <div className="label pt-1">
+                <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Alterações via secretaria</span>
+              </div>
+            </label>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-3">
+            <label className="form-control">
+              <div className="label pb-1">
+                <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-100">Papéis</span>
+              </div>
+              <input
+                disabled
+                value={
+                  professorRoles.length
+                    ? professorRoles.map((role) => role.charAt(0).toUpperCase() + role.slice(1)).join(', ')
+                    : 'Instrutor'
+                }
+                className={disabledFieldClass}
+                readOnly
+              />
+              <div className="label pt-1">
+                <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Definido pela coordenação</span>
+              </div>
+            </label>
+            <label className="form-control">
+              <div className="label pb-1">
+                <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-100">Unidade</span>
+              </div>
+              <input
+                disabled
+                value={user?.unidade || 'Matriz - Vila Mariana'}
+                className={disabledFieldClass}
+                readOnly
+              />
+              <div className="label pt-1">
+                <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Atualize com a secretaria se mudar</span>
+              </div>
+            </label>
+            <label className="form-control">
+              <div className="label pb-1">
+                <span className="label-text text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-100">Especialidade</span>
+              </div>
+              <input
+                disabled
+                value={user?.especialidade || 'Aulas avançadas e No-Gi'}
+                className={disabledFieldClass}
+                readOnly
+              />
+              <div className="label pt-1">
+                <span className="label-text-alt text-[11px] text-bjj-gray-50/80">Editável apenas pela coordenação</span>
+              </div>
+            </label>
+          </div>
+        )}
 
         <div className="flex items-center gap-3">
           <Button type="submit" className="px-5">Salvar alterações</Button>
