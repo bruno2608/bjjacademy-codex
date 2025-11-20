@@ -20,10 +20,18 @@
     "@types/node": "^20.10.6",
     "@types/react": "^18.2.33",
     "@types/react-dom": "^18.2.14",
-    "daisyui": "^4.7.2",
     "autoprefixer": "^10.4.14",
+    "daisyui": "^4.7.2",
     "postcss": "^8.4.27",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.3.3"
-  }
+  },
+  "description": "Bem-vindo à base do novo **BJJ Academy PWA**, plataforma web progressiva\r focada na gestão completa de academias de Jiu-Jitsu. O projeto une a\r identidade \"Zenko Focus\" com uma camada visual gamificada inspirada nas\r versões mobile [`bjjacademyapp`](https://github.com/bruno2608/bjjacademyapp)\r e backend [`bjj-academy-api`](https://github.com/bruno2608/bjj-academy-api).",
+  "main": "next.config.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
