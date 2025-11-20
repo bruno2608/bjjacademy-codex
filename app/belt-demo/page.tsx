@@ -41,29 +41,29 @@ const BjjBeltDemoPage = () => {
 
       <div className="w-full h-px bg-zinc-800"></div>
 
-      <div className="w-full max-w-2xl space-y-4">
-        <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold text-white">BjjBeltStrip (Isolado)</h2>
+      <div className="w-full max-w-2xl">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-white">
+            Componente Visual Isolado
+          </h2>
           <p className="text-zinc-500 text-sm">
-            Apenas a representação visual da faixa, ideal para listas ou perfis.
+            Apenas <code>BjjBeltStrip</code>
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl border border-red-900/40 bg-gradient-to-br from-red-950 via-red-900/60 to-red-950 shadow-lg space-y-3">
-            <p className="text-xs font-semibold text-red-200/80 uppercase tracking-wide">
-              Perfil Compacto
+          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
+            <p className="text-xs text-zinc-500 mb-2">
+              Perfil Compacto (Preta Padrão)
             </p>
             <BjjBeltStrip config={MOCK_FAIXAS[2]} grauAtual={4} />
-            <p className="text-sm text-red-100/80">Mestre Hélio (Praticante)</p>
           </div>
 
-          <div className="p-4 rounded-xl border border-yellow-500/40 bg-gradient-to-br from-black via-yellow-500/10 to-yellow-600/30 shadow-lg space-y-3">
-            <p className="text-xs font-semibold text-yellow-100/80 uppercase tracking-wide">
-              Lista de Presença
+          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
+            <p className="text-xs text-zinc-500 mb-2">
+              Lista de Presença (Infantil)
             </p>
             <BjjBeltStrip config={MOCK_FAIXAS[0]} grauAtual={1} />
-            <p className="text-sm text-yellow-100/80">Enzo (Infantil)</p>
           </div>
         </div>
       </div>

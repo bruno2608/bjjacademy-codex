@@ -72,7 +72,7 @@ export const BjjBeltStrip: React.FC<BjjBeltStripProps> = ({
   const stitchingClass = config.stitchingColorClass || "bg-black/10";
 
   return (
-    <div className="relative w-full h-14 rounded-md shadow-lg flex overflow-hidden group transition-transform hover:scale-[1.005] duration-500 border border-white/10">
+    <div className="relative w-full h-14 rounded-md shadow-lg flex overflow-hidden group transition-transform hover:scale-[1.005] duration-500 border border-white/10 select-none">
       {/* Textura de tecido (Overlay global) */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-black/10 pointer-events-none z-10 mix-blend-overlay opacity-50"></div>
 
@@ -154,7 +154,9 @@ export const BjjBeltProgressCard: React.FC<BjjBeltProgressCardProps> = ({
 }) => {
   if (!config) {
     return (
-      <div className="text-red-500 text-xs p-4">Configuração ausente</div>
+      <div className="p-4 text-red-500 text-xs border border-red-800 rounded bg-red-900/20">
+        Erro: Configuração da faixa ausente.
+      </div>
     );
   }
 
@@ -172,6 +174,7 @@ export const BjjBeltProgressCard: React.FC<BjjBeltProgressCardProps> = ({
   // Cor da barra de progresso (fallback para cor da faixa)
   const progressBarColor = config.progressBarClass || config.beltColorClass;
   const isProfessor = config.tipoPreta === "professor";
+  const isCompetitor = config.tipoPreta === "competidor";
 
   return (
     <div className="w-full p-5 bg-zinc-900 rounded-xl border border-zinc-800/60 shadow-sm font-sans">
@@ -189,7 +192,7 @@ export const BjjBeltProgressCard: React.FC<BjjBeltProgressCardProps> = ({
                 Professor
               </span>
             )}
-            {config.tipoPreta === "competidor" && (
+            {isCompetitor && (
               <span className="text-[10px] py-0.5 px-1.5 rounded border border-zinc-500/40 text-zinc-400 bg-zinc-500/10 uppercase tracking-wide font-bold">
                 Competidor
               </span>
