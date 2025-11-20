@@ -7,9 +7,9 @@ import { MOCK_FAIXAS } from "@/mocks/bjjBeltMocks";
 
 const BjjBeltDemoPage = () => {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-200 py-12 px-4 sm:px-8 flex flex-col items-center gap-12 font-sans">
+    <div className="min-h-screen bg-zinc-950 text-zinc-200 p-8 flex flex-col items-center gap-12 font-sans">
       <div className="w-full max-w-4xl space-y-6">
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-white">Cards de Dashboard</h2>
           <p className="text-zinc-500 text-sm">Teste de componentes refatorados.</p>
         </div>
@@ -41,9 +41,7 @@ const BjjBeltDemoPage = () => {
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-white">Componente Visual Isolado</h2>
-          <p className="text-zinc-500 text-sm">
-            Apenas <code>BjjBeltStrip</code> em diferentes contextos
-          </p>
+          <p className="text-zinc-500 text-sm">Apenas BjjBeltStrip em diferentes contextos</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
