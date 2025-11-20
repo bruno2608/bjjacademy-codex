@@ -12,6 +12,7 @@ export function BjjBeltStrip({ config, grauAtual, className = "" }: BjjBeltStrip
     <div
       className={`relative w-full h-16 rounded-md shadow-lg flex overflow-hidden group transition-transform hover:scale-[1.005] duration-500 border border-white/10 ${className}`}
     >
+      <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-black/10 pointer-events-none z-10 mix-blend-overlay opacity-50" />
       {/* 1. Corpo da Faixa (NÍVEL 2) */}
       <div
         className={`flex-grow ${config.beltColorClass} relative flex items-center pl-4 transition-colors duration-300 overflow-hidden`}
