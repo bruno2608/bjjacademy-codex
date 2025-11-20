@@ -10,20 +10,6 @@ export default function BeltDemoPage() {
   return (
     <main className="min-h-screen bg-zinc-950 p-8">
       <div className="max-w-4xl mx-auto space-y-12">
-        {/* TEST: Ultra simples - sem wrappers */}
-        <div className="bg-red-600 p-8 border-4 border-yellow-400">
-          <p className="text-white text-lg font-bold mb-4">🔴 TEST RENDER AQUI EMBAIXO:</p>
-          <BjjBeltStrip config={MOCK_FAIXAS[0]} grauAtual={3} />
-        </div>
-
-        {/* TEST: BjjBeltStrip simples */}
-        <div className="bg-red-900 p-8 rounded border-2 border-red-500">
-          <p className="text-white mb-4">TEST: BjjBeltStrip simples</p>
-          <div className="bg-blue-900 p-4">
-            <BjjBeltStrip config={MOCK_FAIXAS[0]} grauAtual={3} />
-          </div>
-        </div>
-
         {/* Título */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Cards de Dashboard</h1>
@@ -33,7 +19,7 @@ export default function BeltDemoPage() {
         {/* Cards com progressão */}
         <div className="space-y-4">
           <BjjBeltProgressCard config={MOCK_FAIXAS[0]} grauAtual={3} aulasFeitasNoGrau={30} aulasMetaNoGrau={60} />
-          <BjjBeltProgressCard config={MOCK_FAIXAS[1]} grauAtual={2} aulasFeitasNoGrau={150} aulasMetaNoGrau={150} />
+          <BjjBeltProgressCard config={MOCK_FAIXAS[1]} grauAtual={2} aulasFeitasNoGrau={130} aulasMetaNoGrau={150} />
           <BjjBeltProgressCard config={MOCK_FAIXAS[3]} grauAtual={6} aulasFeitasNoGrau={145} aulasMetaNoGrau={150} />
         </div>
 
