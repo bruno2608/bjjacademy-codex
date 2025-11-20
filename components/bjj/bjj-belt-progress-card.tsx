@@ -1,4 +1,4 @@
-import { BjjBeltStrip } from "./BjjBeltStrip"
+import { BjjBeltStrip } from "./bjj-belt-strip"
 import type { BjjBeltProgressCardProps } from "../../types/bjjBelt"
 
 export function BjjBeltProgressCard({

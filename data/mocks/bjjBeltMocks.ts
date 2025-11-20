@@ -1,4 +1,4 @@
-import type { BjjBeltVisualConfig } from "@/types/bjjBelt"
+import type { BjjBeltVisualConfig } from "../..//types/bjjBelt"
 
 export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
   {
@@ -8,7 +8,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     categoria: "INFANTIL",
     grausMaximos: 6,
     beltColorClass: "bg-yellow-400",
-    horizontalStripeClass: "bg-black",
+    horizontalStripeClass: "bg-red-600",
     tipColorClass: "bg-black",
     stripeColorClass: "bg-white",
     stripeInactiveClass: "bg-zinc-700",

@@ -8,8 +8,9 @@ export function BjjBeltStrip({ config, grauAtual, className = "" }: BjjBeltStrip
 
   return (
     <div
-      className={`relative w-full h-16 rounded-md shadow-lg flex overflow-hidden group transition-transform hover:scale-[1.005] duration-500 border border-white/10 ${className}`}
+      className={`relative w-full h-14 rounded-md shadow-lg flex overflow-hidden group transition-transform hover:scale-[1.005] duration-500 border border-white/10 ${className}`}
     >
+      {/* Textura de tecido */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-black/10 pointer-events-none z-10 mix-blend-overlay opacity-50" />
 
       {/* Corpo da faixa */}
@@ -26,14 +27,15 @@ export function BjjBeltStrip({ config, grauAtual, className = "" }: BjjBeltStrip
         <div className={`w-full h-[1px] ${stitchingClass} absolute top-2 z-10`} />
         <div className={`w-full h-[1px] ${stitchingClass} absolute bottom-2 z-10`} />
 
-        {/* Marca textual */}
+        {/* Marca textual - improved contrast */}
         <span className="text-[10px] font-black tracking-[0.2em] opacity-70 uppercase text-white relative z-10">
           Jiu-Jitsu
         </span>
       </div>
 
+      {/* Ponteira */}
       <div
-        className={`relative h-full flex items-center justify-evenly z-20 shadow-[-2px_0_8px_rgba(0,0,0,0.25)] ${config.tipColorClass} min-w-[7.5rem] md:min-w-[9rem] px-2`}
+        className={`relative h-full flex items-center justify-evenly z-20 shadow-[-2px_0_8px_rgba(0,0,0,0.25)] ${config.tipColorClass} min-w-[6rem] md:min-w-[8rem] px-1`}
       >
         {isProfessor && (
           <>
@@ -42,16 +44,16 @@ export function BjjBeltStrip({ config, grauAtual, className = "" }: BjjBeltStrip
           </>
         )}
 
-        {/* Graus / Listras com melhor espaçamento */}
+        {/* Graus / Listras */}
         {Array.from({ length: config.grausMaximos }).map((_, i) => {
           const isActive = i < safeGrau
           return (
             <div
               key={i}
-              className={`w-3 h-2/3 rounded-sm shadow-md transition-all duration-500 z-20 ${
+              className={`w-2.5 h-3/5 rounded-[1px] shadow-sm transition-all duration-500 z-20 ${
                 isActive
                   ? `${config.stripeColorClass} opacity-100 scale-100 shadow-[0_0_4px_rgba(255,255,255,0.4)]`
-                  : `${config.stripeInactiveClass} opacity-60 scale-90`
+                  : `${config.stripeInactiveClass} scale-95`
               }`}
             />
           )
