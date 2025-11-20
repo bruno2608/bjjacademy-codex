@@ -1,0 +1,63 @@
+import type { BjjBeltVisualConfig } from "@/types/bjjBelt"
+
+export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
+  {
+    id: 1,
+    nome: "Amarela e Preta",
+    slug: "amarela-preta",
+    categoria: "INFANTIL",
+    grausMaximos: 6,
+    beltColorClass: "bg-yellow-400",
+    horizontalStripeClass: "bg-black",
+    tipColorClass: "bg-black",
+    stripeColorClass: "bg-white",
+    stripeInactiveClass: "bg-zinc-700",
+    textColorClass: "text-white/80",
+    progressBarClass: "bg-yellow-500",
+  },
+
+  {
+    id: 2,
+    nome: "Preta (Competidor)",
+    slug: "preta-competidor",
+    categoria: "ADULTO",
+    grausMaximos: 6,
+    beltColorClass: "bg-neutral-950",
+    stitchingColorClass: "bg-white/10",
+    tipColorClass: "bg-white",
+    stripeColorClass: "bg-black",
+    stripeInactiveClass: "bg-zinc-300",
+    tipoPreta: "competidor",
+    progressBarClass: "bg-emerald-500",
+  },
+
+  {
+    id: 3,
+    nome: "Preta (Padrão)",
+    slug: "preta-padrao",
+    categoria: "ADULTO",
+    grausMaximos: 6,
+    beltColorClass: "bg-neutral-950",
+    stitchingColorClass: "bg-white/10",
+    tipColorClass: "bg-red-600",
+    stripeColorClass: "bg-white",
+    stripeInactiveClass: "bg-red-800",
+    tipoPreta: "padrao",
+    progressBarClass: "bg-emerald-500",
+  },
+
+  {
+    id: 4,
+    nome: "Preta (Professor)",
+    slug: "preta-professor",
+    categoria: "ADULTO",
+    grausMaximos: 6,
+    beltColorClass: "bg-neutral-950",
+    stitchingColorClass: "bg-white/10",
+    tipColorClass: "bg-red-600",
+    stripeColorClass: "bg-white",
+    stripeInactiveClass: "bg-red-800",
+    tipoPreta: "professor",
+    progressBarClass: "bg-red-600",
+  },
+]
