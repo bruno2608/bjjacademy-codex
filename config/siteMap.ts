@@ -9,7 +9,8 @@ export const siteMap = {
     '/evolucao',
     '/historico-presencas',
     '/perfil',
-    '/relatorios'
+    '/relatorios',
+    '/belt-demo'
   ],
   instrutor: [
     '/dashboard',
@@ -19,6 +20,7 @@ export const siteMap = {
     '/historico-presencas',
     '/perfil',
     '/relatorios',
+    '/belt-demo',
     '/alunos'
   ],
   professor: [
@@ -32,6 +34,7 @@ export const siteMap = {
     '/presencas',
     '/alunos',
     '/relatorios',
+    '/belt-demo',
     '/configuracoes/graduacao',
     '/configuracoes/treinos',
     '/configuracoes/tipos-treino'

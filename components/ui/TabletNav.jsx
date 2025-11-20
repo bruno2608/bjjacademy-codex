@@ -59,6 +59,12 @@ export default function TabletNav() {
           <div className="hidden min-w-0 flex-1 flex-wrap items-center gap-2 sm:flex">
             {navigationItems.map((item) => renderNavLink(item))}
           </div>
+          <Link
+            href="/belt-demo"
+            className="hidden items-center gap-2 rounded-full border border-bjj-red/60 bg-bjj-red/15 px-3 py-2 text-xs font-semibold text-bjj-white transition hover:border-bjj-red/80 hover:bg-bjj-red/25 sm:inline-flex"
+          >
+            Belt Demo
+          </Link>
           <button
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white sm:hidden"
@@ -76,6 +82,13 @@ export default function TabletNav() {
         <div className="sm:hidden border-t border-bjj-gray-800/70 bg-bjj-black/95">
           <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-3 md:px-6 xl:px-8">
             {navigationItems.map((item) => renderNavLink(item, { condensed: true }))}
+            <Link
+              href="/belt-demo"
+              className="w-full rounded-xl border border-bjj-red/70 bg-bjj-red/15 px-4 py-2 text-center text-sm font-semibold text-bjj-white transition hover:border-bjj-red/80 hover:bg-bjj-red/25"
+              onClick={() => setMobileOpen(false)}
+            >
+              Belt Demo
+            </Link>
             <div className="mt-1 w-full">
               <UserMenu inline />
             </div>
