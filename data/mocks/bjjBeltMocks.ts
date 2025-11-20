@@ -60,7 +60,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     slug: "marrom",
     categoria: "ADULTO",
     grausMaximos: 4,
-    beltColorClass: "bg-amber-800",
+    beltColorClass: "bg-amber-700",
     stitchingColorClass: "bg-bjj-white/30",
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
@@ -78,12 +78,12 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     grausMaximos: 6,
     beltColorClass: "bg-bjj-black",
     stitchingColorClass: "bg-bjj-gray-500",
-    tipColorClass: "bg-bjj-red", // Ponteira Vermelha Lisa
+    tipColorClass: "bg-bjj-red/80", // Ponteira Vermelha Lisa
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-red/60",
     tipoPreta: "padrao",
     textColorClass: "text-bjj-white/80",
-    progressBarClass: "bg-bjj-red"
+    progressBarClass: "bg-bjj-red/80"
   },
 
   // 6. PRETA (Competidor - Ponteira Branca)
@@ -112,12 +112,12 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     grausMaximos: 6,
     beltColorClass: "bg-bjj-black",
     stitchingColorClass: "bg-bjj-gray-500",
-    tipColorClass: "bg-bjj-red", // Ponteira Vermelha com bordas brancas
+    tipColorClass: "bg-bjj-red/80", // Ponteira Vermelha com bordas brancas
     stripeColorClass: "bg-bjj-white",
-    stripeInactiveClass: "bg-bjj-red/60",
+    stripeInactiveClass: "bg-bjj-red/80",
     tipoPreta: "professor", // CHAVE para as bordas brancas no componente Strip
     textColorClass: "text-bjj-white/80",
-    progressBarClass: "bg-bjj-red"
+    progressBarClass: "bg-bjj-red/80"
   },
   
   // ============================================================================
@@ -137,7 +137,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bjj-white/80",
-    progressBarClass: "bg-bjj-red"
+    progressBarClass: "bg-bjj-red/80"
   },
 
   // 9. VERMELHA (Red - 9º/10º Dan)
@@ -147,13 +147,13 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     slug: "vermelha",
     categoria: "ADULTO",
     grausMaximos: 10, 
-    beltColorClass: "bg-bjj-red",
+    beltColorClass: "bg-bjj-red/80",
     stitchingColorClass: "bg-bjj-white/80",
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bjj-white/80",
-    progressBarClass: "bg-bjj-red"
+    progressBarClass: "bg-bjj-red/80"
   },
 
 
@@ -174,7 +174,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bjj-black/80",
-    progressBarClass: "bg-zinc-400"
+    progressBarClass: "bg-white"
   },
   
   // 11. CINZA E BRANCA (Grey/White)
@@ -191,7 +191,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bjj-black/80",
-    progressBarClass: "bg-gray-400"
+    progressBarClass: "bg-gray-500"
   },
   
   // 12. CINZA (Grey)
@@ -224,7 +224,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bg-bjj-white",
-    progressBarClass: "bg-gray-600"
+    progressBarClass: "bg-gray-500"
   },
   
   // 14. AMARELA E BRANCA (Yellow/White)
@@ -234,7 +234,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     slug: "amarela-branca",
     categoria: "INFANTIL",
     grausMaximos: 4,
-    beltColorClass: "bg-yellow-400",
+    beltColorClass: "bg-yellow-500",
     horizontalStripeClass: "bg-white", // Listra branca
     stitchingColorClass: "bg-bjj-black/10",
     tipColorClass: "bg-bjj-black",
@@ -257,7 +257,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bjj-black/80",
-    progressBarClass: "bg-yellow-600"
+    progressBarClass: "bg-yellow-500"
   },
   
   // 16. AMARELA E PRETA (Yellow/Black)
@@ -267,14 +267,14 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     slug: "amarela-preta-infantil",
     categoria: "INFANTIL",
     grausMaximos: 4,
-    beltColorClass: "bg-yellow-600",
+    beltColorClass: "bg-yellow-500",
     horizontalStripeClass: "bg-bjj-black", // Listra preta
     stitchingColorClass: "bg-bjj-black/10",
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bg-bjj-white",
-    progressBarClass: "bg-yellow-700"
+    progressBarClass: "bg-yellow-500"
   },
   
   // 17. LARANJA E BRANCA (Orange/White)
@@ -284,7 +284,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     slug: "laranja-branca",
     categoria: "INFANTIL",
     grausMaximos: 4,
-    beltColorClass: "bg-orange-400",
+    beltColorClass: "bg-orange-500",
     horizontalStripeClass: "bg-white",
     stitchingColorClass: "bg-bjj-black/10",
     tipColorClass: "bg-bjj-black",
@@ -307,7 +307,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bjj-black",
-    progressBarClass: "bg-orange-600"
+    progressBarClass: "bg-orange-500"
   },
   
   // 19. LARANJA E PRETA (Orange/Black)
@@ -317,14 +317,14 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     slug: "laranja-preta",
     categoria: "INFANTIL",
     grausMaximos: 4,
-    beltColorClass: "bg-orange-600",
+    beltColorClass: "bg-orange-500",
     horizontalStripeClass: "bg-bjj-black",
     stitchingColorClass: "bg-bjj-black/10",
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bg-bjj-white",
-    progressBarClass: "bg-orange-700"
+    progressBarClass: "bg-orange-500"
   },
 
   // 20. VERDE E BRANCA (Green/White)
@@ -334,14 +334,14 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     slug: "verde-branca",
     categoria: "INFANTIL",
     grausMaximos: 4,
-    beltColorClass: "bg-green-400",
+    beltColorClass: "bg-green-700",
     horizontalStripeClass: "bg-white",
     stitchingColorClass: "bg-bjj-black/10",
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bjj-black",
-    progressBarClass: "bg-green-500"
+    progressBarClass: "bg-green-700"
   },
   
   // 21. VERDE (Green)
@@ -351,13 +351,13 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     slug: "verde",
     categoria: "INFANTIL",
     grausMaximos: 4,
-    beltColorClass: "bg-green-600",
+    beltColorClass: "bg-green-700",
     stitchingColorClass: "bg-bjj-black/10",
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bg-bjj-white",
-    progressBarClass: "bg-green-700"
+    progressBarClass: "bg-green-600"
   },
   
   // 22. VERDE E PRETA (Green/Black)
@@ -367,13 +367,13 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     slug: "verde-preta",
     categoria: "INFANTIL",
     grausMaximos: 4,
-    beltColorClass: "bg-green-800",
+    beltColorClass: "bg-green-700",
     horizontalStripeClass: "bg-bjj-black",
     stitchingColorClass: "bg-bjj-black/10",
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
     textColorClass: "text-bjj-white/80",
-    progressBarClass: "bg-green-900"
+    progressBarClass: "bg-green-700"
   },
 ];
