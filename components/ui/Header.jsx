@@ -69,6 +69,8 @@ export default function Header() {
 
   const avatarUrl = aluno?.avatarUrl || user?.avatarUrl;
 
+  const avatarUrl = user?.avatarUrl || aluno?.avatarUrl;
+
   const handleLogout = () => {
     logout();
     router.push('/login');
