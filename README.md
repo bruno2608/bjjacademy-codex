@@ -322,6 +322,7 @@ styles/
 - `/presencas` (professor/staff) agora consome **apenas** `usePresencasStore`/`presencasService` em conjunto com `useAlunosStore` e `useTreinosStore`; não há imports diretos de mocks na página ou nos componentes.
 - Cards e totais (presenças/faltas/pendentes, histórico da semana) reutilizam os mesmos helpers do dashboard (`calcularResumoPresencas`/`comporRegistrosDoDia`), garantindo números idênticos entre /dashboard e /presencas.
 - Listagem, filtros e ações de presença operam sobre `alunoId`/`treinoId` vindos das stores; qualquer criação/edição/exclusão chama as ações da store (`carregarTodas`, `salvarPresenca`, `atualizarStatus`, `fecharTreino`), mantendo os snapshots sincronizados com dashboards e histórico.
+- `/historico-presencas` (staff) usa exclusivamente `usePresencasStore` + `useAlunosStore` + `useCurrentStaff` para compor a linha do tempo, aplicando os mesmos agregadores de status (`calcularResumoPresencas`) e filtros de faixa/status/treino usados na visão diária. A página está pronta para troca dos mocks por API apenas alterando `presencasService`.
 
 ### Componentes compartilhados de UI
 
