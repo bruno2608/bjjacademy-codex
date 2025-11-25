@@ -318,6 +318,11 @@ styles/
 - **Regras de graduação configuráveis:** matriz completa em `config/graduationRules.ts` com requisitos de idade mínima, tempo de faixa, aulas mínimas e faixas seguintes. A `graduationRulesStore` permite ajustes por faixa ou por grau (stripe) com persistência local.
 - **Sincronização de alunos:** toda alteração de presença recalcula progressão de alunos (`presencasStore` → `alunosStore`), mantendo contadores de aulas no grau/faixa atual para dashboards e timelines.
 
+### Gestão de Presenças (visão staff)
+- `/presencas` (professor/staff) agora consome **apenas** `usePresencasStore`/`presencasService` em conjunto com `useAlunosStore` e `useTreinosStore`; não há imports diretos de mocks na página ou nos componentes.
+- Cards e totais (presenças/faltas/pendentes, histórico da semana) reutilizam os mesmos helpers do dashboard (`calcularResumoPresencas`/`comporRegistrosDoDia`), garantindo números idênticos entre /dashboard e /presencas.
+- Listagem, filtros e ações de presença operam sobre `alunoId`/`treinoId` vindos das stores; qualquer criação/edição/exclusão chama as ações da store (`carregarTodas`, `salvarPresenca`, `atualizarStatus`, `fecharTreino`), mantendo os snapshots sincronizados com dashboards e histórico.
+
 ### Componentes compartilhados de UI
 
 - `PageHero`: cartão heroico reutilizado nas páginas do painel.

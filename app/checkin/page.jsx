@@ -33,13 +33,6 @@ const formatDateKey = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-const formatDateKey = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
 export default function CheckinPage() {
   const { user, aluno } = useCurrentAluno();
   const alunoId = aluno?.id || user?.alunoId;

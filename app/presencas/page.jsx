@@ -18,7 +18,8 @@ import Select from '../../components/ui/Select';
 import { usePresencasStore } from '@/store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
-import { calcularResumoPresencas } from '@/lib/presencasResumo';
+import { normalizeAlunoStatus } from '@/lib/alunoStats';
+import { calcularResumoPresencas, comporRegistrosDoDia } from '@/lib/presencasResumo';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
@@ -147,41 +148,30 @@ export default function PresencasPage() {
 
   // Lista reativa de alunos ativos para preencher a visão diária.
   const alunosAtivos = useMemo(
-    () => alunos.filter((aluno) => aluno.status === 'Ativo'),
+    () => alunos.filter((aluno) => normalizeAlunoStatus(aluno.status) === 'ATIVO'),
     [alunos]
   );
 
-  // Para o dia atual, combinamos registros reais com placeholders ausentes.
-  const registrosDoDia = useMemo(() => {
-    const registros = presencas
-      .filter((item) => item.data === hoje)
-      .map((item) => ({ ...item, isPlaceholder: false }));
-    const alunosComRegistro = new Set(registros.map((item) => item.alunoId));
-    const placeholders = alunosAtivos
-      .filter((aluno) => !alunosComRegistro.has(aluno.id))
-      .map((aluno) => {
-        const preferencia =
-          filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0 ? null : filterTreinos[0];
-        const treinoSugestao = sugerirTreino(hoje, preferencia);
-        return {
-          id: `placeholder-${aluno.id}-${treinoSugestao?.id || 'principal'}`,
-          alunoId: aluno.id,
-          data: hoje,
-          status: 'FALTA',
-          treinoId: treinoSugestao?.id || null,
-          isPlaceholder: true
-        };
-      });
+  const sugerirTreinoDoAluno = useCallback(
+    (dataReferencia) => {
+      const preferencia =
+        filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0 ? null : filterTreinos[0];
+      return sugerirTreino(dataReferencia, preferencia);
+    },
+    [filterTreinos, sugerirTreino]
+  );
 
-    const combinados = [...registros, ...placeholders].map((item) => {
-      const aluno = getAlunoById(item.alunoId);
-      const alunoNome = aluno?.nome || 'Aluno não encontrado';
-      const faixaSlug = aluno?.faixaSlug || aluno?.faixa || 'Sem faixa';
-      const graus = Number.isFinite(Number(aluno?.graus)) ? Number(aluno?.graus) : 0;
-      return { ...item, alunoNome, faixaSlug, graus };
-    });
-    return combinados.sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
-  }, [alunosAtivos, filterTreinos, getAlunoById, hoje, presencas, sugerirTreino]);
+  // Para o dia atual, combinamos registros reais com placeholders ausentes reaproveitando helper compartilhado.
+  const registrosDoDia = useMemo(
+    () =>
+      comporRegistrosDoDia({
+        data: hoje,
+        presencas,
+        alunos: alunosAtivos,
+        sugerirTreino: (data) => sugerirTreinoDoAluno(data),
+      }),
+    [alunosAtivos, hoje, presencas, sugerirTreinoDoAluno]
+  );
 
   const limparSelecao = useCallback((lista, valorTodos = 'all') => {
     if (!Array.isArray(lista) || lista.length === 0 || lista.includes(valorTodos)) {
@@ -193,7 +183,7 @@ export default function PresencasPage() {
   const registrosFiltrados = useMemo(() => {
     const termo = searchTerm.trim().toLowerCase();
     const faixasAtivas = limparSelecao(filterFaixas);
-    const statusAtivos = limparSelecao(filterStatuses);
+    const statusAtivos = limparSelecao(filterStatuses).map((status) => normalizeAlunoStatus(status));
     const treinosAtivos = limparSelecao(filterTreinos, TODOS_TREINOS);
 
     return registrosDoDia.filter((item) => {
@@ -203,7 +193,8 @@ export default function PresencasPage() {
       if (faixasAtivas.length && !faixasAtivas.includes(item.faixaSlug)) {
         return false;
       }
-      if (statusAtivos.length && !statusAtivos.includes(item.status)) {
+      const statusRegistro = normalizeAlunoStatus(item.status);
+      if (statusAtivos.length && !statusAtivos.includes(statusRegistro)) {
         return false;
       }
       if (treinosAtivos.length) {
