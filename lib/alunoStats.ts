@@ -26,9 +26,13 @@ const normalizeHistorico = (historico?: GraduationHistoryEntry[]): GraduationHis
   }));
 };
 
-export const normalizeAluno = (aluno: Partial<Aluno>): Aluno => ({
-  id: aluno.id ?? `aluno-${Date.now()}`,
-  nome: aluno.nome ?? 'Aluno sem nome',
+export const normalizeAluno = (aluno: Partial<Aluno>): Aluno => {
+  const baseNome = aluno.nome ?? aluno.nomeCompleto ?? 'Aluno sem nome'
+
+  return {
+    id: aluno.id ?? `aluno-${Date.now()}`,
+    nome: baseNome,
+    nomeCompleto: aluno.nomeCompleto ?? baseNome,
   telefone: aluno.telefone ?? '',
   plano: aluno.plano ?? 'Mensal',
   status: (aluno.status as Aluno['status']) ?? 'Ativo',
@@ -46,8 +50,9 @@ export const normalizeAluno = (aluno: Partial<Aluno>): Aluno => ({
   aulasTotais: Number(aluno.aulasTotais ?? 0),
   aulasDesdeUltimaFaixa: Number(aluno.aulasDesdeUltimaFaixa ?? 0),
   aulasNoGrauAtual: Number(aluno.aulasNoGrauAtual ?? 0),
-  proximaMeta: aluno.proximaMeta ?? null
-});
+    proximaMeta: aluno.proximaMeta ?? null
+  }
+}
 
 const parseISODate = (value?: string | null): Date | null => {
   if (!value) return null;

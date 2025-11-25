@@ -9,6 +9,7 @@ import StudentHero from '../../components/student/StudentHero';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useCurrentInstrutor } from '@/hooks/useCurrentInstrutor';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useInstrutoresStore } from '@/store/instrutoresStore';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { normalizeFaixaSlug } from '@/lib/alunoStats';
 
@@ -20,6 +21,7 @@ export default function PerfilAlunoPage() {
   const { updateUser } = useCurrentUser();
   const { instrutor } = useCurrentInstrutor();
   const updateAluno = useAlunosStore((state) => state.updateAluno);
+  const atualizarInstrutor = useInstrutoresStore((state) => state.atualizar);
   const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
 
   const professorRoles = useMemo(
@@ -28,7 +30,10 @@ export default function PerfilAlunoPage() {
   );
 
   const deriveInitialForm = () => ({
-    nome: (isAluno ? aluno?.nome : instrutor?.nome || user?.nomeCompleto || user?.name) || '',
+    nome:
+      (isAluno
+        ? aluno?.nome
+        : instrutor?.nomeCompleto || instrutor?.nome || user?.nomeCompleto || user?.name) || '',
     telefone: (isAluno ? aluno?.telefone : user?.telefone) || '',
     email: (isAluno ? aluno?.email : user?.email) || '',
     avatarUrl: (isAluno ? aluno?.avatarUrl : user?.avatarUrl || instrutor?.avatarUrl) || ''
@@ -60,7 +65,7 @@ export default function PerfilAlunoPage() {
 
   useEffect(() => {
     setForm(deriveInitialForm());
-  }, [aluno, user, isAluno]);
+  }, [aluno, user, isAluno, instrutor]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -81,8 +86,19 @@ export default function PerfilAlunoPage() {
     if (isAluno && aluno) {
       updateAluno(aluno.id, form);
     } else {
+      const instrutorId = instrutor?.id || user?.instrutorId || user?.professorId;
+      if (instrutorId) {
+        void atualizarInstrutor(instrutorId, {
+          nome: form.nome,
+          nomeCompleto: form.nome,
+          email: form.email,
+          avatarUrl: form.avatarUrl
+        });
+      }
+
       updateUser?.({
         name: form.nome,
+        nomeCompleto: form.nome,
         telefone: form.telefone,
         email: form.email,
         avatarUrl: form.avatarUrl

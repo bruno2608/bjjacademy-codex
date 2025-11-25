@@ -3,6 +3,8 @@ import type { UserRole } from './session'
 export interface InstrutorProfile {
   id: string
   nome: string
+  nomeCompleto?: string
+  email?: string | null
   faixaSlug: string
   graus?: number
   status?: string

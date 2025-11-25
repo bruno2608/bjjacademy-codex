@@ -115,6 +115,12 @@ await atualizarStatus(registro.id, 'PRESENTE');
 - **Dashboards**: `/dashboard` seleciona automaticamente entre visão de professor/instrutor (via `useProfessorDashboard`) ou aluno (`useAlunoDashboard`).
 - **Telas de presença por perfil**: Aluno → `/dashboard`, `/checkin`, `/historico-presencas`; Professor/Instrutor → `/presencas` (listar/fechar treinos) e cards de presença no dashboard staff.
 
+`useProfessorDashboard` centraliza as métricas do painel staff a partir das mesmas stores/services usados em outras telas:
+
+- **Alunos ativos/total** = contagem do `alunosStore` (mesma da lista de alunos).
+- **Aulas na semana / check-ins registrados / histórico na semana** = `treinosStore` + `presencasStore` filtrados pela semana corrente.
+- **Check-ins por status e pendências** = agregação de `presencasStore` (PRESENTE/PENDENTE/FALTA/JUSTIFICADA) sem cálculos locais na página.
+
 Arquitetura de fluxo (mocks → service → store → hooks → tela):
 
 ```
@@ -128,6 +134,40 @@ useCurrentInstrutor · useCurrentAluno · useProfessorDashboard · useAlunoDashb
         ↓ (telas)
 Dashboards · Check-in · Histórico · Presenças (staff)
 ```
+
+## 🔄 Consistência de dados entre perfis
+
+### Entidades centrais e fontes oficiais
+
+- **CurrentUser** (`types/session.ts` + `useCurrentUser`) — nome/email/avatar e papéis carregados do `userStore`.
+- **AlunoProfile** (`types/aluno.ts` + `useAlunosStore`) — nome/nomeCompleto, faixaSlug/grauAtual, status e academia; normalizado por `normalizeAluno`.
+- **InstrutorProfile** (`types/instrutor.ts` + `useInstrutoresStore`) — nome/nomeCompleto, faixaSlug/grauAtual, status e avatar derivados dos mocks centralizados.
+- **BjjBeltVisualConfig** (`data/mocks/bjjBeltMocks.ts` + `getFaixaConfigBySlug`) — única fonte para visuais de faixa/grau.
+- **PresencaRegistro** (`types/presenca.ts` + `presencasStore`/`presencasService`) — check-ins, confirmações e faltas.
+
+### Como cada perfil consome os dados
+
+- **Aluno**: `/dashboard-aluno`, `/checkin`, `/evolucao`, `/historico-presencas`, `/perfil` usam `useCurrentAluno` + `useAlunoDashboard`/`presencasStore` para nome/faixa/presenças.
+- **Instrutor/Professor**: `/dashboard`, `/dashboard-instrutor`, `/presencas`, `/alunos`, `/perfil` usam `useCurrentInstrutor` (derivado do `userStore` + `instrutoresStore`) e as mesmas stores de presenças/treinos/alunos.
+- **Admin/TI**: acessos ampliados seguem o mesmo pipeline (mocks → services → stores), com TODO para expansão de regras específicas.
+
+### Fluxo único para faixa/grau e presenças
+
+- Faixas sempre resolvidas por `faixaSlug` + `getFaixaConfigBySlug` + `BjjBeltStrip` (sem arrays duplicados).
+- Presenças sempre via `presencasService` → `presencasStore`; totais em dashboards, histórico e visão staff leem o mesmo estado.
+
+### Exemplo de atualização consistente
+
+1) **Alterar nome/avatar do aluno X** → `alunosService.updateAluno` atualiza `useAlunosStore`, sincroniza presenças/graduacoes e reflete no `userStore` quando o usuário logado é o mesmo aluno.
+2) **Alterar nome/avatar do instrutor Y** → `instrutoresStore.atualizar` (via `/perfil` do professor) atualiza o profile central e sincroniza o `userStore` para que hero, header e dashboards mostrem o mesmo dado.
+3) Telas afetadas automaticamente: header/menu do app, `/dashboard-aluno`, `/historico-presencas`, `/presencas` (staff), `/perfil` e listas em `/alunos`.
+
+### Checklist rápido
+
+- Nenhuma página usa `MOCK_ALUNOS` ou `MOCK_INSTRUTORES` diretamente (sempre via services/stores).
+- Hooks de sessão: `useCurrentUser` → identidade básica; `useCurrentAluno`/`useCurrentInstrutor` → perfis completos.
+- Todas as telas de faixa usam `faixaSlug` + `getFaixaConfigBySlug`.
+- Dashboards do aluno x histórico x presenças compartilham os mesmos nomes e totais vindos das stores.
 
 ## 🎯 **O que já está pronto**
 

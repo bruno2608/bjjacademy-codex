@@ -5,7 +5,7 @@
  * exibindo os alunos disponíveis e definindo status inicial.
  */
 import { useEffect, useMemo, useState } from 'react';
-import useUserStore from '../../store/userStore';
+import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
 
 const statusOptions = ['Presente', 'Ausente'];
@@ -16,7 +16,7 @@ const obterHoraAtual = () =>
     .padStart(5, '0');
 
 export default function PresenceForm({ onSubmit, initialData = null, onCancel, submitLabel }) {
-  const alunos = useUserStore((state) => state.alunos);
+  const alunos = useAlunosStore((state) => state.alunos);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
   const isEditing = Boolean(initialData?.id);

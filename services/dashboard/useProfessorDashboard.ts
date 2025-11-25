@@ -3,36 +3,90 @@ import { useMemo, useState } from 'react'
 import { Activity, BarChart2, BarChart3, CalendarCheck, Clock3, Medal, PieChart, ShieldCheck, TrendingUp, Users } from 'lucide-react'
 
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils'
-import { useAlunosStore } from '@/store/alunosStore'
-import { usePresencasStore } from '@/store/presencasStore'
-import { useTreinosStore } from '@/store/treinosStore'
 import { normalizeFaixaSlug } from '@/lib/alunoStats'
 import { useCurrentAluno } from '@/hooks/useCurrentAluno'
-import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useCurrentInstrutor } from '@/hooks/useCurrentInstrutor'
+import { useCurrentUser } from '@/hooks/useCurrentUser'
+import { useAlunosStore } from '@/store/alunosStore'
+import { useGraduacoesStore } from '@/store/graduacoesStore'
+import { usePresencasStore } from '@/store/presencasStore'
+import { useTreinosStore } from '@/store/treinosStore'
+import type { BjjBeltVisualConfig } from '@/types/bjjBelt'
+
+type PendingCheckin = {
+  id: string
+  alunoId: string
+  alunoNome: string
+  treinoId: string
+  treinoNome: string
+  treinoHora?: string
+  dataLabel: string
+}
+
+type CheckinsPorStatus = {
+  confirmados: number
+  pendentes: number
+  faltas: number
+}
+
+type SerieSemanal = { dia: string; total: number }
 
 export interface ProfessorDashboardData {
   instructorName: string
-  faixaSlug: string
-  faixaConfig: ReturnType<typeof getFaixaConfigBySlug>
+  faixaConfig: BjjBeltVisualConfig
   graus: number
   avatarUrl: string
-  metrics: { totalAlunos: number; ativos: number; inativos: number; graduados: number; pendentes: number; presentesSemana: number }
+  statusLabel: string
+
+  overviewCards: { label: string; value: number; icon: any; href: string }[]
+  semanaCards: { label: string; value: number; icon: any; href: string }[]
   tabCards: Record<
     'visao' | 'alunos' | 'presencas' | 'graduacoes',
     { title: string; value: number | string; icon: any; tone: string }[]
   >
-  treinoPorId: Map<string, { id: string; nome: string; hora?: string }>
-  pendentes: ReturnType<typeof usePresencasStore>['presencas']
-  presencas: ReturnType<typeof usePresencasStore>['presencas']
-  treinos: ReturnType<typeof useTreinosStore>['treinos']
-  alunos: ReturnType<typeof useAlunosStore>['alunos']
-  getAlunoById: ReturnType<typeof useAlunosStore>['getAlunoById']
+
+  analytics: {
+    checkinsPorStatus: CheckinsPorStatus
+    presencasNaSemana: SerieSemanal[]
+  }
+
+  pendencias: PendingCheckin[]
+  pendentesTotal: number
+
   activeTab: string
   setActiveTab: (value: string) => void
   handleStatusChange: (id: string, action: 'approve' | 'reject') => Promise<void>
   updatingId: string | null
 }
+
+const parseDate = (value?: string | null) => {
+  if (!value) return null
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+const isSameWeek = (value: string | undefined, start: Date, end: Date) => {
+  const date = parseDate(value)
+  if (!date) return false
+  return date >= start && date < end
+}
+
+const startOfCurrentWeek = () => {
+  const today = new Date()
+  const start = new Date(today)
+  start.setHours(0, 0, 0, 0)
+  const day = start.getDay()
+  const diff = (day + 6) % 7 // Monday as first day
+  start.setDate(start.getDate() - diff)
+  const end = new Date(start)
+  end.setDate(start.getDate() + 7)
+  return { start, end }
+}
+
+const normalizarStatus = (status?: string | null) => (status || '').toString().toUpperCase()
+
+const getAlunoNome = (id: string, alunos: ReturnType<typeof useAlunosStore.getState>['alunos']) =>
+  alunos.find((a) => a.id === id)?.nome || 'Aluno não encontrado'
 
 export function useProfessorDashboard(): ProfessorDashboardData {
   const { user } = useCurrentUser()
@@ -41,61 +95,150 @@ export function useProfessorDashboard(): ProfessorDashboardData {
   const presencas = usePresencasStore((state) => state.presencas)
   const atualizarStatus = usePresencasStore((state) => state.atualizarStatus)
   const alunos = useAlunosStore((state) => state.alunos)
-  const getAlunoById = useAlunosStore((state) => state.getAlunoById)
   const treinos = useTreinosStore((state) => state.treinos)
+  const graduacoes = useGraduacoesStore((state) => state.graduacoes)
   const [activeTab, setActiveTab] = useState('visao')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
-  const instructorName = alunoAtual?.nome || instrutor?.nome || user?.nomeCompleto || 'Instrutor'
-  const faixaSlug = normalizeFaixaSlug(alunoAtual?.faixaSlug || alunoAtual?.faixa || instrutor?.faixaSlug) || 'branca-adulto'
-  const faixaConfig = getFaixaConfigBySlug(faixaSlug) || getFaixaConfigBySlug('branca-adulto')
-  const graus = typeof alunoAtual?.graus === 'number' ? alunoAtual.graus : instrutor?.graus ?? faixaConfig?.grausMaximos ?? 0
-  const avatarUrl = alunoAtual?.avatarUrl || instrutor?.avatarUrl || user?.avatarUrl || ''
+  const perfilInstrutor = instrutor || null
+  const perfilAlunoFallback = !perfilInstrutor ? alunoAtual : null
+  const profile = perfilInstrutor || perfilAlunoFallback || null
+
+  const faixaSlug = normalizeFaixaSlug(profile?.faixaSlug || (perfilAlunoFallback?.faixa ?? '')) || 'branca-adulto'
+  const faixaConfig = getFaixaConfigBySlug(faixaSlug) || getFaixaConfigBySlug('branca-adulto')!
+  const graus = typeof profile?.graus === 'number' ? profile.graus : faixaConfig?.grausMaximos ?? 0
+
+  const instructorName = profile?.nomeCompleto || profile?.nome || user?.nomeCompleto || 'Instrutor'
+  const avatarUrl = profile?.avatarUrl || user?.avatarUrl || ''
+  const statusLabel = normalizarStatus(profile?.status) || 'ATIVO'
 
   const treinoPorId = useMemo(() => {
-    const map = new Map<string, { id: string; nome: string; hora?: string }>()
+    const map = new Map<string, { id: string; nome: string; hora?: string; data?: string }>()
     treinos.forEach((treino) => map.set(treino.id, treino))
     return map
   }, [treinos])
 
+  const { start, end } = useMemo(() => startOfCurrentWeek(), [])
+
+  const presencasSemana = useMemo(
+    () => presencas.filter((p) => isSameWeek(p.data, start, end)),
+    [end, presencas, start]
+  )
+
+  const checkinsPorStatus = useMemo<CheckinsPorStatus>(() => {
+    const base = { confirmados: 0, pendentes: 0, faltas: 0 }
+    return presencas.reduce((acc, item) => {
+      const status = normalizarStatus(item.status)
+      if (status === 'PRESENTE') acc.confirmados += 1
+      else if (status === 'PENDENTE') acc.pendentes += 1
+      else if (status === 'FALTA' || status === 'JUSTIFICADA') acc.faltas += 1
+      return acc
+    }, base)
+  }, [presencas])
+
+  const alunosAtivos = useMemo(
+    () => alunos.filter((a) => normalizarStatus(a.status) === 'ATIVO').length,
+    [alunos]
+  )
+
+  const presencasNaSemana = useMemo<SerieSemanal[]>(() => {
+    const labels = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM']
+    const counts = Array(7).fill(0) as number[]
+    presencasSemana.forEach((p) => {
+      const data = parseDate(p.data)
+      if (!data) return
+      const idx = (data.getDay() + 6) % 7 // Monday index 0
+      counts[idx] += 1
+    })
+    return counts.map((total, idx) => ({ dia: labels[idx], total }))
+  }, [presencasSemana])
+
+  const pendencias = useMemo<PendingCheckin[]>(() => {
+    return presencas
+      .filter((p) => normalizarStatus(p.status) === 'PENDENTE')
+      .map((item) => {
+        const alunoNome = getAlunoNome(item.alunoId, alunos)
+        const treino = treinoPorId.get(item.treinoId)
+        const dataLabel = item.data
+          ? new Date(item.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '')
+          : 'Sem data'
+        return {
+          id: item.id,
+          alunoId: item.alunoId,
+          alunoNome,
+          treinoId: item.treinoId,
+          treinoNome: treino?.nome || treino?.titulo || 'Treino',
+          treinoHora: treino?.hora || treino?.horaInicio,
+          dataLabel,
+        }
+      })
+  }, [alunos, presencas, treinoPorId])
+
   const metrics = useMemo(() => {
     const totalAlunos = alunos.length
-    const ativos = alunos.filter((a) => (a.status || '').toString().toUpperCase() === 'ATIVO').length
-    const inativos = totalAlunos - ativos
-    const graduados = alunos.filter((a) => (a.faixa || '').toLowerCase() !== 'branca').length
-    const pendentes = presencas.filter((p) => p.status === 'PENDENTE').length
-    const presentesSemana = presencas.filter((p) => p.status === 'PRESENTE').length
-    return { totalAlunos, ativos, inativos, graduados, pendentes, presentesSemana }
-  }, [alunos, presencas])
+    const graduacoesTotal = graduacoes.length
+    const aulasNaSemana = treinos.filter((treino) => isSameWeek(treino.data, start, end)).length
+    const historicoSemana = presencasSemana.length
+    const checkinsRegistradosSemana = presencasSemana.filter((p) => normalizarStatus(p.status) !== 'FALTA').length
+
+    return {
+      totalAlunos,
+      alunosAtivos,
+      graduacoesTotal,
+      pendentesAprovacao: checkinsPorStatus.pendentes,
+      aulasNaSemana,
+      historicoSemana,
+      checkinsRegistradosSemana,
+    }
+  }, [alunos.length, alunosAtivos, checkinsPorStatus.pendentes, graduacoes.length, presencasSemana, treinos, start, end])
+
+  const overviewCards = useMemo(
+    () => [
+      { label: 'Pendentes de aprovação', value: metrics.pendentesAprovacao, icon: Clock3, href: '/presencas' },
+      { label: 'Alunos ativos', value: metrics.alunosAtivos, icon: Activity, href: '/alunos' },
+      { label: 'Graduações', value: metrics.graduacoesTotal, icon: Medal, href: '/configuracoes/graduacao' },
+    ],
+    [metrics.alunosAtivos, metrics.graduacoesTotal, metrics.pendentesAprovacao]
+  )
+
+  const semanaCards = useMemo(
+    () => [
+      { label: 'Aulas na semana', value: metrics.aulasNaSemana, icon: CalendarCheck, href: '/presencas' },
+      { label: 'Histórico na semana', value: metrics.historicoSemana, icon: BarChart3, href: '/historico-presencas' },
+      { label: 'Total de alunos', value: metrics.totalAlunos, icon: Users, href: '/alunos' },
+      { label: 'Check-ins registrados', value: metrics.checkinsRegistradosSemana, icon: Activity, href: '/presencas' },
+    ],
+    [metrics.aulasNaSemana, metrics.checkinsRegistradosSemana, metrics.historicoSemana, metrics.totalAlunos]
+  )
 
   const tabCards = useMemo(
     () => ({
       visao: [
-        { title: 'Presenças hoje', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'text-green-300' },
-        { title: 'Registros pendentes', value: metrics.pendentes, icon: Clock3, tone: 'text-yellow-300' },
-        { title: 'Faixas em progresso', value: metrics.graduados, icon: Medal, tone: 'text-white' },
-        { title: 'Alunos ativos', value: metrics.ativos, icon: Users, tone: 'text-bjj-red' }
+        { title: 'Presenças semanais', value: metrics.historicoSemana, icon: CalendarCheck, tone: 'text-green-300' },
+        { title: 'Registros pendentes', value: metrics.pendentesAprovacao, icon: Clock3, tone: 'text-yellow-300' },
+        { title: 'Faixas em progresso', value: metrics.graduacoesTotal, icon: Medal, tone: 'text-white' },
+        { title: 'Alunos ativos', value: metrics.alunosAtivos, icon: Users, tone: 'text-bjj-red' },
       ],
       alunos: [
         { title: 'Total de alunos', value: metrics.totalAlunos, icon: Users, tone: 'text-white' },
-        { title: 'Alunos ativos', value: metrics.ativos, icon: Activity, tone: 'text-green-300' },
-        { title: 'Inativos', value: metrics.inativos, icon: BarChart2, tone: 'text-yellow-300' },
-        { title: 'Últimas matrículas', value: 4, icon: TrendingUp, tone: 'text-bjj-red' }
+        { title: 'Alunos ativos', value: metrics.alunosAtivos, icon: Activity, tone: 'text-green-300' },
+        { title: 'Inativos', value: Math.max(metrics.totalAlunos - metrics.alunosAtivos, 0), icon: BarChart2, tone: 'text-yellow-300' },
+        { title: 'Últimas matrículas', value: 4, icon: TrendingUp, tone: 'text-bjj-red' },
       ],
       presencas: [
-        { title: 'Presenças na semana', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'text-green-300' },
-        { title: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, tone: 'text-yellow-300' },
-        { title: 'Ausências', value: presencas.filter((p) => p.status === 'FALTA').length, icon: BarChart3, tone: 'text-bjj-red' },
-        { title: 'Check-ins registrados', value: presencas.length, icon: Activity, tone: 'text-white' }
+        { title: 'Check-ins registrados', value: metrics.checkinsRegistradosSemana, icon: Activity, tone: 'text-white' },
+        { title: 'Pendentes de aprovação', value: metrics.pendentesAprovacao, icon: Clock3, tone: 'text-yellow-300' },
+        { title: 'Ausências', value: checkinsPorStatus.faltas, icon: BarChart3, tone: 'text-bjj-red' },
+        { title: 'Presenças na semana', value: metrics.historicoSemana, icon: CalendarCheck, tone: 'text-green-300' },
       ],
       graduacoes: [
-        { title: 'Próximas graduações', value: alunos.filter((a) => a.proximaMeta).length || 6, icon: Medal, tone: 'text-white' },
-        { title: 'Faixas avançadas', value: metrics.graduados, icon: ShieldCheck, tone: 'text-bjj-red' },
+        { title: 'Próximas graduações', value: graduacoes.length, icon: Medal, tone: 'text-white' },
+        { title: 'Faixas avançadas', value: metrics.graduacoesTotal, icon: ShieldCheck, tone: 'text-bjj-red' },
         { title: 'Tempo médio na faixa', value: '14 meses', icon: Clock3, tone: 'text-yellow-300' },
-        { title: 'Relatórios emitidos', value: 12, icon: PieChart, tone: 'text-green-300' }
-      ]
+        { title: 'Relatórios emitidos', value: 12, icon: PieChart, tone: 'text-green-300' },
+      ],
     }),
-    [alunos, metrics, presencas]
+    [checkinsPorStatus.faltas, graduacoes.length, metrics]
   )
 
   const handleStatusChange = async (id: string, action: 'approve' | 'reject') => {
@@ -108,25 +251,21 @@ export function useProfessorDashboard(): ProfessorDashboardData {
     }
   }
 
-  const pendentes = useMemo(() => presencas.filter((p) => p.status === 'PENDENTE'), [presencas])
-
   return {
     instructorName,
-    faixaSlug,
     faixaConfig,
     graus,
     avatarUrl,
-    metrics,
+    statusLabel,
+    overviewCards,
+    semanaCards,
     tabCards,
-    treinoPorId,
-    pendentes,
-    presencas,
-    treinos,
-    alunos,
-    getAlunoById,
+    analytics: { checkinsPorStatus, presencasNaSemana },
+    pendencias,
+    pendentesTotal: metrics.pendentesAprovacao,
     activeTab,
     setActiveTab,
     handleStatusChange,
-    updatingId
+    updatingId,
   }
 }
