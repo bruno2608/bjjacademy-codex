@@ -15,6 +15,7 @@ import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
+import { calcularResumoPresencas } from '@/lib/presencaStats';
 import { usePresencasStore } from '@/store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
@@ -250,11 +251,10 @@ export default function PresencasPage() {
 
   const totalFiltrado = registrosFiltrados.length;
 
-  const presentesDia = registrosDoDia.filter((item) => item.status === 'PRESENTE').length;
-  const faltasDia = registrosDoDia.filter((item) => item.status === 'FALTA' || item.status === 'JUSTIFICADA').length;
-  const pendentesDia = registrosDoDia.filter((item) => item.status === 'PENDENTE').length;
-  const totalDia = registrosDoDia.length || 1;
-  const taxaPresencaDia = (presentesDia / totalDia) * 100;
+  const resumoDia = useMemo(() => calcularResumoPresencas(registrosDoDia), [registrosDoDia]);
+  const { totalPresencas: presentesDia, totalFaltas: faltasDia, totalPendentes: pendentesDia } = resumoDia;
+  const totalDia = resumoDia.totalRegistros || 1;
+  const taxaPresencaDia = (resumoDia.totalPresencas / totalDia) * 100;
 
   const diasAtivos = useMemo(() => {
     const conjunto = new Set(presencas.map((item) => item.data));
