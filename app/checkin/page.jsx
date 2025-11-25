@@ -9,11 +9,29 @@ import { useTreinosStore } from '../../store/treinosStore';
 import Modal from '../../components/ui/Modal';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 
+const toLocalDate = (value) => {
+  if (value instanceof Date) return value;
+  if (typeof value === 'string') {
+    const [year, month, day] = value.split('-').map(Number);
+    if (!Number.isNaN(year) && !Number.isNaN(month) && !Number.isNaN(day)) {
+      return new Date(year, month - 1, day);
+    }
+  }
+  return new Date(value);
+};
+
 const normalizeWeekday = (date) =>
-  new Date(date).toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '').toLowerCase();
+  toLocalDate(date).toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '').toLowerCase();
 
 const formatDate = (date) =>
-  new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+  toLocalDate(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+
+const formatDateKey = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const formatDateKey = (date) => {
   const year = date.getFullYear();
