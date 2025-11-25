@@ -55,9 +55,9 @@ function StudentDashboard() {
 
   const stats = useMemo(() => {
     const registrosAluno = presencas.filter((item) => item.alunoId === aluno?.id);
-    const presentes = registrosAluno.filter((item) => item.status === 'CONFIRMADO').length;
-    const faltas = registrosAluno.filter((item) => item.status === 'AUSENTE' || item.status === 'AUSENTE_JUSTIFICADA').length;
-    const pendentes = registrosAluno.filter((item) => item.status === 'CHECKIN' || item.status === 'PENDENTE').length;
+    const presentes = registrosAluno.filter((item) => item.status === 'PRESENTE').length;
+    const faltas = registrosAluno.filter((item) => item.status === 'FALTA').length;
+    const pendentes = registrosAluno.filter((item) => item.status === 'PENDENTE').length;
     return { presentes, faltas, pendentes };
   }, [aluno?.id, presencas]);
 
@@ -90,13 +90,11 @@ function StudentDashboard() {
 
   const formatStatus = (status) => {
     switch (status) {
-      case 'CONFIRMADO':
+      case 'PRESENTE':
         return { label: 'Presente', tone: 'bg-green-600/20 text-green-300' };
-      case 'CHECKIN':
       case 'PENDENTE':
         return { label: 'Pendente', tone: 'bg-yellow-500/20 text-yellow-300' };
-      case 'AUSENTE':
-      case 'AUSENTE_JUSTIFICADA':
+      case 'FALTA':
         return { label: 'Ausente', tone: 'bg-bjj-red/20 text-bjj-red' };
       default:
         return { label: 'Sem registro', tone: 'bg-bjj-gray-700 text-bjj-gray-200' };
@@ -230,8 +228,8 @@ function ProfessorDashboard() {
     const ativos = alunos.filter((a) => (a.status || '').toString().toUpperCase() === 'ATIVO').length;
     const inativos = totalAlunos - ativos;
     const graduados = alunos.filter((a) => (a.faixa || '').toLowerCase() !== 'branca').length;
-    const pendentes = presencas.filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN').length;
-    const presentesSemana = presencas.filter((p) => p.status === 'CONFIRMADO').length;
+    const pendentes = presencas.filter((p) => p.status === 'PENDENTE').length;
+    const presentesSemana = presencas.filter((p) => p.status === 'PRESENTE').length;
     return { totalAlunos, ativos, inativos, graduados, pendentes, presentesSemana };
   }, [alunos, presencas]);
 
@@ -254,7 +252,7 @@ function ProfessorDashboard() {
         { title: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, tone: 'text-yellow-300' },
         {
           title: 'Ausências',
-          value: presencas.filter((p) => p.status === 'AUSENTE' || p.status === 'AUSENTE_JUSTIFICADA').length,
+          value: presencas.filter((p) => p.status === 'FALTA').length,
           icon: BarChart3,
           tone: 'text-bjj-red'
         },
@@ -377,9 +375,9 @@ function ProfessorDashboard() {
                   <Clock3 size={16} className="text-bjj-gray-200" />
                 </div>
                 <div className="mt-4 space-y-3">
-                  {[{ label: 'Confirmados', value: presencas.filter((p) => p.status === 'CONFIRMADO').length, tone: 'bg-green-500' },
+                  {[{ label: 'Confirmados', value: presencas.filter((p) => p.status === 'PRESENTE').length, tone: 'bg-green-500' },
                     { label: 'Pendentes', value: metrics.pendentes, tone: 'bg-yellow-400' },
-                    { label: 'Ausentes', value: presencas.filter((p) => p.status === 'AUSENTE' || p.status === 'AUSENTE_JUSTIFICADA').length, tone: 'bg-bjj-red' }
+                    { label: 'Ausentes', value: presencas.filter((p) => p.status === 'FALTA').length, tone: 'bg-bjj-red' }
                   ].map((row) => (
                     <div key={row.label} className="space-y-2">
                       <div className="flex items-center justify-between text-sm text-bjj-gray-200">
