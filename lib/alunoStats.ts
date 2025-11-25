@@ -4,15 +4,32 @@ import type { PresencaRegistro } from '../types/presenca';
 
 const getCurrentDateISO = () => new Date().toISOString().split('T')[0];
 
+const faixaAliasMap: Record<string, string> = {
+  branca: 'branca-adulto',
+  'branca-adulto': 'branca-adulto',
+  'faixa-branca': 'branca-adulto',
+  'preta': 'preta-professor',
+  'preta-adulto': 'preta-professor',
+  'faixa-preta': 'preta-professor',
+  'preta-padrao': 'preta-padrao',
+  'preta-competidor': 'preta-competidor',
+  'preta-professor': 'preta-professor',
+  'cinza-e-branca': 'cinza-branca',
+  'cinza-e-branco': 'cinza-branca',
+  'cinza-branca': 'cinza-branca'
+};
+
 export const normalizeFaixaSlug = (valor?: string | null) => {
   if (!valor) return 'branca-adulto';
-  return valor
+  const slug = valor
     .toLowerCase()
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
     .replace(/[^a-z0-9-]+/g, '-')
     .replace(/--+/g, '-')
     .replace(/^-+|-+$/g, '');
+
+  return faixaAliasMap[slug] ?? slug;
 };
 
 export const normalizeAlunoStatus = (valor?: string | null) =>
