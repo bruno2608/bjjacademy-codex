@@ -53,6 +53,15 @@ const persistRoles = (roles: UserRole[]) => {
   }
 };
 
+const persistUser = (user: AuthUser) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem('bjj_user', JSON.stringify(user));
+  } catch (error) {
+    console.warn('Não foi possível salvar o usuário localmente', error);
+  }
+};
+
 const clearPersistedRoles = () => {
   if (typeof window !== 'undefined') {
     window.localStorage.removeItem(ROLES_KEY);
@@ -90,16 +99,19 @@ export const useUserStore = create<UserState>((set) => ({
     };
 
     persistRoles(finalUser.roles);
-    window.localStorage.setItem(
-      'bjj_user',
-      JSON.stringify({ ...finalUser, alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null })
-    );
+    persistUser({ ...finalUser, alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null });
     set({ user: finalUser, token: fakeToken, hydrated: true });
   },
   updateUser: (payload) =>
-    set((state) => ({
-      user: state.user ? { ...state.user, ...payload } : state.user
-    })),
+    set((state) => {
+      const updatedUser = state.user ? { ...state.user, ...payload } : state.user;
+      if (updatedUser) {
+        persistUser(updatedUser);
+      }
+      return {
+        user: updatedUser
+      };
+    }),
   logout: () => {
     clearPersistedRoles();
     set({ user: null, token: null });
