@@ -21,7 +21,7 @@ export default function EvolucaoPage() {
   const graduacoesPlanejadas = useGraduacoesStore((state) => state.graduacoes);
 
   const alunoId = alunoFromUser?.id ?? alunos[0]?.id;
-  const { aluno, faixaConfig, grauAtual, aulasFeitasNoGrau, aulasMetaNoGrau } = useAlunoDashboard(alunoId);
+  const { aluno, faixaConfig, grauAtual, aulasNoGrau, aulasMetaNoGrau } = useAlunoDashboard(alunoId);
 
   const historicoGraduacoes = useMemo(() => {
     const historico = aluno?.historicoGraduacoes ?? alunoFromUser?.historicoGraduacoes ?? [];
@@ -36,11 +36,11 @@ export default function EvolucaoPage() {
   );
 
   const progressoProximoGrau = useMemo(() => {
-    const aulasNoGrau = aulasFeitasNoGrau ?? aluno?.aulasNoGrauAtual ?? 0;
+    const aulasNoGrauAtual = aulasNoGrau ?? aluno?.aulasNoGrauAtual ?? 0;
     const alvo = aulasMetaNoGrau ?? 20;
-    const percent = alvo > 0 ? Math.min(100, Math.round((aulasNoGrau / alvo) * 100)) : 0;
-    return { aulasNoGrau, alvo, percent };
-  }, [aluno?.aulasNoGrauAtual, aulasFeitasNoGrau, aulasMetaNoGrau]);
+    const percent = alvo > 0 ? Math.min(100, Math.round((aulasNoGrauAtual / alvo) * 100)) : 0;
+    return { aulasNoGrau: aulasNoGrauAtual, alvo, percent };
+  }, [aluno?.aulasNoGrauAtual, aulasNoGrau, aulasMetaNoGrau]);
 
   const proximaGraduacaoLabel = useMemo(() => {
     if (proximaMeta) {
@@ -98,7 +98,7 @@ export default function EvolucaoPage() {
                 <BjjBeltProgressCard
                   config={faixaConfigAtual}
                   grauAtual={grauAtualSafeguarded}
-                  aulasFeitasNoGrau={aulasFeitasNoGrau ?? 0}
+                  aulasFeitasNoGrau={aulasNoGrau ?? 0}
                   aulasMetaNoGrau={aulasMetaNoGrau}
                   className="scale-[0.95] md:scale-100 origin-center bg-bjj-gray-900/80 border-bjj-gray-800"
                 />

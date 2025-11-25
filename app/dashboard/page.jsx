@@ -23,7 +23,6 @@ import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useAlunoDashboard } from '@/services/dashboard/useAlunoDashboard';
 import { useProfessorDashboard } from '@/services/dashboard/useProfessorDashboard';
 import { BjjBeltProgressCard } from '@/components/bjj/BjjBeltProgressCard';
-import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -40,14 +39,12 @@ function DashboardHero({
   subtitle,
   statusLabel,
   avatarUrl,
-  faixaSlug,
+  faixaConfig,
   graus,
   aulasFeitasNoGrau,
   aulasMetaNoGrau,
   className
 }) {
-  const faixaConfig =
-    getFaixaConfigBySlug(faixaSlug) || getFaixaConfigBySlug('branca-adulto');
   const grauAtual = graus ?? faixaConfig?.grausMaximos ?? 0;
 
   return (
@@ -75,7 +72,7 @@ function DashboardHero({
             </span>
           </div>
 
-          <div className="flex w-full justify-center lg:max-w-md">
+          <div className="flex w-full flex-col gap-3 lg:max-w-md">
             {faixaConfig && (
               <div className="w-full max-w-2xl">
                 <BjjBeltProgressCard
@@ -97,19 +94,20 @@ function DashboardHero({
 function StudentDashboard() {
   const { user } = useCurrentAluno();
 
+  const data = useAlunoDashboard();
   const {
     aluno,
     faixaConfig,
-    faixaSlug,
     grauAtual,
-    aulasFeitasNoGrau,
+    aulasNoGrau,
     aulasMetaNoGrau,
-    stats,
-    progressoProximoGrau,
+    percentualProgresso,
+    totalPresencasConfirmadas,
+    totalFaltas,
+    totalPendentes,
     ultimasPresencas,
-    statusLabel,
     treinoPorId
-  } = useAlunoDashboard();
+  } = data;
 
   const avatarUrl = ensureAvatar(aluno?.nome, aluno?.avatarUrl || user?.avatarUrl || defaultAvatar);
 
@@ -126,15 +124,20 @@ function StudentDashboard() {
     }
   };
 
+  const formatStatusLabel = (status) => {
+    const raw = status || 'ativo';
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
+  };
+
   return (
     <div className="space-y-6">
       <DashboardHero
         name={aluno?.nome || 'Aluno'}
-        faixaSlug={faixaConfig?.slug || faixaSlug}
+        faixaConfig={faixaConfig}
         graus={grauAtual}
-        aulasFeitasNoGrau={aulasFeitasNoGrau}
+        aulasFeitasNoGrau={aulasNoGrau}
         aulasMetaNoGrau={aulasMetaNoGrau}
-        statusLabel={statusLabel}
+        statusLabel={formatStatusLabel(aluno?.status)}
         avatarUrl={avatarUrl}
         subtitle="Dashboard do aluno"
       />
@@ -143,8 +146,8 @@ function StudentDashboard() {
         {[
           {
             title: 'Aulas no grau',
-            value: progressoProximoGrau.aulasNoGrau,
-            helper: `meta de ${progressoProximoGrau.alvo} aulas`,
+            value: aulasNoGrau,
+            helper: `meta de ${aulasMetaNoGrau} aulas`,
             href: '/evolucao',
             tone: 'from-bjj-gray-900/80 to-bjj-black/90',
             badgeTone: 'text-bjj-gray-300',
@@ -152,7 +155,7 @@ function StudentDashboard() {
           },
           {
             title: 'Presenças',
-            value: stats.presentes,
+            value: totalPresencasConfirmadas,
             helper: 'últimos registros confirmados',
             href: '/historico-presencas',
             tone: 'from-bjj-gray-900/85 to-bjj-black/80',
@@ -161,7 +164,7 @@ function StudentDashboard() {
           },
           {
             title: 'Faltas registradas',
-            value: stats.faltas,
+            value: totalFaltas,
             helper: 'inclui ausências justificadas',
             href: '/historico-presencas',
             tone: 'from-bjj-gray-900/80 to-bjj-black/85',
@@ -170,7 +173,7 @@ function StudentDashboard() {
           },
           {
             title: 'Check-ins pendentes',
-            value: stats.pendentes,
+            value: totalPendentes,
             helper: 'aguardando aprovação',
             href: '/checkin',
             tone: 'from-bjj-gray-900/80 to-bjj-black/90',
@@ -203,6 +206,9 @@ function StudentDashboard() {
           <div>
             <p className={badge}>Últimas presenças</p>
             <h3 className="text-xl font-semibold">Últimos registros</h3>
+            <p className="text-xs text-bjj-gray-300/80">
+              {`Progresso atual: ${percentualProgresso}% (${aulasNoGrau}/${aulasMetaNoGrau} aulas)`}
+            </p>
           </div>
           <Activity size={18} className="text-green-400" />
         </header>
@@ -236,7 +242,6 @@ function StudentDashboard() {
 function ProfessorDashboard() {
   const {
     instructorName,
-    faixaSlug,
     faixaConfig,
     graus: instructorGraus,
     avatarUrl: instructorAvatar,
@@ -258,7 +263,7 @@ function ProfessorDashboard() {
     <div className="space-y-6">
       <DashboardHero
         name={instructorName}
-        faixaSlug={faixaConfig?.slug || faixaSlug}
+        faixaConfig={faixaConfig}
         graus={instructorGraus}
         statusLabel="Professor"
         avatarUrl={ensureAvatar(instructorName, instructorAvatar)}
