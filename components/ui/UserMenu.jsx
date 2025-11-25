@@ -29,7 +29,9 @@ export default function UserMenu({ inline = false }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
-  const getAlunoById = useAlunosStore((s) => s.getAlunoById);
+  const aluno = useAlunosStore((state) =>
+    user?.alunoId ? state.getAlunoById(user.alunoId) : null
+  );
   const { roles } = useRole();
   const [open, setOpen] = useState(inline);
   const [configOpen, setConfigOpen] = useState(false);
@@ -120,7 +122,6 @@ export default function UserMenu({ inline = false }) {
     router.push('/login');
   };
 
-  const aluno = useMemo(() => (user?.alunoId ? getAlunoById(user.alunoId) : null), [getAlunoById, user?.alunoId]);
   const displayName = aluno?.nome || user?.name || 'Instrutor';
   const displayEmail = aluno?.email || user?.email || 'instrutor@bjj.academy';
 

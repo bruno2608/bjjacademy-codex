@@ -18,7 +18,9 @@ export default function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
-  const getAlunoById = useAlunosStore((s) => s.getAlunoById);
+  const alunoSelecionado = useAlunosStore((state) =>
+    user?.alunoId ? state.getAlunoById(user.alunoId) : null
+  );
   const { roles } = useRole();
 
   const navigationItems = useMemo(() => getNavigationItemsForRoles(roles), [roles]);
@@ -54,9 +56,8 @@ export default function Header() {
     }
   }, [hydrateFromStorage, hydrated]);
 
-  const aluno = useMemo(() => (user?.alunoId ? getAlunoById(user.alunoId) : null), [getAlunoById, user?.alunoId]);
-  const displayName = aluno?.nome || user?.name || 'Instrutor';
-  const displayEmail = aluno?.email || user?.email || 'instrutor@bjj.academy';
+  const displayName = alunoSelecionado?.nome || user?.name || 'Instrutor';
+  const displayEmail = alunoSelecionado?.email || user?.email || 'instrutor@bjj.academy';
 
   const initials = useMemo(() => {
     const source = displayName || displayEmail;
@@ -67,9 +68,7 @@ export default function Header() {
     return `${first}${last}`.toUpperCase();
   }, [displayEmail, displayName]);
 
-  const avatarUrl = aluno?.avatarUrl || user?.avatarUrl;
-
-  const avatarUrl = user?.avatarUrl || aluno?.avatarUrl;
+  const avatarUrl = alunoSelecionado?.avatarUrl || user?.avatarUrl;
 
   const handleLogout = () => {
     logout();
