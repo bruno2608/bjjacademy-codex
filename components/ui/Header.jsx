@@ -12,6 +12,7 @@ import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigat
 import useRole from '../../hooks/useRole';
 import useUserStore from '../../store/userStore';
 import { useAlunosStore } from '@/store/alunosStore';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 
 export default function Header() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function Header() {
   const alunoSelecionado = useAlunosStore((state) =>
     user?.alunoId ? state.getAlunoById(user.alunoId) : null
   );
+  const { staff } = useCurrentStaff();
   const { roles } = useRole();
 
   const navigationItems = useMemo(() => getNavigationItemsForRoles(roles), [roles]);
@@ -56,8 +58,8 @@ export default function Header() {
     }
   }, [hydrateFromStorage, hydrated]);
 
-  const displayName = alunoSelecionado?.nome || user?.name || 'Instrutor';
-  const displayEmail = alunoSelecionado?.email || user?.email || 'instrutor@bjj.academy';
+  const displayName = alunoSelecionado?.nome || staff?.nome || user?.name || 'Instrutor';
+  const displayEmail = alunoSelecionado?.email || staff?.email || user?.email || 'instrutor@bjj.academy';
 
   const initials = useMemo(() => {
     const source = displayName || displayEmail;
@@ -68,7 +70,7 @@ export default function Header() {
     return `${first}${last}`.toUpperCase();
   }, [displayEmail, displayName]);
 
-  const avatarUrl = alunoSelecionado?.avatarUrl || user?.avatarUrl;
+  const avatarUrl = alunoSelecionado?.avatarUrl || staff?.avatarUrl || user?.avatarUrl;
 
   const handleLogout = () => {
     logout();
