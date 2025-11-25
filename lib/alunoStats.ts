@@ -1,6 +1,6 @@
 import type { Aluno } from '../types/aluno';
 import type { GraduationHistoryEntry } from '../types/graduacao';
-import type { Presenca } from '../types/presenca';
+import type { PresencaRegistro } from '../types/presenca';
 
 const getCurrentDateISO = () => new Date().toISOString().split('T')[0];
 
@@ -55,7 +55,7 @@ const parseISODate = (value?: string | null): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const countAttendancesFrom = (registros: Presenca[], inicio: Date | null): number => {
+const countAttendancesFrom = (registros: PresencaRegistro[], inicio: Date | null): number => {
   if (!inicio) return registros.length;
   const referencia = inicio.getTime();
   return registros.filter((item) => {
@@ -80,11 +80,12 @@ const getLatestHistoryRecord = (
   );
 };
 
-const buildAttendanceStatsForAluno = (aluno: Aluno, presencas: Presenca[] = []) => {
-  const registrosAluno = presencas.filter(
-    (item) =>
-      item.alunoId === aluno.id && (item.status === 'PRESENTE' || item.status === 'CONFIRMADO')
-  );
+const buildAttendanceStatsForAluno = (aluno: Aluno, presencas: PresencaRegistro[] = []) => {
+  const registrosAluno = presencas.filter((item) => {
+    if (item.alunoId !== aluno.id) return false
+    const statusNormalizado = (item.status || '').toString().toUpperCase()
+    return statusNormalizado === 'PRESENTE' || statusNormalizado === 'CONFIRMADO'
+  })
 
   const historico = Array.isArray(aluno.historicoGraduacoes)
     ? aluno.historicoGraduacoes
