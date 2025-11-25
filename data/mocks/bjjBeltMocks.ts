@@ -9,7 +9,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
   {
     id: 1,
     nome: "Branca",
-    slug: "branca",
+    slug: "branca-adulto",
     categoria: "ADULTO",
     grausMaximos: 4,
     beltColorClass: "bg-white",
@@ -264,7 +264,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
   {
     id: 16,
     nome: "Amarela e Preta",
-    slug: "amarela-preta-infantil",
+    slug: "amarela-preta",
     categoria: "INFANTIL",
     grausMaximos: 4,
     beltColorClass: "bg-yellow-500",
