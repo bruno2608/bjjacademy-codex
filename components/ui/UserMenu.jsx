@@ -14,6 +14,7 @@ import useUserStore from '../../store/userStore';
 import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import { ROLE_KEYS } from '../../config/roles';
+import { useAlunosStore } from '@/store/alunosStore';
 
 const buildInitials = (name = '', email = '') => {
   const source = name || email || 'Instrutor';
@@ -28,6 +29,9 @@ export default function UserMenu({ inline = false }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
+  const aluno = useAlunosStore((state) =>
+    user?.alunoId ? state.getAlunoById(user.alunoId) : null
+  );
   const { roles } = useRole();
   const [open, setOpen] = useState(inline);
   const [configOpen, setConfigOpen] = useState(false);
@@ -118,18 +122,16 @@ export default function UserMenu({ inline = false }) {
     router.push('/login');
   };
 
-  const initials = buildInitials(user?.name, user?.email);
-  const avatarUrl = user?.avatarUrl;
+  const displayName = aluno?.nome || user?.name || 'Instrutor';
+  const displayEmail = aluno?.email || user?.email || 'instrutor@bjj.academy';
+
+  const initials = buildInitials(displayName, displayEmail);
+  const avatarUrl = aluno?.avatarUrl || user?.avatarUrl;
 
   const AvatarBadge = (
     <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-bjj-red/80 to-bjj-red text-xs font-semibold text-bjj-white shadow-[0_0_0_1px_rgba(225,6,0,0.4)]">
       {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt={`Avatar de ${user?.name || 'Instrutor'}`}
-          className="h-full w-full object-cover"
-          loading="lazy"
-        />
+        <img src={avatarUrl} alt={`Avatar de ${displayName}`} className="h-full w-full object-cover" loading="lazy" />
       ) : (
         initials
       )}
@@ -145,17 +147,17 @@ export default function UserMenu({ inline = false }) {
       }`}
     >
       <header className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-bjj-red/80 to-bjj-red text-sm font-semibold text-bjj-white shadow-[0_0_0_1px_rgba(225,6,0,0.4)]">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={`Avatar de ${user?.name || 'Instrutor'}`} className="h-full w-full object-cover" loading="lazy" />
-          ) : (
-            initials
-          )}
-        </span>
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold text-bjj-white">{user?.name || 'Instrutor'}</span>
-          <span className="text-[11px] text-bjj-gray-200/60">{user?.email || 'instrutor@bjj.academy'}</span>
-        </div>
+          <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-bjj-red/80 to-bjj-red text-sm font-semibold text-bjj-white shadow-[0_0_0_1px_rgba(225,6,0,0.4)]">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={`Avatar de ${displayName}`} className="h-full w-full object-cover" loading="lazy" />
+            ) : (
+              initials
+            )}
+          </span>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-bjj-white">{displayName}</span>
+            <span className="text-[11px] text-bjj-gray-200/60">{displayEmail}</span>
+          </div>
       </header>
 
       <nav className="mt-4 space-y-1 text-sm text-bjj-gray-200/80">
@@ -251,7 +253,7 @@ export default function UserMenu({ inline = false }) {
         aria-expanded={open}
       >
         {AvatarBadge}
-        <span className="hidden text-xs uppercase tracking-wide text-bjj-gray-300/80 md:inline">{user?.name || 'Instrutor'}</span>
+        <span className="hidden text-xs uppercase tracking-wide text-bjj-gray-300/80 md:inline">{displayName}</span>
         <ChevronDown size={14} className={`transition ${open ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-400 group-hover:text-bjj-white'}`} />
       </button>
 

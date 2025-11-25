@@ -11,12 +11,16 @@ import { LogOut, Menu, X, Settings2, ChevronRight, ChevronDown, BarChart3, UserC
 import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import useUserStore from '../../store/userStore';
+import { useAlunosStore } from '@/store/alunosStore';
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
+  const alunoSelecionado = useAlunosStore((state) =>
+    user?.alunoId ? state.getAlunoById(user.alunoId) : null
+  );
   const { roles } = useRole();
 
   const navigationItems = useMemo(() => getNavigationItemsForRoles(roles), [roles]);
@@ -52,14 +56,19 @@ export default function Header() {
     }
   }, [hydrateFromStorage, hydrated]);
 
+  const displayName = alunoSelecionado?.nome || user?.name || 'Instrutor';
+  const displayEmail = alunoSelecionado?.email || user?.email || 'instrutor@bjj.academy';
+
   const initials = useMemo(() => {
-    const source = user?.name || user?.email || 'Instrutor';
+    const source = displayName || displayEmail;
     const parts = source.split(/[\s@._-]+/).filter(Boolean);
     if (!parts.length) return 'IN';
     const first = parts[0][0] || '';
     const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
     return `${first}${last}`.toUpperCase();
-  }, [user?.name, user?.email]);
+  }, [displayEmail, displayName]);
+
+  const avatarUrl = alunoSelecionado?.avatarUrl || user?.avatarUrl;
 
   const handleLogout = () => {
     logout();
@@ -78,13 +87,8 @@ export default function Header() {
       </button>
       <span className="text-sm font-semibold uppercase tracking-wide text-bjj-gray-200">BJJ Academy</span>
       <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-bjj-red/80 to-bjj-red text-xs font-semibold text-bjj-white shadow-[0_0_0_1px_rgba(225,6,0,0.4)]">
-        {user?.avatarUrl ? (
-          <img
-            src={user.avatarUrl}
-            alt={`Avatar de ${user?.name || 'Instrutor'}`}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
+        {avatarUrl ? (
+          <img src={avatarUrl} alt={`Avatar de ${displayName}`} className="h-full w-full object-cover" loading="lazy" />
         ) : (
           initials
         )}
@@ -137,10 +141,10 @@ export default function Header() {
             <div className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 text-sm text-bjj-gray-200/80">
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-bjj-red/80 to-bjj-red text-sm font-semibold text-bjj-white shadow-[0_0_0_1px_rgba(225,6,0,0.4)]">
-                  {user?.avatarUrl ? (
+                  {avatarUrl ? (
                     <img
-                      src={user.avatarUrl}
-                      alt={`Avatar de ${user?.name || 'Instrutor'}`}
+                      src={avatarUrl}
+                      alt={`Avatar de ${displayName}`}
                       className="h-full w-full object-cover"
                       loading="lazy"
                     />
@@ -149,8 +153,8 @@ export default function Header() {
                   )}
                 </span>
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-bjj-white">{user?.name || 'Instrutor'}</span>
-                  <span className="text-[11px] text-bjj-gray-200/60">{user?.email || 'instrutor@bjj.academy'}</span>
+                  <span className="text-sm font-semibold text-bjj-white">{displayName}</span>
+                  <span className="text-[11px] text-bjj-gray-200/60">{displayEmail}</span>
                 </div>
               </div>
 

@@ -1,17 +1,18 @@
 import { create } from 'zustand';
 
-import { MOCK_PRESENCAS } from '../data/mockPresencas';
-import type { Presenca, StatusPresenca } from '../types/presenca';
+import { MOCK_PRESENCAS } from '@/data/mockPresencas';
+import type { Presenca } from '@/types/presenca';
 import { useAlunosStore } from './alunosStore';
 
-const normalizarStatus = (status: Presenca['status']): StatusPresenca => {
-  const mapa: Record<string, StatusPresenca> = {
-    PRESENTE: 'CONFIRMADO',
-    CONFIRMADO: 'CONFIRMADO',
-    CHECKIN: 'CHECKIN',
+const normalizarStatus = (status: Presenca['status'] | string): Presenca['status'] => {
+  const mapa: Record<string, Presenca['status']> = {
+    PRESENTE: 'PRESENTE',
+    CONFIRMADO: 'PRESENTE',
+    CHECKIN: 'PENDENTE',
     PENDENTE: 'PENDENTE',
-    AUSENTE: 'AUSENTE',
-    AUSENTE_JUSTIFICADA: 'AUSENTE_JUSTIFICADA'
+    AUSENTE: 'FALTA',
+    AUSENTE_JUSTIFICADA: 'FALTA',
+    FALTA: 'FALTA'
   };
 
   const chave = (status || '').toString().toUpperCase();
@@ -23,11 +24,6 @@ const normalizarPresencas = (lista: Presenca[]): Presenca[] =>
     ...item,
     status: normalizarStatus(item.status)
   }));
-
-const getCurrentTime = () =>
-  new Date()
-    .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    .padStart(5, '0');
 
 const syncAlunos = (presencas: Presenca[]) => {
   useAlunosStore.getState().recalculateFromPresencas(presencas);
@@ -46,11 +42,11 @@ type PresencasState = {
   setPresencas: (presencas: Presenca[]) => void;
   addPresenca: (presenca: Presenca) => void;
   updatePresenca: (id: string, payload: Partial<Presenca>) => Presenca | null;
-  setStatus: (id: string, status: StatusPresenca) => Presenca | null;
+  setStatus: (id: string, status: Presenca['status']) => Presenca | null;
   markJustified: (id: string) => Presenca | null;
   removePresenca: (id: string) => void;
   registerCheckin: (
-    payload: Omit<Presenca, 'id' | 'status' | 'hora'> & {
+    payload: Omit<Presenca, 'id' | 'status'> & {
       id?: string;
       horaInicio?: string;
     }
@@ -83,7 +79,7 @@ export const usePresencasStore = create<PresencasState>((set) => ({
           item.data === presenca.data &&
           item.treinoId === presenca.treinoId
       );
-      const payload = { ...presenca, hora: presenca.hora ?? getCurrentTime() };
+      const payload = { ...presenca, status: normalizarStatus(presenca.status) };
       const atualizadas =
         existenteIndex >= 0
           ? lista.map((item, index) => (index === existenteIndex ? { ...item, ...payload } : item))
@@ -99,12 +95,7 @@ export const usePresencasStore = create<PresencasState>((set) => ({
       const atualizadas = state.presencas.map((item) => {
         if (item.id !== id) return item;
         const status = statusNormalizado ?? item.status;
-        atualizada = {
-          ...item,
-          ...payload,
-          status,
-          hora: status === 'CONFIRMADO' ? item.hora || getCurrentTime() : item.hora
-        };
+        atualizada = { ...item, ...payload, status };
         return atualizada;
       });
       syncAlunos(atualizadas);
@@ -115,13 +106,10 @@ export const usePresencasStore = create<PresencasState>((set) => ({
   setStatus: (id, status) => {
     let atualizada: Presenca | null = null;
     set((state) => {
+      const statusNormalizado = normalizarStatus(status);
       const atualizadas = state.presencas.map((item) => {
         if (item.id !== id) return item;
-        atualizada = {
-          ...item,
-          status,
-          hora: status === 'CONFIRMADO' ? item.hora || getCurrentTime() : item.hora
-        };
+        atualizada = { ...item, status: statusNormalizado };
         return atualizada;
       });
       syncAlunos(atualizadas);
@@ -134,7 +122,7 @@ export const usePresencasStore = create<PresencasState>((set) => ({
     set((state) => {
       const atualizadas = state.presencas.map((item) => {
         if (item.id !== id) return item;
-        atualizada = { ...item, status: 'AUSENTE_JUSTIFICADA', hora: item.hora };
+        atualizada = { ...item, status: 'FALTA' };
         return atualizada;
       });
       syncAlunos(atualizadas);
@@ -167,7 +155,7 @@ export const usePresencasStore = create<PresencasState>((set) => ({
 
       if (existenteIndex >= 0) {
         const existente = lista[existenteIndex];
-        const statusElegivelDuplicado: StatusPresenca[] = ['CHECKIN', 'PENDENTE', 'CONFIRMADO'];
+        const statusElegivelDuplicado: Presenca['status'][] = ['PENDENTE', 'PRESENTE'];
         if (statusElegivelDuplicado.includes(existente.status)) {
           status = 'duplicado';
           registro = existente;
@@ -181,15 +169,13 @@ export const usePresencasStore = create<PresencasState>((set) => ({
       const limite = inicio + janelaMinutos * 60 * 1000;
       const dentroJanela = agora.getTime() >= inicio && agora.getTime() <= limite;
 
-      const statusPresenca: StatusPresenca = dentroJanela ? 'CHECKIN' : 'PENDENTE';
+      const statusPresenca: Presenca['status'] = 'PENDENTE';
       status = dentroJanela ? 'checkin' : 'pendente';
 
       const payloadRegistro: Presenca = {
         id: payload.id || `checkin-${Date.now()}`,
         ...payload,
         status: statusPresenca,
-        hora: dentroJanela ? getCurrentTime() : null,
-        treinoModalidade: payload.treinoModalidade ?? payload.treinoId ?? null,
         origem: 'ALUNO'
       };
 
@@ -210,7 +196,7 @@ export const usePresencasStore = create<PresencasState>((set) => ({
     set((state) => {
       const atualizadas = state.presencas.map((item) => {
         if (item.id !== id) return item;
-        atualizado = { ...item, status: 'CONFIRMADO', hora: item.hora || getCurrentTime(), origem: item.origem || 'PROFESSOR' };
+        atualizado = { ...item, status: 'PRESENTE', origem: item.origem || 'PROFESSOR' };
         return atualizado;
       });
       syncAlunos(atualizadas);
@@ -223,7 +209,7 @@ export const usePresencasStore = create<PresencasState>((set) => ({
     set((state) => {
       const atualizadas = state.presencas.map((item) => {
         if (item.id !== id) return item;
-        atualizado = { ...item, status: 'AUSENTE', hora: null, origem: item.origem || 'PROFESSOR' };
+        atualizado = { ...item, status: 'FALTA', origem: item.origem || 'PROFESSOR' };
         return atualizado;
       });
       syncAlunos(atualizadas);
@@ -236,7 +222,7 @@ export const usePresencasStore = create<PresencasState>((set) => ({
     set((state) => {
       const atualizadas = state.presencas.map((item) => {
         if (item.data === data && item.treinoId === treinoId) {
-          const cancelado = { ...item, status: 'Cancelado' as const };
+          const cancelado = { ...item, status: 'FALTA' as const };
           novos.push(cancelado);
           return cancelado;
         }
@@ -253,11 +239,11 @@ export const usePresencasStore = create<PresencasState>((set) => ({
     let ausentesCriados = 0;
     set((state) => {
       const lista = Array.isArray(state.presencas) ? state.presencas : [];
-      const atualizadas = lista.map((item) => { 
+      const atualizadas = lista.map((item) => {
         if (item.data === data && item.treinoId === treinoId) {
-          if (item.status === 'CHECKIN') {
+          if (item.status === 'PENDENTE') {
             confirmados += 1;
-            return { ...item, status: 'CONFIRMADO', hora: item.hora || getCurrentTime(), origem: item.origem || 'PROFESSOR' };
+            return { ...item, status: 'PRESENTE', origem: item.origem || 'PROFESSOR' };
           }
         }
         return item;
@@ -273,14 +259,9 @@ export const usePresencasStore = create<PresencasState>((set) => ({
         novosAusentes.push({
           id: `abs-${aluno.id}-${Date.now()}`,
           alunoId: aluno.id,
-          alunoNome: aluno.nome,
-          faixa: aluno.faixa,
-          graus: aluno.graus,
           data,
-          hora: null,
-          status: 'AUSENTE',
+          status: 'FALTA',
           treinoId,
-          tipoTreino: 'Sessão principal',
           origem: 'PROFESSOR'
         });
       });
