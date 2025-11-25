@@ -82,9 +82,9 @@ function StudentDashboard() {
     return raw.charAt(0).toUpperCase() + raw.slice(1);
   }, [aluno?.status]);
 
-  const horariosPorTreino = useMemo(() => {
+  const treinoPorId = useMemo(() => {
     const map = new Map();
-    treinos.forEach((treino) => map.set(treino.id, treino.hora));
+    treinos.forEach((treino) => map.set(treino.id, treino));
     return map;
   }, [treinos]);
 
@@ -183,8 +183,10 @@ function StudentDashboard() {
           {ultimasPresencas.map((item) => (
             <li key={item.id} className="flex items-center justify-between py-3 text-bjj-gray-100">
               <div>
-                <p className="font-semibold text-white">{item.tipoTreino}</p>
-                <p className="text-xs text-bjj-gray-300/80">{item.data} · {item.hora || '—'}</p>
+                <p className="font-semibold text-white">{treinoPorId.get(item.treinoId)?.nome || 'Treino'}</p>
+                <p className="text-xs text-bjj-gray-300/80">
+                  {item.data} · {treinoPorId.get(item.treinoId)?.hora || '—'}
+                </p>
               </div>
               {(() => {
                 const tone = formatStatus(item.status);
@@ -208,6 +210,7 @@ function ProfessorDashboard() {
   const { user } = useCurrentUser();
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const treinos = useTreinosStore((state) => state.treinos);
   const [activeTab, setActiveTab] = useState('visao');
   const [updatingId, setUpdatingId] = useState(null);
@@ -217,9 +220,9 @@ function ProfessorDashboard() {
   const instructorGraus = typeof defaultInstrutor?.graus === 'number' ? defaultInstrutor.graus : 0;
   const instructorAvatar = user?.avatarUrl || defaultInstrutor?.avatarUrl || defaultAvatar;
 
-  const horariosPorTreino = useMemo(() => {
+  const treinoPorId = useMemo(() => {
     const map = new Map();
-    treinos.forEach((treino) => map.set(treino.id, treino.hora));
+    treinos.forEach((treino) => map.set(treino.id, treino));
     return map;
   }, [treinos]);
 
@@ -471,12 +474,11 @@ function ProfessorDashboard() {
           </div>
           <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
             {presencas
-              .filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN')
+              .filter((p) => p.status === 'PENDENTE')
               .map((item) => {
-                const isPending = item.status === 'PENDENTE';
-                const badgeTone = isPending
-                  ? 'bg-amber-500/20 text-amber-200'
-                  : 'bg-yellow-500/20 text-yellow-200';
+                const aluno = getAlunoById(item.alunoId);
+                const treino = treinoPorId.get(item.treinoId);
+                const badgeTone = 'bg-amber-500/20 text-amber-200';
 
                 return (
                 <div
@@ -484,10 +486,10 @@ function ProfessorDashboard() {
                   className="flex items-start justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
                 >
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome || 'Aluno'}</p>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.tipoTreino}</p>
+                    <p className="text-sm font-semibold text-white leading-tight">{aluno?.nome || 'Aluno não encontrado'}</p>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{treino?.nome || 'Treino'}</p>
                     <p className="text-[11px] text-bjj-gray-400">
-                      {item.data ? `${formatDate(item.data)} · ${item.hora || horariosPorTreino.get(item.treinoId) || '--:--'}` : 'Sem data'}
+                      {item.data ? `${formatDate(item.data)} · ${treino?.hora || '--:--'}` : 'Sem data'}
                     </p>
                     <div className="flex items-center gap-2">
                       <button
@@ -513,7 +515,7 @@ function ProfessorDashboard() {
                     </div>
                   </div>
                   <span className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${badgeTone}`}>
-                    {isPending ? 'Pendente' : 'Check-in'}
+                    Pendente
                   </span>
                 </div>
               );
