@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import TabletNav from './TabletNav';
 import useUserStore from '../../store/userStore';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 
 const BARE_PATHS = ['/login', '/unauthorized'];
 
@@ -13,6 +14,7 @@ export default function AppShell({ children }) {
   const pathname = usePathname();
   const { hydrateFromStorage, hydrated, updateUser } = useUserStore();
   const { user, aluno } = useCurrentAluno();
+  const { staff } = useCurrentStaff();
 
   useEffect(() => {
     if (!hydrated) {
@@ -21,13 +23,12 @@ export default function AppShell({ children }) {
   }, [hydrateFromStorage, hydrated]);
 
   useEffect(() => {
-    if (!aluno) return;
-
-    const nextAvatar = aluno.avatarUrl || user?.avatarUrl;
+    const nextAvatar = aluno?.avatarUrl || staff?.avatarUrl || user?.avatarUrl;
+    const nextName = aluno?.nome || staff?.nome;
     if (user && nextAvatar && nextAvatar !== user.avatarUrl && updateUser) {
-      updateUser({ avatarUrl: nextAvatar, name: aluno.nome });
+      updateUser({ avatarUrl: nextAvatar, name: nextName || user.name });
     }
-  }, [aluno, updateUser, user]);
+  }, [aluno, staff, updateUser, user]);
 
   const isBareLayout = useMemo(
     () => BARE_PATHS.some((publicPath) => pathname?.startsWith(publicPath)),

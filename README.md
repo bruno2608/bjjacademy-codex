@@ -111,11 +111,11 @@ await atualizarStatus(registro.id, 'PRESENTE');
 ## 👥 Perfis e dashboards
 
 - **Perfis suportados**: `ALUNO`, `INSTRUTOR`, `PROFESSOR` (há `ADMIN/TI` mapeados, seguirão o mesmo padrão em fase futura).
-- **Hooks de sessão**: `useCurrentUser` (dados básicos), `useCurrentAluno` (perfil de aluno), `useCurrentInstrutor` (perfil instrutor/professor via store de instrutores).
-- **Dashboards**: `/dashboard` seleciona automaticamente entre visão de professor/instrutor (via `useProfessorDashboard`) ou aluno (`useAlunoDashboard`).
+- **Hooks de sessão**: `useCurrentUser` (dados básicos), `useCurrentAluno` (perfil de aluno), `useCurrentStaff` (perfil de professor/instrutor/admin derivado do `instrutoresStore`).
+- **Dashboards**: `/dashboard` seleciona automaticamente entre visão de professor/instrutor (via `useStaffDashboard`/`useProfessorDashboard`) ou aluno (`useAlunoDashboard`).
 - **Telas de presença por perfil**: Aluno → `/dashboard`, `/checkin`, `/historico-presencas`; Professor/Instrutor → `/presencas` (listar/fechar treinos) e cards de presença no dashboard staff.
 
-`useProfessorDashboard` centraliza as métricas do painel staff a partir das mesmas stores/services usados em outras telas:
+`useStaffDashboard` centraliza as métricas do painel staff a partir das mesmas stores/services usados em outras telas:
 
 - **Alunos ativos/total** = contagem do `alunosStore` (mesma da lista de alunos).
 - **Aulas na semana / check-ins registrados / histórico na semana** = `treinosStore` + `presencasStore` filtrados pela semana corrente.
@@ -130,7 +130,7 @@ instrutoresService / presencasService
         ↓ (stores)
 useInstrutoresStore / usePresencasStore / treinosStore
         ↓ (hooks)
-useCurrentInstrutor · useCurrentAluno · useProfessorDashboard · useAlunoDashboard
+useCurrentStaff · useCurrentAluno · useStaffDashboard · useAlunoDashboard
         ↓ (telas)
 Dashboards · Check-in · Histórico · Presenças (staff)
 ```
@@ -148,13 +148,20 @@ Dashboards · Check-in · Histórico · Presenças (staff)
 ### Como cada perfil consome os dados
 
 - **Aluno**: `/dashboard-aluno`, `/checkin`, `/evolucao`, `/historico-presencas`, `/perfil` usam `useCurrentAluno` + `useAlunoDashboard`/`presencasStore` para nome/faixa/presenças.
-- **Instrutor/Professor**: `/dashboard`, `/dashboard-instrutor`, `/presencas`, `/alunos`, `/perfil` usam `useCurrentInstrutor` (derivado do `userStore` + `instrutoresStore`) e as mesmas stores de presenças/treinos/alunos.
+- **Instrutor/Professor**: `/dashboard`, `/dashboard-instrutor`, `/presencas`, `/alunos`, `/perfil` usam `useCurrentStaff` (derivado do `userStore` + `instrutoresStore`) e as mesmas stores de presenças/treinos/alunos.
 - **Admin/TI**: acessos ampliados seguem o mesmo pipeline (mocks → services → stores), com TODO para expansão de regras específicas.
 
 ### Fluxo único para faixa/grau e presenças
 
 - Faixas sempre resolvidas por `faixaSlug` + `getFaixaConfigBySlug` + `BjjBeltStrip` (sem arrays duplicados).
 - Presenças sempre via `presencasService` → `presencasStore`; totais em dashboards, histórico e visão staff leem o mesmo estado.
+
+### Fluxo de dados para perfis de Professor/Instrutor/Admin
+
+- **StaffProfile**: tipo central (`types/user.ts`) com nome/email/avatar, roles (`StaffRole`), faixaSlug/grauAtual e métricas agregadas opcionais (presenças do dia, alunos ativos, etc.).
+- **Fonte de verdade**: `useCurrentStaff` resolve o staff atual a partir do `AuthUser` (papéis/ids do `userStore`) e do `instrutoresStore` (popularizado via `MOCK_INSTRUTORES` → `instrutoresService`).
+- **Dashboards e métricas**: `useStaffDashboard` (e aliases `useProfessorDashboard`/`useTiDashboard`/`useAdminDashboard`) lê `usePresencasStore`, `useAlunosStore`, `useGraduacoesStore` e `useTreinosStore`, monta resumo diário de presenças (`calcularResumoPresencas`/`comporRegistrosDoDia`) e contagens semanais compartilhadas com `/presencas`.
+- **Perímetro de uso**: `/dashboard`, `/presencas`, `/perfil` e menus de usuário devem consumir apenas `useCurrentStaff`/`useStaffDashboard` para nome/faixa/grau e números; novas telas de staff NÃO devem importar `MOCK_INSTRUTORES` diretamente.
 
 ### Exemplo de atualização consistente
 
@@ -165,7 +172,7 @@ Dashboards · Check-in · Histórico · Presenças (staff)
 ### Checklist rápido
 
 - Nenhuma página usa `MOCK_ALUNOS` ou `MOCK_INSTRUTORES` diretamente (sempre via services/stores).
-- Hooks de sessão: `useCurrentUser` → identidade básica; `useCurrentAluno`/`useCurrentInstrutor` → perfis completos.
+- Hooks de sessão: `useCurrentUser` → identidade básica; `useCurrentAluno`/`useCurrentStaff` → perfis completos.
 - Todas as telas de faixa usam `faixaSlug` + `getFaixaConfigBySlug`.
 - Dashboards do aluno x histórico x presenças compartilham os mesmos nomes e totais vindos das stores.
 

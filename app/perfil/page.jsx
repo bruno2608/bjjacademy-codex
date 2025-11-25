@@ -7,11 +7,11 @@ import { ROLE_KEYS } from '../../config/roles';
 import { useAlunosStore } from '../../store/alunosStore';
 import StudentHero from '../../components/student/StudentHero';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
-import { useCurrentInstrutor } from '@/hooks/useCurrentInstrutor';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useInstrutoresStore } from '@/store/instrutoresStore';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { normalizeFaixaSlug } from '@/lib/alunoStats';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 
 const ensureAvatar = (name, avatarUrl) =>
   avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
@@ -19,7 +19,7 @@ const ensureAvatar = (name, avatarUrl) =>
 export default function PerfilAlunoPage() {
   const { user, aluno } = useCurrentAluno();
   const { updateUser } = useCurrentUser();
-  const { instrutor } = useCurrentInstrutor();
+  const { staff: instrutor } = useCurrentStaff();
   const updateAluno = useAlunosStore((state) => state.updateAluno);
   const atualizarInstrutor = useInstrutoresStore((state) => state.atualizar);
   const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
@@ -61,7 +61,7 @@ export default function PerfilAlunoPage() {
   const faixaConfig = resolverFaixaConfig(isAluno ? aluno?.faixaSlug ?? aluno?.faixa : instrutor?.faixaSlug);
   const grauAtual = isAluno
     ? aluno?.graus ?? faixaConfig?.grausMaximos ?? 0
-    : instrutor?.graus ?? faixaConfig?.grausMaximos ?? 0;
+    : instrutor?.grauAtual ?? faixaConfig?.grausMaximos ?? 0;
 
   useEffect(() => {
     setForm(deriveInitialForm());
