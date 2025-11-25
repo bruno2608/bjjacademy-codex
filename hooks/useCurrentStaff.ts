@@ -1,76 +1,40 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { normalizeFaixaSlug } from '@/lib/alunoStats'
-import { useInstrutoresStore } from '@/store/instrutoresStore'
+import { useAlunosStore } from '@/store/alunosStore'
 import { useCurrentUser } from './useCurrentUser'
-import type { StaffProfile, StaffRole } from '@/types/user'
+import type { StaffProfile } from '@/types/user'
 
-const mapRoles = (roles?: string[] | null): StaffRole[] => {
-  if (!roles) return []
-  return roles
-    .map((role) => role.toUpperCase())
-    .filter((role): role is StaffRole =>
-      ['PROFESSOR', 'INSTRUTOR', 'ADMIN', 'TI'].includes(role)
-    )
+const normalizarStatus = (status?: string | null): StaffProfile['status'] => {
+  if (!status) return 'ATIVO'
+  const normalizado = status.toString().toUpperCase()
+  return normalizado === 'INATIVO' ? 'INATIVO' : 'ATIVO'
 }
 
 export function useCurrentStaff() {
   const { user } = useCurrentUser()
-  const getInstrutorById = useInstrutoresStore((s) => s.getInstrutorById)
-  const instrutores = useInstrutoresStore((s) => s.instrutores)
-  const hydrated = useInstrutoresStore((s) => s.hydrated)
-  const carregarInstrutores = useInstrutoresStore((s) => s.carregar)
-
-  useEffect(() => {
-    if (!hydrated && (user?.instrutorId || user?.professorId || instrutores.length === 0)) {
-      void carregarInstrutores()
-    }
-  }, [carregarInstrutores, hydrated, instrutores.length, user?.instrutorId, user?.professorId])
+  const getAlunoById = useAlunosStore((s) => s.getAlunoById)
 
   const staff: StaffProfile | null = useMemo(() => {
-    const candidateId = user?.instrutorId || user?.professorId
-    const instrutor = candidateId ? getInstrutorById(candidateId) : null
-    const fallback = instrutor || instrutores[0]
+    if (!user) return null
 
-    if (!fallback && user) {
-      const resolvedRoles = mapRoles(user.roles)
-      return {
-        id: user.id,
-        nome: user.nomeCompleto || user.name || 'Instrutor',
-        email: user.email || null,
-        avatarUrl: user.avatarUrl || null,
-        roles: resolvedRoles.length ? resolvedRoles : [],
-        faixaSlug: null,
-        grauAtual: null,
-        status: 'ATIVO',
-      }
-    }
-
-    if (!fallback) return null
-
-    const faixaSlug = normalizeFaixaSlug(fallback.faixaSlug || fallback.faixa)
-    const rolesFromUser = mapRoles(user?.roles)
-    const rolesFromFallback = mapRoles(fallback.roles)
-    const roles = rolesFromUser.length ? rolesFromUser : rolesFromFallback
+    const aluno = user.alunoId ? getAlunoById(user.alunoId) : null
+    const faixaSlug = normalizeFaixaSlug(aluno?.faixaSlug || aluno?.faixa)
+    const grauAtual = typeof aluno?.graus === 'number' ? aluno.graus : null
 
     return {
-      id: fallback.id,
-      nome: fallback.nomeCompleto || fallback.nome,
-      email: fallback.email ?? user?.email ?? null,
-      avatarUrl: fallback.avatarUrl || user?.avatarUrl || null,
-      roles,
+      id: user.id,
+      nome: aluno?.nomeCompleto || aluno?.nome || user.nomeCompleto || user.name || 'Instrutor',
+      email: aluno?.email ?? user.email ?? null,
+      avatarUrl: aluno?.avatarUrl ?? user.avatarUrl ?? null,
+      roles: user.roles || [],
+      alunoId: aluno?.id ?? user.alunoId ?? null,
       faixaSlug: faixaSlug || null,
-      grauAtual: typeof fallback.graus === 'number' ? fallback.graus : null,
-      status: (fallback.status?.toUpperCase() as StaffProfile['status']) || 'ATIVO',
-      alunosAtivos: fallback.alunosAtivos,
-      totalAlunos: fallback.totalAlunos,
-      graduacoesPendentes: fallback.graduacoesPendentes,
-      checkinsRegistradosSemana: fallback.checkinsRegistradosSemana,
-      presencasHoje: fallback.presencasHoje,
-      faltasHoje: fallback.faltasHoje,
-      pendentesHoje: fallback.pendentesHoje,
+      grauAtual: grauAtual ?? null,
+      status: normalizarStatus(aluno?.status),
+      academiaId: aluno?.academiaId ?? user.academiaId ?? null,
     }
-  }, [getInstrutorById, instrutores, user])
+  }, [getAlunoById, user])
 
   return { user, staff }
 }

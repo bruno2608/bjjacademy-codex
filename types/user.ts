@@ -6,17 +6,17 @@ export type AuthUser = CurrentUser & {
   telefone?: string | null;
 };
 
-export type StaffRole = 'PROFESSOR' | 'INSTRUTOR' | 'ADMIN' | 'TI';
-
 export interface StaffProfile {
   id: string;
   nome: string;
   email: string | null;
   avatarUrl?: string | null;
-  roles: StaffRole[];
+  roles: UserRole[];
+  alunoId?: string | null;
   faixaSlug?: string | null;
   grauAtual?: number | null;
   status?: 'ATIVO' | 'INATIVO';
+  academiaId?: string | null;
   alunosAtivos?: number;
   totalAlunos?: number;
   graduacoesPendentes?: number;

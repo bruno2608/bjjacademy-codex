@@ -141,14 +141,14 @@ Dashboards · Check-in · Histórico · Presenças (staff)
 
 - **CurrentUser** (`types/session.ts` + `useCurrentUser`) — nome/email/avatar e papéis carregados do `userStore`.
 - **AlunoProfile** (`types/aluno.ts` + `useAlunosStore`) — nome/nomeCompleto, faixaSlug/grauAtual, status e academia; normalizado por `normalizeAluno`.
-- **InstrutorProfile** (`types/instrutor.ts` + `useInstrutoresStore`) — nome/nomeCompleto, faixaSlug/grauAtual, status e avatar derivados dos mocks centralizados.
+- **StaffProfile** (`types/user.ts` + `useCurrentStaff`) — nome/nomeCompleto, email/avatar, roles e faixa/grau derivados do `AuthUser` + `Aluno` relacionado (via `alunosStore`).
 - **BjjBeltVisualConfig** (`data/mocks/bjjBeltMocks.ts` + `getFaixaConfigBySlug`) — única fonte para visuais de faixa/grau.
 - **PresencaRegistro** (`types/presenca.ts` + `presencasStore`/`presencasService`) — check-ins, confirmações e faltas.
 
 ### Como cada perfil consome os dados
 
 - **Aluno**: `/dashboard-aluno`, `/checkin`, `/evolucao`, `/historico-presencas`, `/perfil` usam `useCurrentAluno` + `useAlunoDashboard`/`presencasStore` para nome/faixa/presenças.
-- **Instrutor/Professor**: `/dashboard`, `/dashboard-instrutor`, `/presencas`, `/alunos`, `/perfil` usam `useCurrentStaff` (derivado do `userStore` + `instrutoresStore`) e as mesmas stores de presenças/treinos/alunos.
+- **Instrutor/Professor**: `/dashboard`, `/dashboard-instrutor`, `/presencas`, `/alunos`, `/perfil` usam `useCurrentStaff` (derivado do `userStore` + `alunosStore`) e as mesmas stores de presenças/treinos/alunos.
 - **Admin/TI**: acessos ampliados seguem o mesmo pipeline (mocks → services → stores), com TODO para expansão de regras específicas.
 
 ### Fluxo único para faixa/grau e presenças
@@ -158,8 +158,8 @@ Dashboards · Check-in · Histórico · Presenças (staff)
 
 ### Fluxo de dados para perfis de Professor/Instrutor/Admin
 
-- **StaffProfile**: tipo central (`types/user.ts`) com nome/email/avatar, roles (`StaffRole`), faixaSlug/grauAtual e métricas agregadas opcionais (presenças do dia, alunos ativos, etc.).
-- **Fonte de verdade**: `useCurrentStaff` resolve o staff atual a partir do `AuthUser` (papéis/ids do `userStore`) e do `instrutoresStore` (popularizado via `MOCK_INSTRUTORES` → `instrutoresService`).
+- **StaffProfile**: tipo central (`types/user.ts`) com nome/email/avatar, roles (`UserRole[]`), faixaSlug/grauAtual e métricas agregadas opcionais (presenças do dia, alunos ativos, etc.).
+- **Fonte de verdade**: `useCurrentStaff` resolve o staff atual a partir do `AuthUser` (papéis/ids do `userStore`), cruzando com o `Aluno` relacionado em `alunosStore` para faixa/grau/avatar/status. O mock `MOCK_INSTRUTORES` fica restrito ao `instrutoresService` para compatibilidade, não às telas.
 - **Dashboards e métricas**: `useStaffDashboard` (e aliases `useProfessorDashboard`/`useTiDashboard`/`useAdminDashboard`) lê `usePresencasStore`, `useAlunosStore`, `useGraduacoesStore` e `useTreinosStore`, monta resumo diário de presenças (`calcularResumoPresencas`/`comporRegistrosDoDia`) e contagens semanais compartilhadas com `/presencas`.
 - **Perímetro de uso**: `/dashboard`, `/presencas`, `/perfil` e menus de usuário devem consumir apenas `useCurrentStaff`/`useStaffDashboard` para nome/faixa/grau e números; novas telas de staff NÃO devem importar `MOCK_INSTRUTORES` diretamente.
 
@@ -171,10 +171,26 @@ Dashboards · Check-in · Histórico · Presenças (staff)
 - **Permissões**: visões de configurações verificam `user.roles` (`PROFESSOR`/`INSTRUTOR`/`ADMIN`/`TI`). Usuários sem esses papéis veem aviso de acesso restrito.
 - **Regra de ouro**: novas telas de staff devem consumir hooks/stores (`useCurrentStaff`, `useStaffDashboard`, `usePresencasStore`, `useAlunosStore`, etc.) e nunca acessar mocks diretamente.
 
+### Hierarquia de perfis (Aluno, Instrutor, Professor, Admin)
+
+- Um único `AuthUser` (em `types/user.ts` + `userStore`) representa a sessão e contém `roles: UserRole[]`, `alunoId` e `academiaId`.
+- Instrutor/Professor/Admin são o mesmo usuário com papéis adicionais; faixa/grau/status são lidos do `Aluno` apontado por `alunoId` (via `alunosStore`).
+- `useCurrentUser` expõe os dados brutos da sessão; `useCurrentStaff` combina `AuthUser` + `Aluno` para entregar nome/email/avatar/faixa/grau/status.
+- `MOCK_INSTRUTORES` permanece encapsulado em `instrutoresService`/`instrutoresStore` apenas para compatibilidade; novas telas não devem importar esse mock.
+
+### Mapeamento atual (fontes de dados de professor/instrutor)
+
+- `data/mockInstrutores.ts` + `services/instrutoresService.ts`: único ponto que ainda lê `MOCK_INSTRUTORES` para hidratar a store legada de instrutores.
+- `store/userStore.ts`: seeds de sessão definem `DEFAULT_INSTRUTOR_ID`/`professorId` e relacionam `alunoId` ao mesmo usuário raiz (`AuthUser`).
+- `hooks/useCurrentInstrutor.ts`: hook legado que ainda consulta `instrutoresStore` (nenhuma tela atual consome esse caminho).
+- `app/dashboard/page.jsx` e `services/dashboard/useStaffDashboard.ts`: nome/avatar/faixa/grau/status do professor vêm de `useCurrentStaff` → `AuthUser` + `alunosStore`; métricas de presenças/alunos usam apenas stores e helpers compartilhados.
+- `app/perfil/page.jsx`: perfil do professor usa `useCurrentStaff` para preencher headline/faixa/avatar/status e grava alterações via `useCurrentUser` + `useAlunosStore` (sem ler mocks diretos).
+- `components/ui/AppShell.jsx`, `components/ui/Header.jsx`, `components/ui/UserMenu.jsx`: cabeçalhos e menus exibem nome/email/avatar via `useCurrentUser`/`useCurrentStaff`; não há imports diretos de mocks.
+
 ### Exemplo de atualização consistente
 
 1) **Alterar nome/avatar do aluno X** → `alunosService.updateAluno` atualiza `useAlunosStore`, sincroniza presenças/graduacoes e reflete no `userStore` quando o usuário logado é o mesmo aluno.
-2) **Alterar nome/avatar do instrutor Y** → `instrutoresStore.atualizar` (via `/perfil` do professor) atualiza o profile central e sincroniza o `userStore` para que hero, header e dashboards mostrem o mesmo dado.
+2) **Alterar nome/avatar do instrutor Y** → `/perfil` (staff) usa `useCurrentStaff` + `useAlunosStore` + `useCurrentUser` para atualizar o mesmo usuário raiz; hero, header e dashboards refletem imediatamente.
 3) Telas afetadas automaticamente: header/menu do app, `/dashboard-aluno`, `/historico-presencas`, `/presencas` (staff), `/perfil` e listas em `/alunos`.
 
 ### Checklist rápido
