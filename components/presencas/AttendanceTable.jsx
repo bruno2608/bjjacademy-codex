@@ -7,6 +7,7 @@
  */
 import { CheckCircle2, Loader2, Pencil, Plus, Trash2, XCircle } from 'lucide-react';
 import { useAlunosStore } from '@/store/alunosStore';
+import { useTreinosStore } from '@/store/treinosStore';
 import Badge from '../ui/Badge';
 
 const baseActionButtonClasses =
@@ -36,36 +37,26 @@ export default function AttendanceTable({
 
   const statusTone = (status) => {
     switch (status) {
-      case 'CONFIRMADO':
-        return { label: 'PRESENTE', variant: 'success', className: 'bg-green-600 text-white shadow-[0_0_0_1px_rgba(34,197,94,0.35)]' };
-      case 'CHECKIN':
-        return {
-          label: 'CHECK-IN',
-          variant: 'warning',
-          className: 'bg-amber-400 text-bjj-black shadow-[0_0_0_1px_rgba(251,191,36,0.4)]'
-        };
       case 'PENDENTE':
         return {
           label: 'PENDENTE',
           variant: 'warning',
           className: 'bg-amber-500 text-bjj-black font-semibold shadow-[0_0_0_1px_rgba(245,158,11,0.45)]'
         };
-      case 'AUSENTE':
-        return { label: 'AUSENTE', variant: 'danger', className: 'bg-red-600 text-white shadow-[0_0_0_1px_rgba(248,113,113,0.45)]' };
-      case 'AUSENTE_JUSTIFICADA':
-        return {
-          label: 'AUSENTE JUSTIFICADA',
-          variant: 'danger',
-          className: 'bg-red-500 text-white shadow-[0_0_0_1px_rgba(248,113,113,0.45)]'
-        };
+      case 'PRESENTE':
+        return { label: 'PRESENTE', variant: 'success', className: 'bg-green-600 text-white shadow-[0_0_0_1px_rgba(34,197,94,0.35)]' };
+      case 'FALTA':
+        return { label: 'FALTA', variant: 'danger', className: 'bg-red-600 text-white shadow-[0_0_0_1px_rgba(248,113,113,0.45)]' };
       default:
         return { label: status || '—', variant: 'neutral', className: 'bg-bjj-gray-700/40 text-bjj-gray-100' };
     }
   };
 
-  const canConfirm = (status) =>
-    status === 'CHECKIN' || status === 'PENDENTE' || status === 'AUSENTE' || status === 'AUSENTE_JUSTIFICADA';
-  const canAbsent = (status) => status === 'CHECKIN' || status === 'PENDENTE' || status === 'CONFIRMADO';
+  const treinos = useTreinosStore((state) => state.treinos);
+  const findTreino = (treinoId) => treinos.find((treino) => treino.id === treinoId);
+
+  const canConfirm = (status) => status === 'PENDENTE';
+  const canAbsent = (status) => status === 'PENDENTE' || status === 'PRESENTE';
 
   return (
     <div
@@ -86,9 +77,12 @@ export default function AttendanceTable({
           const alunoNome = aluno?.nome ?? 'Aluno não encontrado';
           const faixa = aluno?.faixaSlug || aluno?.faixa || 'Sem faixa';
           const graus = Number.isFinite(Number(aluno?.graus)) ? Number(aluno?.graus) : 0;
-          const hora = record.hora || '—';
-          const treinoLabel = record.tipoTreino || 'Sessão principal';
-          const horarioLabel = hora !== '—' ? `${hora}h` : 'Sem horário';
+          const formattedDate = record.data
+            ? new Date(record.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '')
+            : '—';
+          const treino = findTreino(record.treinoId);
+          const treinoLabel = treino?.nome || 'Sessão principal';
+          const horarioLabel = treino?.hora || 'Sem horário';
           const dataTreinoLabel = `${formattedDate} · ${horarioLabel} · ${treinoLabel}`;
           const isPlaceholder = Boolean(record.isPlaceholder);
           const tone = statusTone(record.status);
@@ -127,7 +121,7 @@ export default function AttendanceTable({
                     <p className="font-semibold text-bjj-gray-200/90">Data</p>
                     <p>
                       {formattedDate}
-                      <span className="ml-1 text-bjj-gray-200/60">{hora !== '—' ? `· ${hora}` : ''}</span>
+                      <span className="ml-1 text-bjj-gray-200/60">{horarioLabel !== 'Sem horário' ? `· ${horarioLabel}` : ''}</span>
                     </p>
                   </div>
                   <div>

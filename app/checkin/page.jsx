@@ -47,9 +47,9 @@ export default function CheckinPage() {
       const [ano, mes] = (item.data || '').split('-').map(Number);
       if (ano === year && mes === month) {
         const status = item.status;
-        if (status === 'CONFIRMADO') {
+        if (status === 'PRESENTE') {
           map.set(item.data, 'PRESENTE');
-        } else if (status === 'CHECKIN' || status === 'PENDENTE') {
+        } else if (status === 'PENDENTE') {
           if (!map.has(item.data)) {
             map.set(item.data, 'PENDENTE');
           }
@@ -82,9 +82,6 @@ export default function CheckinPage() {
       alunoId,
       data: hoje,
       treinoId: treino.id,
-      hora: null,
-      tipoTreino: treino.nome,
-      treinoModalidade: treino.tipo,
       horaInicio: treino.hora,
       origem: aluno ? 'ALUNO' : undefined
     });
@@ -109,7 +106,7 @@ export default function CheckinPage() {
   };
 
   const pendentesHoje = useMemo(
-    () => checkinsDoAluno.filter((item) => item.status === 'CHECKIN' || item.status === 'PENDENTE'),
+    () => checkinsDoAluno.filter((item) => item.status === 'PENDENTE'),
     [checkinsDoAluno]
   );
 
@@ -117,16 +114,12 @@ export default function CheckinPage() {
 
   const statusLabel = (status) => {
     switch (status) {
-      case 'CONFIRMADO':
-        return { label: 'PRESENÇA CONFIRMADA', tone: 'bg-green-600/20 text-green-300' };
-      case 'CHECKIN':
-        return { label: 'CHECK-IN ENVIADO', tone: 'bg-yellow-500/20 text-yellow-200' };
       case 'PENDENTE':
         return { label: 'EM ANÁLISE PELO PROFESSOR', tone: 'bg-yellow-500/20 text-yellow-200' };
-      case 'AUSENTE':
+      case 'PRESENTE':
+        return { label: 'PRESENÇA CONFIRMADA', tone: 'bg-green-600/20 text-green-300' };
+      case 'FALTA':
         return { label: 'AUSENTE', tone: 'bg-red-600/10 text-red-300' };
-      case 'AUSENTE_JUSTIFICADA':
-        return { label: 'AUSENTE JUSTIFICADA', tone: 'bg-red-600/10 text-red-300' };
       default:
         return { label: 'NÃO REGISTRADO', tone: 'bg-bjj-gray-800 text-bjj-gray-200' };
     }
@@ -189,21 +182,28 @@ export default function CheckinPage() {
                 </span>
               </div>
               <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                {pendentesHoje.map((item) => (
-                  <li
-                    key={item.id}
-                    className="flex items-start justify-between gap-3 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
-                  >
-                    <div className="space-y-1">
-                      <p className="text-sm font-semibold text-white leading-tight">{item.tipoTreino}</p>
-                      <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.treinoModalidade}</p>
-                      <p className="text-[11px] text-bjj-gray-300">{`${formatDate(item.data)} · ${item.hora || horarioDoTreino(item.treinoId)}`}</p>
-                    </div>
-                    <span className="rounded-full bg-yellow-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
-                      Aguardando
-                    </span>
-                  </li>
-                ))}
+                {pendentesHoje.map((item) => {
+                  const treino = treinos.find((t) => t.id === item.treinoId);
+                  const treinoNome = treino?.nome || 'Treino';
+                  const treinoModalidade = treino?.tipo || 'Sessão';
+                  const horario = treino?.hora || horarioDoTreino(item.treinoId);
+
+                  return (
+                    <li
+                      key={item.id}
+                      className="flex items-start justify-between gap-3 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
+                    >
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-white leading-tight">{treinoNome}</p>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{treinoModalidade}</p>
+                        <p className="text-[11px] text-bjj-gray-300">{`${formatDate(item.data)} · ${horario}`}</p>
+                      </div>
+                      <span className="rounded-full bg-yellow-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-yellow-200">
+                        Aguardando
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}

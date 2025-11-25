@@ -5,6 +5,7 @@ import { CalendarRange, Check, Clock3, History, UserRound, X } from 'lucide-reac
 import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
+import { useTreinosStore } from '../../store/treinosStore';
 import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
 
@@ -23,6 +24,7 @@ const buildMonthOptions = () => {
 export default function HistoricoPresencasPage() {
   const { user } = useUserStore();
   const { alunos, getAlunoById } = useAlunosStore();
+  const treinos = useTreinosStore((state) => state.treinos);
   const alunoId = user?.alunoId;
   const presencas = usePresencasStore((state) => state.presencas);
   const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
@@ -64,14 +66,13 @@ export default function HistoricoPresencasPage() {
 
   const statusTone = (status) => {
     switch (status) {
-      case 'CONFIRMADO':
+      case 'PRESENTE':
         return {
           label: 'Presente',
           tone: 'bg-green-600/15 text-green-200 ring-1 ring-inset ring-green-500/40',
           marker: 'bg-gradient-to-br from-green-400 to-emerald-500 text-bjj-gray-950',
           icon: Check
         };
-      case 'CHECKIN':
       case 'PENDENTE':
         return {
           label: 'Pendente',
@@ -79,8 +80,7 @@ export default function HistoricoPresencasPage() {
           marker: 'bg-gradient-to-br from-amber-300 to-orange-400 text-bjj-gray-950',
           icon: Clock3
         };
-      case 'AUSENTE':
-      case 'AUSENTE_JUSTIFICADA':
+      case 'FALTA':
         return {
           label: 'Ausente',
           tone: 'bg-bjj-red/15 text-bjj-red ring-1 ring-inset ring-bjj-red/50',
@@ -105,9 +105,9 @@ export default function HistoricoPresencasPage() {
   const totais = useMemo(() => {
     return registros.reduce(
       (acc, item) => {
-        if (item.status === 'CONFIRMADO') acc.presentes += 1;
-        if (item.status === 'PENDENTE' || item.status === 'CHECKIN') acc.pendentes += 1;
-        if (item.status === 'AUSENTE' || item.status === 'AUSENTE_JUSTIFICADA') acc.ausencias += 1;
+        if (item.status === 'PRESENTE') acc.presentes += 1;
+        if (item.status === 'PENDENTE') acc.pendentes += 1;
+        if (item.status === 'FALTA') acc.ausencias += 1;
         acc.total += 1;
         return acc;
       },
@@ -199,6 +199,10 @@ export default function HistoricoPresencasPage() {
               {registros.map((item) => {
                 const tone = statusTone(item.status);
                 const Icon = tone.icon;
+                const treino = treinos.find((treinoItem) => treinoItem.id === item.treinoId);
+                const treinoNome = treino?.nome || 'Sessão principal';
+                const treinoTipo = treino?.tipo || 'Treino';
+                const horario = treino?.hora || 'Horário a confirmar';
                 return (
                   <li key={item.id} className="relative pl-16">
                     <div
@@ -221,11 +225,11 @@ export default function HistoricoPresencasPage() {
 
                       <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <p className="text-base font-semibold text-white">{item.tipoTreino}</p>
-                          <p className="text-xs text-bjj-gray-100/85">{item.treinoModalidade || 'Treino livre'}</p>
+                          <p className="text-base font-semibold text-white">{treinoNome}</p>
+                          <p className="text-xs text-bjj-gray-100/85">{treinoTipo}</p>
                         </div>
                         <div className="flex flex-col items-end text-right text-xs text-bjj-gray-100/85">
-                          <span className="font-semibold text-white">{item.hora || 'Horário a confirmar'}</span>
+                          <span className="font-semibold text-white">{horario}</span>
                           {item.origem && <span className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-200/80">{item.origem}</span>}
                         </div>
                       </div>

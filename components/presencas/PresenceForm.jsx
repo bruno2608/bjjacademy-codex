@@ -11,12 +11,7 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 
-const statusOptions = ['CONFIRMADO', 'CHECKIN', 'PENDENTE', 'AUSENTE', 'AUSENTE_JUSTIFICADA'];
-
-const obterHoraAtual = () =>
-  new Date()
-    .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    .padStart(5, '0');
+const statusOptions = ['PRESENTE', 'PENDENTE', 'FALTA'];
 
 export default function PresenceForm({ onSubmit, initialData = null, onCancel, submitLabel }) {
   const alunos = useAlunosStore((state) => state.alunos);
@@ -107,13 +102,10 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
 
     const treinoSelecionado =
       treinosDisponiveis.find((treino) => treino.id === form.treinoId) || sugerirTreino(form.data);
-    const horaSessao = treinoSelecionado?.hora || initialData?.hora || obterHoraAtual();
 
     onSubmit({
       ...form,
-      hora: horaSessao,
-      treinoId: treinoSelecionado?.id || form.treinoId || null,
-      tipoTreino: treinoSelecionado?.nome || 'Sessão principal'
+      treinoId: treinoSelecionado?.id || form.treinoId || null
     });
 
     if (!isEditing) {

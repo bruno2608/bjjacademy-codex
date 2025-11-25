@@ -33,10 +33,8 @@ const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os status' },
   { value: 'PENDENTE', label: 'Pendente' },
-  { value: 'CHECKIN', label: 'Check-in' },
-  { value: 'CONFIRMADO', label: 'Confirmado' },
-  { value: 'AUSENTE', label: 'Ausente' },
-  { value: 'AUSENTE_JUSTIFICADA', label: 'Ausente justificada' }
+  { value: 'PRESENTE', label: 'Presente' },
+  { value: 'FALTA', label: 'Falta' }
 ];
 const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
 
@@ -174,10 +172,8 @@ export default function PresencasPage() {
           id: `placeholder-${aluno.id}-${treinoSugestao?.id || 'principal'}`,
           alunoId: aluno.id,
           data: hoje,
-          status: 'AUSENTE',
-          hora: null,
+          status: 'FALTA',
           treinoId: treinoSugestao?.id || null,
-          tipoTreino: treinoSugestao?.nome || 'Sessão principal',
           isPlaceholder: true
         };
       });
@@ -227,24 +223,18 @@ export default function PresencasPage() {
 
   const statusOrder = {
     PENDENTE: 0,
-    CHECKIN: 1,
-    CONFIRMADO: 2,
-    AUSENTE: 3,
-    AUSENTE_JUSTIFICADA: 4
+    PRESENTE: 1,
+    FALTA: 2
   };
 
   const statusLabel = (status) => {
     switch (status) {
-      case 'CONFIRMADO':
-        return { label: 'PRESENTE', tone: 'text-green-300' };
-      case 'CHECKIN':
-        return { label: 'CHECK-IN', tone: 'text-yellow-200' };
       case 'PENDENTE':
         return { label: 'PENDENTE', tone: 'text-yellow-200' };
-      case 'AUSENTE':
-        return { label: 'AUSENTE', tone: 'text-red-300' };
-      case 'AUSENTE_JUSTIFICADA':
-        return { label: 'AUSENTE JUSTIFICADA', tone: 'text-red-300' };
+      case 'PRESENTE':
+        return { label: 'PRESENTE', tone: 'text-green-300' };
+      case 'FALTA':
+        return { label: 'FALTA', tone: 'text-red-300' };
       default:
         return { label: status || '—', tone: 'text-bjj-gray-200' };
     }
@@ -263,9 +253,9 @@ export default function PresencasPage() {
 
   const totalFiltrado = registrosFiltrados.length;
 
-  const presentesDia = registrosDoDia.filter((item) => item.status === 'CONFIRMADO').length;
-  const faltasDia = registrosDoDia.filter((item) => item.status === 'AUSENTE' || item.status === 'AUSENTE_JUSTIFICADA').length;
-  const pendentesDia = registrosDoDia.filter((item) => item.status === 'CHECKIN' || item.status === 'PENDENTE').length;
+  const presentesDia = registrosDoDia.filter((item) => item.status === 'PRESENTE').length;
+  const faltasDia = registrosDoDia.filter((item) => item.status === 'FALTA').length;
+  const pendentesDia = registrosDoDia.filter((item) => item.status === 'PENDENTE').length;
   const totalDia = registrosDoDia.length || 1;
   const taxaPresencaDia = (presentesDia / totalDia) * 100;
 
@@ -482,7 +472,7 @@ export default function PresencasPage() {
       faixaSlug: aluno?.faixaSlug || aluno?.faixa,
       graus: aluno?.graus,
       data: dataRegistro,
-      status: 'CONFIRMADO',
+      status: 'PRESENTE',
       tipoTreino: sugestao?.nome || registro.tipoTreino || 'Sessão principal'
     });
     setIsSessionOpen(true);
@@ -512,7 +502,7 @@ export default function PresencasPage() {
     const novaPresenca = await createPresenca({
       alunoId: sessionRecord.alunoId,
       data: sessionRecord.data,
-      status: 'CONFIRMADO',
+      status: 'PRESENTE',
       treinoId: treinoSelecionado?.id || null,
       tipoTreino: treinoSelecionado?.nome || sessionRecord.tipoTreino || 'Sessão principal',
       hora: treinoSelecionado?.hora || formatTime()
@@ -748,29 +738,35 @@ export default function PresencasPage() {
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Lista rápida</p>
             <ul className="space-y-2.5">
-              {registrosDoDia.map((item) => (
-                <li
-                  key={item.id || `${item.alunoId}-${item.treinoId || item.data}`}
-                  className="flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-3 py-2"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-bjj-white">{resolveAlunoNome(item.alunoId)}</p>
-                    <p className="text-[11px] text-bjj-gray-200/60">
-                      {item.status === 'CONFIRMADO'
-                        ? `Confirmado às ${item.hora || '—'}`
-                        : item.status === 'CHECKIN' || item.status === 'PENDENTE'
-                        ? 'Aguardando confirmação'
-                        : 'Ainda não marcado'}
-                    </p>
-                    <p className="text-[11px] text-bjj-gray-200/50">{item.tipoTreino || 'Sessão principal'}</p>
-                  </div>
-                  <span
-                    className={`text-xs font-semibold ${statusLabel(item.status).tone}`}
+              {registrosDoDia.map((item) => {
+                const treino = treinos.find((treino) => treino.id === item.treinoId);
+                const treinoLabel = treino?.nome || 'Sessão principal';
+                const statusInfo = statusLabel(item.status);
+                const statusMessage =
+                  item.status === 'PRESENTE'
+                    ? 'Presença confirmada'
+                    : item.status === 'PENDENTE'
+                    ? 'Aguardando confirmação'
+                    : 'Falta registrada';
+
+                return (
+                  <li
+                    key={item.id || `${item.alunoId}-${item.treinoId || item.data}`}
+                    className="flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-3 py-2"
                   >
-                    {statusLabel(item.status).label}
-                  </span>
-                </li>
-              ))}
+                    <div>
+                      <p className="text-sm font-semibold text-bjj-white">{resolveAlunoNome(item.alunoId)}</p>
+                      <p className="text-[11px] text-bjj-gray-200/60">{statusMessage}</p>
+                      <p className="text-[11px] text-bjj-gray-200/50">{treinoLabel}</p>
+                    </div>
+                    <span
+                      className={`text-xs font-semibold ${statusInfo.tone}`}
+                    >
+                      {statusInfo.label}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
