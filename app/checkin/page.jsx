@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle, Clock3 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import { useAlunosStore } from '../../store/alunosStore';
@@ -16,16 +16,22 @@ const formatDate = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
 
 export default function CheckinPage() {
-  const { user } = useCurrentAluno();
-  const alunoId = user?.alunoId;
+  const { user, aluno } = useCurrentAluno();
+  const alunoId = aluno?.id || user?.alunoId;
   const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const hoje = new Date().toISOString().split('T')[0];
   const today = useMemo(() => new Date(), []);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
-  const registerCheckin = usePresencasStore((state) => state.registerCheckin);
+  const registrarCheckin = usePresencasStore((state) => state.registrarCheckin);
+  const carregarPorAluno = usePresencasStore((state) => state.carregarPorAluno);
   const presencas = usePresencasStore((state) => state.presencas);
   const isTreinoFechado = usePresencasStore((state) => state.isTreinoFechado);
   const [feedbackModal, setFeedbackModal] = useState({ open: false, title: '', message: '' });
+
+  useEffect(() => {
+    if (!alunoId) return;
+    carregarPorAluno(alunoId);
+  }, [alunoId, carregarPorAluno]);
 
   const diaSemana = normalizeWeekday(hoje);
   const treinosDoDia = useMemo(
@@ -76,14 +82,23 @@ export default function CheckinPage() {
     return days;
   }, [presenceByDay, today]);
 
-  const handleCheckin = (treino) => {
-    const aluno = alunoId ? getAlunoById(alunoId) : null;
-    const resultado = registerCheckin({
+  const handleCheckin = async (treino) => {
+    const alunoRegistro = alunoId ? getAlunoById(alunoId) : null;
+    if (!alunoId) {
+      setFeedbackModal({
+        open: true,
+        title: 'Não foi possível registrar',
+        message: 'Identifique-se como aluno para enviar o check-in deste treino.'
+      });
+      return;
+    }
+
+    const resultado = await registrarCheckin({
       alunoId,
       data: hoje,
       treinoId: treino.id,
       horaInicio: treino.hora,
-      origem: aluno ? 'ALUNO' : undefined
+      origem: alunoRegistro ? 'ALUNO' : undefined
     });
 
     if (resultado.status === 'fechado') {

@@ -1,12 +1,11 @@
 import { create } from 'zustand';
 
 import { MOCK_ALUNOS } from '@/data/mocks/mockAlunos';
-import { MOCK_PRESENCAS } from '../data/mockPresencas';
 import { applyAttendanceStats, normalizeAluno, normalizeFaixaSlug } from '../lib/alunoStats';
 import { calculateNextStep, getMaxStripes, getNextBelt } from '../lib/graduationRules';
 import type { Aluno, NovoAlunoPayload } from '../types/aluno';
 import type { GraduacaoPlanejada, GraduationHistoryEntry } from '../types/graduacao';
-import type { Presenca } from '../types/presenca';
+import type { PresencaRegistro } from '../types/presenca';
 
 const buildHistoricoRegistro = (
   graduacao: GraduacaoPlanejada,
@@ -29,13 +28,13 @@ const buildHistoricoRegistro = (
 type AlunosState = {
   alunos: Aluno[];
   getAlunoById: (id: string) => Aluno | null;
-  presencasCache: Presenca[];
-  setAlunos: (alunos: Aluno[], presencas?: Presenca[]) => void;
-  addAluno: (payload: NovoAlunoPayload, presencas?: Presenca[]) => Aluno;
-  updateAluno: (id: string, payload: Partial<NovoAlunoPayload>, presencas?: Presenca[]) => Aluno | null;
-  removeAluno: (id: string, presencas?: Presenca[]) => void;
-  recalculateFromPresencas: (presencas: Presenca[]) => void;
-  applyGraduacaoConclusao: (graduacao: GraduacaoPlanejada, presencas?: Presenca[]) => void;
+  presencasCache: PresencaRegistro[];
+  setAlunos: (alunos: Aluno[], presencas?: PresencaRegistro[]) => void;
+  addAluno: (payload: NovoAlunoPayload, presencas?: PresencaRegistro[]) => Aluno;
+  updateAluno: (id: string, payload: Partial<NovoAlunoPayload>, presencas?: PresencaRegistro[]) => Aluno | null;
+  removeAluno: (id: string, presencas?: PresencaRegistro[]) => void;
+  recalculateFromPresencas: (presencas: PresencaRegistro[]) => void;
+  applyGraduacaoConclusao: (graduacao: GraduacaoPlanejada, presencas?: PresencaRegistro[]) => void;
 };
 
 const ALUNOS_KEY = 'bjj_alunos';
@@ -185,4 +184,3 @@ export const useAlunosStore = create<AlunosState>((set, get) => ({
   }
 }));
 
-useAlunosStore.getState().recalculateFromPresencas(MOCK_PRESENCAS);

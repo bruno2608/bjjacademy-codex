@@ -29,6 +29,8 @@ export default function HistoricoPresencasPage() {
   const treinos = useTreinosStore((state) => state.treinos);
   const alunoId = user?.alunoId;
   const presencas = usePresencasStore((state) => state.presencas);
+  const carregarTodas = usePresencasStore((state) => state.carregarTodas);
+  const carregarPorAluno = usePresencasStore((state) => state.carregarPorAluno);
   const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
   const [meses, setMeses] = useState(buildMonthOptions().slice(0, 1).map((item) => item.value));
   const [alunoSelecionado, setAlunoSelecionado] = useState(alunoId || '');
@@ -45,6 +47,20 @@ export default function HistoricoPresencasPage() {
     }
   }, [alunos, alunoSelecionado, isAluno]);
 
+  useEffect(() => {
+    async function sincronizar() {
+      if (isAluno && alunoId) {
+        await carregarPorAluno(alunoId);
+        return;
+      }
+      await carregarTodas();
+      if (alunoSelecionado) {
+        await carregarPorAluno(alunoSelecionado);
+      }
+    }
+    sincronizar();
+  }, [alunoId, alunoSelecionado, carregarPorAluno, carregarTodas, isAluno]);
+
   const registros = useMemo(() => {
     const selecionados = meses.length ? meses : [];
     const filtroAluno = alunoSelecionado || (isAluno ? alunoId : undefined);
@@ -58,11 +74,17 @@ export default function HistoricoPresencasPage() {
     return filtrados
       .filter((item) => {
         if (!selecionados.length) return true;
-        const [ano, mes] = item.data.split('-');
+        const data = item.data || '';
+        const [ano, mes] = data.split('-');
+        if (!ano || !mes) return false;
         const chave = `${ano}-${mes}`;
         return selecionados.includes(chave);
       })
-      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+      .sort((a, b) => {
+        const dataB = new Date(b.data || 0).getTime();
+        const dataA = new Date(a.data || 0).getTime();
+        return dataB - dataA;
+      })
       .slice(0, 80);
   }, [alunoId, alunoSelecionado, isAluno, meses, presencas]);
 
@@ -89,6 +111,13 @@ export default function HistoricoPresencasPage() {
           marker: 'bg-gradient-to-br from-bjj-red to-rose-500 text-white',
           icon: X
         };
+      case 'JUSTIFICADA':
+        return {
+          label: 'Justificada',
+          tone: 'bg-indigo-500/20 text-indigo-100 ring-1 ring-inset ring-indigo-300/50',
+          marker: 'bg-gradient-to-br from-indigo-400 to-violet-500 text-bjj-gray-950',
+          icon: Clock3
+        };
       default:
         return {
           label: 'Sem registro',
@@ -109,7 +138,7 @@ export default function HistoricoPresencasPage() {
       (acc, item) => {
         if (item.status === 'PRESENTE') acc.presentes += 1;
         if (item.status === 'PENDENTE') acc.pendentes += 1;
-        if (item.status === 'FALTA') acc.ausencias += 1;
+        if (item.status === 'FALTA' || item.status === 'JUSTIFICADA') acc.ausencias += 1;
         acc.total += 1;
         return acc;
       },
