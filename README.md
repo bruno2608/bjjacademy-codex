@@ -40,12 +40,73 @@ npm run dev
 - **Lucide React** para ícones
 - **next-pwa** com `manifest.json`, service worker custom e cache offline
 
-### 🆕 Atualizações mais recentes (25/11)
+### 🆕 Atualizações mais recentes (25/11 — presenças)
+
+- **Fonte única de presenças**: os mocks agora são consumidos exclusivamente por `services/presencasService.ts`, permitindo trocar para Supabase/API apenas alterando essa camada.
+- **Stores e páginas desacopladas de mocks**: dashboards (aluno e staff), check-in, histórico e visão de presenças usam apenas hooks/stores (`usePresencasStore`), sem importar `data/mockPresencas` diretamente.
+- **Contratos padronizados**: tipos de presença e treino (`types/presenca.ts`, `types/treino.ts`) unificam status `PENDENTE | PRESENTE | FALTA | JUSTIFICADA` e metadados de criação/atualização, evitando variações por tela.
+- **Fluxo mock → service → store → tela**: as ações de check-in, atualização de status e fechamento de treino passam primeiro pelo service, que atualiza o estado global via store antes de chegar às páginas.
+- **Totais consistentes**: cálculos de presenças/faltas/pendentes aproveitam os mesmos dados da store, garantindo que dashboards e histórico exibam números alinhados.
+
+### 🆕 Atualizações anteriores (24/11)
 
 - **Evolução alinhada ao dashboard**: a página `/evolucao` agora consome o hook centralizado `useAlunoDashboard`, unificando cálculos de presença e projeções de graduação.
 - **Linha do tempo combinada**: histórico real do aluno e planos futuros são exibidos na mesma timeline, com indicação visual de grau/faixa, instrutor e data formatada.
 - **Projeção detalhada**: cards destacam a próxima graduação com percentual, aulas realizadas x meta, estimativa de data e lembrete sobre check-ins pendentes fora do horário.
 - **Resumo rápido**: blocos com início na academia, aulas concluídas no grau/faixa e última atualização, todos derivados dos dados normalizados da dashboard.
+
+## 📒 Gestão de Presenças (MVP)
+
+### Fluxo
+
+- **Check-in do aluno**: o usuário logado (`useCurrentAluno`) envia presença do treino do dia pela `usePresencasStore.registrarCheckin`, que cria/atualiza o registro com status `PENDENTE`.
+- **Confirmação pelo professor**: a visão de staff/professor carrega presenças via `usePresencasStore.carregarTodas/PorTreino` e altera status com `atualizarStatus` (ex.: `PRESENTE`, `FALTA`, `JUSTIFICADA`).
+- **Fechamento de treino**: o botão “Fechar treino” chama `presencasStore.fecharTreino`, aplicando a regra atual (pendentes viram `PRESENTE`; ausentes continuam `FALTA`/`JUSTIFICADA`) e bloqueando novos check-ins com `marcarTreinoFechado`.
+- **Reflexo entre telas**: qualquer atualização passa pelo service → store, mantendo dashboard do aluno, check-in, histórico e visão de staff sincronizados.
+
+### Status e significado
+
+- `PENDENTE`: check-in enviado pelo aluno, aguardando confirmação do professor.
+- `PRESENTE`: presença confirmada manualmente ou ao fechar o treino.
+- `FALTA`: ausência registrada ou placeholder automático do dia.
+- `JUSTIFICADA`: falta com justificativa lançada pelo professor/staff.
+
+### Camada de dados
+
+1. `data/mockPresencas.ts` → **somente** lido pelo `services/presencasService.ts`.
+2. `services/presencasService.ts` → centraliza listagens, check-in, atualização de status e fechamento.
+3. `store/presencasStore.ts` → expõe ações/estado para UI, recalculando métricas de alunos.
+4. Telas `/dashboard-aluno`, `/checkin`, `/historico-presencas`, `/presencas` → consomem apenas hooks/stores (nenhum acesso direto a mocks).
+
+### Exemplos de uso
+
+**Check-in do aluno**
+
+```tsx
+const { user, aluno } = useCurrentAluno();
+const registrarCheckin = usePresencasStore((s) => s.registrarCheckin);
+
+const handleCheckin = async (treino) => {
+  await registrarCheckin({ alunoId: aluno?.id || user?.alunoId, treinoId: treino.id, data: hoje });
+};
+```
+
+**Lista/ação do professor**
+
+```tsx
+const presencas = usePresencasStore((s) => s.presencas);
+const atualizarStatus = usePresencasStore((s) => s.atualizarStatus);
+
+// Exemplo de confirmação
+await atualizarStatus(registro.id, 'PRESENTE');
+```
+
+### Checklist de telas alinhadas
+
+- ✅ Dashboard do aluno (sincronizado com presenças mock via service/store)
+- ✅ Check-in do aluno (`/checkin`)
+- ✅ Histórico de presenças do aluno (`/historico-presencas`)
+- ✅ Presenças do professor/staff (`/presencas`)
 
 ## 🎯 **O que já está pronto**
 
@@ -108,7 +169,7 @@ components/
 services/
   api.js
   alunosService.js
-  presencasService.js
+  presencasService.ts
   graduacoesService.js
 store/
   userStore.ts
@@ -144,16 +205,16 @@ styles/
 
 ### Check-in do aluno (mock)
 
-- **Treinos do dia** são carregados da store de presenças com horário, professor e tipo (Gi/No-Gi).
-- **Regras de horário:** check-in automático até o início do treino ou +30min; fora desse intervalo abre modal de confirmação e registra status **pendente** para aprovação do professor.
-- **Limites:** um registro por treino, com status exibido no histórico do aluno e na tela de presenças do professor.
+- **Treinos do dia** chegam via stores (`useTreinosStore` + `usePresencasStore`), sempre intermediados por `presencasService` — nenhuma página acessa os mocks diretamente.
+- **Status padronizados:** check-ins criam/atualizam registros como `PENDENTE`; professores ou fechamento do treino convertem para `PRESENTE`, e ausências são registradas como `FALTA` ou `JUSTIFICADA` via atualização de status.
+- **Limites:** um registro por treino/data; tentativas duplicadas retornam o mesmo registro para evitar múltiplos check-ins.
 
 ## 🧾 Regras de negócios principais
 
 - **RBAC centralizado:** papéis são normalizados (`config/roles.ts`) e persistidos no `localStorage`/cookies pela `userStore`, aplicando o filtro de rotas no `middleware.ts` e nos componentes de navegação.
-- **Janela de check-in do aluno:** a store `presencasStore` considera uma janela de **30 minutos** a partir do horário do treino; dentro dela o status é `CHECKIN` com hora registrada, fora dela o registro fica como `PENDENTE` para aprovação docente. Check-ins duplicados são ignorados para o mesmo aluno/treino/data.
-- **Fechamento de treino:** ao usar **fechamento rápido** (`presencasStore.fecharTreinoRapido`), todos os check-ins viram `CONFIRMADO`, ausências são criadas automaticamente para alunos ativos sem registro e o treino fica marcado como fechado, bloqueando novos check-ins.
-- **Controle de status de presenças:** professores/instrutores podem aprovar (`CONFIRMADO`), rejeitar (`AUSENTE`) ou justificar (`AUSENTE_JUSTIFICADA`) registros, inclusive cancelar treinos específicos do dia.
+- **Fluxo de presenças centralizado:** os mocks vivem em `data/mockPresencas.ts`, são servidos por `services/presencasService.ts`, sincronizados em `store/presencasStore.ts` e consumidos pelas telas. Isso já deixa o código pronto para trocar os mocks por API apenas mudando o service.
+- **Check-ins e status:** registros começam como `PENDENTE`; aprovação/fechamento de treino os torna `PRESENTE`, e ausências justificadas usam `FALTA` ou `JUSTIFICADA`. A store evita duplicidade para o mesmo aluno/treino/data e propaga contadores atualizados para `alunosStore`.
+- **Fechamento de treino:** `presencasStore.fecharTreino` chama o service para marcar pendências como `PRESENTE` e sincroniza o snapshot completo de presenças, garantindo consistência das estatísticas nos dashboards.
 - **Regras de graduação configuráveis:** matriz completa em `config/graduationRules.ts` com requisitos de idade mínima, tempo de faixa, aulas mínimas e faixas seguintes. A `graduationRulesStore` permite ajustes por faixa ou por grau (stripe) com persistência local.
 - **Sincronização de alunos:** toda alteração de presença recalcula progressão de alunos (`presencasStore` → `alunosStore`), mantendo contadores de aulas no grau/faixa atual para dashboards e timelines.
 

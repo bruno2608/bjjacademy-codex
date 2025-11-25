@@ -5,7 +5,7 @@ import {
   type GraduationRules as GraduationRulesMap
 } from '../config/graduationRules';
 import type { Aluno } from '../types/aluno';
-import type { Presenca } from '../types/presenca';
+import type { PresencaRegistro } from '../types/presenca';
 import type {
   GraduationHistoryEntry,
   GraduationRecommendation,
@@ -44,7 +44,7 @@ const parseISODate = (value: string | null | undefined): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const countAttendancesFrom = (registros: Presenca[], inicio: Date | null): number => {
+const countAttendancesFrom = (registros: PresencaRegistro[], inicio: Date | null): number => {
   if (!inicio) return registros.length;
   const referencia = inicio.getTime();
   return registros.filter((item) => {
@@ -69,7 +69,7 @@ const getLatestHistoryRecord = (
   );
 };
 
-const buildAttendanceStats = (aluno: Aluno, presencas: Presenca[] = []) => {
+const buildAttendanceStats = (aluno: Aluno, presencas: PresencaRegistro[] = []) => {
   const registrosAluno = presencas.filter((item) => {
     if (item.alunoId !== aluno.id) return false;
     const statusNormalizado = (item.status || '').toUpperCase();

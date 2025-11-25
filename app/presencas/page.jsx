@@ -15,26 +15,17 @@ import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
+import { usePresencasStore } from '@/store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
-import {
-  createPresenca,
-  deletePresenca,
-  getPresencas,
-  updatePresenca,
-  confirmarPresenca,
-  marcarAusencia,
-  justificarAusencia,
-  fecharTreinoRapido,
-  marcarTreinoFechado
-} from '../../services/presencasService';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os status' },
   { value: 'PENDENTE', label: 'Pendente' },
   { value: 'PRESENTE', label: 'Presente' },
-  { value: 'FALTA', label: 'Falta' }
+  { value: 'FALTA', label: 'Falta' },
+  { value: 'JUSTIFICADA', label: 'Justificada' }
 ];
 const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
 
@@ -45,7 +36,6 @@ const formatTime = () =>
     .padStart(5, '0');
 
 export default function PresencasPage() {
-  const [presencas, setPresencas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
@@ -64,6 +54,13 @@ export default function PresencasPage() {
   const [filterFaixas, setFilterFaixas] = useState([]);
   const [filterStatuses, setFilterStatuses] = useState([]);
   const [filterTreinos, setFilterTreinos] = useState([]);
+  const presencas = usePresencasStore((state) => state.presencas);
+  const carregarPresencas = usePresencasStore((state) => state.carregarTodas);
+  const salvarPresenca = usePresencasStore((state) => state.salvarPresenca);
+  const atualizarStatus = usePresencasStore((state) => state.atualizarStatus);
+  const excluirPresenca = usePresencasStore((state) => state.excluirPresenca);
+  const fecharTreino = usePresencasStore((state) => state.fecharTreino);
+  const marcarTreinoFechado = usePresencasStore((state) => state.marcarTreinoFechado);
   const alunos = useAlunosStore((state) => state.alunos);
   const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const resolveAlunoNome = useCallback(
@@ -128,9 +125,7 @@ export default function PresencasPage() {
     let active = true;
     async function carregar() {
       try {
-        const lista = await getPresencas();
-        if (!active) return;
-        setPresencas(lista);
+        await carregarPresencas();
       } finally {
         if (active) {
           setIsLoading(false);
@@ -141,14 +136,13 @@ export default function PresencasPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [carregarPresencas]);
 
   const atualizarLista = useCallback(async () => {
     setIsRefreshing(true);
-    const lista = await getPresencas();
-    setPresencas(lista);
+    await carregarPresencas();
     setIsRefreshing(false);
-  }, []);
+  }, [carregarPresencas]);
 
   // Lista reativa de alunos ativos para preencher a visão diária.
   const alunosAtivos = useMemo(
@@ -224,7 +218,8 @@ export default function PresencasPage() {
   const statusOrder = {
     PENDENTE: 0,
     PRESENTE: 1,
-    FALTA: 2
+    FALTA: 2,
+    JUSTIFICADA: 2
   };
 
   const statusLabel = (status) => {
@@ -235,6 +230,8 @@ export default function PresencasPage() {
         return { label: 'PRESENTE', tone: 'text-green-300' };
       case 'FALTA':
         return { label: 'FALTA', tone: 'text-red-300' };
+      case 'JUSTIFICADA':
+        return { label: 'JUSTIFICADA', tone: 'text-indigo-200' };
       default:
         return { label: status || '—', tone: 'text-bjj-gray-200' };
     }
@@ -254,7 +251,7 @@ export default function PresencasPage() {
   const totalFiltrado = registrosFiltrados.length;
 
   const presentesDia = registrosDoDia.filter((item) => item.status === 'PRESENTE').length;
-  const faltasDia = registrosDoDia.filter((item) => item.status === 'FALTA').length;
+  const faltasDia = registrosDoDia.filter((item) => item.status === 'FALTA' || item.status === 'JUSTIFICADA').length;
   const pendentesDia = registrosDoDia.filter((item) => item.status === 'PENDENTE').length;
   const totalDia = registrosDoDia.length || 1;
   const taxaPresencaDia = (presentesDia / totalDia) * 100;
@@ -321,21 +318,12 @@ export default function PresencasPage() {
       abrirSelecaoSessao(registro);
       return;
     }
-
-    const atualizado = await confirmarPresenca(registro.id);
-    if (atualizado) {
-      setPresencas((prev) => prev.map((item) => (item.id === atualizado.id ? atualizado : item)));
-    }
+    await atualizarStatus(registro.id, 'PRESENTE');
   };
 
   const handleMarkAbsent = async (registro, justificativa = false) => {
     if (!registro?.id) return;
-    const atualizado = justificativa
-      ? await justificarAusencia(registro.id)
-      : await marcarAusencia(registro.id);
-    if (atualizado) {
-      setPresencas((prev) => prev.map((item) => (item.id === atualizado.id ? atualizado : item)));
-    }
+    await atualizarStatus(registro.id, justificativa ? 'JUSTIFICADA' : 'FALTA');
   };
 
   const abrirFechamento = () => {
@@ -348,12 +336,9 @@ export default function PresencasPage() {
 
   const fecharTreinoAutomatico = async () => {
     const alvo = treinoParaFechar || treinosDoDiaPadrao[0]?.id || null;
-    await fecharTreinoRapido(
-      hoje,
-      alvo,
-      alunosAtivos.map((aluno) => ({ id: aluno.id, nome: aluno.nome, faixa: aluno.faixa, graus: aluno.graus }))
-    );
-    await atualizarLista();
+    if (alvo) {
+      await fecharTreino(alvo);
+    }
     setIsCloseModalOpen(false);
   };
 
@@ -369,7 +354,6 @@ export default function PresencasPage() {
   const salvarFechamentoManual = async () => {
     const alvo = treinoEmAnalise || treinosDoDiaPadrao[0]?.id || null;
     marcarTreinoFechado(hoje, alvo);
-    await atualizarLista();
     setTreinoEmAnalise('');
   };
 
@@ -380,8 +364,7 @@ export default function PresencasPage() {
 
   const confirmarExclusao = async () => {
     if (!deleteTarget) return;
-    await deletePresenca(deleteTarget.id);
-    await atualizarLista();
+    await excluirPresenca(deleteTarget.id);
     setDeleteTarget(null);
   };
 
@@ -499,13 +482,16 @@ export default function PresencasPage() {
     const treinoSelecionado =
       treinos.find((treino) => treino.id === sessionTreinoId) ||
       obterSugestaoTreino(sessionRecord.alunoId, sessionRecord.data, sessionTakenTreinos);
-    const novaPresenca = await createPresenca({
+    const novaPresenca = await salvarPresenca({
+      id: sessionRecord.id || `presenca-${Date.now()}`,
       alunoId: sessionRecord.alunoId,
       data: sessionRecord.data,
       status: 'PRESENTE',
-      treinoId: treinoSelecionado?.id || null,
-      tipoTreino: treinoSelecionado?.nome || sessionRecord.tipoTreino || 'Sessão principal',
-      hora: treinoSelecionado?.hora || formatTime()
+      treinoId: treinoSelecionado?.id || '',
+      origem: 'PROFESSOR',
+      observacao: sessionRecord.observacao || null,
+      createdAt: `${sessionRecord.data || hoje}T00:00:00.000Z`,
+      updatedAt: new Date().toISOString(),
     });
     if (
       novaPresenca.treinoId &&
@@ -532,9 +518,18 @@ export default function PresencasPage() {
 
   const handleEditSubmit = async (dados) => {
     if (!selectedRecord?.id) return;
-    const atualizado = await updatePresenca(selectedRecord.id, dados);
+    const atualizado = await salvarPresenca({
+      id: selectedRecord.id,
+      alunoId: dados.alunoId || selectedRecord.alunoId,
+      treinoId: dados.treinoId || selectedRecord.treinoId,
+      status: dados.status || selectedRecord.status,
+      data: dados.data || selectedRecord.data,
+      origem: dados.origem || 'PROFESSOR',
+      observacao: dados.observacao || null,
+      createdAt: selectedRecord.createdAt || `${dados.data || selectedRecord.data || hoje}T00:00:00.000Z`,
+      updatedAt: new Date().toISOString(),
+    });
     if (!atualizado) return;
-    setPresencas((prev) => prev.map((item) => (item.id === atualizado.id ? atualizado : item)));
     fecharEdicao();
   };
 
