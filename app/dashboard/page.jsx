@@ -43,11 +43,13 @@ function StudentDashboard() {
   const { user, aluno: alunoSelecionado } = useCurrentAluno();
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const treinos = useTreinosStore((state) => state.treinos);
 
+  const alunoId = alunoSelecionado?.id || user?.alunoId || alunos[0]?.id;
   const aluno = useMemo(
-    () => alunoSelecionado || alunos.find((item) => item.id === alunoSelecionado?.id) || alunos[0],
-    [alunoSelecionado, alunos]
+    () => (alunoId ? getAlunoById(alunoId) || alunos.find((item) => item.id === alunoId) : null) || alunos[0],
+    [alunoId, alunos, getAlunoById]
   );
   const faixaAtual = aluno?.faixa || aluno?.faixaSlug || 'Branca';
   const graus = aluno?.graus || 0;
@@ -55,9 +57,9 @@ function StudentDashboard() {
 
   const stats = useMemo(() => {
     const registrosAluno = presencas.filter((item) => item.alunoId === aluno?.id);
-    const presentes = registrosAluno.filter((item) => item.status === 'CONFIRMADO').length;
-    const faltas = registrosAluno.filter((item) => item.status === 'AUSENTE' || item.status === 'AUSENTE_JUSTIFICADA').length;
-    const pendentes = registrosAluno.filter((item) => item.status === 'CHECKIN' || item.status === 'PENDENTE').length;
+    const presentes = registrosAluno.filter((item) => item.status === 'PRESENTE').length;
+    const faltas = registrosAluno.filter((item) => item.status === 'FALTA').length;
+    const pendentes = registrosAluno.filter((item) => item.status === 'PENDENTE').length;
     return { presentes, faltas, pendentes };
   }, [aluno?.id, presencas]);
 
@@ -82,21 +84,19 @@ function StudentDashboard() {
     return raw.charAt(0).toUpperCase() + raw.slice(1);
   }, [aluno?.status]);
 
-  const horariosPorTreino = useMemo(() => {
+  const treinoPorId = useMemo(() => {
     const map = new Map();
-    treinos.forEach((treino) => map.set(treino.id, treino.hora));
+    treinos.forEach((treino) => map.set(treino.id, treino));
     return map;
   }, [treinos]);
 
   const formatStatus = (status) => {
     switch (status) {
-      case 'CONFIRMADO':
+      case 'PRESENTE':
         return { label: 'Presente', tone: 'bg-green-600/20 text-green-300' };
-      case 'CHECKIN':
       case 'PENDENTE':
         return { label: 'Pendente', tone: 'bg-yellow-500/20 text-yellow-300' };
-      case 'AUSENTE':
-      case 'AUSENTE_JUSTIFICADA':
+      case 'FALTA':
         return { label: 'Ausente', tone: 'bg-bjj-red/20 text-bjj-red' };
       default:
         return { label: 'Sem registro', tone: 'bg-bjj-gray-700 text-bjj-gray-200' };
@@ -185,8 +185,10 @@ function StudentDashboard() {
           {ultimasPresencas.map((item) => (
             <li key={item.id} className="flex items-center justify-between py-3 text-bjj-gray-100">
               <div>
-                <p className="font-semibold text-white">{item.tipoTreino}</p>
-                <p className="text-xs text-bjj-gray-300/80">{item.data} · {item.hora || '—'}</p>
+                <p className="font-semibold text-white">{treinoPorId.get(item.treinoId)?.nome || 'Treino'}</p>
+                <p className="text-xs text-bjj-gray-300/80">
+                  {item.data} · {treinoPorId.get(item.treinoId)?.hora || '—'}
+                </p>
               </div>
               {(() => {
                 const tone = formatStatus(item.status);
@@ -208,20 +210,27 @@ function StudentDashboard() {
 
 function ProfessorDashboard() {
   const { user } = useCurrentUser();
+  const { aluno: alunoAtual } = useCurrentAluno();
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const treinos = useTreinosStore((state) => state.treinos);
   const [activeTab, setActiveTab] = useState('visao');
   const [updatingId, setUpdatingId] = useState(null);
   const defaultInstrutor = useMemo(() => MOCK_INSTRUTORES[0], []);
-  const instructorName = user?.name || defaultInstrutor?.nome || 'Instrutor';
-  const instructorFaixa = defaultInstrutor?.faixa || 'Preta';
-  const instructorGraus = typeof defaultInstrutor?.graus === 'number' ? defaultInstrutor.graus : 0;
-  const instructorAvatar = user?.avatarUrl || defaultInstrutor?.avatarUrl || defaultAvatar;
+  const instructorName = alunoAtual?.nome || user?.name || defaultInstrutor?.nome || 'Instrutor';
+  const instructorFaixa = alunoAtual?.faixa || alunoAtual?.faixaSlug || defaultInstrutor?.faixa || 'Preta';
+  const instructorGraus =
+    typeof alunoAtual?.graus === 'number'
+      ? alunoAtual.graus
+      : typeof defaultInstrutor?.graus === 'number'
+        ? defaultInstrutor.graus
+        : 0;
+  const instructorAvatar = alunoAtual?.avatarUrl || user?.avatarUrl || defaultInstrutor?.avatarUrl || defaultAvatar;
 
-  const horariosPorTreino = useMemo(() => {
+  const treinoPorId = useMemo(() => {
     const map = new Map();
-    treinos.forEach((treino) => map.set(treino.id, treino.hora));
+    treinos.forEach((treino) => map.set(treino.id, treino));
     return map;
   }, [treinos]);
 
@@ -230,8 +239,8 @@ function ProfessorDashboard() {
     const ativos = alunos.filter((a) => (a.status || '').toString().toUpperCase() === 'ATIVO').length;
     const inativos = totalAlunos - ativos;
     const graduados = alunos.filter((a) => (a.faixa || '').toLowerCase() !== 'branca').length;
-    const pendentes = presencas.filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN').length;
-    const presentesSemana = presencas.filter((p) => p.status === 'CONFIRMADO').length;
+    const pendentes = presencas.filter((p) => p.status === 'PENDENTE').length;
+    const presentesSemana = presencas.filter((p) => p.status === 'PRESENTE').length;
     return { totalAlunos, ativos, inativos, graduados, pendentes, presentesSemana };
   }, [alunos, presencas]);
 
@@ -254,7 +263,7 @@ function ProfessorDashboard() {
         { title: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, tone: 'text-yellow-300' },
         {
           title: 'Ausências',
-          value: presencas.filter((p) => p.status === 'AUSENTE' || p.status === 'AUSENTE_JUSTIFICADA').length,
+          value: presencas.filter((p) => p.status === 'FALTA').length,
           icon: BarChart3,
           tone: 'text-bjj-red'
         },
@@ -377,9 +386,9 @@ function ProfessorDashboard() {
                   <Clock3 size={16} className="text-bjj-gray-200" />
                 </div>
                 <div className="mt-4 space-y-3">
-                  {[{ label: 'Confirmados', value: presencas.filter((p) => p.status === 'CONFIRMADO').length, tone: 'bg-green-500' },
+                  {[{ label: 'Confirmados', value: presencas.filter((p) => p.status === 'PRESENTE').length, tone: 'bg-green-500' },
                     { label: 'Pendentes', value: metrics.pendentes, tone: 'bg-yellow-400' },
-                    { label: 'Ausentes', value: presencas.filter((p) => p.status === 'AUSENTE' || p.status === 'AUSENTE_JUSTIFICADA').length, tone: 'bg-bjj-red' }
+                    { label: 'Ausentes', value: presencas.filter((p) => p.status === 'FALTA').length, tone: 'bg-bjj-red' }
                   ].map((row) => (
                     <div key={row.label} className="space-y-2">
                       <div className="flex items-center justify-between text-sm text-bjj-gray-200">
@@ -473,12 +482,11 @@ function ProfessorDashboard() {
           </div>
           <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
             {presencas
-              .filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN')
+              .filter((p) => p.status === 'PENDENTE')
               .map((item) => {
-                const isPending = item.status === 'PENDENTE';
-                const badgeTone = isPending
-                  ? 'bg-amber-500/20 text-amber-200'
-                  : 'bg-yellow-500/20 text-yellow-200';
+                const aluno = getAlunoById(item.alunoId);
+                const treino = treinoPorId.get(item.treinoId);
+                const badgeTone = 'bg-amber-500/20 text-amber-200';
 
                 return (
                 <div
@@ -486,10 +494,10 @@ function ProfessorDashboard() {
                   className="flex items-start justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
                 >
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome || 'Aluno'}</p>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.tipoTreino}</p>
+                    <p className="text-sm font-semibold text-white leading-tight">{aluno?.nome || 'Aluno não encontrado'}</p>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{treino?.nome || 'Treino'}</p>
                     <p className="text-[11px] text-bjj-gray-400">
-                      {item.data ? `${formatDate(item.data)} · ${item.hora || horariosPorTreino.get(item.treinoId) || '--:--'}` : 'Sem data'}
+                      {item.data ? `${formatDate(item.data)} · ${treino?.hora || '--:--'}` : 'Sem data'}
                     </p>
                     <div className="flex items-center gap-2">
                       <button
@@ -515,7 +523,7 @@ function ProfessorDashboard() {
                     </div>
                   </div>
                   <span className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${badgeTone}`}>
-                    {isPending ? 'Pendente' : 'Check-in'}
+                    Pendente
                   </span>
                 </div>
               );
