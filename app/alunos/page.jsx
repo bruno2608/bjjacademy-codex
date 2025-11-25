@@ -4,7 +4,7 @@
  * Página de listagem de alunos atualizada com o mesmo visual gamificado
  * da seção de graduações. Todas as ações permanecem na mesma tela via modal.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Filter, UserPlus2 } from 'lucide-react';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
@@ -15,29 +15,28 @@ import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import AlunoForm from '../../components/alunos/AlunoForm';
 import PageHero from '../../components/ui/PageHero';
-import LoadingState from '../../components/ui/LoadingState';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import { getAlunos, deleteAluno, createAluno } from '../../services/alunosService';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useTreinosStore } from '../../store/treinosStore';
 import { useGraduationRulesStore } from '../../store/graduationRulesStore';
+import { useAlunosStore } from '../../store/alunosStore';
 import { orderBelts } from '../../lib/graduationRules';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { useStaffDashboard } from '@/services/dashboard/useStaffDashboard';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os status' },
-  { value: 'Ativo', label: 'Ativo' },
-  { value: 'Inativo', label: 'Inativo' }
+  { value: 'ATIVO', label: 'Ativo' },
+  { value: 'INATIVO', label: 'Inativo' }
 ];
 const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
 
 export default function AlunosPage() {
   const router = useRouter();
-  const [alunos, setAlunos] = useState([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterFaixas, setFilterFaixas] = useState([]);
@@ -47,32 +46,11 @@ export default function AlunosPage() {
   const presencas = usePresencasStore((state) => state.presencas);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
   const rules = useGraduationRulesStore((state) => state.rules);
-
-  useEffect(() => {
-    let active = true;
-    async function inicializar() {
-      try {
-        const lista = await getAlunos();
-        if (!active) return;
-        setAlunos(lista);
-      } finally {
-        if (active) {
-          setIsLoading(false);
-        }
-      }
-    }
-    inicializar();
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const refreshList = useCallback(async () => {
-    setIsRefreshing(true);
-    const lista = await getAlunos();
-    setAlunos(lista);
-    setIsRefreshing(false);
-  }, []);
+  const { staff } = useCurrentStaff();
+  const { alunosAtivos, totalAlunos, checkinsRegistradosSemana, graduacoesPendentes } = useStaffDashboard();
+  const alunos = useAlunosStore((state) => state.alunos);
+  const addAluno = useAlunosStore((state) => state.addAluno);
+  const removeAluno = useAlunosStore((state) => state.removeAluno);
 
   const faixasDisponiveis = useMemo(() => {
     const beltNames = orderBelts(Object.keys(rules || {}));
@@ -198,8 +176,9 @@ export default function AlunosPage() {
 
   const confirmarExclusao = async () => {
     if (!deleteTarget) return;
-    await deleteAluno(deleteTarget.id);
-    await refreshList();
+    setIsRefreshing(true);
+    removeAluno(deleteTarget.id, presencas);
+    setIsRefreshing(false);
     setDeleteTarget(null);
   };
 
@@ -209,23 +188,46 @@ export default function AlunosPage() {
 
   const handleCreate = async (data) => {
     setIsSaving(true);
-    await createAluno(data);
-    await refreshList();
+    addAluno(data, presencas);
     setIsSaving(false);
     setIsCreateOpen(false);
   };
-
-  if (isLoading) {
-    return <LoadingState title="Preparando cadastro" message="Buscando a lista de alunos cadastrados." />;
-  }
 
   return (
     <div className="space-y-6">
       <PageHero
         badge="Gestão de alunos"
-        title="Cadastre, filtre e mantenha os dados dos praticantes em dia"
+        title={
+          staff?.nome
+            ? `Olá, ${staff.nome.split(' ')[0]}! Cadastre, filtre e mantenha os dados em dia`
+            : 'Cadastre, filtre e mantenha os dados dos praticantes em dia'
+        }
         subtitle="Use os filtros inteligentes para localizar alunos, abrir o cadastro e acompanhar graduações em poucos cliques."
       />
+
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {[{
+          label: 'Alunos ativos',
+          value: alunosAtivos,
+        }, {
+          label: 'Total de alunos',
+          value: totalAlunos,
+        }, {
+          label: 'Check-ins na semana',
+          value: checkinsRegistradosSemana,
+        }, {
+          label: 'Graduações pendentes',
+          value: graduacoesPendentes,
+        }].map((item) => (
+          <article
+            key={item.label}
+            className="card flex flex-col gap-1 border-bjj-gray-800/70 bg-bjj-gray-925/80"
+          >
+            <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-200/70">{item.label}</p>
+            <p className="text-3xl font-bold text-white">{item.value ?? 0}</p>
+          </article>
+        ))}
+      </section>
 
       <section className="space-y-3">
         <article className="card space-y-4 overflow-visible">
