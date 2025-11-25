@@ -43,11 +43,13 @@ function StudentDashboard() {
   const { user, aluno: alunoSelecionado } = useCurrentAluno();
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const treinos = useTreinosStore((state) => state.treinos);
 
+  const alunoId = alunoSelecionado?.id || user?.alunoId || alunos[0]?.id;
   const aluno = useMemo(
-    () => alunoSelecionado || alunos.find((item) => item.id === alunoSelecionado?.id) || alunos[0],
-    [alunoSelecionado, alunos]
+    () => (alunoId ? getAlunoById(alunoId) || alunos.find((item) => item.id === alunoId) : null) || alunos[0],
+    [alunoId, alunos, getAlunoById]
   );
   const faixaAtual = aluno?.faixa || aluno?.faixaSlug || 'Branca';
   const graus = aluno?.graus || 0;
@@ -208,6 +210,7 @@ function StudentDashboard() {
 
 function ProfessorDashboard() {
   const { user } = useCurrentUser();
+  const { aluno: alunoAtual } = useCurrentAluno();
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
   const getAlunoById = useAlunosStore((state) => state.getAlunoById);
@@ -215,10 +218,15 @@ function ProfessorDashboard() {
   const [activeTab, setActiveTab] = useState('visao');
   const [updatingId, setUpdatingId] = useState(null);
   const defaultInstrutor = useMemo(() => MOCK_INSTRUTORES[0], []);
-  const instructorName = user?.name || defaultInstrutor?.nome || 'Instrutor';
-  const instructorFaixa = defaultInstrutor?.faixa || 'Preta';
-  const instructorGraus = typeof defaultInstrutor?.graus === 'number' ? defaultInstrutor.graus : 0;
-  const instructorAvatar = user?.avatarUrl || defaultInstrutor?.avatarUrl || defaultAvatar;
+  const instructorName = alunoAtual?.nome || user?.name || defaultInstrutor?.nome || 'Instrutor';
+  const instructorFaixa = alunoAtual?.faixa || alunoAtual?.faixaSlug || defaultInstrutor?.faixa || 'Preta';
+  const instructorGraus =
+    typeof alunoAtual?.graus === 'number'
+      ? alunoAtual.graus
+      : typeof defaultInstrutor?.graus === 'number'
+        ? defaultInstrutor.graus
+        : 0;
+  const instructorAvatar = alunoAtual?.avatarUrl || user?.avatarUrl || defaultInstrutor?.avatarUrl || defaultAvatar;
 
   const treinoPorId = useMemo(() => {
     const map = new Map();
