@@ -22,12 +22,14 @@ import useRole from '../../hooks/useRole';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import { ROLE_KEYS } from '../../config/roles';
-import StudentHero from '../../components/student/StudentHero';
 import { useTreinosStore } from '../../store/treinosStore';
 import { confirmarPresenca, marcarAusencia } from '../../services/presencasService';
 import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAlunoDashboard } from '@/hooks/useAlunoDashboard';
+import { BjjBeltProgressCard } from '@/components/bjj/BjjBeltProgressCard';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -39,20 +41,79 @@ const ensureAvatar = (name, avatarUrl) =>
 const formatDate = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
 
+function DashboardHero({
+  name,
+  subtitle,
+  statusLabel,
+  avatarUrl,
+  faixaSlug,
+  graus,
+  aulasFeitasNoGrau,
+  aulasMetaNoGrau,
+  className
+}) {
+  const faixaConfig =
+    getFaixaConfigBySlug(faixaSlug) || getFaixaConfigBySlug('branca-adulto');
+  const grauAtual = graus ?? faixaConfig?.grausMaximos ?? 0;
+
+  return (
+    <div
+      className={`hero w-full rounded-3xl border border-bjj-gray-800/70 bg-gradient-to-br from-bjj-gray-900/90 via-bjj-gray-900/60 to-bjj-black shadow-[0_25px_60px_rgba(0,0,0,0.35)] ${
+        className || ''
+      }`}
+    >
+      <div className="hero-content w-full flex-col gap-6 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
+        <figure className="avatar">
+          <div className="w-28 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950 lg:w-32">
+            <img src={avatarUrl} alt={`Avatar de ${name || 'Aluno'}`} loading="lazy" />
+          </div>
+        </figure>
+
+        <div className="flex w-full flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:pl-4">
+          <div className="flex flex-col gap-3">
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">{subtitle || 'Dashboard'}</p>
+              <h1 className="text-2xl font-semibold leading-tight text-white sm:text-3xl">{name || 'Aluno'}</h1>
+            </div>
+
+            <span className="badge badge-outline w-fit border-green-500/70 bg-green-600/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-green-200 shadow-[0_0_0_1px_rgba(74,222,128,0.25)]">
+              {statusLabel || 'Ativo'}
+            </span>
+          </div>
+
+          <div className="flex w-full justify-center lg:max-w-md">
+            {faixaConfig && (
+              <div className="w-full max-w-2xl">
+                <BjjBeltProgressCard
+                  config={faixaConfig}
+                  grauAtual={grauAtual}
+                  aulasFeitasNoGrau={aulasFeitasNoGrau ?? 0}
+                  aulasMetaNoGrau={aulasMetaNoGrau}
+                  className="scale-[0.95] md:scale-100 origin-center bg-bjj-gray-900/80 border-bjj-gray-800"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StudentDashboard() {
   const { user, aluno: alunoSelecionado } = useCurrentAluno();
   const presencas = usePresencasStore((state) => state.presencas);
-  const alunos = useAlunosStore((state) => state.alunos);
-  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const treinos = useTreinosStore((state) => state.treinos);
 
-  const alunoId = alunoSelecionado?.id || user?.alunoId || alunos[0]?.id;
-  const aluno = useMemo(
-    () => (alunoId ? getAlunoById(alunoId) || alunos.find((item) => item.id === alunoId) : null) || alunos[0],
-    [alunoId, alunos, getAlunoById]
-  );
-  const faixaAtual = aluno?.faixa || aluno?.faixaSlug || 'Branca';
-  const graus = aluno?.graus || 0;
+  const {
+    aluno,
+    faixaConfig,
+    faixaSlug,
+    grauAtual,
+    aulasFeitasNoGrau,
+    aulasMetaNoGrau
+  } = useAlunoDashboard(alunoSelecionado?.id || user?.alunoId);
+
   const avatarUrl = ensureAvatar(aluno?.nome, aluno?.avatarUrl || user?.avatarUrl || defaultAvatar);
 
   const stats = useMemo(() => {
@@ -64,11 +125,11 @@ function StudentDashboard() {
   }, [aluno?.id, presencas]);
 
   const progressoProximoGrau = useMemo(() => {
-    const aulasNoGrau = aluno?.aulasNoGrauAtual || 0;
-    const alvo = 20;
-    const percent = Math.min(100, Math.round((aulasNoGrau / alvo) * 100));
+    const aulasNoGrau = aulasFeitasNoGrau || 0;
+    const alvo = aulasMetaNoGrau ?? 20;
+    const percent = alvo > 0 ? Math.min(100, Math.round((aulasNoGrau / alvo) * 100)) : 0;
     return { aulasNoGrau, alvo, percent };
-  }, [aluno?.aulasNoGrauAtual]);
+  }, [aulasFeitasNoGrau, aulasMetaNoGrau]);
 
   const ultimasPresencas = useMemo(
     () =>
@@ -105,10 +166,12 @@ function StudentDashboard() {
 
   return (
     <div className="space-y-6">
-      <StudentHero
+      <DashboardHero
         name={aluno?.nome || 'Aluno'}
-        faixa={faixaAtual}
-        graus={graus}
+        faixaSlug={faixaConfig?.slug || faixaSlug}
+        graus={grauAtual}
+        aulasFeitasNoGrau={aulasFeitasNoGrau}
+        aulasMetaNoGrau={aulasMetaNoGrau}
         statusLabel={statusLabel}
         avatarUrl={avatarUrl}
         subtitle="Dashboard do aluno"
@@ -219,13 +282,15 @@ function ProfessorDashboard() {
   const [updatingId, setUpdatingId] = useState(null);
   const defaultInstrutor = useMemo(() => MOCK_INSTRUTORES[0], []);
   const instructorName = alunoAtual?.nome || user?.name || defaultInstrutor?.nome || 'Instrutor';
-  const instructorFaixa = alunoAtual?.faixa || alunoAtual?.faixaSlug || defaultInstrutor?.faixa || 'Preta';
+  const instructorFaixaSlug = alunoAtual?.faixaSlug || alunoAtual?.faixa || defaultInstrutor?.faixa || 'branca-adulto';
+  const faixaConfig =
+    getFaixaConfigBySlug(instructorFaixaSlug) || getFaixaConfigBySlug('branca-adulto');
   const instructorGraus =
     typeof alunoAtual?.graus === 'number'
       ? alunoAtual.graus
       : typeof defaultInstrutor?.graus === 'number'
         ? defaultInstrutor.graus
-        : 0;
+        : faixaConfig?.grausMaximos ?? 0;
   const instructorAvatar = alunoAtual?.avatarUrl || user?.avatarUrl || defaultInstrutor?.avatarUrl || defaultAvatar;
 
   const treinoPorId = useMemo(() => {
@@ -295,9 +360,9 @@ function ProfessorDashboard() {
 
   return (
     <div className="space-y-6">
-      <StudentHero
+      <DashboardHero
         name={instructorName}
-        faixa={instructorFaixa}
+        faixaSlug={faixaConfig?.slug || instructorFaixaSlug}
         graus={instructorGraus}
         statusLabel="Professor"
         avatarUrl={ensureAvatar(instructorName, instructorAvatar)}

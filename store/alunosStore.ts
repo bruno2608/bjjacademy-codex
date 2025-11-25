@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import { MOCK_ALUNOS } from '@/data/mocks/mockAlunos';
 import { MOCK_PRESENCAS } from '../data/mockPresencas';
-import { applyAttendanceStats, normalizeAluno } from '../lib/alunoStats';
+import { applyAttendanceStats, normalizeAluno, normalizeFaixaSlug } from '../lib/alunoStats';
 import { calculateNextStep, getMaxStripes, getNextBelt } from '../lib/graduationRules';
 import type { Aluno, NovoAlunoPayload } from '../types/aluno';
 import type { GraduacaoPlanejada, GraduationHistoryEntry } from '../types/graduacao';
@@ -15,6 +15,11 @@ const buildHistoricoRegistro = (
   id: `history-${Date.now()}`,
   tipo: graduacao.tipo,
   faixa: graduacao.tipo === 'Faixa' ? graduacao.proximaFaixa ?? graduacao.faixaAtual : graduacao.faixaAtual,
+  faixaSlug: normalizeFaixaSlug(
+    graduacao.tipo === 'Faixa'
+      ? graduacao.proximaFaixa ?? graduacao.faixaAtual
+      : graduacao.faixaAtual
+  ),
   grau: graduacao.tipo === 'Grau' ? graduacao.grauAlvo : null,
   data: graduacao.previsao,
   instrutor: graduacao.instrutor || 'Equipe BJJ Academy',

@@ -4,17 +4,15 @@
  * Formulário reutilizável para criação e edição de alunos.
  * Encapsula validação simples e dispara callbacks fornecidos pelas páginas.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { BELT_ORDER, getMaxStripes, orderBelts } from '../../lib/graduationRules';
+import { beltConfigBySlug, getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { PLANOS_MOCK, STATUS_ALUNO } from '../../data/catalogs';
 import { useGraduationRulesStore } from '../../store/graduationRulesStore';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 import FormSection from '../ui/FormSection';
-
-const beltFallback = BELT_ORDER.filter((faixa) => faixa !== 'Vermelha');
 
 const formatTelefone = (raw) => {
   const digits = raw.replace(/\D/g, '').slice(0, 11);
@@ -28,8 +26,30 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
   const rules = useGraduationRulesStore((state) => state.rules);
 
   const beltOptions = useMemo(() => {
-    const beltnames = orderBelts(Object.keys(rules || {})).filter((faixa) => faixa !== 'Vermelha');
-    return beltnames.length ? beltnames : beltFallback;
+    const baseOptions = Object.values(rules || {}).map((rule) => {
+      const faixaConfig = getFaixaConfigBySlug(rule.faixaSlug);
+      return {
+        slug: rule.faixaSlug,
+        label: faixaConfig?.nome || rule.faixaSlug,
+        maxStripes: rule.grausMaximos ?? rule.graus?.length ?? 0,
+        order: faixaConfig?.id ?? Number.MAX_SAFE_INTEGER
+      };
+    });
+
+    if (baseOptions.length) {
+      return baseOptions.sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+    }
+
+    const fallbackOptions = Object.values(beltConfigBySlug)
+      .filter((item) => item.slug !== 'vermelha')
+      .map((item) => ({
+        slug: item.slug,
+        label: item.nome,
+        maxStripes: item.grausMaximos ?? 0,
+        order: item.id ?? Number.MAX_SAFE_INTEGER
+      }));
+
+    return fallbackOptions.sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
   }, [rules]);
 
   const planos = useMemo(() => PLANOS_MOCK, []);
@@ -40,7 +60,8 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
     telefone: '',
     plano: planos[0],
     status: statusOptions[0],
-    faixa: 'Branca',
+    faixa: beltOptions[0]?.label || 'Branca',
+    faixaSlug: beltOptions[0]?.slug || 'branca-adulto',
     graus: 0,
     mesesNaFaixa: 0,
     dataUltimaGraduacao: ''
@@ -55,25 +76,33 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
         telefone: initialData.telefone ? formatTelefone(initialData.telefone) : '',
         plano: initialData.plano || planos[0],
         status: initialData.status || statusOptions[0],
-        faixa: initialData.faixa || 'Branca',
+        faixa: initialData.faixa || initialData.faixaSlug || beltOptions[0]?.label || 'Branca',
+        faixaSlug:
+          initialData.faixaSlug || beltOptions[0]?.slug || 'branca-adulto',
         graus: Number(initialData.graus ?? 0),
         mesesNaFaixa: Number(initialData.mesesNaFaixa ?? 0),
         dataUltimaGraduacao: initialData.dataUltimaGraduacao || ''
       });
     }
-  }, [initialData, planos, statusOptions]);
+  }, [initialData, planos, statusOptions, beltOptions]);
 
   useEffect(() => {
     if (!beltOptions.length) return;
     setFormData((prev) => ({
       ...prev,
-      faixa: beltOptions.includes(prev.faixa) ? prev.faixa : beltOptions[0]
+      faixa: beltOptions.find((item) => item.slug === prev.faixaSlug)?.label || beltOptions[0].label,
+      faixaSlug: beltOptions.find((item) => item.slug === prev.faixaSlug)?.slug || beltOptions[0].slug
     }));
   }, [beltOptions]);
 
+  const getStripeLimit = useCallback(
+    (slug) => beltOptions.find((item) => item.slug === slug)?.maxStripes ?? 0,
+    [beltOptions]
+  );
+
   useEffect(() => {
     setFormData((prev) => {
-      const limite = getMaxStripes(prev.faixa);
+      const limite = getStripeLimit(prev.faixaSlug);
       if (limite === 0 && prev.graus !== 0) {
         return { ...prev, graus: 0 };
       }
@@ -82,19 +111,30 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
       }
       return prev;
     });
-  }, [formData.faixa]);
+  }, [formData.faixaSlug, getStripeLimit]);
 
   const grauOptions = useMemo(() => {
-    const limite = getMaxStripes(formData.faixa);
+    const limite = getStripeLimit(formData.faixaSlug);
     const max = limite > 0 ? limite : 0;
     return Array.from({ length: max + 1 }, (_, index) => index);
-  }, [formData.faixa]);
+  }, [formData.faixaSlug, getStripeLimit]);
 
   const handleChange = (event) => {
     const { name, value, type } = event.target;
     if (name === 'telefone') {
       setFormData((prev) => ({ ...prev, telefone: formatTelefone(value) }));
       setErrors((prev) => ({ ...prev, telefone: undefined }));
+      return;
+    }
+
+    if (name === 'faixaSlug') {
+      const selecionada = beltOptions.find((item) => item.slug === value) || beltOptions[0];
+      setFormData((prev) => ({
+        ...prev,
+        faixaSlug: selecionada?.slug || value,
+        faixa: selecionada?.label || prev.faixa
+      }));
+      setErrors((prev) => ({ ...prev, faixaSlug: undefined }));
       return;
     }
 
@@ -138,6 +178,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
     }
     onSubmit({
       ...formData,
+      faixaSlug: formData.faixaSlug,
       graus: Number(formData.graus),
       mesesNaFaixa: Number(formData.mesesNaFaixa)
     });
@@ -249,9 +290,11 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
           <div className="space-y-3.5">
             <div>
               <label className="mb-2 block text-sm font-medium">Faixa atual</label>
-              <Select name="faixa" value={formData.faixa} onChange={handleChange}>
+              <Select name="faixaSlug" value={formData.faixaSlug} onChange={handleChange}>
                 {beltOptions.map((faixa) => (
-                  <option key={faixa}>{faixa}</option>
+                  <option key={faixa.slug} value={faixa.slug}>
+                    {faixa.label}
+                  </option>
                 ))}
               </Select>
             </div>

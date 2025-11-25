@@ -7,7 +7,8 @@ import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 import Button from '../../../components/ui/Button';
 import ConfirmDialog from '../../../components/ui/ConfirmDialog';
-import FaixaVisual from '../../../components/graduacoes/FaixaVisual';
+import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { useGraduationRulesStore } from '../../../store/graduationRulesStore';
 import { BELT_ORDER } from '../../../config/graduationRules';
 
@@ -206,59 +207,62 @@ export default function RegrasGraduacaoPage() {
             </tr>
           </thead>
           <tbody>
-            {belts.map(([belt, rule]) => (
-              <tr key={belt} className="align-middle text-sm text-bjj-gray-200">
-                <td className="px-4 py-4">
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      type="button"
-                      className={actionButtonClasses}
-                      aria-label={`Editar ${belt}`}
-                      onClick={() => openEditModal(belt, rule)}
-                    >
-                      <Edit3 size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      className={actionButtonClasses}
-                      aria-label={`Excluir ${belt}`}
-                      onClick={() => handleDelete(belt)}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </td>
-                <td className="px-4 py-4 align-middle">
-                  <p className="text-base font-semibold text-bjj-white">{belt}</p>
-                </td>
-                <td className="px-4 py-4 align-middle">
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs md:text-sm">
-                    <p>
-                      <span className="font-semibold text-bjj-white">Tempo:</span> {rule.tempoFaixaMeses} meses
-                    </p>
-                    <p>
-                      <span className="font-semibold text-bjj-white">Aulas mínimas:</span> {rule.aulasMinimasFaixa}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-bjj-white">Graus:</span> {rule.graus?.length ?? 0}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-bjj-white">Próxima faixa:</span> {rule.proximaFaixa || '—'}
-                    </p>
-                  </div>
-                </td>
-                <td className="px-4 py-4 align-middle">
-                  <FaixaVisual
-                    corBase={rule.corFaixa}
-                    corLinha={rule.corBarra}
-                    corPonteira={rule.corPonteira}
-                    graus={rule.graus?.length ?? 0}
-                    categoria={rule.categoria}
-                    className="w-full min-w-[8.5rem] max-w-[12rem]"
-                  />
-                </td>
-              </tr>
-            ))}
+            {belts.map(([belt, rule]) => {
+              const faixaConfig = getFaixaConfigBySlug(rule.faixaSlug);
+
+              return (
+                <tr key={belt} className="align-middle text-sm text-bjj-gray-200">
+                  <td className="px-4 py-4">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        className={actionButtonClasses}
+                        aria-label={`Editar ${belt}`}
+                        onClick={() => openEditModal(belt, rule)}
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className={actionButtonClasses}
+                        aria-label={`Excluir ${belt}`}
+                        onClick={() => handleDelete(belt)}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 align-middle">
+                    <p className="text-base font-semibold text-bjj-white">{belt}</p>
+                  </td>
+                  <td className="px-4 py-4 align-middle">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs md:text-sm">
+                      <p>
+                        <span className="font-semibold text-bjj-white">Tempo:</span> {rule.tempoFaixaMeses} meses
+                      </p>
+                      <p>
+                        <span className="font-semibold text-bjj-white">Aulas mínimas:</span> {rule.aulasMinimasFaixa}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-bjj-white">Graus:</span> {rule.graus?.length ?? 0}
+                      </p>
+                      <p>
+                        <span className="font-semibold text-bjj-white">Próxima faixa:</span> {rule.proximaFaixa || '—'}
+                      </p>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 align-middle w-64">
+                    {faixaConfig && (
+                      <BjjBeltStrip
+                        config={faixaConfig}
+                        grauAtual={rule.grausMaximos ?? faixaConfig.grausMaximos}
+                        className="scale-[0.9] origin-center"
+                      />
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </section>
