@@ -7,11 +7,10 @@ import { ROLE_KEYS } from '../../config/roles';
 import { useAlunosStore } from '../../store/alunosStore';
 import StudentHero from '../../components/student/StudentHero';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
-import { useCurrentInstrutor } from '@/hooks/useCurrentInstrutor';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { useInstrutoresStore } from '@/store/instrutoresStore';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { normalizeFaixaSlug } from '@/lib/alunoStats';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 
 const ensureAvatar = (name, avatarUrl) =>
   avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
@@ -19,9 +18,8 @@ const ensureAvatar = (name, avatarUrl) =>
 export default function PerfilAlunoPage() {
   const { user, aluno } = useCurrentAluno();
   const { updateUser } = useCurrentUser();
-  const { instrutor } = useCurrentInstrutor();
+  const { staff } = useCurrentStaff();
   const updateAluno = useAlunosStore((state) => state.updateAluno);
-  const atualizarInstrutor = useInstrutoresStore((state) => state.atualizar);
   const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
 
   const professorRoles = useMemo(
@@ -33,10 +31,10 @@ export default function PerfilAlunoPage() {
     nome:
       (isAluno
         ? aluno?.nome
-        : instrutor?.nomeCompleto || instrutor?.nome || user?.nomeCompleto || user?.name) || '',
+        : staff?.nome || user?.nomeCompleto || user?.name) || '',
     telefone: (isAluno ? aluno?.telefone : user?.telefone) || '',
     email: (isAluno ? aluno?.email : user?.email) || '',
-    avatarUrl: (isAluno ? aluno?.avatarUrl : user?.avatarUrl || instrutor?.avatarUrl) || ''
+    avatarUrl: (isAluno ? aluno?.avatarUrl : user?.avatarUrl || staff?.avatarUrl) || ''
   });
 
   const [form, setForm] = useState(deriveInitialForm);
@@ -44,10 +42,10 @@ export default function PerfilAlunoPage() {
   const [saved, setSaved] = useState(false);
 
   const statusLabel = useMemo(() => {
-    if (!isAluno) return instrutor?.status || 'Ativo';
+    if (!isAluno) return staff?.status || 'Ativo';
     const raw = aluno?.status || 'Ativo';
     return typeof raw === 'string' ? raw.charAt(0).toUpperCase() + raw.slice(1) : 'Ativo';
-  }, [aluno?.status, instrutor?.status, isAluno]);
+  }, [aluno?.status, staff?.status, isAluno]);
 
   const resolverFaixaConfig = (valor) => {
     const slug = normalizeFaixaSlug(valor);
@@ -58,14 +56,14 @@ export default function PerfilAlunoPage() {
     );
   };
 
-  const faixaConfig = resolverFaixaConfig(isAluno ? aluno?.faixaSlug ?? aluno?.faixa : instrutor?.faixaSlug);
+  const faixaConfig = resolverFaixaConfig(isAluno ? aluno?.faixaSlug ?? aluno?.faixa : staff?.faixaSlug);
   const grauAtual = isAluno
     ? aluno?.graus ?? faixaConfig?.grausMaximos ?? 0
-    : instrutor?.graus ?? faixaConfig?.grausMaximos ?? 0;
+    : staff?.grauAtual ?? faixaConfig?.grausMaximos ?? 0;
 
   useEffect(() => {
     setForm(deriveInitialForm());
-  }, [aluno, user, isAluno, instrutor]);
+  }, [aluno, user, isAluno, staff]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -86,11 +84,12 @@ export default function PerfilAlunoPage() {
     if (isAluno && aluno) {
       updateAluno(aluno.id, form);
     } else {
-      const instrutorId = instrutor?.id || user?.instrutorId || user?.professorId;
-      if (instrutorId) {
-        void atualizarInstrutor(instrutorId, {
+      const alunoId = staff?.alunoId || user?.alunoId;
+      if (alunoId) {
+        updateAluno(alunoId, {
           nome: form.nome,
           nomeCompleto: form.nome,
+          telefone: form.telefone,
           email: form.email,
           avatarUrl: form.avatarUrl
         });
@@ -113,12 +112,12 @@ export default function PerfilAlunoPage() {
   return (
     <div className="space-y-4">
       <StudentHero
-        name={form.nome || user?.nomeCompleto || user?.name || instrutor?.nome || 'Aluno'}
-        faixa={isAluno ? aluno?.faixa || aluno?.faixaSlug : instrutor?.faixaSlug}
-        faixaSlug={isAluno ? aluno?.faixaSlug ?? aluno?.faixa : instrutor?.faixaSlug}
+        name={form.nome || user?.nomeCompleto || user?.name || staff?.nome || 'Aluno'}
+        faixa={isAluno ? aluno?.faixa || aluno?.faixaSlug : staff?.faixaSlug}
+        faixaSlug={isAluno ? aluno?.faixaSlug ?? aluno?.faixa : staff?.faixaSlug}
         graus={grauAtual}
         statusLabel={statusLabel}
-        avatarUrl={ensureAvatar(form.nome || instrutor?.nome, form.avatarUrl)}
+        avatarUrl={ensureAvatar(form.nome || staff?.nome, form.avatarUrl)}
         subtitle={isAluno ? 'Perfil do aluno' : 'Perfil do professor'}
       />
 

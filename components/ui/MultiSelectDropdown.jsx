@@ -15,6 +15,7 @@ export default function MultiSelectDropdown({
   label,
   options,
   value,
+  values,
   onChange,
   allValue = 'all',
   allLabel = 'Todos',
@@ -27,7 +28,11 @@ export default function MultiSelectDropdown({
   const [query, setQuery] = useState('');
 
   const optionValues = useMemo(() => options.map((option) => option.value), [options]);
-  const safeValue = useMemo(() => (Array.isArray(value) ? value.filter(Boolean) : EMPTY_ARRAY), [value]);
+  const resolvedValue = value ?? values;
+  const safeValue = useMemo(
+    () => (Array.isArray(resolvedValue) ? resolvedValue.filter(Boolean) : EMPTY_ARRAY),
+    [resolvedValue]
+  );
   const hasAllSelected = safeValue.includes(allValue);
 
   const selectedValues = useMemo(() => {
