@@ -242,19 +242,20 @@ export default function HistoricoPresencasPage() {
                         </div>
                       </div>
 
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-bjj-gray-50">
-                        <span className="rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/85">{aluno?.nome || 'Aluno(a)'}</span>
-                        <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-emerald-100">{item.turmaId ? `Turma ${item.turmaId}` : 'Sem turma'}</span>
+                      <div className="mt-3 flex flex-col gap-2 text-xs text-bjj-gray-50">
+                        <div className="flex flex-wrap gap-2">
+                          <span className="rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/85">{aluno?.nome || 'Aluno(a)'}</span>
+                          <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-emerald-100">{item.turmaId ? `Turma ${item.turmaId}` : 'Sem turma'}</span>
+                        </div>
                         {faixaConfig ? (
-                          <div className="flex items-center gap-2 rounded-full border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3 py-1">
-                            <span className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/90">
-                              {faixaConfig.nome}
-                            </span>
-                            <div className="w-[120px]">
+                          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3 py-1">
+                            <span className="text-[10px] uppercase tracking-[0.2em] text-bjj-gray-100/80">Faixa</span>
+                            <span className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/90">{faixaConfig.nome}</span>
+                            <div className="w-[108px] md:w-[128px]">
                               <BjjBeltStrip
                                 config={faixaConfig}
                                 grauAtual={grauAtual}
-                                className="scale-[0.6] md:scale-[0.7] origin-left"
+                                className="scale-[0.55] md:scale-[0.68] origin-left"
                               />
                             </div>
                           </div>
