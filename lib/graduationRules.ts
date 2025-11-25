@@ -70,9 +70,11 @@ const getLatestHistoryRecord = (
 };
 
 const buildAttendanceStats = (aluno: Aluno, presencas: Presenca[] = []) => {
-  const registrosAluno = presencas.filter(
-    (item) => item.alunoId === aluno.id && item.status === 'Presente'
-  );
+  const registrosAluno = presencas.filter((item) => {
+    if (item.alunoId !== aluno.id) return false;
+    const statusNormalizado = (item.status || '').toUpperCase();
+    return statusNormalizado === 'PRESENTE' || statusNormalizado === 'CONFIRMADO';
+  });
   const totalAulas = registrosAluno.length;
 
   const historico = Array.isArray(aluno.historicoGraduacoes)

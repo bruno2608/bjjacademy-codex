@@ -3,12 +3,14 @@ import { useMemo } from 'react'
 import { GRADUATION_RULES } from '@/config/graduationRules'
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils'
 import { buildAttendanceSnapshot, normalizeFaixaSlug } from '@/lib/alunoStats'
+import { calculateNextStep, estimateGraduationDate } from '@/lib/graduationRules'
 import { useCurrentAluno } from '@/hooks/useCurrentAluno'
 import { useAlunosStore } from '@/store/alunosStore'
 import { usePresencasStore } from '@/store/presencasStore'
 import { useTreinosStore } from '@/store/treinosStore'
 import type { BjjBeltVisualConfig } from '@/types/bjjBelt'
 import type { Aluno } from '@/types/aluno'
+import type { GraduationRecommendation } from '@/types/graduacao'
 import type { Presenca } from '@/types/presenca'
 
 export interface AlunoDashboardData {
@@ -28,6 +30,13 @@ export interface AlunoDashboardData {
   ultimaPresenca?: Presenca | null
   ultimasPresencas: Presenca[]
   treinoPorId: Map<string, { id: string; nome: string; hora?: string }>
+
+  proximaGraduacao: GraduationRecommendation | null
+  proximaGraduacaoLabel: string
+  proximaGraduacaoEstimativa: string | null
+  proximaGraduacaoPercentual: number | null
+  proximaGraduacaoAulasRealizadas: number | null
+  proximaGraduacaoAulasMinimas: number | null
 }
 
 export function useAlunoDashboard(alunoId?: string): AlunoDashboardData {
@@ -112,6 +121,48 @@ export function useAlunoDashboard(alunoId?: string): AlunoDashboardData {
     return map
   }, [treinos])
 
+  const proximaGraduacao = useMemo(
+    () => (aluno ? calculateNextStep(aluno, { presencas: presencasDoAluno }) : null),
+    [aluno, presencasDoAluno]
+  )
+
+  const proximaGraduacaoLabel = useMemo(() => {
+    if (!proximaGraduacao) return 'Em avaliação pela equipe'
+    if (proximaGraduacao.tipo === 'Grau') {
+      return `${proximaGraduacao.grauAlvo}º grau em ${proximaGraduacao.faixaAtual}`
+    }
+    return `${proximaGraduacao.faixaAtual} → ${proximaGraduacao.proximaFaixa}`
+  }, [proximaGraduacao])
+
+  const proximaGraduacaoEstimativa = useMemo(() => {
+    if (!aluno || proximaGraduacao?.mesesRestantes == null) return null
+    const estimada = estimateGraduationDate(aluno, proximaGraduacao.mesesRestantes)
+    const parsed = new Date(estimada)
+    if (Number.isNaN(parsed.getTime())) return null
+    return parsed.toISOString().split('T')[0]
+  }, [aluno, proximaGraduacao?.mesesRestantes])
+
+  const proximaGraduacaoPercentual = useMemo(() => {
+    if (!proximaGraduacao) return percentualProgresso
+    const percentual =
+      proximaGraduacao.tipo === 'Grau'
+        ? proximaGraduacao.progressoAulasGrau
+        : proximaGraduacao.progressoAulasFaixa
+    return percentual ?? percentualProgresso
+  }, [percentualProgresso, proximaGraduacao])
+
+  const proximaGraduacaoAulasRealizadas = useMemo(() => {
+    if (!proximaGraduacao) return aulasNoGrau
+    if (proximaGraduacao.tipo === 'Grau')
+      return proximaGraduacao.aulasRealizadasNoGrau ?? aulasNoGrau
+    return proximaGraduacao.aulasRealizadasNaFaixa ?? aluno?.aulasDesdeUltimaFaixa ?? aulasNoGrau
+  }, [aluno?.aulasDesdeUltimaFaixa, aulasNoGrau, proximaGraduacao])
+
+  const proximaGraduacaoAulasMinimas = useMemo(() => {
+    if (!proximaGraduacao) return aulasMetaNoGrau
+    return proximaGraduacao.aulasMinimasRequeridas ?? aulasMetaNoGrau
+  }, [aulasMetaNoGrau, proximaGraduacao])
+
   return {
     aluno,
     faixaConfig,
@@ -125,6 +176,12 @@ export function useAlunoDashboard(alunoId?: string): AlunoDashboardData {
     totalPendentes,
     ultimaPresenca,
     ultimasPresencas,
-    treinoPorId
+    treinoPorId,
+    proximaGraduacao,
+    proximaGraduacaoLabel,
+    proximaGraduacaoEstimativa,
+    proximaGraduacaoPercentual,
+    proximaGraduacaoAulasRealizadas,
+    proximaGraduacaoAulasMinimas
   }
 }

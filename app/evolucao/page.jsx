@@ -8,63 +8,54 @@ import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { useAlunoDashboard } from '@/hooks/useAlunoDashboard';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
-import { calculateNextStep, estimateGraduationDate } from '@/lib/graduationRules';
 import { normalizeFaixaSlug } from '@/lib/alunoStats';
-import { useAlunosStore } from '@/store/alunosStore';
 import { useGraduacoesStore } from '@/store/graduacoesStore';
-import { usePresencasStore } from '@/store/presencasStore';
 
 export default function EvolucaoPage() {
   const { aluno: alunoFromUser } = useCurrentAluno();
-  const alunos = useAlunosStore((state) => state.alunos);
-  const presencas = usePresencasStore((state) => state.presencas);
   const graduacoesPlanejadas = useGraduacoesStore((state) => state.graduacoes);
 
-  const alunoId = alunoFromUser?.id ?? alunos[0]?.id;
-  const { aluno, faixaConfig, grauAtual, aulasNoGrau, aulasMetaNoGrau } = useAlunoDashboard(alunoId);
+  const alunoId = alunoFromUser?.id;
+  const {
+    aluno,
+    faixaConfig,
+    grauAtual,
+    aulasNoGrau,
+    aulasMetaNoGrau,
+    percentualProgresso,
+    proximaGraduacaoLabel,
+    proximaGraduacaoEstimativa,
+    proximaGraduacaoPercentual,
+    proximaGraduacaoAulasMinimas,
+    proximaGraduacaoAulasRealizadas
+  } = useAlunoDashboard(alunoId);
 
-  const historicoGraduacoes = useMemo(() => {
-    const historico = aluno?.historicoGraduacoes ?? alunoFromUser?.historicoGraduacoes ?? [];
-    return [...historico].sort(
-      (a, b) => (new Date(b.data || '').getTime() || 0) - (new Date(a.data || '').getTime() || 0)
-    );
-  }, [aluno?.historicoGraduacoes, alunoFromUser?.historicoGraduacoes]);
-
-  const proximaMeta = useMemo(
-    () => calculateNextStep(aluno || null, { presencas }),
-    [aluno, presencas]
+  const graduacoesDoAluno = useMemo(
+    () => graduacoesPlanejadas.filter((item) => item.alunoId === (aluno?.id || alunoId)),
+    [aluno?.id, alunoId, graduacoesPlanejadas]
   );
 
-  const progressoProximoGrau = useMemo(() => {
-    const aulasNoGrauAtual = aulasNoGrau ?? aluno?.aulasNoGrauAtual ?? 0;
-    const alvo = aulasMetaNoGrau ?? 20;
-    const percent = alvo > 0 ? Math.min(100, Math.round((aulasNoGrauAtual / alvo) * 100)) : 0;
-    return { aulasNoGrau: aulasNoGrauAtual, alvo, percent };
-  }, [aluno?.aulasNoGrauAtual, aulasNoGrau, aulasMetaNoGrau]);
+  const historicoGraduacoes = useMemo(() => {
+    const historicoPlanos = graduacoesDoAluno.map((item) => ({
+      id: item.id,
+      tipo: item.tipo,
+      faixa: item.tipo === 'Grau' ? item.faixaAtual : item.proximaFaixa || item.faixaAtual,
+      faixaSlug: normalizeFaixaSlug(item.tipo === 'Grau' ? item.faixaAtual : item.proximaFaixa),
+      grau: item.grauAlvo,
+      data: item.previsao,
+      instrutor: item.instrutor,
+      descricao:
+        item.tipo === 'Grau'
+          ? `${item.grauAlvo}º grau em ${item.faixaAtual}`
+          : `${item.faixaAtual} → ${item.proximaFaixa || 'próxima faixa'}`
+    }));
 
-  const proximaGraduacaoLabel = useMemo(() => {
-    if (proximaMeta) {
-      if (proximaMeta.tipo === 'Grau') {
-        return `${proximaMeta.grauAlvo}º grau em ${proximaMeta.faixaAtual}`;
-      }
-      return `${proximaMeta.faixaAtual} → ${proximaMeta.proximaFaixa}`;
-    }
-    const planejada = graduacoesPlanejadas.find((item) => item.alunoId === aluno?.id);
-    if (planejada) {
-      return planejada.tipo === 'Grau'
-        ? `${planejada.grauAlvo}º grau em ${planejada.faixaAtual}`
-        : `${planejada.faixaAtual} → ${planejada.proximaFaixa}`;
-    }
-    return 'Em avaliação pela equipe';
-  }, [aluno?.id, graduacoesPlanejadas, proximaMeta]);
+    const historicoAluno = aluno?.historicoGraduacoes ?? alunoFromUser?.historicoGraduacoes ?? [];
 
-  const proximaDataEstimada = useMemo(() => {
-    if (!aluno || !proximaMeta || proximaMeta.mesesRestantes == null) return null;
-    const estimada = estimateGraduationDate(aluno, proximaMeta.mesesRestantes);
-    const parsed = new Date(estimada);
-    if (Number.isNaN(parsed.getTime())) return null;
-    return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-  }, [aluno, proximaMeta]);
+    return [...historicoAluno, ...historicoPlanos].sort(
+      (a, b) => (new Date(b.data || '').getTime() || 0) - (new Date(a.data || '').getTime() || 0)
+    );
+  }, [aluno?.historicoGraduacoes, alunoFromUser?.historicoGraduacoes, graduacoesDoAluno]);
 
   const faixaConfigAtual =
     faixaConfig || getFaixaConfigBySlug(aluno?.faixaSlug || alunoFromUser?.faixaSlug || 'branca-adulto');
@@ -109,11 +100,11 @@ export default function EvolucaoPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
-          <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-5 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
-            <header className="mb-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">Linha do tempo</p>
+          <div className="space-y-4 lg:col-span-2">
+            <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-5 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+              <header className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">Linha do tempo</p>
                 <h3 className="text-lg font-semibold">Histórico de graduações</h3>
               </div>
               <Medal size={18} className="text-bjj-red" />
@@ -182,43 +173,46 @@ export default function EvolucaoPage() {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-5 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
-            <header className="mb-3 flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">Próxima meta</p>
-                <h3 className="text-lg font-semibold">Projeção</h3>
-              </div>
-              <TrendingUp size={18} className="text-bjj-red" />
-            </header>
-            <div className="space-y-2 text-sm text-bjj-gray-100">
-              <div className="flex items-center justify-between text-bjj-gray-200/80">
-                <span>Próxima graduação</span>
-                <span className="font-semibold text-white">{proximaGraduacaoLabel}</span>
-              </div>
-              <div className="h-2 rounded-full bg-bjj-gray-800">
-                <div
-                  className="h-2 rounded-full bg-gradient-to-r from-bjj-red to-red-500"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      proximaMeta?.progressoAulasGrau ?? proximaMeta?.progressoAulasFaixa ?? progressoProximoGrau.percent
-                    )}%`
-                  }}
-                />
-              </div>
-              <p className="text-xs text-bjj-gray-300/80">
-                {proximaMeta?.aulasRealizadasNoGrau || proximaMeta?.aulasRealizadasNaFaixa || progressoProximoGrau.aulasNoGrau}
-                {' '}
-                aulas registradas {proximaMeta?.aulasMinimasRequeridas ? `de ${proximaMeta?.aulasMinimasRequeridas}` : ''}
-                {proximaDataEstimada ? ` · estimativa ${proximaDataEstimada}` : ''}
-              </p>
-              <div className="flex items-center gap-2 rounded-lg bg-bjj-black/30 px-3 py-2 text-xs text-bjj-gray-200/80">
-                <Clock3 size={14} className="text-bjj-red" />
-                Check-ins fora do horário ficam pendentes até aprovação do professor.
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-5 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+              <header className="mb-3 flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">Próxima meta</p>
+                  <h3 className="text-lg font-semibold">Projeção</h3>
+                </div>
+                <TrendingUp size={18} className="text-bjj-red" />
+              </header>
+              <div className="space-y-2 text-sm text-bjj-gray-100">
+                <div className="flex items-center justify-between text-bjj-gray-200/80">
+                  <span>Próxima graduação</span>
+                  <span className="font-semibold text-white">{proximaGraduacaoLabel}</span>
+                </div>
+                <div className="h-2 rounded-full bg-bjj-gray-800">
+                  <div
+                    className="h-2 rounded-full bg-gradient-to-r from-bjj-red to-red-500"
+                    style={{
+                      width: `${Math.min(100, proximaGraduacaoPercentual ?? percentualProgresso ?? 0)}%`
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-bjj-gray-300/80">
+                  {proximaGraduacaoAulasRealizadas ?? aulasNoGrau}{' '}
+                  aulas registradas
+                  {proximaGraduacaoAulasMinimas ? ` de ${proximaGraduacaoAulasMinimas}` : ''}
+                  {proximaGraduacaoEstimativa
+                    ? ` · estimativa ${new Date(proximaGraduacaoEstimativa).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                      })}`
+                    : ''}
+                </p>
+                <div className="flex items-center gap-2 rounded-lg bg-bjj-black/30 px-3 py-2 text-xs text-bjj-gray-200/80">
+                  <Clock3 size={14} className="text-bjj-red" />
+                  Check-ins fora do horário ficam pendentes até aprovação do professor.
+                </div>
               </div>
             </div>
-          </div>
 
           <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-5 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
             <header className="mb-3 flex items-center justify-between">
@@ -236,7 +230,8 @@ export default function EvolucaoPage() {
               <div className="flex items-center justify-between">
                 <span>Aulas concluídas no grau</span>
                 <span className="font-semibold text-white">
-                  {progressoProximoGrau.aulasNoGrau}/{proximaMeta?.aulasMinimasRequeridas || progressoProximoGrau.alvo}
+                  {proximaGraduacaoAulasRealizadas ?? aulasNoGrau}/
+                  {proximaGraduacaoAulasMinimas ?? aulasMetaNoGrau}
                 </span>
               </div>
               <div className="flex items-center justify-between">
