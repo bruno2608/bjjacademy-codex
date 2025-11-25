@@ -9,6 +9,8 @@ import StudentHero from '../../components/student/StudentHero';
 import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import useUserStore from '../../store/userStore';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
+import { normalizeFaixaSlug } from '@/lib/alunoStats';
 
 const ensureAvatar = (name, avatarUrl) =>
   avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
@@ -41,6 +43,20 @@ export default function PerfilAlunoPage() {
     const raw = aluno?.status || 'Ativo';
     return typeof raw === 'string' ? raw.charAt(0).toUpperCase() + raw.slice(1) : 'Ativo';
   }, [aluno?.status, defaultInstrutor?.status, isAluno]);
+
+  const resolverFaixaConfig = (valor) => {
+    const slug = normalizeFaixaSlug(valor);
+    return (
+      getFaixaConfigBySlug(slug) ||
+      (slug?.startsWith('preta') ? getFaixaConfigBySlug('preta-padrao') : undefined) ||
+      getFaixaConfigBySlug('branca-adulto')
+    );
+  };
+
+  const faixaConfig = resolverFaixaConfig(isAluno ? aluno?.faixaSlug ?? aluno?.faixa : defaultInstrutor?.faixa);
+  const grauAtual = isAluno
+    ? aluno?.graus ?? faixaConfig?.grausMaximos ?? 0
+    : defaultInstrutor?.graus ?? faixaConfig?.grausMaximos ?? 0;
 
   useEffect(() => {
     setForm(deriveInitialForm());
@@ -83,7 +99,8 @@ export default function PerfilAlunoPage() {
       <StudentHero
         name={form.nome || user?.name || defaultInstrutor?.nome || 'Aluno'}
         faixa={isAluno ? aluno?.faixa || aluno?.faixaSlug : defaultInstrutor?.faixa}
-        graus={isAluno ? aluno?.graus : defaultInstrutor?.graus}
+        faixaSlug={isAluno ? aluno?.faixaSlug ?? aluno?.faixa : defaultInstrutor?.faixa}
+        graus={grauAtual}
         statusLabel={statusLabel}
         avatarUrl={ensureAvatar(form.nome || defaultInstrutor?.nome, form.avatarUrl)}
         subtitle={isAluno ? 'Perfil do aluno' : 'Perfil do professor'}
@@ -165,7 +182,7 @@ export default function PerfilAlunoPage() {
               </div>
               <input
                 disabled
-                value={aluno?.faixa || '—'}
+                value={faixaConfig?.nome || '—'}
                 className={disabledFieldClass}
                 readOnly
               />
@@ -179,7 +196,7 @@ export default function PerfilAlunoPage() {
               </div>
               <input
                 disabled
-                value={`${aluno?.graus || 0}º`}
+                value={`${grauAtual}º`}
                 className={disabledFieldClass}
                 readOnly
               />
