@@ -4,6 +4,7 @@ import { Activity, BarChart2, BarChart3, CalendarCheck, Clock3, Medal, PieChart,
 
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils'
 import { comporRegistrosDoDia, calcularResumoPresencas } from '@/lib/presencasResumo'
+import { normalizeAlunoStatus } from '@/lib/alunoStats'
 import { useCurrentStaff } from '@/hooks/useCurrentStaff'
 import { useAlunosStore } from '@/store/alunosStore'
 import { useGraduacoesStore } from '@/store/graduacoesStore'
@@ -85,8 +86,6 @@ const startOfCurrentWeek = () => {
   return { start, end }
 }
 
-const normalizarStatus = (status?: string | null) => (status || '').toString().toUpperCase()
-
 export function useStaffDashboard(): StaffDashboardData {
   const { staff } = useCurrentStaff()
   const presencas = usePresencasStore((state) => state.presencas)
@@ -102,7 +101,7 @@ export function useStaffDashboard(): StaffDashboardData {
     [staff?.faixaSlug]
   )
   const grauAtual = useMemo(() => Math.max(0, Number(staff?.grauAtual ?? 0)), [staff?.grauAtual])
-  const statusLabel = normalizarStatus(staff?.status) || 'ATIVO'
+  const statusLabel = normalizeAlunoStatus(staff?.status) || 'ATIVO'
   const avatarUrl = staff?.avatarUrl || ''
 
   const treinoPorId = useMemo(() => {
@@ -121,7 +120,7 @@ export function useStaffDashboard(): StaffDashboardData {
   const checkinsPorStatus = useMemo<CheckinsPorStatus>(() => {
     const base = { confirmados: 0, pendentes: 0, faltas: 0 }
     return presencas.reduce((acc, item) => {
-      const status = normalizarStatus(item.status)
+      const status = normalizeAlunoStatus(item.status)
       if (status === 'PRESENTE') acc.confirmados += 1
       else if (status === 'PENDENTE') acc.pendentes += 1
       else if (status === 'FALTA' || status === 'JUSTIFICADA') acc.faltas += 1
@@ -130,7 +129,7 @@ export function useStaffDashboard(): StaffDashboardData {
   }, [presencas])
 
   const alunosAtivos = useMemo(
-    () => alunos.filter((a) => normalizarStatus(a.status) === 'ATIVO'),
+    () => alunos.filter((a) => normalizeAlunoStatus(a.status) === 'ATIVO'),
     [alunos]
   )
 
@@ -172,7 +171,7 @@ export function useStaffDashboard(): StaffDashboardData {
 
   const pendencias = useMemo<PendingCheckin[]>(() => {
     return presencas
-      .filter((p) => normalizarStatus(p.status) === 'PENDENTE')
+      .filter((p) => normalizeAlunoStatus(p.status) === 'PENDENTE')
       .map((item) => {
         const alunoNome = alunos.find((a) => a.id === item.alunoId)?.nome || 'Aluno não encontrado'
         const treino = treinoPorId.get(item.treinoId)
@@ -200,7 +199,9 @@ export function useStaffDashboard(): StaffDashboardData {
     const totalAlunos = alunos.length
     const aulasNaSemana = treinos.filter((treino) => isSameWeek(treino.data, start, end)).length
     const historicoSemana = presencasSemana.length
-    const checkinsRegistradosSemana = presencasSemana.filter((p) => normalizarStatus(p.status) !== 'FALTA').length
+    const checkinsRegistradosSemana = presencasSemana.filter(
+      (p) => normalizeAlunoStatus(p.status) !== 'FALTA'
+    ).length
 
     return {
       totalAlunos,

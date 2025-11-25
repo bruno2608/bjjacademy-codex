@@ -9,6 +9,9 @@ import { useRouter } from 'next/navigation';
 import { Filter, UserPlus2 } from 'lucide-react';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
+import { normalizeAlunoStatus, normalizeFaixaSlug } from '@/lib/alunoStats';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { useStaffDashboard } from '@/services/dashboard/useStaffDashboard';
 import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
 import Table from '../../components/ui/Table';
 import Modal from '../../components/ui/Modal';
@@ -19,11 +22,7 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useTreinosStore } from '../../store/treinosStore';
-import { useGraduationRulesStore } from '../../store/graduationRulesStore';
 import { useAlunosStore } from '../../store/alunosStore';
-import { orderBelts } from '../../lib/graduationRules';
-import { useCurrentStaff } from '@/hooks/useCurrentStaff';
-import { useStaffDashboard } from '@/services/dashboard/useStaffDashboard';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
@@ -45,7 +44,6 @@ export default function AlunosPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const presencas = usePresencasStore((state) => state.presencas);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
-  const rules = useGraduationRulesStore((state) => state.rules);
   const { staff } = useCurrentStaff();
   const { alunosAtivos, totalAlunos, checkinsRegistradosSemana, graduacoesPendentes } = useStaffDashboard();
   const alunos = useAlunosStore((state) => state.alunos);
@@ -53,12 +51,18 @@ export default function AlunosPage() {
   const removeAluno = useAlunosStore((state) => state.removeAluno);
 
   const faixasDisponiveis = useMemo(() => {
-    const beltNames = orderBelts(Object.keys(rules || {}));
-    return beltNames;
-  }, [rules]);
+    const slugs = new Set(
+      alunos.map((aluno) => normalizeFaixaSlug(aluno.faixaSlug ?? aluno.faixa))
+    );
+    return Array.from(slugs).filter(Boolean);
+  }, [alunos]);
 
   const opcoesFaixa = useMemo(
-    () => faixasDisponiveis.map((faixa) => ({ value: faixa, label: faixa })),
+    () =>
+      faixasDisponiveis.map((faixaSlug) => {
+        const faixaConfig = getFaixaConfigBySlug(faixaSlug);
+        return { value: faixaSlug, label: faixaConfig?.nome ?? faixaSlug };
+      }),
     [faixasDisponiveis]
   );
   const opcoesStatus = useMemo(
@@ -97,17 +101,21 @@ export default function AlunosPage() {
   const alunosFiltrados = useMemo(() => {
     const termo = searchTerm.trim().toLowerCase();
     const faixasAtivas = limparSelecao(filterFaixas);
-    const statusAtivos = limparSelecao(filterStatuses);
+    const statusAtivos = limparSelecao(filterStatuses).map((status) => normalizeAlunoStatus(status));
     const treinosAtivos = limparSelecao(filterTreinos, TODOS_TREINOS);
 
     return alunos.filter((aluno) => {
-      if (termo.length >= 3 && !aluno.nome.toLowerCase().includes(termo)) {
+      const faixaSlug = normalizeFaixaSlug(aluno.faixaSlug ?? aluno.faixa);
+      const statusNormalizado = normalizeAlunoStatus(aluno.status);
+      const nomeBusca = (aluno.nomeCompleto ?? aluno.nome ?? '').toLowerCase();
+
+      if (termo.length >= 3 && !nomeBusca.includes(termo)) {
         return false;
       }
-      if (faixasAtivas.length && !faixasAtivas.includes(aluno.faixa)) {
+      if (faixasAtivas.length && !faixasAtivas.includes(faixaSlug)) {
         return false;
       }
-      if (statusAtivos.length && !statusAtivos.includes(aluno.status)) {
+      if (statusAtivos.length && !statusAtivos.includes(statusNormalizado)) {
         return false;
       }
       if (treinosAtivos.length) {
@@ -123,11 +131,18 @@ export default function AlunosPage() {
   const alunosComFaixa = useMemo(
     () =>
       alunosFiltrados.map((aluno) => {
-        const faixaConfig =
-          getFaixaConfigBySlug(aluno.faixaSlug) || getFaixaConfigBySlug('branca-adulto');
+        const faixaSlug = normalizeFaixaSlug(aluno.faixaSlug ?? aluno.faixa);
+        const faixaConfig = getFaixaConfigBySlug(faixaSlug) || getFaixaConfigBySlug('branca-adulto');
         const grauAtual = Number.isFinite(Number(aluno.graus))
           ? Number(aluno.graus)
           : faixaConfig?.grausMaximos ?? 0;
+        const statusNormalizado = normalizeAlunoStatus(aluno.status);
+        const statusLabel =
+          statusNormalizado === 'ATIVO'
+            ? 'Ativo'
+            : statusNormalizado === 'INATIVO'
+            ? 'Inativo'
+            : aluno.status;
         const faixaVisual =
           faixaConfig && (
             <div className="w-full max-w-[180px]">
@@ -141,7 +156,11 @@ export default function AlunosPage() {
 
         return {
           ...aluno,
-          faixaVisual
+          faixa: faixaConfig?.nome ?? aluno.faixa ?? faixaSlug,
+          faixaSlug,
+          status: statusLabel,
+          faixaVisual,
+          telefone: aluno.telefone || aluno.phone || '—'
         };
       }),
     [alunosFiltrados]

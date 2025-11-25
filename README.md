@@ -40,6 +40,12 @@ npm run dev
 - **Lucide React** para ícones
 - **next-pwa** com `manifest.json`, service worker custom e cache offline
 
+### 🆕 Atualizações mais recentes (25/11 — gestão de alunos)
+
+- **/alunos alinhado aos stores**: a listagem, filtros e cards usam apenas `useAlunosStore`/`usePresencasStore`/`useStaffDashboard`, sem acessar mocks diretamente.
+- **Filtros por faixa/status coerentes**: seleção por `faixaSlug` + `getFaixaConfigBySlug` e status normalizado (`ATIVO/INATIVO`), refletindo o mesmo pipeline do dashboard do aluno e staff.
+- **Tabela sincronizada**: graduação e contato renderizados com o mesmo visual de faixa/graus (BjjBeltStrip) e dados imediatos das stores após criar/editar/remover aluno.
+
 ### 🆕 Atualizações mais recentes (25/11 — presenças)
 
 - **Fonte única de presenças**: os mocks agora são consumidos exclusivamente por `services/presencasService.ts`, permitindo trocar para Supabase/API apenas alterando essa camada.
@@ -134,6 +140,8 @@ useCurrentStaff · useCurrentAluno · useStaffDashboard · useAlunoDashboard
         ↓ (telas)
 Dashboards · Check-in · Histórico · Presenças (staff)
 ```
+
+- **Gestão de alunos (`/alunos`)** segue o mesmo pipeline: `mockAlunos` → `alunosService` → `useAlunosStore` → filtros/lista na página, reaproveitando `getFaixaConfigBySlug` e os mesmos contadores de alunos ativos/total exibidos no dashboard de staff.
 
 ## 🔄 Consistência de dados entre perfis
 
