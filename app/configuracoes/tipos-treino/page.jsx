@@ -5,17 +5,40 @@ import { useTiposTreinoStore } from '../../../store/tiposTreinoStore';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
 import ConfirmDialog from '../../../components/ui/ConfirmDialog';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { ROLE_KEYS } from '@/config/roles';
 
 /**
  * Mantém o catálogo de modalidades que alimenta cadastros de treino e presenças.
  */
 
 export default function TiposTreinoPage() {
+  const { user } = useCurrentUser();
+  const { staff } = useCurrentStaff();
   const { tipos, addTipo, updateTipo, removeTipo } = useTiposTreinoStore();
   const [novoTipo, setNovoTipo] = useState('');
   const [editIndex, setEditIndex] = useState(null);
   const [editValue, setEditValue] = useState('');
   const [deleteIndex, setDeleteIndex] = useState(null);
+
+  const canManageConfigs = Boolean(
+    user?.roles?.some((role) =>
+      [ROLE_KEYS.professor, ROLE_KEYS.instrutor, ROLE_KEYS.admin, ROLE_KEYS.ti].includes(role)
+    )
+  );
+
+  if (!canManageConfigs) {
+    return (
+      <div className="space-y-4">
+        <header className="card">
+          <p className="text-xs uppercase tracking-[0.3em] text-bjj-gray-200/60">Acesso restrito</p>
+          <h1 className="mt-2 text-xl font-semibold text-bjj-white">Tipos de Treino</h1>
+          <p className="mt-2 text-sm text-bjj-gray-200/70">Somente staff autorizado pode editar o catálogo de modalidades.</p>
+        </header>
+      </div>
+    );
+  }
 
   const handleAdd = (event) => {
     event.preventDefault();
@@ -52,6 +75,11 @@ export default function TiposTreinoPage() {
         <p className="mt-2 max-w-2xl text-sm text-bjj-gray-200/70">
           Mantenha a lista de modalidades disponíveis (Gi, No-Gi, Kids, Competição, etc.). Elas aparecem na agenda e na tela de presenças.
         </p>
+        {staff?.nome && (
+          <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-200/70">
+            Responsável: {staff.nome} · {staff.roles?.join(', ') || 'Staff'}
+          </p>
+        )}
       </header>
 
       <form className="card" onSubmit={handleAdd}>

@@ -18,6 +18,7 @@ import Select from '../../components/ui/Select';
 import { usePresencasStore } from '@/store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
+import { calcularResumoPresencas } from '@/lib/presencasResumo';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
@@ -250,9 +251,10 @@ export default function PresencasPage() {
 
   const totalFiltrado = registrosFiltrados.length;
 
-  const presentesDia = registrosDoDia.filter((item) => item.status === 'PRESENTE').length;
-  const faltasDia = registrosDoDia.filter((item) => item.status === 'FALTA' || item.status === 'JUSTIFICADA').length;
-  const pendentesDia = registrosDoDia.filter((item) => item.status === 'PENDENTE').length;
+  const resumoDia = useMemo(() => calcularResumoPresencas(registrosDoDia), [registrosDoDia]);
+  const presentesDia = resumoDia.presentes;
+  const faltasDia = resumoDia.faltas;
+  const pendentesDia = resumoDia.pendentes;
   const totalDia = registrosDoDia.length || 1;
   const taxaPresencaDia = (presentesDia / totalDia) * 100;
 
