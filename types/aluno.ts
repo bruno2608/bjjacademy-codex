@@ -6,6 +6,7 @@ export type AlunoStatus = 'ATIVO' | 'INATIVO' | 'Ativo' | 'Inativo';
 export type Aluno = {
   id: string;
   nome: string;
+  nomeCompleto?: string;
   faixaSlug: string;
   graus: number;
   plano: string;

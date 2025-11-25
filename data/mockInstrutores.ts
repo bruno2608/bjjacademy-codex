@@ -4,6 +4,7 @@ export type InstrutorMock = {
   faixa: string;
   graus: number;
   status: string;
+  email?: string;
   avatarUrl?: string;
 };
 

@@ -1,6 +1,6 @@
 import type { Aluno } from '../types/aluno';
 import type { GraduationHistoryEntry } from '../types/graduacao';
-import type { Presenca } from '../types/presenca';
+import type { PresencaRegistro } from '../types/presenca';
 
 const getCurrentDateISO = () => new Date().toISOString().split('T')[0];
 
@@ -26,9 +26,13 @@ const normalizeHistorico = (historico?: GraduationHistoryEntry[]): GraduationHis
   }));
 };
 
-export const normalizeAluno = (aluno: Partial<Aluno>): Aluno => ({
-  id: aluno.id ?? `aluno-${Date.now()}`,
-  nome: aluno.nome ?? 'Aluno sem nome',
+export const normalizeAluno = (aluno: Partial<Aluno>): Aluno => {
+  const baseNome = aluno.nome ?? aluno.nomeCompleto ?? 'Aluno sem nome'
+
+  return {
+    id: aluno.id ?? `aluno-${Date.now()}`,
+    nome: baseNome,
+    nomeCompleto: aluno.nomeCompleto ?? baseNome,
   telefone: aluno.telefone ?? '',
   plano: aluno.plano ?? 'Mensal',
   status: (aluno.status as Aluno['status']) ?? 'Ativo',
@@ -46,8 +50,9 @@ export const normalizeAluno = (aluno: Partial<Aluno>): Aluno => ({
   aulasTotais: Number(aluno.aulasTotais ?? 0),
   aulasDesdeUltimaFaixa: Number(aluno.aulasDesdeUltimaFaixa ?? 0),
   aulasNoGrauAtual: Number(aluno.aulasNoGrauAtual ?? 0),
-  proximaMeta: aluno.proximaMeta ?? null
-});
+    proximaMeta: aluno.proximaMeta ?? null
+  }
+}
 
 const parseISODate = (value?: string | null): Date | null => {
   if (!value) return null;
@@ -55,7 +60,7 @@ const parseISODate = (value?: string | null): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const countAttendancesFrom = (registros: Presenca[], inicio: Date | null): number => {
+const countAttendancesFrom = (registros: PresencaRegistro[], inicio: Date | null): number => {
   if (!inicio) return registros.length;
   const referencia = inicio.getTime();
   return registros.filter((item) => {
@@ -80,11 +85,12 @@ const getLatestHistoryRecord = (
   );
 };
 
-const buildAttendanceStatsForAluno = (aluno: Aluno, presencas: Presenca[] = []) => {
-  const registrosAluno = presencas.filter(
-    (item) =>
-      item.alunoId === aluno.id && (item.status === 'PRESENTE' || item.status === 'CONFIRMADO')
-  );
+const buildAttendanceStatsForAluno = (aluno: Aluno, presencas: PresencaRegistro[] = []) => {
+  const registrosAluno = presencas.filter((item) => {
+    if (item.alunoId !== aluno.id) return false
+    const statusNormalizado = (item.status || '').toString().toUpperCase()
+    return statusNormalizado === 'PRESENTE' || statusNormalizado === 'CONFIRMADO'
+  })
 
   const historico = Array.isArray(aluno.historicoGraduacoes)
     ? aluno.historicoGraduacoes
