@@ -38,7 +38,29 @@ type AlunosState = {
   applyGraduacaoConclusao: (graduacao: GraduacaoPlanejada, presencas?: Presenca[]) => void;
 };
 
-const initialAlunos = MOCK_ALUNOS;
+const ALUNOS_KEY = 'bjj_alunos';
+
+const loadAlunosFromStorage = (): Aluno[] | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(ALUNOS_KEY);
+    return raw ? (JSON.parse(raw) as Aluno[]) : null;
+  } catch (error) {
+    console.warn('Não foi possível carregar alunos salvos, usando mocks.', error);
+    return null;
+  }
+};
+
+const persistAlunos = (alunos: Aluno[]) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(ALUNOS_KEY, JSON.stringify(alunos));
+  } catch (error) {
+    console.warn('Não foi possível salvar alunos localmente.', error);
+  }
+};
+
+const initialAlunos = loadAlunosFromStorage() ?? MOCK_ALUNOS;
 
 export const useAlunosStore = create<AlunosState>((set, get) => ({
   alunos: initialAlunos,
@@ -47,16 +69,20 @@ export const useAlunosStore = create<AlunosState>((set, get) => ({
   setAlunos: (alunos, presencas) => {
     const presencasAtuais = presencas ?? get().presencasCache;
     const normalizados = alunos.map((aluno) => normalizeAluno(aluno));
+    const comStats = applyAttendanceStats(normalizados, presencasAtuais);
+    persistAlunos(comStats);
     set({
-      alunos: applyAttendanceStats(normalizados, presencasAtuais),
+      alunos: comStats,
       presencasCache: presencasAtuais
     });
   },
   addAluno: (payload, presencas) => {
     const presencasAtuais = presencas ?? get().presencasCache;
     const aluno = normalizeAluno({ ...payload, id: payload.id ?? `aluno-${Date.now()}` });
+    const proximoEstado = applyAttendanceStats([...get().alunos, aluno], presencasAtuais);
+    persistAlunos(proximoEstado);
     set((state) => ({
-      alunos: applyAttendanceStats([...state.alunos, aluno], presencasAtuais),
+      alunos: proximoEstado,
       presencasCache: presencasAtuais
     }));
     return aluno;
@@ -70,6 +96,7 @@ export const useAlunosStore = create<AlunosState>((set, get) => ({
         alunoAtualizado = normalizeAluno({ ...aluno, ...payload, id });
         return alunoAtualizado;
       });
+      persistAlunos(atualizados);
       return {
         alunos: applyAttendanceStats(atualizados, presencasAtuais),
         presencasCache: presencasAtuais
@@ -79,19 +106,24 @@ export const useAlunosStore = create<AlunosState>((set, get) => ({
   },
   removeAluno: (id, presencas) => {
     const presencasAtuais = presencas ?? get().presencasCache;
-    set((state) => ({
-      alunos: applyAttendanceStats(
-        state.alunos.filter((aluno) => aluno.id !== id),
-        presencasAtuais
-      ),
-      presencasCache: presencasAtuais
-    }));
+    set((state) => {
+      const filtrados = state.alunos.filter((aluno) => aluno.id !== id);
+      persistAlunos(filtrados);
+      return {
+        alunos: applyAttendanceStats(filtrados, presencasAtuais),
+        presencasCache: presencasAtuais
+      };
+    });
   },
   recalculateFromPresencas: (presencas) => {
-    set((state) => ({
-      alunos: applyAttendanceStats(state.alunos, presencas),
-      presencasCache: presencas
-    }));
+    set((state) => {
+      const atualizados = applyAttendanceStats(state.alunos, presencas);
+      persistAlunos(atualizados);
+      return {
+        alunos: atualizados,
+        presencasCache: presencas
+      };
+    });
   },
   applyGraduacaoConclusao: (graduacao, presencas) => {
     const presencasAtuais = presencas ?? get().presencasCache;
@@ -143,8 +175,10 @@ export const useAlunosStore = create<AlunosState>((set, get) => ({
         return aluno;
       });
 
+      const alunosComStats = applyAttendanceStats(alunosAtualizados, presencasAtuais);
+      persistAlunos(alunosComStats);
       return {
-        alunos: applyAttendanceStats(alunosAtualizados, presencasAtuais),
+        alunos: alunosComStats,
         presencasCache: presencasAtuais
       };
     });
