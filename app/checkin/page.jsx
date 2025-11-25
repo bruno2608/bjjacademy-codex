@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { CheckCircle, Clock3 } from 'lucide-react';
 import Button from '../../components/ui/Button';
+import { useAlunosStore } from '../../store/alunosStore';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useTreinosStore } from '../../store/treinosStore';
 import useUserStore from '../../store/userStore';
@@ -17,6 +18,7 @@ const formatDate = (date) =>
 export default function CheckinPage() {
   const { user } = useUserStore();
   const alunoId = user?.alunoId;
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const hoje = new Date().toISOString().split('T')[0];
   const today = useMemo(() => new Date(), []);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
@@ -75,17 +77,16 @@ export default function CheckinPage() {
   }, [presenceByDay, today]);
 
   const handleCheckin = (treino) => {
+    const aluno = alunoId ? getAlunoById(alunoId) : null;
     const resultado = registerCheckin({
       alunoId,
-      alunoNome: user?.name || 'Aluno',
-      faixa: 'Branca',
-      graus: 0,
       data: hoje,
-      hora: null,
       treinoId: treino.id,
+      hora: null,
       tipoTreino: treino.nome,
       treinoModalidade: treino.tipo,
-      horaInicio: treino.hora
+      horaInicio: treino.hora,
+      origem: aluno ? 'ALUNO' : undefined
     });
 
     if (resultado.status === 'fechado') {

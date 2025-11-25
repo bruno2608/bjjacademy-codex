@@ -67,6 +67,11 @@ export default function PresencasPage() {
   const [filterStatuses, setFilterStatuses] = useState([]);
   const [filterTreinos, setFilterTreinos] = useState([]);
   const alunos = useAlunosStore((state) => state.alunos);
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
+  const resolveAlunoNome = useCallback(
+    (alunoId) => getAlunoById(alunoId)?.nome || 'Aluno não encontrado',
+    [getAlunoById]
+  );
   // Treinos ativos são carregados do store dedicado para alimentar dropdowns e sugestões.
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -168,9 +173,6 @@ export default function PresencasPage() {
         return {
           id: `placeholder-${aluno.id}-${treinoSugestao?.id || 'principal'}`,
           alunoId: aluno.id,
-          alunoNome: aluno.nome,
-          faixa: aluno.faixa,
-          graus: aluno.graus,
           data: hoje,
           status: 'AUSENTE',
           hora: null,
@@ -180,9 +182,15 @@ export default function PresencasPage() {
         };
       });
 
-    const combinados = [...registros, ...placeholders];
+    const combinados = [...registros, ...placeholders].map((item) => {
+      const aluno = getAlunoById(item.alunoId);
+      const alunoNome = aluno?.nome || 'Aluno não encontrado';
+      const faixaSlug = aluno?.faixaSlug || aluno?.faixa || 'Sem faixa';
+      const graus = Number.isFinite(Number(aluno?.graus)) ? Number(aluno?.graus) : 0;
+      return { ...item, alunoNome, faixaSlug, graus };
+    });
     return combinados.sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
-  }, [alunosAtivos, filterTreinos, hoje, presencas, sugerirTreino]);
+  }, [alunosAtivos, filterTreinos, getAlunoById, hoje, presencas, sugerirTreino]);
 
   const limparSelecao = useCallback((lista, valorTodos = 'all') => {
     if (!Array.isArray(lista) || lista.length === 0 || lista.includes(valorTodos)) {
@@ -201,7 +209,7 @@ export default function PresencasPage() {
       if (termo.length >= 3 && !item.alunoNome.toLowerCase().includes(termo)) {
         return false;
       }
-      if (faixasAtivas.length && !faixasAtivas.includes(item.faixa)) {
+      if (faixasAtivas.length && !faixasAtivas.includes(item.faixaSlug)) {
         return false;
       }
       if (statusAtivos.length && !statusAtivos.includes(item.status)) {
@@ -275,7 +283,7 @@ export default function PresencasPage() {
   const faixasDisponiveis = useMemo(() => {
     const conjunto = new Set(
       alunosAtivos
-        .map((aluno) => aluno.faixa)
+        .map((aluno) => aluno.faixaSlug || aluno.faixa)
         .filter((faixa) => typeof faixa === 'string' && faixa.trim().length > 0)
     );
     return Array.from(conjunto).sort((a, b) => a.localeCompare(b, 'pt-BR'));
@@ -463,15 +471,16 @@ export default function PresencasPage() {
         ? treinos.find((treino) => treino.id === registro.treinoId)
         : null;
     const sugestao = sugestaoDireta || obterSugestaoTreino(registro.alunoId, dataRegistro, utilizados);
+    const aluno = getAlunoById(registro.alunoId);
 
     setSessionContext(contexto);
     setSessionTakenTreinos(utilizados);
     setSessionTreinoId(sugestao?.id || registro.treinoId || '');
     setSessionRecord({
       alunoId: registro.alunoId,
-      alunoNome: registro.alunoNome,
-      faixa: registro.faixa,
-      graus: registro.graus,
+      alunoNome: aluno?.nome || 'Aluno não encontrado',
+      faixaSlug: aluno?.faixaSlug || aluno?.faixa,
+      graus: aluno?.graus,
       data: dataRegistro,
       status: 'CONFIRMADO',
       tipoTreino: sugestao?.nome || registro.tipoTreino || 'Sessão principal'
@@ -502,9 +511,6 @@ export default function PresencasPage() {
       obterSugestaoTreino(sessionRecord.alunoId, sessionRecord.data, sessionTakenTreinos);
     const novaPresenca = await createPresenca({
       alunoId: sessionRecord.alunoId,
-      alunoNome: sessionRecord.alunoNome,
-      faixa: sessionRecord.faixa,
-      graus: sessionRecord.graus,
       data: sessionRecord.data,
       status: 'CONFIRMADO',
       treinoId: treinoSelecionado?.id || null,
@@ -526,9 +532,6 @@ export default function PresencasPage() {
     abrirSelecaoSessao(
       {
         alunoId: registro.alunoId,
-        alunoNome: registro.alunoNome,
-        faixa: registro.faixa,
-        graus: registro.graus,
         data: registro.data || hoje,
         treinoId: null,
         tipoTreino: registro.tipoTreino
@@ -751,7 +754,7 @@ export default function PresencasPage() {
                   className="flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-3 py-2"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-bjj-white">{item.alunoNome}</p>
+                    <p className="text-sm font-semibold text-bjj-white">{resolveAlunoNome(item.alunoId)}</p>
                     <p className="text-[11px] text-bjj-gray-200/60">
                       {item.status === 'CONFIRMADO'
                         ? `Confirmado às ${item.hora || '—'}`
@@ -776,7 +779,9 @@ export default function PresencasPage() {
       <Modal
         isOpen={isEditOpen}
         onClose={fecharEdicao}
-        title={selectedRecord ? `Corrigir presença de ${selectedRecord.alunoNome}` : 'Corrigir presença'}
+        title={
+          selectedRecord ? `Corrigir presença de ${resolveAlunoNome(selectedRecord.alunoId)}` : 'Corrigir presença'
+        }
       >
         {selectedRecord && (
           <PresenceForm
@@ -793,16 +798,16 @@ export default function PresencasPage() {
         onClose={fecharSelecaoSessao}
         title={
           sessionRecord
-            ? sessionContext === 'extra'
-              ? `Adicionar nova sessão para ${sessionRecord.alunoNome}`
-              : `Selecionar sessão para ${sessionRecord.alunoNome}`
-            : 'Selecionar sessão'
+              ? sessionContext === 'extra'
+                ? `Adicionar nova sessão para ${resolveAlunoNome(sessionRecord.alunoId)}`
+                : `Selecionar sessão para ${resolveAlunoNome(sessionRecord.alunoId)}`
+              : 'Selecionar sessão'
         }
       >
         <div className="space-y-4 text-sm text-bjj-gray-200/80">
           <p>
             Escolha o treino correspondente para registrar a presença de
-            <strong className="text-bjj-white"> {sessionRecord?.alunoNome}</strong> no dia{' '}
+            <strong className="text-bjj-white"> {sessionRecord ? resolveAlunoNome(sessionRecord.alunoId) : ''}</strong> no dia{' '}
             {sessionRecord
               ? new Date(sessionRecord.data).toLocaleDateString('pt-BR')
               : new Date().toLocaleDateString('pt-BR')}. Você pode adicionar mais de uma sessão no mesmo dia,
@@ -834,7 +839,7 @@ export default function PresencasPage() {
         title="Confirmar exclusão"
         message={
           deleteTarget
-            ? `Deseja remover o registro de ${deleteTarget.alunoNome} em ${new Date(deleteTarget.data).toLocaleDateString(
+            ? `Deseja remover o registro de ${resolveAlunoNome(deleteTarget.alunoId)} em ${new Date(deleteTarget.data).toLocaleDateString(
                 'pt-BR'
               )}?`
             : ''

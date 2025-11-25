@@ -22,7 +22,7 @@ const buildMonthOptions = () => {
 
 export default function HistoricoPresencasPage() {
   const { user } = useUserStore();
-  const { alunos } = useAlunosStore();
+  const { alunos, getAlunoById } = useAlunosStore();
   const alunoId = user?.alunoId;
   const presencas = usePresencasStore((state) => state.presencas);
   const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
@@ -231,7 +231,7 @@ export default function HistoricoPresencasPage() {
                       </div>
 
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-bjj-gray-50">
-                        <span className="rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/85">{item.alunoNome || 'Aluno(a)'}</span>
+                        <span className="rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/85">{getAlunoById(item.alunoId)?.nome || 'Aluno(a)'}</span>
                         <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-emerald-100">{item.turmaId ? `Turma ${item.turmaId}` : 'Sem turma'}</span>
                       </div>
                     </div>

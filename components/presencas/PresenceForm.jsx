@@ -113,10 +113,7 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       ...form,
       hora: horaSessao,
       treinoId: treinoSelecionado?.id || form.treinoId || null,
-      tipoTreino: treinoSelecionado?.nome || 'Sessão principal',
-      alunoNome: alunoSelecionado.nome,
-      faixa: alunoSelecionado.faixa,
-      graus: alunoSelecionado.graus
+      tipoTreino: treinoSelecionado?.nome || 'Sessão principal'
     });
 
     if (!isEditing) {

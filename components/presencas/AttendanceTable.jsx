@@ -6,6 +6,7 @@
  * preparado para mobile-first.
  */
 import { CheckCircle2, Loader2, Pencil, Plus, Trash2, XCircle } from 'lucide-react';
+import { useAlunosStore } from '@/store/alunosStore';
 import Badge from '../ui/Badge';
 
 const baseActionButtonClasses =
@@ -31,6 +32,8 @@ export default function AttendanceTable({
   onRequestSession,
   isLoading = false
 }) {
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
+
   const statusTone = (status) => {
     switch (status) {
       case 'CONFIRMADO':
@@ -79,9 +82,10 @@ export default function AttendanceTable({
       </div>
       <div className="relative divide-y divide-bjj-gray-800/80">
         {records.map((record) => {
-          const formattedDate = new Date(record.data).toLocaleDateString('pt-BR');
-          const faixa = record.faixa || 'Sem faixa';
-          const graus = Number.isFinite(Number(record.graus)) ? Number(record.graus) : 0;
+          const aluno = getAlunoById(record.alunoId);
+          const alunoNome = aluno?.nome ?? 'Aluno não encontrado';
+          const faixa = aluno?.faixaSlug || aluno?.faixa || 'Sem faixa';
+          const graus = Number.isFinite(Number(aluno?.graus)) ? Number(aluno?.graus) : 0;
           const hora = record.hora || '—';
           const treinoLabel = record.tipoTreino || 'Sessão principal';
           const horarioLabel = hora !== '—' ? `${hora}h` : 'Sem horário';
@@ -106,7 +110,7 @@ export default function AttendanceTable({
               <div className="flex flex-col gap-2 border-b border-bjj-gray-800/60 p-3.5 md:hidden">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-bjj-white">{record.alunoNome}</p>
+                    <p className="text-sm font-semibold text-bjj-white">{alunoNome}</p>
                     <p className="text-[11px] text-bjj-gray-200/70">
                       {faixa} · {graus}º grau
                     </p>
@@ -202,7 +206,7 @@ export default function AttendanceTable({
                   </button>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3">
-                  <p className="text-sm font-semibold text-bjj-white">{record.alunoNome}</p>
+                  <p className="text-sm font-semibold text-bjj-white">{alunoNome}</p>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
                   <span className="font-medium text-bjj-white/90">{faixa}</span>
