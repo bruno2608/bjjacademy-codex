@@ -4,7 +4,7 @@ import type { Presenca } from '../types/presenca';
 
 const getCurrentDateISO = () => new Date().toISOString().split('T')[0];
 
-const normalizarSlug = (valor?: string | null) => {
+export const normalizeFaixaSlug = (valor?: string | null) => {
   if (!valor) return 'branca-adulto';
   return valor
     .toLowerCase()
@@ -21,7 +21,8 @@ const normalizeHistorico = (historico?: GraduationHistoryEntry[]): GraduationHis
   }
   return historico.map((item) => ({
     ...item,
-    grau: item.grau ?? null
+    grau: item.grau ?? null,
+    faixaSlug: item.faixaSlug ?? normalizeFaixaSlug(item.faixa)
   }));
 };
 
@@ -32,7 +33,7 @@ export const normalizeAluno = (aluno: Partial<Aluno>): Aluno => ({
   plano: aluno.plano ?? 'Mensal',
   status: (aluno.status as Aluno['status']) ?? 'Ativo',
   faixa: aluno.faixa ?? aluno.faixaSlug ?? 'Branca',
-  faixaSlug: normalizarSlug(aluno.faixaSlug ?? aluno.faixa ?? undefined),
+  faixaSlug: normalizeFaixaSlug(aluno.faixaSlug ?? aluno.faixa ?? undefined),
   graus: Number(aluno.graus ?? 0),
   mesesNaFaixa: Number(aluno.mesesNaFaixa ?? 0),
   avatarUrl: aluno.avatarUrl ?? null,
@@ -86,11 +87,12 @@ const buildAttendanceStatsForAluno = (aluno: Aluno, presencas: Presenca[] = []) 
     ? aluno.historicoGraduacoes
     : [];
   const faixaAtual = aluno.faixa;
+  const faixaSlugAtual = aluno.faixaSlug;
   const grauAtual = Number(aluno.graus ?? 0);
 
   const ultimoRegistroFaixa = getLatestHistoryRecord(
     historico,
-    (item) => item.tipo === 'Faixa' && item.faixa === faixaAtual
+    (item) => item.tipo === 'Faixa' && (item.faixa === faixaAtual || item.faixaSlug === faixaSlugAtual)
   );
   const inicioFaixa =
     parseISODate(ultimoRegistroFaixa?.data) ||

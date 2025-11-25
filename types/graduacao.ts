@@ -2,6 +2,7 @@ export type GraduationHistoryEntry = {
   id: string;
   tipo: 'Faixa' | 'Grau';
   faixa: string;
+  faixaSlug?: string | null;
   grau: number | null;
   data: string;
   instrutor: string;
