@@ -31,9 +31,6 @@ const defaultAvatar = 'https://ui-avatars.com/api/?background=1b1b1b&color=fff&n
 const ensureAvatar = (name, avatarUrl) =>
   avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
 
-const formatDate = (date) =>
-  new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
-
 function DashboardHero({
   name,
   subtitle,
@@ -245,14 +242,13 @@ function ProfessorDashboard() {
     faixaConfig,
     graus: instructorGraus,
     avatarUrl: instructorAvatar,
-    metrics,
+    statusLabel,
+    overviewCards,
+    semanaCards,
     tabCards,
-    treinoPorId,
-    pendentes,
-    presencas,
-    treinos,
-    alunos,
-    getAlunoById,
+    analytics,
+    pendencias,
+    pendentesTotal,
     activeTab,
     setActiveTab,
     handleStatusChange,
@@ -265,7 +261,7 @@ function ProfessorDashboard() {
         name={instructorName}
         faixaConfig={faixaConfig}
         graus={instructorGraus}
-        statusLabel="Professor"
+        statusLabel={statusLabel || 'Professor'}
         avatarUrl={ensureAvatar(instructorName, instructorAvatar)}
         subtitle="Dashboard do professor"
         className="border-bjj-gray-800/90"
@@ -280,15 +276,12 @@ function ProfessorDashboard() {
               <p className="text-xs text-bjj-gray-300/90">Painel compacto com atalhos para aprovar presenças e gerenciar alunos.</p>
             </div>
             <span className="badge badge-outline border-green-500/70 bg-green-600/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-green-200 shadow-[0_0_0_1px_rgba(74,222,128,0.25)]">
-              Ativo
+              {statusLabel || 'Ativo'}
             </span>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            {[{ label: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, href: '/presencas' },
-              { label: 'Alunos ativos', value: metrics.ativos, icon: Activity, href: '/alunos' },
-              { label: 'Graduações', value: metrics.graduados, icon: Medal, href: '/configuracoes/graduacao' }
-            ].map((item) => (
+            {overviewCards.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
@@ -308,11 +301,7 @@ function ProfessorDashboard() {
 
         <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-gray-900/60 p-5`}>
           <div className="grid gap-3 sm:grid-cols-2">
-            {[{ label: 'Aulas na semana', value: metrics.presentesSemana, icon: CalendarCheck, href: '/presencas' },
-              { label: 'Histórico na semana', value: presencas.length, icon: BarChart3, href: '/historico-presencas' },
-              { label: 'Total de alunos', value: metrics.totalAlunos, icon: Users, href: '/alunos' },
-              { label: 'Check-ins registrados', value: presencas.length, icon: Activity, href: '/presencas' }
-            ].map((item) => (
+            {semanaCards.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
@@ -352,9 +341,9 @@ function ProfessorDashboard() {
                   <Clock3 size={16} className="text-bjj-gray-200" />
                 </div>
                 <div className="mt-4 space-y-3">
-                  {[{ label: 'Confirmados', value: presencas.filter((p) => p.status === 'PRESENTE').length, tone: 'bg-green-500' },
-                    { label: 'Pendentes', value: metrics.pendentes, tone: 'bg-yellow-400' },
-                    { label: 'Ausentes', value: presencas.filter((p) => p.status === 'FALTA').length, tone: 'bg-bjj-red' }
+                  {[{ label: 'Confirmados', value: analytics.checkinsPorStatus.confirmados, tone: 'bg-green-500' },
+                    { label: 'Pendentes', value: analytics.checkinsPorStatus.pendentes, tone: 'bg-yellow-400' },
+                    { label: 'Ausentes', value: analytics.checkinsPorStatus.faltas, tone: 'bg-bjj-red' }
                   ].map((row) => (
                     <div key={row.label} className="space-y-2">
                       <div className="flex items-center justify-between text-sm text-bjj-gray-200">
@@ -374,10 +363,10 @@ function ProfessorDashboard() {
                   <BarChart2 size={16} className="text-bjj-gray-200" />
                 </div>
                 <div className="mt-4 flex items-end gap-3">
-                  {[5, 8, 6, 9, 7, 10, 4].map((value, idx) => (
+                  {analytics.presencasNaSemana.map((dia, idx) => (
                     <div key={idx} className="flex flex-1 flex-col items-center gap-2">
-                      <div className="w-full rounded-t-xl bg-gradient-to-t from-bjj-red to-red-400" style={{ height: `${value * 6}px` }} />
-                      <span className="text-[11px] text-bjj-gray-300">D{idx + 1}</span>
+                      <div className="w-full rounded-t-xl bg-gradient-to-t from-bjj-red to-red-400" style={{ height: `${dia.total * 6}px` }} />
+                      <span className="text-[11px] text-bjj-gray-300">{dia.dia}</span>
                     </div>
                   ))}
                 </div>
@@ -443,27 +432,23 @@ function ProfessorDashboard() {
               <h3 className="text-lg font-semibold text-white">Check-ins em análise</h3>
             </div>
             <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-950 shadow">
-              {metrics.pendentes} aguardando
+              {pendentesTotal} aguardando
             </span>
           </div>
           <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
-            {presencas
-              .filter((p) => p.status === 'PENDENTE')
-              .map((item) => {
-                const aluno = getAlunoById(item.alunoId);
-                const treino = treinoPorId.get(item.treinoId);
-                const badgeTone = 'bg-amber-500/20 text-amber-200';
+            {pendencias.map((item) => {
+              const badgeTone = 'bg-amber-500/20 text-amber-200';
 
-                return (
+              return (
                 <div
                   key={item.id}
                   className="flex items-start justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
                 >
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-white leading-tight">{aluno?.nome || 'Aluno não encontrado'}</p>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{treino?.nome || 'Treino'}</p>
+                    <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome}</p>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.treinoNome}</p>
                     <p className="text-[11px] text-bjj-gray-400">
-                      {item.data ? `${formatDate(item.data)} · ${treino?.hora || '--:--'}` : 'Sem data'}
+                      {item.dataLabel} · {item.treinoHora || '--:--'}
                     </p>
                     <div className="flex items-center gap-2">
                       <button
@@ -493,8 +478,8 @@ function ProfessorDashboard() {
                   </span>
                 </div>
               );
-              })}
-            {metrics.pendentes === 0 && (
+            })}
+            {pendencias.length === 0 && (
               <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/50 p-4 text-sm text-bjj-gray-300">
                 Nenhum check-in pendente no momento. Acompanhe novos envios em tempo real.
               </p>

@@ -115,6 +115,12 @@ await atualizarStatus(registro.id, 'PRESENTE');
 - **Dashboards**: `/dashboard` seleciona automaticamente entre visão de professor/instrutor (via `useProfessorDashboard`) ou aluno (`useAlunoDashboard`).
 - **Telas de presença por perfil**: Aluno → `/dashboard`, `/checkin`, `/historico-presencas`; Professor/Instrutor → `/presencas` (listar/fechar treinos) e cards de presença no dashboard staff.
 
+`useProfessorDashboard` centraliza as métricas do painel staff a partir das mesmas stores/services usados em outras telas:
+
+- **Alunos ativos/total** = contagem do `alunosStore` (mesma da lista de alunos).
+- **Aulas na semana / check-ins registrados / histórico na semana** = `treinosStore` + `presencasStore` filtrados pela semana corrente.
+- **Check-ins por status e pendências** = agregação de `presencasStore` (PRESENTE/PENDENTE/FALTA/JUSTIFICADA) sem cálculos locais na página.
+
 Arquitetura de fluxo (mocks → service → store → hooks → tela):
 
 ```
