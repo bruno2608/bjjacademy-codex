@@ -4,24 +4,21 @@ import { useEffect, useMemo, useState } from 'react';
 import Button from '../../components/ui/Button';
 import ValidatedField from '../../components/ui/ValidatedField';
 import { ROLE_KEYS } from '../../config/roles';
-import useUserStore from '../../store/userStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import StudentHero from '../../components/student/StudentHero';
 import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
+import { useCurrentAluno } from '@/hooks/useCurrentAluno';
+import useUserStore from '../../store/userStore';
 
 const ensureAvatar = (name, avatarUrl) =>
   avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
 
 export default function PerfilAlunoPage() {
-  const { user, updateUser } = useUserStore();
-  const alunos = useAlunosStore((state) => state.alunos);
+  const { user, aluno } = useCurrentAluno();
+  const updateUser = useUserStore((state) => state.updateUser);
   const updateAluno = useAlunosStore((state) => state.updateAluno);
   const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
   const defaultInstrutor = useMemo(() => MOCK_INSTRUTORES[0], []);
-  const aluno = useMemo(() => {
-    if (!isAluno) return null;
-    return alunos.find((item) => item.id === user?.alunoId) || alunos[0] || null;
-  }, [alunos, isAluno, user?.alunoId]);
 
   const professorRoles = useMemo(
     () => (user?.roles || []).filter((role) => role !== ROLE_KEYS.aluno),
@@ -85,7 +82,7 @@ export default function PerfilAlunoPage() {
     <div className="space-y-4">
       <StudentHero
         name={form.nome || user?.name || defaultInstrutor?.nome || 'Aluno'}
-        faixa={isAluno ? aluno?.faixa : defaultInstrutor?.faixa}
+        faixa={isAluno ? aluno?.faixa || aluno?.faixaSlug : defaultInstrutor?.faixa}
         graus={isAluno ? aluno?.graus : defaultInstrutor?.graus}
         statusLabel={statusLabel}
         avatarUrl={ensureAvatar(form.nome || defaultInstrutor?.nome, form.avatarUrl)}

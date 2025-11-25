@@ -15,7 +15,7 @@ const TODAY = new Date().toISOString().split('T')[0];
 export const MOCK_PRESENCAS: Presenca[] = [
   {
     id: 'p-today-joao',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
@@ -51,7 +51,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
   },
   {
     id: 'p1',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
@@ -63,7 +63,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
   },
   {
     id: 'p21',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
@@ -75,7 +75,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
   },
   {
     id: 'p22',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
@@ -87,7 +87,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
   },
   {
     id: 'p23',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
@@ -99,7 +99,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
   },
   {
     id: 'p24',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
@@ -111,7 +111,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
   },
   {
     id: 'p25',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
@@ -123,7 +123,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
   },
   {
     id: 'p26',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
@@ -135,7 +135,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
   },
   {
     id: 'p27',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
@@ -147,7 +147,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
   },
   {
     id: 'p28',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,
@@ -159,7 +159,7 @@ export const MOCK_PRESENCAS: Presenca[] = [
   },
   {
     id: 'p29',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixa: 'Roxa',
     graus: 2,

@@ -17,8 +17,19 @@ type UserState = {
 
 const TOKEN_KEY = 'bjj_token';
 const ROLES_KEY = 'bjj_roles';
-const DEFAULT_ALUNO_ID = '1';
+const DEFAULT_ALUNO_ID = 'aluno_joao_silva';
+const DEFAULT_ACADEMIA_ID = 'academia_usgo';
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80';
+
+const fallbackUser: AuthUser = {
+  id: 'user_admin',
+  name: 'João Silva',
+  email: 'adminhml@bjjacademy.com.br',
+  avatarUrl: '/img/avatar-admin.png',
+  roles: [ROLE_KEYS.admin, ROLE_KEYS.professor],
+  alunoId: DEFAULT_ALUNO_ID,
+  academiaId: DEFAULT_ACADEMIA_ID
+};
 
 const deriveRolesFromEmail = (email: string): UserRole[] => {
   const normalized = email.toLowerCase();
@@ -61,12 +72,14 @@ export const useUserStore = create<UserState>((set) => ({
     const resolvedRoles = normalizeRoles(roles);
     const finalRoles = resolvedRoles.length ? resolvedRoles : deriveRolesFromEmail(email);
     const finalUser: AuthUser = {
+      id: fallbackUser.id,
       name: email.split('@')[0] || 'Instrutor',
       email,
       roles: finalRoles.length ? finalRoles : ALL_ROLES,
       avatarUrl: DEFAULT_AVATAR,
       telefone: null,
-      alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null
+      alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null,
+      academiaId: DEFAULT_ACADEMIA_ID
     };
 
     persistRoles(finalUser.roles);
@@ -119,7 +132,7 @@ export const useUserStore = create<UserState>((set) => ({
     const parsedRoles = normalizeRoles(storedRoles);
 
     if (!hasToken && !parsedRoles.length) {
-      set({ hydrated: true });
+      set({ user: fallbackUser, token: null, hydrated: true });
       return;
     }
 
@@ -132,17 +145,11 @@ export const useUserStore = create<UserState>((set) => ({
       }
     }
 
-    const fallbackUser: AuthUser = {
-      name: parsedRoles.includes(ROLE_KEYS.aluno) ? 'Aluno' : 'Instrutor',
-      email: parsedRoles.includes(ROLE_KEYS.aluno) ? 'aluno@bjj.academy' : 'instrutor@bjj.academy',
-      avatarUrl: DEFAULT_AVATAR,
-      telefone: null,
-      roles: parsedRoles,
-      alunoId: parsedRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null
-    };
+    const finalRoles = parsedRoles.length ? parsedRoles : fallbackUser.roles;
+    const baseUser = parsedUser ? { ...fallbackUser, ...parsedUser, roles: finalRoles } : { ...fallbackUser, roles: finalRoles };
 
     set({
-      user: parsedUser ? { ...fallbackUser, ...parsedUser, roles: parsedRoles } : fallbackUser,
+      user: baseUser,
       token: hasToken ?? null,
       hydrated: true
     });

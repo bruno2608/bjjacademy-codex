@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { MOCK_ALUNOS } from '../data/mockAlunos';
+import { MOCK_ALUNOS } from '@/data/mocks/mockAlunos';
 import { MOCK_PRESENCAS } from '../data/mockPresencas';
 import { applyAttendanceStats, normalizeAluno } from '../lib/alunoStats';
 import { calculateNextStep, getMaxStripes, getNextBelt } from '../lib/graduationRules';
@@ -23,6 +23,7 @@ const buildHistoricoRegistro = (
 
 type AlunosState = {
   alunos: Aluno[];
+  getAlunoById: (id: string) => Aluno | null;
   presencasCache: Presenca[];
   setAlunos: (alunos: Aluno[], presencas?: Presenca[]) => void;
   addAluno: (payload: NovoAlunoPayload, presencas?: Presenca[]) => Aluno;
@@ -36,6 +37,7 @@ const initialAlunos = MOCK_ALUNOS;
 
 export const useAlunosStore = create<AlunosState>((set, get) => ({
   alunos: initialAlunos,
+  getAlunoById: (id) => get().alunos.find((a) => a.id === id) ?? null,
   presencasCache: [],
   setAlunos: (alunos, presencas) => {
     const presencasAtuais = presencas ?? get().presencasCache;

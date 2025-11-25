@@ -21,12 +21,13 @@ import {
 import useRole from '../../hooks/useRole';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
-import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
 import StudentHero from '../../components/student/StudentHero';
 import { useTreinosStore } from '../../store/treinosStore';
 import { confirmarPresenca, marcarAusencia } from '../../services/presencasService';
 import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
+import { useCurrentAluno } from '@/hooks/useCurrentAluno';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -39,14 +40,16 @@ const formatDate = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
 
 function StudentDashboard() {
-  const { user } = useUserStore();
-  const alunoId = user?.alunoId;
+  const { user, aluno: alunoSelecionado } = useCurrentAluno();
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
   const treinos = useTreinosStore((state) => state.treinos);
 
-  const aluno = useMemo(() => alunos.find((item) => item.id === alunoId) || alunos[0], [alunoId, alunos]);
-  const faixaAtual = aluno?.faixa || 'Branca';
+  const aluno = useMemo(
+    () => alunoSelecionado || alunos.find((item) => item.id === alunoSelecionado?.id) || alunos[0],
+    [alunoSelecionado, alunos]
+  );
+  const faixaAtual = aluno?.faixa || aluno?.faixaSlug || 'Branca';
   const graus = aluno?.graus || 0;
   const avatarUrl = ensureAvatar(aluno?.nome, aluno?.avatarUrl || user?.avatarUrl || defaultAvatar);
 
@@ -204,7 +207,7 @@ function StudentDashboard() {
 }
 
 function ProfessorDashboard() {
-  const { user } = useUserStore();
+  const { user } = useCurrentUser();
   const presencas = usePresencasStore((state) => state.presencas);
   const alunos = useAlunosStore((state) => state.alunos);
   const treinos = useTreinosStore((state) => state.treinos);
@@ -224,7 +227,7 @@ function ProfessorDashboard() {
 
   const metrics = useMemo(() => {
     const totalAlunos = alunos.length;
-    const ativos = alunos.filter((a) => a.status === 'Ativo').length;
+    const ativos = alunos.filter((a) => (a.status || '').toString().toUpperCase() === 'ATIVO').length;
     const inativos = totalAlunos - ativos;
     const graduados = alunos.filter((a) => (a.faixa || '').toLowerCase() !== 'branca').length;
     const pendentes = presencas.filter((p) => p.status === 'PENDENTE' || p.status === 'CHECKIN').length;

@@ -1,22 +1,26 @@
 import type { GraduationHistoryEntry } from './graduacao';
 import type { GraduationRecommendation } from '../lib/graduationRules';
 
-export type AlunoStatus = 'Ativo' | 'Inativo';
+export type AlunoStatus = 'ATIVO' | 'INATIVO' | 'Ativo' | 'Inativo';
 
 export type Aluno = {
   id: string;
   nome: string;
-  telefone: string;
+  faixaSlug: string;
+  graus: number;
   plano: string;
   status: AlunoStatus;
-  faixa: string;
-  graus: number;
-  mesesNaFaixa: number;
   avatarUrl?: string | null;
-  dataInicio: string;
+  telefone?: string | null;
+  email?: string | null;
+  academiaId?: string | null;
+  // Campos legados mantidos para compatibilidade das telas existentes
+  faixa?: string;
+  mesesNaFaixa?: number;
+  dataInicio?: string;
   dataNascimento?: string | null;
   dataUltimaGraduacao?: string | null;
-  historicoGraduacoes: GraduationHistoryEntry[];
+  historicoGraduacoes?: GraduationHistoryEntry[];
   aulasTotais?: number;
   aulasDesdeUltimaFaixa?: number;
   aulasNoGrauAtual?: number;
