@@ -14,10 +14,10 @@ export function useCurrentInstrutor() {
   const hydrated = useInstrutoresStore((s) => s.hydrated)
 
   useEffect(() => {
-    if (!hydrated) {
+    if (!hydrated && (user?.instrutorId || user?.professorId || instrutores.length === 0)) {
       void carregarInstrutores()
     }
-  }, [carregarInstrutores, hydrated])
+  }, [carregarInstrutores, hydrated, instrutores.length, user?.instrutorId, user?.professorId])
 
   const instrutor = useMemo(() => {
     const candidatoId = user?.instrutorId || user?.professorId
@@ -29,7 +29,7 @@ export function useCurrentInstrutor() {
       }
     }
 
-    const alunoPerfil = user?.alunoId ? getAlunoById(user.alunoId) : null
+    const alunoPerfil = !candidatoId && user?.alunoId ? getAlunoById(user.alunoId) : null
     if (alunoPerfil) {
       return {
         id: user?.instrutorId || alunoPerfil.id,
@@ -46,12 +46,20 @@ export function useCurrentInstrutor() {
       }
     }
 
-    if (instrutores[0]) {
+    if (!candidatoId && instrutores[0]) {
       return instrutores[0]
     }
 
     return null
-  }, [getAlunoById, getInstrutorById, instrutores, user?.alunoId, user?.avatarUrl, user?.instrutorId, user?.professorId])
+  }, [
+    getAlunoById,
+    getInstrutorById,
+    instrutores,
+    user?.alunoId,
+    user?.avatarUrl,
+    user?.instrutorId,
+    user?.professorId
+  ])
 
   return { user, instrutor }
 }

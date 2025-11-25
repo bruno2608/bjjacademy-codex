@@ -153,7 +153,8 @@ Dashboards · Check-in · Histórico · Presenças (staff)
 ### Exemplo de atualização consistente
 
 1) **Alterar nome/avatar do aluno X** → `alunosService.updateAluno` atualiza `useAlunosStore`, sincroniza presenças/graduacoes e reflete no `userStore` quando o usuário logado é o mesmo aluno.
-2) Telas afetadas automaticamente: header/menu do app, `/dashboard-aluno`, `/historico-presencas`, `/presencas` (staff), `/perfil` e listas em `/alunos`.
+2) **Alterar nome/avatar do instrutor Y** → `instrutoresStore.atualizar` (via `/perfil` do professor) atualiza o profile central e sincroniza o `userStore` para que hero, header e dashboards mostrem o mesmo dado.
+3) Telas afetadas automaticamente: header/menu do app, `/dashboard-aluno`, `/historico-presencas`, `/presencas` (staff), `/perfil` e listas em `/alunos`.
 
 ### Checklist rápido
 

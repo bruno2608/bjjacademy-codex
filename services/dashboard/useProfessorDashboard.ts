@@ -46,11 +46,16 @@ export function useProfessorDashboard(): ProfessorDashboardData {
   const [activeTab, setActiveTab] = useState('visao')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
-  const instructorName = alunoAtual?.nome || instrutor?.nome || user?.nomeCompleto || 'Instrutor'
-  const faixaSlug = normalizeFaixaSlug(alunoAtual?.faixaSlug || alunoAtual?.faixa || instrutor?.faixaSlug) || 'branca-adulto'
+  const perfilInstrutor = instrutor || null
+  const perfilAlunoFallback = !perfilInstrutor ? alunoAtual : null
+  const profile = perfilInstrutor || perfilAlunoFallback || null
+
+  const instructorName = profile?.nomeCompleto || profile?.nome || user?.nomeCompleto || 'Instrutor'
+  const faixaSlug = normalizeFaixaSlug(profile?.faixaSlug || (perfilAlunoFallback?.faixa ?? '')) || 'branca-adulto'
   const faixaConfig = getFaixaConfigBySlug(faixaSlug) || getFaixaConfigBySlug('branca-adulto')
-  const graus = typeof alunoAtual?.graus === 'number' ? alunoAtual.graus : instrutor?.graus ?? faixaConfig?.grausMaximos ?? 0
-  const avatarUrl = alunoAtual?.avatarUrl || instrutor?.avatarUrl || user?.avatarUrl || ''
+  const graus =
+    typeof profile?.graus === 'number' ? profile.graus : faixaConfig?.grausMaximos ?? 0
+  const avatarUrl = profile?.avatarUrl || user?.avatarUrl || ''
 
   const treinoPorId = useMemo(() => {
     const map = new Map<string, { id: string; nome: string; hora?: string }>()

@@ -1,13 +1,14 @@
 import { create } from 'zustand'
 
 import type { InstrutorProfile } from '@/types/instrutor'
-import { buscarInstrutorPorId, listarInstrutores } from '@/services/instrutoresService'
+import { atualizarInstrutor, buscarInstrutorPorId, listarInstrutores } from '@/services/instrutoresService'
 
 type InstrutoresState = {
   instrutores: InstrutorProfile[]
   hydrated: boolean
   carregar: () => Promise<void>
   getInstrutorById: (id: string) => InstrutorProfile | null
+  atualizar: (id: string, payload: Partial<InstrutorProfile>) => Promise<InstrutorProfile | null>
 }
 
 export const useInstrutoresStore = create<InstrutoresState>((set, get) => ({
@@ -21,6 +22,18 @@ export const useInstrutoresStore = create<InstrutoresState>((set, get) => ({
     const cached = get().instrutores.find((item) => item.id === id)
     if (cached) return cached
     return null
+  },
+  atualizar: async (id, payload) => {
+    const atualizado = await atualizarInstrutor(id, payload)
+    if (!atualizado) return null
+
+    set((state) => ({
+      instrutores: state.instrutores.some((item) => item.id === id)
+        ? state.instrutores.map((item) => (item.id === id ? atualizado : item))
+        : [...state.instrutores, atualizado]
+    }))
+
+    return atualizado
   }
 }))
 
