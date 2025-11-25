@@ -27,7 +27,8 @@ import { confirmarPresenca, marcarAusencia } from '../../services/presencasServi
 import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
+import { useAlunoDashboard } from '@/hooks/useAlunoDashboard';
+import { BjjBeltProgressCard } from '@/components/bjj/BjjBeltProgressCard';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
@@ -47,6 +48,8 @@ function DashboardHero({
   avatarUrl,
   faixaSlug,
   graus,
+  aulasFeitasNoGrau,
+  aulasMetaNoGrau,
   className
 }) {
   const faixaConfig =
@@ -84,11 +87,13 @@ function DashboardHero({
 
           <div className="flex w-full justify-center lg:max-w-md">
             {faixaConfig && (
-              <div className="w-full max-w-sm">
-                <BjjBeltStrip
+              <div className="w-full max-w-2xl">
+                <BjjBeltProgressCard
                   config={faixaConfig}
                   grauAtual={grauAtual}
-                  className="scale-[0.8] md:scale-[0.9] origin-left"
+                  aulasFeitasNoGrau={aulasFeitasNoGrau ?? 0}
+                  aulasMetaNoGrau={aulasMetaNoGrau}
+                  className="scale-[0.95] md:scale-100 origin-center bg-bjj-gray-900/80 border-bjj-gray-800"
                 />
               </div>
             )}
@@ -102,19 +107,17 @@ function DashboardHero({
 function StudentDashboard() {
   const { user, aluno: alunoSelecionado } = useCurrentAluno();
   const presencas = usePresencasStore((state) => state.presencas);
-  const alunos = useAlunosStore((state) => state.alunos);
-  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const treinos = useTreinosStore((state) => state.treinos);
 
-  const alunoId = alunoSelecionado?.id || user?.alunoId || alunos[0]?.id;
-  const aluno = useMemo(
-    () => (alunoId ? getAlunoById(alunoId) || alunos.find((item) => item.id === alunoId) : null) || alunos[0],
-    [alunoId, alunos, getAlunoById]
-  );
-  const faixaSlug = aluno?.faixaSlug || aluno?.faixa || 'branca-adulto';
-  const faixaConfig =
-    getFaixaConfigBySlug(faixaSlug) || getFaixaConfigBySlug('branca-adulto');
-  const grauAtual = aluno?.graus ?? faixaConfig?.grausMaximos ?? 0;
+  const {
+    aluno,
+    faixaConfig,
+    faixaSlug,
+    grauAtual,
+    aulasFeitasNoGrau,
+    aulasMetaNoGrau
+  } = useAlunoDashboard(alunoSelecionado?.id || user?.alunoId);
+
   const avatarUrl = ensureAvatar(aluno?.nome, aluno?.avatarUrl || user?.avatarUrl || defaultAvatar);
 
   const stats = useMemo(() => {
@@ -126,11 +129,11 @@ function StudentDashboard() {
   }, [aluno?.id, presencas]);
 
   const progressoProximoGrau = useMemo(() => {
-    const aulasNoGrau = aluno?.aulasNoGrauAtual || 0;
-    const alvo = 20;
-    const percent = Math.min(100, Math.round((aulasNoGrau / alvo) * 100));
+    const aulasNoGrau = aulasFeitasNoGrau || 0;
+    const alvo = aulasMetaNoGrau ?? 20;
+    const percent = alvo > 0 ? Math.min(100, Math.round((aulasNoGrau / alvo) * 100)) : 0;
     return { aulasNoGrau, alvo, percent };
-  }, [aluno?.aulasNoGrauAtual]);
+  }, [aulasFeitasNoGrau, aulasMetaNoGrau]);
 
   const ultimasPresencas = useMemo(
     () =>
@@ -171,6 +174,8 @@ function StudentDashboard() {
         name={aluno?.nome || 'Aluno'}
         faixaSlug={faixaConfig?.slug || faixaSlug}
         graus={grauAtual}
+        aulasFeitasNoGrau={aulasFeitasNoGrau}
+        aulasMetaNoGrau={aulasMetaNoGrau}
         statusLabel={statusLabel}
         avatarUrl={avatarUrl}
         subtitle="Dashboard do aluno"
