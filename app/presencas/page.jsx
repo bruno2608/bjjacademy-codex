@@ -33,10 +33,8 @@ const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os status' },
   { value: 'PENDENTE', label: 'Pendente' },
-  { value: 'CHECKIN', label: 'Check-in' },
-  { value: 'CONFIRMADO', label: 'Confirmado' },
-  { value: 'AUSENTE', label: 'Ausente' },
-  { value: 'AUSENTE_JUSTIFICADA', label: 'Ausente justificada' }
+  { value: 'PRESENTE', label: 'Presente' },
+  { value: 'FALTA', label: 'Falta' }
 ];
 const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
 
@@ -67,6 +65,11 @@ export default function PresencasPage() {
   const [filterStatuses, setFilterStatuses] = useState([]);
   const [filterTreinos, setFilterTreinos] = useState([]);
   const alunos = useAlunosStore((state) => state.alunos);
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
+  const resolveAlunoNome = useCallback(
+    (alunoId) => getAlunoById(alunoId)?.nome || 'Aluno não encontrado',
+    [getAlunoById]
+  );
   // Treinos ativos são carregados do store dedicado para alimentar dropdowns e sugestões.
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -168,21 +171,22 @@ export default function PresencasPage() {
         return {
           id: `placeholder-${aluno.id}-${treinoSugestao?.id || 'principal'}`,
           alunoId: aluno.id,
-          alunoNome: aluno.nome,
-          faixa: aluno.faixa,
-          graus: aluno.graus,
           data: hoje,
-          status: 'AUSENTE',
-          hora: null,
+          status: 'FALTA',
           treinoId: treinoSugestao?.id || null,
-          tipoTreino: treinoSugestao?.nome || 'Sessão principal',
           isPlaceholder: true
         };
       });
 
-    const combinados = [...registros, ...placeholders];
+    const combinados = [...registros, ...placeholders].map((item) => {
+      const aluno = getAlunoById(item.alunoId);
+      const alunoNome = aluno?.nome || 'Aluno não encontrado';
+      const faixaSlug = aluno?.faixaSlug || aluno?.faixa || 'Sem faixa';
+      const graus = Number.isFinite(Number(aluno?.graus)) ? Number(aluno?.graus) : 0;
+      return { ...item, alunoNome, faixaSlug, graus };
+    });
     return combinados.sort((a, b) => a.alunoNome.localeCompare(b.alunoNome, 'pt-BR'));
-  }, [alunosAtivos, filterTreinos, hoje, presencas, sugerirTreino]);
+  }, [alunosAtivos, filterTreinos, getAlunoById, hoje, presencas, sugerirTreino]);
 
   const limparSelecao = useCallback((lista, valorTodos = 'all') => {
     if (!Array.isArray(lista) || lista.length === 0 || lista.includes(valorTodos)) {
@@ -201,7 +205,7 @@ export default function PresencasPage() {
       if (termo.length >= 3 && !item.alunoNome.toLowerCase().includes(termo)) {
         return false;
       }
-      if (faixasAtivas.length && !faixasAtivas.includes(item.faixa)) {
+      if (faixasAtivas.length && !faixasAtivas.includes(item.faixaSlug)) {
         return false;
       }
       if (statusAtivos.length && !statusAtivos.includes(item.status)) {
@@ -219,24 +223,18 @@ export default function PresencasPage() {
 
   const statusOrder = {
     PENDENTE: 0,
-    CHECKIN: 1,
-    CONFIRMADO: 2,
-    AUSENTE: 3,
-    AUSENTE_JUSTIFICADA: 4
+    PRESENTE: 1,
+    FALTA: 2
   };
 
   const statusLabel = (status) => {
     switch (status) {
-      case 'CONFIRMADO':
-        return { label: 'PRESENTE', tone: 'text-green-300' };
-      case 'CHECKIN':
-        return { label: 'CHECK-IN', tone: 'text-yellow-200' };
       case 'PENDENTE':
         return { label: 'PENDENTE', tone: 'text-yellow-200' };
-      case 'AUSENTE':
-        return { label: 'AUSENTE', tone: 'text-red-300' };
-      case 'AUSENTE_JUSTIFICADA':
-        return { label: 'AUSENTE JUSTIFICADA', tone: 'text-red-300' };
+      case 'PRESENTE':
+        return { label: 'PRESENTE', tone: 'text-green-300' };
+      case 'FALTA':
+        return { label: 'FALTA', tone: 'text-red-300' };
       default:
         return { label: status || '—', tone: 'text-bjj-gray-200' };
     }
@@ -255,9 +253,9 @@ export default function PresencasPage() {
 
   const totalFiltrado = registrosFiltrados.length;
 
-  const presentesDia = registrosDoDia.filter((item) => item.status === 'CONFIRMADO').length;
-  const faltasDia = registrosDoDia.filter((item) => item.status === 'AUSENTE' || item.status === 'AUSENTE_JUSTIFICADA').length;
-  const pendentesDia = registrosDoDia.filter((item) => item.status === 'CHECKIN' || item.status === 'PENDENTE').length;
+  const presentesDia = registrosDoDia.filter((item) => item.status === 'PRESENTE').length;
+  const faltasDia = registrosDoDia.filter((item) => item.status === 'FALTA').length;
+  const pendentesDia = registrosDoDia.filter((item) => item.status === 'PENDENTE').length;
   const totalDia = registrosDoDia.length || 1;
   const taxaPresencaDia = (presentesDia / totalDia) * 100;
 
@@ -275,7 +273,7 @@ export default function PresencasPage() {
   const faixasDisponiveis = useMemo(() => {
     const conjunto = new Set(
       alunosAtivos
-        .map((aluno) => aluno.faixa)
+        .map((aluno) => aluno.faixaSlug || aluno.faixa)
         .filter((faixa) => typeof faixa === 'string' && faixa.trim().length > 0)
     );
     return Array.from(conjunto).sort((a, b) => a.localeCompare(b, 'pt-BR'));
@@ -463,17 +461,18 @@ export default function PresencasPage() {
         ? treinos.find((treino) => treino.id === registro.treinoId)
         : null;
     const sugestao = sugestaoDireta || obterSugestaoTreino(registro.alunoId, dataRegistro, utilizados);
+    const aluno = getAlunoById(registro.alunoId);
 
     setSessionContext(contexto);
     setSessionTakenTreinos(utilizados);
     setSessionTreinoId(sugestao?.id || registro.treinoId || '');
     setSessionRecord({
       alunoId: registro.alunoId,
-      alunoNome: registro.alunoNome,
-      faixa: registro.faixa,
-      graus: registro.graus,
+      alunoNome: aluno?.nome || 'Aluno não encontrado',
+      faixaSlug: aluno?.faixaSlug || aluno?.faixa,
+      graus: aluno?.graus,
       data: dataRegistro,
-      status: 'CONFIRMADO',
+      status: 'PRESENTE',
       tipoTreino: sugestao?.nome || registro.tipoTreino || 'Sessão principal'
     });
     setIsSessionOpen(true);
@@ -502,11 +501,8 @@ export default function PresencasPage() {
       obterSugestaoTreino(sessionRecord.alunoId, sessionRecord.data, sessionTakenTreinos);
     const novaPresenca = await createPresenca({
       alunoId: sessionRecord.alunoId,
-      alunoNome: sessionRecord.alunoNome,
-      faixa: sessionRecord.faixa,
-      graus: sessionRecord.graus,
       data: sessionRecord.data,
-      status: 'CONFIRMADO',
+      status: 'PRESENTE',
       treinoId: treinoSelecionado?.id || null,
       tipoTreino: treinoSelecionado?.nome || sessionRecord.tipoTreino || 'Sessão principal',
       hora: treinoSelecionado?.hora || formatTime()
@@ -526,9 +522,6 @@ export default function PresencasPage() {
     abrirSelecaoSessao(
       {
         alunoId: registro.alunoId,
-        alunoNome: registro.alunoNome,
-        faixa: registro.faixa,
-        graus: registro.graus,
         data: registro.data || hoje,
         treinoId: null,
         tipoTreino: registro.tipoTreino
@@ -745,29 +738,35 @@ export default function PresencasPage() {
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Lista rápida</p>
             <ul className="space-y-2.5">
-              {registrosDoDia.map((item) => (
-                <li
-                  key={item.id || `${item.alunoId}-${item.treinoId || item.data}`}
-                  className="flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-3 py-2"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-bjj-white">{item.alunoNome}</p>
-                    <p className="text-[11px] text-bjj-gray-200/60">
-                      {item.status === 'CONFIRMADO'
-                        ? `Confirmado às ${item.hora || '—'}`
-                        : item.status === 'CHECKIN' || item.status === 'PENDENTE'
-                        ? 'Aguardando confirmação'
-                        : 'Ainda não marcado'}
-                    </p>
-                    <p className="text-[11px] text-bjj-gray-200/50">{item.tipoTreino || 'Sessão principal'}</p>
-                  </div>
-                  <span
-                    className={`text-xs font-semibold ${statusLabel(item.status).tone}`}
+              {registrosDoDia.map((item) => {
+                const treino = treinos.find((treino) => treino.id === item.treinoId);
+                const treinoLabel = treino?.nome || 'Sessão principal';
+                const statusInfo = statusLabel(item.status);
+                const statusMessage =
+                  item.status === 'PRESENTE'
+                    ? 'Presença confirmada'
+                    : item.status === 'PENDENTE'
+                    ? 'Aguardando confirmação'
+                    : 'Falta registrada';
+
+                return (
+                  <li
+                    key={item.id || `${item.alunoId}-${item.treinoId || item.data}`}
+                    className="flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-3 py-2"
                   >
-                    {statusLabel(item.status).label}
-                  </span>
-                </li>
-              ))}
+                    <div>
+                      <p className="text-sm font-semibold text-bjj-white">{resolveAlunoNome(item.alunoId)}</p>
+                      <p className="text-[11px] text-bjj-gray-200/60">{statusMessage}</p>
+                      <p className="text-[11px] text-bjj-gray-200/50">{treinoLabel}</p>
+                    </div>
+                    <span
+                      className={`text-xs font-semibold ${statusInfo.tone}`}
+                    >
+                      {statusInfo.label}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
@@ -776,7 +775,9 @@ export default function PresencasPage() {
       <Modal
         isOpen={isEditOpen}
         onClose={fecharEdicao}
-        title={selectedRecord ? `Corrigir presença de ${selectedRecord.alunoNome}` : 'Corrigir presença'}
+        title={
+          selectedRecord ? `Corrigir presença de ${resolveAlunoNome(selectedRecord.alunoId)}` : 'Corrigir presença'
+        }
       >
         {selectedRecord && (
           <PresenceForm
@@ -793,16 +794,16 @@ export default function PresencasPage() {
         onClose={fecharSelecaoSessao}
         title={
           sessionRecord
-            ? sessionContext === 'extra'
-              ? `Adicionar nova sessão para ${sessionRecord.alunoNome}`
-              : `Selecionar sessão para ${sessionRecord.alunoNome}`
-            : 'Selecionar sessão'
+              ? sessionContext === 'extra'
+                ? `Adicionar nova sessão para ${resolveAlunoNome(sessionRecord.alunoId)}`
+                : `Selecionar sessão para ${resolveAlunoNome(sessionRecord.alunoId)}`
+              : 'Selecionar sessão'
         }
       >
         <div className="space-y-4 text-sm text-bjj-gray-200/80">
           <p>
             Escolha o treino correspondente para registrar a presença de
-            <strong className="text-bjj-white"> {sessionRecord?.alunoNome}</strong> no dia{' '}
+            <strong className="text-bjj-white"> {sessionRecord ? resolveAlunoNome(sessionRecord.alunoId) : ''}</strong> no dia{' '}
             {sessionRecord
               ? new Date(sessionRecord.data).toLocaleDateString('pt-BR')
               : new Date().toLocaleDateString('pt-BR')}. Você pode adicionar mais de uma sessão no mesmo dia,
@@ -834,7 +835,7 @@ export default function PresencasPage() {
         title="Confirmar exclusão"
         message={
           deleteTarget
-            ? `Deseja remover o registro de ${deleteTarget.alunoNome} em ${new Date(deleteTarget.data).toLocaleDateString(
+            ? `Deseja remover o registro de ${resolveAlunoNome(deleteTarget.alunoId)} em ${new Date(deleteTarget.data).toLocaleDateString(
                 'pt-BR'
               )}?`
             : ''
