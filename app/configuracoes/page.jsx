@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import { navigationItems } from '../../lib/navigation';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { ROLE_KEYS } from '@/config/roles';
 
 /**
  * Página hub das configurações administrativas com links para as subseções.
@@ -13,6 +16,29 @@ export const metadata = {
 };
 
 export default function ConfiguracoesPage() {
+  const { user } = useCurrentUser();
+  const { staff } = useCurrentStaff();
+
+  const canManageConfigs = Boolean(
+    user?.roles?.some((role) =>
+      [ROLE_KEYS.professor, ROLE_KEYS.instrutor, ROLE_KEYS.admin, ROLE_KEYS.ti].includes(role)
+    )
+  );
+
+  if (!canManageConfigs) {
+    return (
+      <div className="space-y-4">
+        <header className="rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-6">
+          <p className="text-xs uppercase tracking-[0.3em] text-bjj-gray-200/60">Acesso restrito</p>
+          <h1 className="mt-2 text-xl font-semibold text-bjj-white">Configurações da academia</h1>
+          <p className="mt-2 max-w-2xl text-sm text-bjj-gray-200/70">
+            Somente instrutores e administradores podem alterar regras e agenda. Solicite acesso à coordenação.
+          </p>
+        </header>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <header className="rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-6">
@@ -21,6 +47,11 @@ export default function ConfiguracoesPage() {
         <p className="mt-2 max-w-2xl text-sm text-bjj-gray-200/70">
           Ajuste regras de graduação, organize a grade de treinos e mantenha os tipos de sessão sempre alinhados à rotina da equipe.
         </p>
+        {staff?.nome && (
+          <p className="mt-3 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
+            Responsável: {staff.nome} · {staff.roles?.join(', ') || 'Staff'}
+          </p>
+        )}
       </header>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">

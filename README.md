@@ -163,6 +163,14 @@ Dashboards · Check-in · Histórico · Presenças (staff)
 - **Dashboards e métricas**: `useStaffDashboard` (e aliases `useProfessorDashboard`/`useTiDashboard`/`useAdminDashboard`) lê `usePresencasStore`, `useAlunosStore`, `useGraduacoesStore` e `useTreinosStore`, monta resumo diário de presenças (`calcularResumoPresencas`/`comporRegistrosDoDia`) e contagens semanais compartilhadas com `/presencas`.
 - **Perímetro de uso**: `/dashboard`, `/presencas`, `/perfil` e menus de usuário devem consumir apenas `useCurrentStaff`/`useStaffDashboard` para nome/faixa/grau e números; novas telas de staff NÃO devem importar `MOCK_INSTRUTORES` diretamente.
 
+### Visão do Professor/Instrutor: telas e dados
+
+- **Telas principais**: `/dashboard`, `/alunos`, `/presencas`, `/historico-presencas`, `/perfil` e `/configuracoes/*` (regras, treinos, tipos) compartilham o mesmo pipeline.
+- **Sessão**: `useCurrentUser` mantém identidade e papéis; `useCurrentStaff` entrega `StaffProfile` (nome/email/avatar/faixa/roles) como fonte única para cabeçalhos, menus e cards.
+- **Métricas**: `useStaffDashboard` centraliza contagens (alunos ativos/total, graduacoesPendentes, checkins/presenças/faltas/pendentes) reaproveitando `usePresencasStore` + helpers `calcularResumoPresencas`/`comporRegistrosDoDia`; `/presencas` e `/historico-presencas` leem a mesma lógica.
+- **Permissões**: visões de configurações verificam `user.roles` (`PROFESSOR`/`INSTRUTOR`/`ADMIN`/`TI`). Usuários sem esses papéis veem aviso de acesso restrito.
+- **Regra de ouro**: novas telas de staff devem consumir hooks/stores (`useCurrentStaff`, `useStaffDashboard`, `usePresencasStore`, `useAlunosStore`, etc.) e nunca acessar mocks diretamente.
+
 ### Exemplo de atualização consistente
 
 1) **Alterar nome/avatar do aluno X** → `alunosService.updateAluno` atualiza `useAlunosStore`, sincroniza presenças/graduacoes e reflete no `userStore` quando o usuário logado é o mesmo aluno.
