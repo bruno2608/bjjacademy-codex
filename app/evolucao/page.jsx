@@ -1,27 +1,34 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Medal, TrendingUp, Clock3 } from 'lucide-react';
-import FaixaVisual from '../../components/graduacoes/FaixaVisual';
-import { calculateNextStep, estimateGraduationDate } from '../../lib/graduationRules';
-import { useAlunosStore } from '../../store/alunosStore';
-import { usePresencasStore } from '../../store/presencasStore';
-import useUserStore from '../../store/userStore';
+import { Clock3, Medal, TrendingUp } from 'lucide-react';
+
+import { BjjBeltProgressCard } from '@/components/bjj/BjjBeltProgressCard';
+import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
+import { useAlunoDashboard } from '@/hooks/useAlunoDashboard';
+import { useCurrentAluno } from '@/hooks/useCurrentAluno';
+import { calculateNextStep, estimateGraduationDate } from '@/lib/graduationRules';
+import { normalizeFaixaSlug } from '@/lib/alunoStats';
+import { useAlunosStore } from '@/store/alunosStore';
+import { useGraduacoesStore } from '@/store/graduacoesStore';
+import { usePresencasStore } from '@/store/presencasStore';
 
 export default function EvolucaoPage() {
-  const { user } = useUserStore();
-  const alunoId = user?.alunoId;
+  const { aluno: alunoFromUser } = useCurrentAluno();
   const alunos = useAlunosStore((state) => state.alunos);
   const presencas = usePresencasStore((state) => state.presencas);
+  const graduacoesPlanejadas = useGraduacoesStore((state) => state.graduacoes);
 
-  const aluno = useMemo(() => alunos.find((item) => item.id === alunoId) || alunos[0], [alunoId, alunos]);
-  const historicoGraduacoes = useMemo(
-    () =>
-      [...(aluno?.historicoGraduacoes || [])].sort(
-        (a, b) => (new Date(b.data || '').getTime() || 0) - (new Date(a.data || '').getTime() || 0)
-      ),
-    [aluno?.historicoGraduacoes]
-  );
+  const alunoId = alunoFromUser?.id ?? alunos[0]?.id;
+  const { aluno, faixaConfig, grauAtual, aulasFeitasNoGrau, aulasMetaNoGrau } = useAlunoDashboard(alunoId);
+
+  const historicoGraduacoes = useMemo(() => {
+    const historico = aluno?.historicoGraduacoes ?? alunoFromUser?.historicoGraduacoes ?? [];
+    return [...historico].sort(
+      (a, b) => (new Date(b.data || '').getTime() || 0) - (new Date(a.data || '').getTime() || 0)
+    );
+  }, [aluno?.historicoGraduacoes, alunoFromUser?.historicoGraduacoes]);
 
   const proximaMeta = useMemo(
     () => calculateNextStep(aluno || null, { presencas }),
@@ -29,19 +36,27 @@ export default function EvolucaoPage() {
   );
 
   const progressoProximoGrau = useMemo(() => {
-    const aulasNoGrau = aluno?.aulasNoGrauAtual || 0;
-    const alvo = 20;
-    const percent = Math.min(100, Math.round((aulasNoGrau / alvo) * 100));
+    const aulasNoGrau = aulasFeitasNoGrau ?? aluno?.aulasNoGrauAtual ?? 0;
+    const alvo = aulasMetaNoGrau ?? 20;
+    const percent = alvo > 0 ? Math.min(100, Math.round((aulasNoGrau / alvo) * 100)) : 0;
     return { aulasNoGrau, alvo, percent };
-  }, [aluno?.aulasNoGrauAtual]);
+  }, [aluno?.aulasNoGrauAtual, aulasFeitasNoGrau, aulasMetaNoGrau]);
 
   const proximaGraduacaoLabel = useMemo(() => {
-    if (!proximaMeta) return 'Em avaliação pela equipe';
-    if (proximaMeta.tipo === 'Grau') {
-      return `${proximaMeta.grauAlvo}º grau em ${proximaMeta.faixaAtual}`;
+    if (proximaMeta) {
+      if (proximaMeta.tipo === 'Grau') {
+        return `${proximaMeta.grauAlvo}º grau em ${proximaMeta.faixaAtual}`;
+      }
+      return `${proximaMeta.faixaAtual} → ${proximaMeta.proximaFaixa}`;
     }
-    return `${proximaMeta.faixaAtual} → ${proximaMeta.proximaFaixa}`;
-  }, [proximaMeta]);
+    const planejada = graduacoesPlanejadas.find((item) => item.alunoId === aluno?.id);
+    if (planejada) {
+      return planejada.tipo === 'Grau'
+        ? `${planejada.grauAlvo}º grau em ${planejada.faixaAtual}`
+        : `${planejada.faixaAtual} → ${planejada.proximaFaixa}`;
+    }
+    return 'Em avaliação pela equipe';
+  }, [aluno?.id, graduacoesPlanejadas, proximaMeta]);
 
   const proximaDataEstimada = useMemo(() => {
     if (!aluno || !proximaMeta || proximaMeta.mesesRestantes == null) return null;
@@ -50,6 +65,16 @@ export default function EvolucaoPage() {
     if (Number.isNaN(parsed.getTime())) return null;
     return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
   }, [aluno, proximaMeta]);
+
+  const faixaConfigAtual =
+    faixaConfig || getFaixaConfigBySlug(aluno?.faixaSlug || alunoFromUser?.faixaSlug || 'branca-adulto');
+  const grauAtualSafeguarded = grauAtual ?? faixaConfigAtual?.grausMaximos ?? 0;
+
+  const resolverConfigFaixa = (valor) => {
+    if (!valor) return undefined;
+    const slug = normalizeFaixaSlug(valor);
+    return getFaixaConfigBySlug(slug);
+  };
 
   const formatarData = (valor) => {
     if (!valor) return '—';
@@ -67,14 +92,19 @@ export default function EvolucaoPage() {
             <h1 className="text-2xl font-semibold">Progresso na graduação</h1>
             <p className="text-sm text-bjj-gray-200/80">Visualize seu histórico e projeções para os próximos passos.</p>
           </div>
-          <div className="flex items-center gap-4 rounded-2xl border border-bjj-gray-800 bg-bjj-black/60 p-4">
-            <FaixaVisual faixa={aluno?.faixa} graus={aluno?.graus} tamanho="lg" />
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">Faixa atual</p>
-              <p className="text-sm font-semibold">{aluno?.faixa || '—'}</p>
-              <p className="text-xs text-bjj-gray-300/80">{aluno?.graus || 0} grau(s)</p>
+          {faixaConfigAtual && (
+            <div className="flex items-center gap-4 rounded-2xl border border-bjj-gray-800 bg-bjj-black/60 p-4">
+              <div className="w-full max-w-2xl">
+                <BjjBeltProgressCard
+                  config={faixaConfigAtual}
+                  grauAtual={grauAtualSafeguarded}
+                  aulasFeitasNoGrau={aulasFeitasNoGrau ?? 0}
+                  aulasMetaNoGrau={aulasMetaNoGrau}
+                  className="scale-[0.95] md:scale-100 origin-center bg-bjj-gray-900/80 border-bjj-gray-800"
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -96,6 +126,10 @@ export default function EvolucaoPage() {
                   const indicadorClasse = isGrau
                     ? 'border-bjj-red bg-bjj-red/15 text-bjj-red'
                     : 'border-amber-300 bg-amber-200/10 text-amber-200';
+                  const faixaConfigItem =
+                    resolverConfigFaixa(item.faixaSlug || item.faixa) || faixaConfigAtual;
+                  const grauEvento = isGrau ? item.grau ?? 0 : grauAtualSafeguarded;
+                  const faixaLabel = faixaConfigItem?.nome ?? item.faixa ?? 'Faixa não informada';
                   return (
                     <li key={item.id || idx}>
                       <div className="timeline-middle">
@@ -115,8 +149,19 @@ export default function EvolucaoPage() {
                                 }`}
                               >
                                 {isGrau ? `${item.grau}º grau` : 'Faixa'}
-                                <span className="text-[10px] text-bjj-gray-300/90">{item.faixa}</span>
+                                <span className="text-[10px] text-bjj-gray-300/90">{faixaLabel}</span>
                               </span>
+                              {faixaConfigItem ? (
+                                <div className="w-[160px]">
+                                  <BjjBeltStrip
+                                    config={faixaConfigItem}
+                                    grauAtual={grauEvento}
+                                    className="scale-[0.7] origin-left"
+                                  />
+                                </div>
+                              ) : (
+                                <span className="text-[11px] text-bjj-gray-300">Sem dados de faixa</span>
+                              )}
                               <span className="text-xs text-bjj-gray-200/80">Instrutor: {item.instrutor || 'Equipe BJJ Academy'}</span>
                             </div>
                             <span className="text-[12px] text-bjj-gray-300/80">{formatarData(item.data)}</span>

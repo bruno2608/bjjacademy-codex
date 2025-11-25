@@ -1,7 +1,10 @@
-import FaixaVisual from '../graduacoes/FaixaVisual';
+import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
+import { normalizeFaixaSlug } from '@/lib/alunoStats';
 
 interface StudentHeroProps {
   name?: string;
+  faixaSlug?: string;
   faixa?: string;
   graus?: number;
   statusLabel?: string;
@@ -13,6 +16,7 @@ interface StudentHeroProps {
 // Hero dedicado ao aluno para agrupar avatar, faixa/graduacao e status em um layout DaisyUI reutilizável.
 export default function StudentHero({
   name,
+  faixaSlug,
   faixa,
   graus,
   statusLabel,
@@ -20,7 +24,16 @@ export default function StudentHero({
   subtitle,
   className
 }: StudentHeroProps) {
-  const faixaDescricao = graus ? `${faixa} · ${graus}\u00ba grau` : faixa || 'Faixa não informada';
+  const faixaSlugNormalizada = normalizeFaixaSlug(faixaSlug ?? faixa ?? 'branca-adulto');
+  const faixaConfig =
+    getFaixaConfigBySlug(faixaSlugNormalizada) ||
+    (faixaSlugNormalizada?.startsWith('preta') ? getFaixaConfigBySlug('preta-padrao') : undefined) ||
+    getFaixaConfigBySlug('branca-adulto');
+
+  const grauAtual = typeof graus === 'number' ? graus : faixaConfig?.grausMaximos ?? 0;
+  const faixaDescricao = faixaConfig
+    ? `${faixaConfig.nome}${grauAtual ? ` · ${grauAtual}\u00ba grau` : ''}`
+    : faixa || 'Faixa não informada';
 
   return (
     <div
@@ -49,7 +62,15 @@ export default function StudentHero({
           </div>
 
           <div className="flex w-full justify-center lg:max-w-md">
-            <FaixaVisual faixa={faixa} graus={graus} tamanho="lg" />
+            {faixaConfig && (
+              <div className="w-full max-w-md">
+                <BjjBeltStrip
+                  config={faixaConfig}
+                  grauAtual={grauAtual}
+                  className="scale-[0.9] md:scale-100 origin-center"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

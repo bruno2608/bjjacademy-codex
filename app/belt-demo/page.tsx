@@ -2,10 +2,10 @@
 
 import React from "react"
 
-// Caminhos relativos iguais ao seu arquivo atual
-import { BjjBeltStrip } from "../../components/bjj/BjjBeltStrip"
-import { BjjBeltProgressCard } from "../../components/bjj/BjjBeltProgressCard"
-import { MOCK_FAIXAS } from "../../data/mocks/bjjBeltMocks"
+import { BjjBeltProgressCard } from "@/components/bjj/BjjBeltProgressCard"
+import { BjjBeltStrip } from "@/components/bjj/BjjBeltStrip"
+import { MOCK_FAIXAS } from "@/data/mocks/bjjBeltMocks"
+import { getFaixaConfigBySlug } from "@/data/mocks/bjjBeltUtils"
 
 // -----------------------------------------------------------------------------
 // Tipos locais (não usam BjjBeltVisualConfig nem BjjBeltProgressCardProps)
@@ -50,7 +50,12 @@ const gerarDadosAluno = (config: BeltConfig, index: number): BeltCardData => {
 // -----------------------------------------------------------------------------
 
 export default function BeltDemoPage() {
-  const faixasParaExibir: BeltCardData[] = MOCK_FAIXAS.map(gerarDadosAluno)
+  const faixasParaExibir: BeltCardData[] = MOCK_FAIXAS.flatMap((config, index) => {
+    const faixaConfig = getFaixaConfigBySlug(config.slug)
+    if (!faixaConfig) return []
+
+    return [gerarDadosAluno(faixaConfig, index)]
+  })
 
   return (
     <main className="min-h-screen bg-zinc-950 p-8 md:p-12">
