@@ -108,6 +108,15 @@ await atualizarStatus(registro.id, 'PRESENTE');
 - ✅ Histórico de presenças do aluno (`/historico-presencas`)
 - ✅ Presenças do professor/staff (`/presencas`)
 
+### Resumo centralizado de presenças
+
+- **Helper único**: `calcularResumoPresencas` (`lib/presencaStats.ts`) conta **Presenças** (`PRESENTE`), **Faltas** (`FALTA`/`JUSTIFICADA`) e **Pendentes** (`PENDENTE`) a partir de qualquer lista de `PresencaRegistro` e expõe `totalRegistros` agregado.
+- **Hooks prontos**: `useResumoPresencasDoDia` e `useResumoPresencasDaSemana` (em `hooks/useResumoPresencas.ts`) filtram o estado do `presencasStore` por dia ou semana corrente e retornam o resumo calculado.
+- **Telas usando a mesma base**:
+  - `/presencas` (staff/professor) → usa `calcularResumoPresencas` sobre os registros do **dia atual** (incluindo placeholders de faltas) para os cards **PRESENÇAS**, **FALTAS** e **PENDENTES**.
+  - `Dashboard do professor` → aplica o mesmo helper aos registros da **semana atual** para os cards **AULAS NA SEMANA** (treinos da semana), **HISTÓRICO NA SEMANA** (total de registros) e **CHECK-INS REGISTRADOS** (somente status `PRESENTE`).
+- **Sem duplicação**: os cards de presença não filtram mais mocks nem fazem contagens manuais; toda a lógica de status/período passa pelo helper/hook compartilhado.
+
 ## 👥 Perfis e dashboards
 
 - **Perfis suportados**: `ALUNO`, `INSTRUTOR`, `PROFESSOR` (há `ADMIN/TI` mapeados, seguirão o mesmo padrão em fase futura).

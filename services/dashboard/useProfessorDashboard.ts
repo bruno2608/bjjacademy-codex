@@ -4,6 +4,7 @@ import { Activity, BarChart2, BarChart3, CalendarCheck, Clock3, Medal, PieChart,
 
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils'
 import { normalizeFaixaSlug } from '@/lib/alunoStats'
+import { calcularResumoPresencas, getSemanaAtualIntervalo, isMesmaSemana } from '@/lib/presencaStats'
 import { useCurrentAluno } from '@/hooks/useCurrentAluno'
 import { useCurrentInstrutor } from '@/hooks/useCurrentInstrutor'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
@@ -65,24 +66,6 @@ const parseDate = (value?: string | null) => {
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
-const isSameWeek = (value: string | undefined, start: Date, end: Date) => {
-  const date = parseDate(value)
-  if (!date) return false
-  return date >= start && date < end
-}
-
-const startOfCurrentWeek = () => {
-  const today = new Date()
-  const start = new Date(today)
-  start.setHours(0, 0, 0, 0)
-  const day = start.getDay()
-  const diff = (day + 6) % 7 // Monday as first day
-  start.setDate(start.getDate() - diff)
-  const end = new Date(start)
-  end.setDate(start.getDate() + 7)
-  return { start, end }
-}
-
 const normalizarStatus = (status?: string | null) => (status || '').toString().toUpperCase()
 
 const getAlunoNome = (id: string, alunos: ReturnType<typeof useAlunosStore.getState>['alunos']) =>
@@ -118,28 +101,28 @@ export function useProfessorDashboard(): ProfessorDashboardData {
     return map
   }, [treinos])
 
-  const { start, end } = useMemo(() => startOfCurrentWeek(), [])
+  const { inicio, fim } = useMemo(() => getSemanaAtualIntervalo(), [])
 
   const presencasSemana = useMemo(
-    () => presencas.filter((p) => isSameWeek(p.data, start, end)),
-    [end, presencas, start]
+    () => presencas.filter((p) => isMesmaSemana(p.data, inicio, fim)),
+    [fim, inicio, presencas]
   )
 
   const checkinsPorStatus = useMemo<CheckinsPorStatus>(() => {
-    const base = { confirmados: 0, pendentes: 0, faltas: 0 }
-    return presencas.reduce((acc, item) => {
-      const status = normalizarStatus(item.status)
-      if (status === 'PRESENTE') acc.confirmados += 1
-      else if (status === 'PENDENTE') acc.pendentes += 1
-      else if (status === 'FALTA' || status === 'JUSTIFICADA') acc.faltas += 1
-      return acc
-    }, base)
+    const resumo = calcularResumoPresencas(presencas)
+    return {
+      confirmados: resumo.totalPresencas,
+      pendentes: resumo.totalPendentes,
+      faltas: resumo.totalFaltas,
+    }
   }, [presencas])
 
   const alunosAtivos = useMemo(
     () => alunos.filter((a) => normalizarStatus(a.status) === 'ATIVO').length,
     [alunos]
   )
+
+  const resumoSemana = useMemo(() => calcularResumoPresencas(presencasSemana), [presencasSemana])
 
   const presencasNaSemana = useMemo<SerieSemanal[]>(() => {
     const labels = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM']
@@ -177,9 +160,9 @@ export function useProfessorDashboard(): ProfessorDashboardData {
   const metrics = useMemo(() => {
     const totalAlunos = alunos.length
     const graduacoesTotal = graduacoes.length
-    const aulasNaSemana = treinos.filter((treino) => isSameWeek(treino.data, start, end)).length
-    const historicoSemana = presencasSemana.length
-    const checkinsRegistradosSemana = presencasSemana.filter((p) => normalizarStatus(p.status) !== 'FALTA').length
+    const aulasNaSemana = treinos.filter((treino) => isMesmaSemana(treino.data, inicio, fim)).length
+    const historicoSemana = resumoSemana.totalRegistros
+    const checkinsRegistradosSemana = resumoSemana.totalPresencas
 
     return {
       totalAlunos,
@@ -190,7 +173,7 @@ export function useProfessorDashboard(): ProfessorDashboardData {
       historicoSemana,
       checkinsRegistradosSemana,
     }
-  }, [alunos.length, alunosAtivos, checkinsPorStatus.pendentes, graduacoes.length, presencasSemana, treinos, start, end])
+  }, [alunos.length, alunosAtivos, checkinsPorStatus.pendentes, graduacoes.length, inicio, presencasSemana, resumoSemana.totalPresencas, resumoSemana.totalRegistros, treinos, fim])
 
   const overviewCards = useMemo(
     () => [
