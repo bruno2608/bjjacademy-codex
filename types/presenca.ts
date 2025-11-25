@@ -1,8 +1,23 @@
-export type Presenca = {
-  id: string;
-  alunoId: string;
-  treinoId: string;
-  data: string;
-  status: 'PRESENTE' | 'FALTA' | 'PENDENTE';
-  origem?: 'ALUNO' | 'PROFESSOR';
-};
+export type PresencaStatus =
+  | 'PENDENTE' // aluno fez check-in, professor ainda não confirmou
+  | 'PRESENTE' // confirmado pelo professor ou ao fechar aula
+  | 'FALTA' // não apareceu / não registrou check-in
+  | 'JUSTIFICADA' // falta com justificativa (opcional)
+
+export type PresencaOrigem = 'ALUNO' | 'PROFESSOR'
+
+export interface PresencaRegistro {
+  id: string
+  alunoId: string
+  treinoId: string
+  status: PresencaStatus
+  origem: PresencaOrigem
+  observacao?: string | null
+  createdAt: string
+  updatedAt: string
+  /**
+   * Compatibilidade com os mocks atuais: mantemos a data da sessão como campo
+   * opcional enquanto os treinos ainda são baseados em agendamento semanal.
+   */
+  data?: string
+}

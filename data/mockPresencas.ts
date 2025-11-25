@@ -1,8 +1,8 @@
-import type { Presenca } from '@/types/presenca';
+import type { PresencaRegistro } from '@/types/presenca';
 
 const TODAY = new Date().toISOString().split('T')[0];
 
-export const MOCK_PRESENCAS: Presenca[] = [
+const MOCK_PRESENCAS_BASE = [
   {
     id: 'p-today-joao',
     alunoId: 'aluno_joao_silva',
@@ -340,4 +340,11 @@ export const MOCK_PRESENCAS: Presenca[] = [
     origem: 'ALUNO',
   }
 ];
+
+export const MOCK_PRESENCAS: PresencaRegistro[] = MOCK_PRESENCAS_BASE.map((item) => ({
+  ...item,
+  createdAt: item.createdAt ?? `${item.data ?? TODAY}T00:00:00.000Z`,
+  updatedAt: item.updatedAt ?? `${item.data ?? TODAY}T00:00:00.000Z`,
+  observacao: item.observacao ?? null,
+}));
 // Nota: MOCK_PRESENCAS será o mock oficial; outros mocks de presenças serão ajustados posteriormente.

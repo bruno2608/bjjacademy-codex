@@ -2,11 +2,11 @@ import { create } from 'zustand';
 
 import { MOCK_GRADUACOES } from '../data/mockGraduacoes';
 import type { GraduacaoPlanejada } from '../types/graduacao';
-import type { Presenca } from '../types/presenca';
+import type { PresencaRegistro } from '../types/presenca';
 import { useAlunosStore } from './alunosStore';
 import { usePresencasStore } from './presencasStore';
 
-const obterPresencasAtuais = (): Presenca[] => usePresencasStore.getState().presencas;
+const obterPresencasAtuais = (): PresencaRegistro[] => usePresencasStore.getState().presencas;
 
 type GraduacoesState = {
   graduacoes: GraduacaoPlanejada[];
