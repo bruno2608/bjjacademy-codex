@@ -15,12 +15,19 @@ const normalizeWeekday = (date) =>
 const formatDate = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
 
+const formatDateKey = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function CheckinPage() {
   const { user, aluno } = useCurrentAluno();
   const alunoId = aluno?.id || user?.alunoId;
   const getAlunoById = useAlunosStore((state) => state.getAlunoById);
-  const hoje = new Date().toISOString().split('T')[0];
   const today = useMemo(() => new Date(), []);
+  const hoje = useMemo(() => formatDateKey(today), [today]);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
   const registrarCheckin = usePresencasStore((state) => state.registrarCheckin);
   const carregarPorAluno = usePresencasStore((state) => state.carregarPorAluno);
