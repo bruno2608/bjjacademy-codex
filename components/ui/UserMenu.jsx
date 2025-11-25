@@ -15,6 +15,7 @@ import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigat
 import useRole from '../../hooks/useRole';
 import { ROLE_KEYS } from '../../config/roles';
 import { useAlunosStore } from '@/store/alunosStore';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 
 const buildInitials = (name = '', email = '') => {
   const source = name || email || 'Instrutor';
@@ -32,6 +33,7 @@ export default function UserMenu({ inline = false }) {
   const aluno = useAlunosStore((state) =>
     user?.alunoId ? state.getAlunoById(user.alunoId) : null
   );
+  const { staff } = useCurrentStaff();
   const { roles } = useRole();
   const [open, setOpen] = useState(inline);
   const [configOpen, setConfigOpen] = useState(false);
@@ -122,11 +124,11 @@ export default function UserMenu({ inline = false }) {
     router.push('/login');
   };
 
-  const displayName = aluno?.nome || user?.name || 'Instrutor';
-  const displayEmail = aluno?.email || user?.email || 'instrutor@bjj.academy';
+  const displayName = staff?.nome || aluno?.nome || user?.name || 'Instrutor';
+  const displayEmail = staff?.email || aluno?.email || user?.email || 'instrutor@bjj.academy';
 
   const initials = buildInitials(displayName, displayEmail);
-  const avatarUrl = aluno?.avatarUrl || user?.avatarUrl;
+  const avatarUrl = staff?.avatarUrl || aluno?.avatarUrl || user?.avatarUrl;
 
   const AvatarBadge = (
     <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-bjj-red/80 to-bjj-red text-xs font-semibold text-bjj-white shadow-[0_0_0_1px_rgba(225,6,0,0.4)]">

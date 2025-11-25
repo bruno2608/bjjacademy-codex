@@ -125,11 +125,15 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
         <div className="lg:col-span-2">
           <label className="block text-sm font-medium mb-2">Aluno</label>
           <Select name="alunoId" value={form.alunoId} onChange={handleChange} disabled={isEditing}>
-            {alunos.map((aluno) => (
-              <option key={aluno.id} value={aluno.id}>
-                {aluno.nome} · {aluno.faixa} ({aluno.graus}º grau)
-              </option>
-            ))}
+            {alunos.map((aluno) => {
+              const faixa = aluno.faixaSlug || aluno.faixa || 'Sem faixa';
+              const grauAtual = Number.isFinite(Number(aluno.graus)) ? Number(aluno.graus) : 0;
+              return (
+                <option key={aluno.id} value={aluno.id}>
+                  {aluno.nome} · {faixa} ({grauAtual}º grau)
+                </option>
+              );
+            })}
           </Select>
         </div>
         <div>

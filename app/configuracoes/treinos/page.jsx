@@ -9,6 +9,9 @@ import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import Badge from '../../../components/ui/Badge';
 import { useTreinosStore } from '../../../store/treinosStore';
 import { useTiposTreinoStore } from '../../../store/tiposTreinoStore';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { ROLE_KEYS } from '@/config/roles';
 
 /**
  * Editor mockado da grade semanal usado posteriormente pela tela de presenças.
@@ -25,6 +28,8 @@ const emptyTreino = {
 };
 
 export default function TreinosPage() {
+  const { user } = useCurrentUser();
+  const { staff } = useCurrentStaff();
   const { treinos, addTreino, updateTreino, toggleTreinoStatus, removeTreino } = useTreinosStore();
   const tipos = useTiposTreinoStore((state) => state.tipos);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -70,6 +75,12 @@ export default function TreinosPage() {
     }
   };
 
+  const canManageConfigs = Boolean(
+    user?.roles?.some((role) =>
+      [ROLE_KEYS.professor, ROLE_KEYS.instrutor, ROLE_KEYS.admin, ROLE_KEYS.ti].includes(role)
+    )
+  );
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (editingId) {
@@ -79,6 +90,18 @@ export default function TreinosPage() {
     }
     closeModal();
   };
+
+  if (!canManageConfigs) {
+    return (
+      <div className="space-y-4">
+        <header className="card">
+          <p className="text-xs uppercase tracking-[0.3em] text-bjj-gray-200/60">Acesso restrito</p>
+          <h1 className="mt-2 text-xl font-semibold text-bjj-white">Horários de Treino</h1>
+          <p className="mt-2 text-sm text-bjj-gray-200/70">Somente staff autorizado pode editar a grade semanal.</p>
+        </header>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -90,6 +113,11 @@ export default function TreinosPage() {
             <p className="mt-1 text-sm text-bjj-gray-200/70">
               Organize as sessões semanais da academia. Os treinos ativos aparecem na tela de presenças para agilizar o check-in.
             </p>
+            {staff?.nome && (
+              <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-200/70">
+                Responsável: {staff.nome} · {staff.roles?.join(', ') || 'Staff'}
+              </p>
+            )}
           </div>
           <Button type="button" className="btn-sm md:btn-md w-full md:w-auto" onClick={() => openModal(null)}>
             Cadastrar treino
