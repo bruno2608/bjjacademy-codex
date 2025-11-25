@@ -70,7 +70,7 @@ export default function EvolucaoPage() {
     faixaConfig || getFaixaConfigBySlug(aluno?.faixaSlug || alunoFromUser?.faixaSlug || 'branca-adulto');
   const grauAtualSafeguarded = grauAtual ?? faixaConfigAtual?.grausMaximos ?? 0;
 
-  const resolverConfigFaixa = (valor?: string | null) => {
+  const resolverConfigFaixa = (valor) => {
     if (!valor) return undefined;
     const slug = normalizeFaixaSlug(valor);
     return getFaixaConfigBySlug(slug);
