@@ -8,6 +8,8 @@ import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
 import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
+import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 
 const buildMonthOptions = () => {
   const months = [];
@@ -203,6 +205,12 @@ export default function HistoricoPresencasPage() {
                 const treinoNome = treino?.nome || 'Sessão principal';
                 const treinoTipo = treino?.tipo || 'Treino';
                 const horario = treino?.hora || 'Horário a confirmar';
+                const aluno = getAlunoById(item.alunoId);
+                const faixaConfig =
+                  aluno?.faixaSlug
+                    ? getFaixaConfigBySlug(aluno.faixaSlug)
+                    : getFaixaConfigBySlug('branca-adulto');
+                const grauAtual = aluno?.graus ?? faixaConfig?.grausMaximos ?? 0;
                 return (
                   <li key={item.id} className="relative pl-16">
                     <div
@@ -235,8 +243,19 @@ export default function HistoricoPresencasPage() {
                       </div>
 
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-bjj-gray-50">
-                        <span className="rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/85">{getAlunoById(item.alunoId)?.nome || 'Aluno(a)'}</span>
+                        <span className="rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/85">{aluno?.nome || 'Aluno(a)'}</span>
                         <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-emerald-100">{item.turmaId ? `Turma ${item.turmaId}` : 'Sem turma'}</span>
+                        {faixaConfig ? (
+                          <div className="w-[120px]">
+                            <BjjBeltStrip
+                              config={faixaConfig}
+                              grauAtual={grauAtual}
+                              className="scale-[0.6] md:scale-[0.7] origin-left"
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-bjj-gray-300">Sem dados de faixa</span>
+                        )}
                       </div>
                     </div>
                   </li>

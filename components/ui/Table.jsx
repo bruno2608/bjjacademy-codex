@@ -28,7 +28,8 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
       </div>
       <div className="relative divide-y divide-bjj-gray-800/80">
         {data.map((row) => {
-          const faixa = row.faixa || 'Sem faixa';
+          const faixa = row.faixa || row.faixaSlug || 'Sem faixa';
+          const faixaVisual = row.faixaVisual;
           const graus = Number.isFinite(Number(row.graus)) ? Number(row.graus) : 0;
           const mesesNaFaixa = Number.isFinite(Number(row.mesesNaFaixa)) ? Number(row.mesesNaFaixa) : undefined;
           return (
@@ -37,12 +38,18 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-bjj-white">{row.nome}</p>
-                    <p className="text-[11px] text-bjj-gray-200/70">
-                      {faixa} · {graus}º grau
-                    </p>
-                    {typeof mesesNaFaixa === 'number' && (
-                      <p className="text-[11px] text-bjj-gray-200/60">{mesesNaFaixa} meses na faixa</p>
-                    )}
+                    <div className="mt-1 flex flex-col gap-1">
+                      {faixaVisual ? (
+                        faixaVisual
+                      ) : (
+                        <p className="text-[11px] text-bjj-gray-200/70">
+                          {faixa} · {graus}º grau
+                        </p>
+                      )}
+                      {typeof mesesNaFaixa === 'number' && (
+                        <p className="text-[11px] text-bjj-gray-200/60">{mesesNaFaixa} meses na faixa</p>
+                      )}
+                    </div>
                   </div>
                   <Badge variant={row.status === 'Ativo' ? 'success' : 'neutral'}>{row.status}</Badge>
                 </div>
@@ -82,11 +89,16 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
                   <p className="text-sm font-semibold text-bjj-white">{row.nome}</p>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3 text-[11px]">
-                  <span className="font-medium text-bjj-white/90">{faixa}</span>
-                  <span className="block text-[11px] text-bjj-gray-200/70">{graus} grau(s)</span>
-                  {typeof mesesNaFaixa === 'number' && (
-                    <span className="block text-[11px] text-bjj-gray-200/55">{mesesNaFaixa} meses na faixa</span>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {faixaVisual && <div className="shrink-0">{faixaVisual}</div>}
+                    <div className="min-w-[120px]">
+                      <span className="block font-medium text-bjj-white/90 leading-tight">{faixa}</span>
+                      <span className="block text-[11px] text-bjj-gray-200/70">{graus} grau(s)</span>
+                      {typeof mesesNaFaixa === 'number' && (
+                        <span className="block text-[11px] text-bjj-gray-200/55">{mesesNaFaixa} meses na faixa</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3 text-[11px] text-bjj-gray-200/80">{row.plano}</div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3 text-[11px]">
