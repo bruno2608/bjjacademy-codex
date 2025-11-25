@@ -1,15 +1,23 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarRange, Check, Clock3, History, UserRound, X } from 'lucide-react';
+import { CalendarRange, Check, Clock3, History, Search, UserRound, X } from 'lucide-react';
 import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
-import { ROLE_KEYS } from '../../config/roles';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
-import { useCurrentAluno } from '@/hooks/useCurrentAluno';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { normalizeAlunoStatus, normalizeFaixaSlug } from '@/lib/alunoStats';
+import { calcularResumoPresencas } from '@/lib/presencasResumo';
+
+const STATUS_OPTIONS = [
+  { value: 'PENDENTE', label: 'Pendente' },
+  { value: 'PRESENTE', label: 'Presente' },
+  { value: 'FALTA', label: 'Falta' },
+  { value: 'JUSTIFICADA', label: 'Justificada' },
+];
 
 const buildMonthOptions = () => {
   const months = [];
@@ -24,54 +32,47 @@ const buildMonthOptions = () => {
 };
 
 export default function HistoricoPresencasPage() {
-  const { user } = useCurrentAluno();
-  const { alunos, getAlunoById } = useAlunosStore();
+  const { staff } = useCurrentStaff();
+  const alunos = useAlunosStore((state) => state.alunos);
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const treinos = useTreinosStore((state) => state.treinos);
-  const alunoId = user?.alunoId;
   const presencas = usePresencasStore((state) => state.presencas);
   const carregarTodas = usePresencasStore((state) => state.carregarTodas);
-  const carregarPorAluno = usePresencasStore((state) => state.carregarPorAluno);
-  const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
   const [meses, setMeses] = useState(buildMonthOptions().slice(0, 1).map((item) => item.value));
-  const [alunoSelecionado, setAlunoSelecionado] = useState(alunoId || '');
+  const [search, setSearch] = useState('');
+  const [faixasSelecionadas, setFaixasSelecionadas] = useState([]);
+  const [statusesSelecionados, setStatusesSelecionados] = useState([]);
+  const [treinosSelecionados, setTreinosSelecionados] = useState([]);
 
   useEffect(() => {
-    if (isAluno && alunoId) {
-      setAlunoSelecionado(alunoId);
-    }
-  }, [alunoId, isAluno]);
-
-  useEffect(() => {
-    if (!isAluno && !alunoSelecionado && alunos?.length) {
-      setAlunoSelecionado(alunos[0].id);
-    }
-  }, [alunos, alunoSelecionado, isAluno]);
-
-  useEffect(() => {
-    async function sincronizar() {
-      if (isAluno && alunoId) {
-        await carregarPorAluno(alunoId);
-        return;
-      }
-      await carregarTodas();
-      if (alunoSelecionado) {
-        await carregarPorAluno(alunoSelecionado);
-      }
-    }
-    sincronizar();
-  }, [alunoId, alunoSelecionado, carregarPorAluno, carregarTodas, isAluno]);
+    carregarTodas();
+  }, [carregarTodas]);
 
   const registros = useMemo(() => {
     const selecionados = meses.length ? meses : [];
-    const filtroAluno = alunoSelecionado || (isAluno ? alunoId : undefined);
+    const termo = search.trim().toLowerCase();
+    const faixasAtivas = faixasSelecionadas.includes('all') ? [] : faixasSelecionadas;
+    const statusAtivos = statusesSelecionados.includes('all')
+      ? []
+      : statusesSelecionados.map((item) => normalizeAlunoStatus(item));
+    const treinosAtivos = treinosSelecionados.includes('all') ? [] : treinosSelecionados;
 
-    const filtrados = presencas.filter((item) => {
-      if (isAluno && alunoId) return item.alunoId === alunoId;
-      if (filtroAluno) return item.alunoId === filtroAluno;
-      return true;
-    });
-
-    return filtrados
+    return presencas
+      .map((item) => {
+        const aluno = getAlunoById(item.alunoId);
+        const faixaSlug = normalizeFaixaSlug(aluno?.faixaSlug || aluno?.faixa || '');
+        const faixaConfig = getFaixaConfigBySlug(faixaSlug);
+        const treino = treinos.find((treinoItem) => treinoItem.id === item.treinoId);
+        return {
+          ...item,
+          alunoNome: aluno?.nome || 'Aluno(a)',
+          faixaSlug,
+          graus: aluno?.graus ?? faixaConfig?.grausMaximos ?? 0,
+          treinoNome: treino?.nome || 'Sessão principal',
+          treinoTipo: treino?.tipo || 'Treino',
+          horario: treino?.hora || 'Horário a confirmar',
+        };
+      })
       .filter((item) => {
         if (!selecionados.length) return true;
         const data = item.data || '';
@@ -80,13 +81,20 @@ export default function HistoricoPresencasPage() {
         const chave = `${ano}-${mes}`;
         return selecionados.includes(chave);
       })
+      .filter((item) => {
+        if (termo && !item.alunoNome.toLowerCase().includes(termo)) return false;
+        if (faixasAtivas.length && !faixasAtivas.includes(item.faixaSlug)) return false;
+        if (statusAtivos.length && !statusAtivos.includes(normalizeAlunoStatus(item.status))) return false;
+        if (treinosAtivos.length && !treinosAtivos.includes(item.treinoId || '')) return false;
+        return true;
+      })
       .sort((a, b) => {
         const dataB = new Date(b.data || 0).getTime();
         const dataA = new Date(a.data || 0).getTime();
         return dataB - dataA;
       })
       .slice(0, 80);
-  }, [alunoId, alunoSelecionado, isAluno, meses, presencas]);
+  }, [faixasSelecionadas, getAlunoById, meses, presencas, search, statusesSelecionados, treinos, treinosSelecionados]);
 
   const statusTone = (status) => {
     switch (status) {
@@ -95,55 +103,65 @@ export default function HistoricoPresencasPage() {
           label: 'Presente',
           tone: 'bg-green-600/15 text-green-200 ring-1 ring-inset ring-green-500/40',
           marker: 'bg-gradient-to-br from-green-400 to-emerald-500 text-bjj-gray-950',
-          icon: Check
+          icon: Check,
         };
       case 'PENDENTE':
         return {
           label: 'Pendente',
           tone: 'bg-amber-500/15 text-amber-100 ring-1 ring-inset ring-amber-400/40',
           marker: 'bg-gradient-to-br from-amber-300 to-orange-400 text-bjj-gray-950',
-          icon: Clock3
+          icon: Clock3,
         };
       case 'FALTA':
         return {
           label: 'Ausente',
           tone: 'bg-bjj-red/15 text-bjj-red ring-1 ring-inset ring-bjj-red/50',
           marker: 'bg-gradient-to-br from-bjj-red to-rose-500 text-white',
-          icon: X
+          icon: X,
         };
       case 'JUSTIFICADA':
         return {
           label: 'Justificada',
           tone: 'bg-indigo-500/20 text-indigo-100 ring-1 ring-inset ring-indigo-300/50',
           marker: 'bg-gradient-to-br from-indigo-400 to-violet-500 text-bjj-gray-950',
-          icon: Clock3
+          icon: Clock3,
         };
       default:
         return {
           label: 'Sem registro',
           tone: 'bg-bjj-gray-800 text-bjj-gray-100 ring-1 ring-inset ring-bjj-gray-700',
           marker: 'bg-gradient-to-br from-bjj-gray-600 to-bjj-gray-500 text-white',
-          icon: Clock3
+          icon: Clock3,
         };
     }
   };
 
-  const alunoOptions = useMemo(() => {
+  const faixaOptions = useMemo(() => {
     if (!alunos?.length) return [];
-    return alunos.map((item) => ({ value: item.id, label: item.nome }));
+    const mapa = new Map();
+    alunos.forEach((item) => {
+      const slug = normalizeFaixaSlug(item.faixaSlug || item.faixa || '');
+      if (slug && !mapa.has(slug)) {
+        const config = getFaixaConfigBySlug(slug);
+        mapa.set(slug, config?.nome || item.faixa || slug);
+      }
+    });
+    return Array.from(mapa.entries()).map(([value, label]) => ({ value, label }));
   }, [alunos]);
 
+  const treinoOptions = useMemo(() => {
+    if (!treinos?.length) return [];
+    return treinos.map((treino) => ({ value: treino.id, label: treino.nome || treino.tipo || 'Treino' }));
+  }, [treinos]);
+
   const totais = useMemo(() => {
-    return registros.reduce(
-      (acc, item) => {
-        if (item.status === 'PRESENTE') acc.presentes += 1;
-        if (item.status === 'PENDENTE') acc.pendentes += 1;
-        if (item.status === 'FALTA' || item.status === 'JUSTIFICADA') acc.ausencias += 1;
-        acc.total += 1;
-        return acc;
-      },
-      { presentes: 0, pendentes: 0, ausencias: 0, total: 0 }
-    );
+    const resumo = calcularResumoPresencas(registros);
+    return {
+      presentes: resumo.presentes,
+      pendentes: resumo.pendentes,
+      ausencias: resumo.faltas,
+      total: registros.length,
+    };
   }, [registros]);
 
   return (
@@ -152,7 +170,7 @@ export default function HistoricoPresencasPage() {
         <p className="text-xs uppercase tracking-[0.25em] text-bjj-gray-200/80">Histórico</p>
         <h1 className="text-2xl font-semibold text-white">Presenças</h1>
         <p className="text-sm text-bjj-gray-50/90">
-          Visualize presenças confirmadas, pendentes e ausências com filtros por mês.
+          {`Controle central para ${staff?.nome || 'instrutores'} acompanharem presenças confirmadas, pendentes e ausências.`}
         </p>
       </header>
 
@@ -167,40 +185,63 @@ export default function HistoricoPresencasPage() {
               onChange={setMeses}
             />
           </div>
-          {!isAluno && alunoOptions.length > 0 && (
-            <div className="mt-4">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-bjj-gray-200/90">
-                <UserRound size={16} /> Aluno
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-bjj-gray-200/90">
+              <span className="flex items-center gap-2"><UserRound size={16} /> Buscar aluno</span>
+              <div className="flex items-center gap-2 rounded-xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3 py-2 text-sm text-bjj-gray-100">
+                <Search size={14} className="text-bjj-gray-300" />
+                <input
+                  className="w-full bg-transparent text-sm text-white placeholder:text-bjj-gray-200/60 focus:outline-none"
+                  placeholder="Nome ou e-mail"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
               </div>
-              <select
-                className="select select-bordered mt-2 w-full max-w-md border-bjj-gray-700 bg-bjj-gray-925 text-sm text-white shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
-                value={alunoSelecionado}
-                onChange={(event) => setAlunoSelecionado(event.target.value)}
-              >
-                {alunoOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+            </label>
+            <MultiSelectDropdown
+              label="Faixas"
+              options={faixaOptions}
+              values={faixasSelecionadas}
+              onChange={setFaixasSelecionadas}
+              placeholder="Todas as faixas"
+            />
+          </div>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <MultiSelectDropdown
+              label="Status"
+              options={STATUS_OPTIONS}
+              values={statusesSelecionados}
+              onChange={setStatusesSelecionados}
+              placeholder="Todos os status"
+            />
+            <MultiSelectDropdown
+              label="Treinos"
+              options={treinoOptions}
+              values={treinosSelecionados}
+              onChange={setTreinosSelecionados}
+              placeholder="Todos os treinos"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          {[{
-            label: 'Presenças',
-            value: totais.presentes,
-            tone: 'from-green-500/35 via-emerald-500/20 to-green-400/10 text-green-50 border-green-500/40'
-          }, {
-            label: 'Pendentes',
-            value: totais.pendentes,
-            tone: 'from-amber-400/35 via-orange-400/20 to-amber-300/10 text-amber-50 border-amber-400/50'
-          }, {
-            label: 'Ausências',
-            value: totais.ausencias,
-            tone: 'from-bjj-red/35 via-rose-500/20 to-bjj-red/10 text-rose-50 border-bjj-red/50'
-          }].map((item) => (
+          {[
+            {
+              label: 'Presenças',
+              value: totais.presentes,
+              tone: 'from-green-500/35 via-emerald-500/20 to-green-400/10 text-green-50 border-green-500/40',
+            },
+            {
+              label: 'Pendentes',
+              value: totais.pendentes,
+              tone: 'from-amber-400/35 via-orange-400/20 to-amber-300/10 text-amber-50 border-amber-400/50',
+            },
+            {
+              label: 'Ausências',
+              value: totais.ausencias,
+              tone: 'from-bjj-red/35 via-rose-500/20 to-bjj-red/10 text-rose-50 border-bjj-red/50',
+            },
+          ].map((item) => (
             <div
               key={item.label}
               className={`rounded-2xl border bg-gradient-to-br ${item.tone} p-4 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur`}
@@ -230,16 +271,10 @@ export default function HistoricoPresencasPage() {
               {registros.map((item) => {
                 const tone = statusTone(item.status);
                 const Icon = tone.icon;
-                const treino = treinos.find((treinoItem) => treinoItem.id === item.treinoId);
-                const treinoNome = treino?.nome || 'Sessão principal';
-                const treinoTipo = treino?.tipo || 'Treino';
-                const horario = treino?.hora || 'Horário a confirmar';
-                const aluno = getAlunoById(item.alunoId);
-                const faixaConfig =
-                  aluno?.faixaSlug
-                    ? getFaixaConfigBySlug(aluno.faixaSlug)
-                    : getFaixaConfigBySlug('branca-adulto');
-                const grauAtual = aluno?.graus ?? faixaConfig?.grausMaximos ?? 0;
+                const faixaConfig = getFaixaConfigBySlug(item.faixaSlug || 'branca-adulto');
+                const grauAtual = Number.isFinite(Number(item.graus))
+                  ? Number(item.graus)
+                  : faixaConfig?.grausMaximos ?? 0;
                 return (
                   <li key={item.id} className="relative pl-16">
                     <div
@@ -262,18 +297,18 @@ export default function HistoricoPresencasPage() {
 
                       <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <p className="text-base font-semibold text-white">{treinoNome}</p>
-                          <p className="text-xs text-bjj-gray-100/85">{treinoTipo}</p>
+                          <p className="text-base font-semibold text-white">{item.treinoNome}</p>
+                          <p className="text-xs text-bjj-gray-100/85">{item.treinoTipo}</p>
                         </div>
                         <div className="flex flex-col items-end text-right text-xs text-bjj-gray-100/85">
-                          <span className="font-semibold text-white">{horario}</span>
+                          <span className="font-semibold text-white">{item.horario}</span>
                           {item.origem && <span className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-200/80">{item.origem}</span>}
                         </div>
                       </div>
 
                       <div className="mt-3 flex flex-col gap-2 text-xs text-bjj-gray-50">
                         <div className="flex flex-wrap gap-2">
-                          <span className="rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/85">{aluno?.nome || 'Aluno(a)'}</span>
+                          <span className="rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/85">{item.alunoNome}</span>
                           <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-emerald-100">{item.turmaId ? `Turma ${item.turmaId}` : 'Sem turma'}</span>
                         </div>
                         {faixaConfig ? (
