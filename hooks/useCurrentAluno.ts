@@ -1,11 +1,13 @@
+import { useMemo } from 'react';
+
 import { useAlunosStore } from '@/store/alunosStore';
-import useUserStore from '@/store/userStore';
+import { useCurrentUser } from './useCurrentUser';
 
 export function useCurrentAluno() {
-  const user = useUserStore((s) => s.user);
+  const { user } = useCurrentUser();
   const getAlunoById = useAlunosStore((s) => s.getAlunoById);
 
-  const aluno = user?.alunoId ? getAlunoById(user.alunoId) : null;
+  const aluno = useMemo(() => (user?.alunoId ? getAlunoById(user.alunoId) : null), [getAlunoById, user?.alunoId]);
 
   return { user, aluno };
 }

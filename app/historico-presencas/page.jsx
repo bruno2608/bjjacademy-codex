@@ -6,10 +6,10 @@ import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
-import useUserStore from '../../store/userStore';
 import { ROLE_KEYS } from '../../config/roles';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
+import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 
 const buildMonthOptions = () => {
   const months = [];
@@ -24,7 +24,7 @@ const buildMonthOptions = () => {
 };
 
 export default function HistoricoPresencasPage() {
-  const { user } = useUserStore();
+  const { user } = useCurrentAluno();
   const { alunos, getAlunoById } = useAlunosStore();
   const treinos = useTreinosStore((state) => state.treinos);
   const alunoId = user?.alunoId;

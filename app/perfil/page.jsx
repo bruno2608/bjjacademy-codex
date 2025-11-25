@@ -6,9 +6,9 @@ import ValidatedField from '../../components/ui/ValidatedField';
 import { ROLE_KEYS } from '../../config/roles';
 import { useAlunosStore } from '../../store/alunosStore';
 import StudentHero from '../../components/student/StudentHero';
-import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
-import useUserStore from '../../store/userStore';
+import { useCurrentInstrutor } from '@/hooks/useCurrentInstrutor';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { normalizeFaixaSlug } from '@/lib/alunoStats';
 
@@ -17,10 +17,10 @@ const ensureAvatar = (name, avatarUrl) =>
 
 export default function PerfilAlunoPage() {
   const { user, aluno } = useCurrentAluno();
-  const updateUser = useUserStore((state) => state.updateUser);
+  const { updateUser } = useCurrentUser();
+  const { instrutor } = useCurrentInstrutor();
   const updateAluno = useAlunosStore((state) => state.updateAluno);
   const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
-  const defaultInstrutor = useMemo(() => MOCK_INSTRUTORES[0], []);
 
   const professorRoles = useMemo(
     () => (user?.roles || []).filter((role) => role !== ROLE_KEYS.aluno),
@@ -28,10 +28,10 @@ export default function PerfilAlunoPage() {
   );
 
   const deriveInitialForm = () => ({
-    nome: (isAluno ? aluno?.nome : user?.name || defaultInstrutor?.nome) || '',
+    nome: (isAluno ? aluno?.nome : instrutor?.nome || user?.nomeCompleto || user?.name) || '',
     telefone: (isAluno ? aluno?.telefone : user?.telefone) || '',
     email: (isAluno ? aluno?.email : user?.email) || '',
-    avatarUrl: (isAluno ? aluno?.avatarUrl : user?.avatarUrl || defaultInstrutor?.avatarUrl) || ''
+    avatarUrl: (isAluno ? aluno?.avatarUrl : user?.avatarUrl || instrutor?.avatarUrl) || ''
   });
 
   const [form, setForm] = useState(deriveInitialForm);
@@ -39,10 +39,10 @@ export default function PerfilAlunoPage() {
   const [saved, setSaved] = useState(false);
 
   const statusLabel = useMemo(() => {
-    if (!isAluno) return defaultInstrutor?.status || 'Ativo';
+    if (!isAluno) return instrutor?.status || 'Ativo';
     const raw = aluno?.status || 'Ativo';
     return typeof raw === 'string' ? raw.charAt(0).toUpperCase() + raw.slice(1) : 'Ativo';
-  }, [aluno?.status, defaultInstrutor?.status, isAluno]);
+  }, [aluno?.status, instrutor?.status, isAluno]);
 
   const resolverFaixaConfig = (valor) => {
     const slug = normalizeFaixaSlug(valor);
@@ -53,10 +53,10 @@ export default function PerfilAlunoPage() {
     );
   };
 
-  const faixaConfig = resolverFaixaConfig(isAluno ? aluno?.faixaSlug ?? aluno?.faixa : defaultInstrutor?.faixa);
+  const faixaConfig = resolverFaixaConfig(isAluno ? aluno?.faixaSlug ?? aluno?.faixa : instrutor?.faixaSlug);
   const grauAtual = isAluno
     ? aluno?.graus ?? faixaConfig?.grausMaximos ?? 0
-    : defaultInstrutor?.graus ?? faixaConfig?.grausMaximos ?? 0;
+    : instrutor?.graus ?? faixaConfig?.grausMaximos ?? 0;
 
   useEffect(() => {
     setForm(deriveInitialForm());
@@ -97,12 +97,12 @@ export default function PerfilAlunoPage() {
   return (
     <div className="space-y-4">
       <StudentHero
-        name={form.nome || user?.name || defaultInstrutor?.nome || 'Aluno'}
-        faixa={isAluno ? aluno?.faixa || aluno?.faixaSlug : defaultInstrutor?.faixa}
-        faixaSlug={isAluno ? aluno?.faixaSlug ?? aluno?.faixa : defaultInstrutor?.faixa}
+        name={form.nome || user?.nomeCompleto || user?.name || instrutor?.nome || 'Aluno'}
+        faixa={isAluno ? aluno?.faixa || aluno?.faixaSlug : instrutor?.faixaSlug}
+        faixaSlug={isAluno ? aluno?.faixaSlug ?? aluno?.faixa : instrutor?.faixaSlug}
         graus={grauAtual}
         statusLabel={statusLabel}
-        avatarUrl={ensureAvatar(form.nome || defaultInstrutor?.nome, form.avatarUrl)}
+        avatarUrl={ensureAvatar(form.nome || instrutor?.nome, form.avatarUrl)}
         subtitle={isAluno ? 'Perfil do aluno' : 'Perfil do professor'}
       />
 
