@@ -40,6 +40,13 @@ npm run dev
 - **Lucide React** para ícones
 - **next-pwa** com `manifest.json`, service worker custom e cache offline
 
+### 🆕 Atualizações mais recentes (25/11)
+
+- **Evolução alinhada ao dashboard**: a página `/evolucao` agora consome o hook centralizado `useAlunoDashboard`, unificando cálculos de presença e projeções de graduação.
+- **Linha do tempo combinada**: histórico real do aluno e planos futuros são exibidos na mesma timeline, com indicação visual de grau/faixa, instrutor e data formatada.
+- **Projeção detalhada**: cards destacam a próxima graduação com percentual, aulas realizadas x meta, estimativa de data e lembrete sobre check-ins pendentes fora do horário.
+- **Resumo rápido**: blocos com início na academia, aulas concluídas no grau/faixa e última atualização, todos derivados dos dados normalizados da dashboard.
+
 ## 🎯 **O que já está pronto**
 
 | Área | Destaques |
