@@ -6,8 +6,8 @@ import Button from '../../components/ui/Button';
 import { useAlunosStore } from '../../store/alunosStore';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useTreinosStore } from '../../store/treinosStore';
-import useUserStore from '../../store/userStore';
 import Modal from '../../components/ui/Modal';
+import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 
 const normalizeWeekday = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '').toLowerCase();
@@ -16,7 +16,7 @@ const formatDate = (date) =>
   new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
 
 export default function CheckinPage() {
-  const { user } = useUserStore();
+  const { user } = useCurrentAluno();
   const alunoId = user?.alunoId;
   const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const hoje = new Date().toISOString().split('T')[0];

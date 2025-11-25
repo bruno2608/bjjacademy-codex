@@ -18,16 +18,20 @@ type UserState = {
 const TOKEN_KEY = 'bjj_token';
 const ROLES_KEY = 'bjj_roles';
 const DEFAULT_ALUNO_ID = 'aluno_joao_silva';
+const DEFAULT_INSTRUTOR_ID = 'instrutor-vilmar';
 const DEFAULT_ACADEMIA_ID = 'academia_usgo';
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80';
 
 const fallbackUser: AuthUser = {
   id: 'user_admin',
   name: 'João Silva',
+  nomeCompleto: 'João Silva',
   email: 'adminhml@bjjacademy.com.br',
   avatarUrl: '/img/avatar-admin.png',
   roles: [ROLE_KEYS.admin, ROLE_KEYS.professor],
   alunoId: DEFAULT_ALUNO_ID,
+  instrutorId: DEFAULT_INSTRUTOR_ID,
+  professorId: 'professor-admin',
   academiaId: DEFAULT_ACADEMIA_ID
 };
 
@@ -74,11 +78,14 @@ export const useUserStore = create<UserState>((set) => ({
     const finalUser: AuthUser = {
       id: fallbackUser.id,
       name: email.split('@')[0] || 'Instrutor',
+      nomeCompleto: email.split('@')[0] || 'Instrutor',
       email,
       roles: finalRoles.length ? finalRoles : ALL_ROLES,
       avatarUrl: DEFAULT_AVATAR,
       telefone: null,
       alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null,
+      instrutorId: finalRoles.includes(ROLE_KEYS.instrutor) ? DEFAULT_INSTRUTOR_ID : null,
+      professorId: finalRoles.includes(ROLE_KEYS.professor) ? 'professor-admin' : null,
       academiaId: DEFAULT_ACADEMIA_ID
     };
 

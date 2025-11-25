@@ -37,6 +37,8 @@ export const normalizeAluno = (aluno: Partial<Aluno>): Aluno => ({
   graus: Number(aluno.graus ?? 0),
   mesesNaFaixa: Number(aluno.mesesNaFaixa ?? 0),
   avatarUrl: aluno.avatarUrl ?? null,
+  email: aluno.email ?? '',
+  academiaId: aluno.academiaId ?? null,
   dataInicio: aluno.dataInicio ?? getCurrentDateISO(),
   dataNascimento: aluno.dataNascimento ?? null,
   dataUltimaGraduacao: aluno.dataUltimaGraduacao ?? null,
@@ -80,7 +82,8 @@ const getLatestHistoryRecord = (
 
 const buildAttendanceStatsForAluno = (aluno: Aluno, presencas: Presenca[] = []) => {
   const registrosAluno = presencas.filter(
-    (item) => item.alunoId === aluno.id && item.status === 'CONFIRMADO'
+    (item) =>
+      item.alunoId === aluno.id && (item.status === 'PRESENTE' || item.status === 'CONFIRMADO')
   );
 
   const historico = Array.isArray(aluno.historicoGraduacoes)

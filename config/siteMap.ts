@@ -1,8 +1,8 @@
-import type { Role } from './roles';
+import type { Role, UserRole } from './roles';
 import { ROLE_KEYS } from './roles';
 
 export const siteMap = {
-  aluno: [
+  [ROLE_KEYS.aluno]: [
     '/dashboard',
     '/checkin',
     '/treinos',
@@ -11,7 +11,7 @@ export const siteMap = {
     '/belt-demo',
     '/perfil'
   ],
-  instrutor: [
+  [ROLE_KEYS.instrutor]: [
     '/dashboard',
     '/checkin',
     '/treinos',
@@ -22,7 +22,7 @@ export const siteMap = {
     '/relatorios',
     '/alunos'
   ],
-  professor: [
+  [ROLE_KEYS.professor]: [
     '/dashboard',
     '/checkin',
     '/treinos',
@@ -38,11 +38,11 @@ export const siteMap = {
     '/configuracoes/treinos',
     '/configuracoes/tipos-treino'
   ],
-  admin: 'acesso total',
-  ti: 'acesso total'
+  [ROLE_KEYS.admin]: 'acesso total',
+  [ROLE_KEYS.ti]: 'acesso total'
 } as const;
 
-const ROUTE_KEYS = Object.keys(siteMap) as Role[];
+const ROUTE_KEYS = Object.keys(siteMap) as UserRole[];
 
 export function routesForRole(role: Role): string[] {
   if ([ROLE_KEYS.admin, ROLE_KEYS.ti].includes(role)) {
