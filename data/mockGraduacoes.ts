@@ -3,7 +3,7 @@ import type { GraduacaoPlanejada } from '../types';
 export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
   {
     id: 'g1',
-    alunoId: '1',
+    alunoId: 'aluno_joao_silva',
     alunoNome: 'João Silva',
     faixaAtual: 'Roxa',
     proximaFaixa: 'Marrom',

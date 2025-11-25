@@ -1,12 +1,14 @@
 import type { UserRole } from '../config/roles';
 
 export type AuthUser = {
+  id?: string;
   name: string;
   email: string;
   roles: UserRole[];
   avatarUrl?: string | null;
   telefone?: string | null;
   alunoId?: string | null;
+  academiaId?: string | null;
 };
 
 export type LoginPayload = {
