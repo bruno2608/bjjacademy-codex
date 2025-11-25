@@ -55,15 +55,19 @@ export default function Header() {
   }, [hydrateFromStorage, hydrated]);
 
   const aluno = useMemo(() => (user?.alunoId ? getAlunoById(user.alunoId) : null), [getAlunoById, user?.alunoId]);
+  const displayName = aluno?.nome || user?.name || 'Instrutor';
+  const displayEmail = aluno?.email || user?.email || 'instrutor@bjj.academy';
 
   const initials = useMemo(() => {
-    const source = user?.name || user?.email || 'Instrutor';
+    const source = displayName || displayEmail;
     const parts = source.split(/[\s@._-]+/).filter(Boolean);
     if (!parts.length) return 'IN';
     const first = parts[0][0] || '';
     const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
     return `${first}${last}`.toUpperCase();
-  }, [user?.name, user?.email]);
+  }, [displayEmail, displayName]);
+
+  const avatarUrl = aluno?.avatarUrl || user?.avatarUrl;
 
   const avatarUrl = user?.avatarUrl || aluno?.avatarUrl;
 
@@ -85,12 +89,7 @@ export default function Header() {
       <span className="text-sm font-semibold uppercase tracking-wide text-bjj-gray-200">BJJ Academy</span>
       <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-bjj-red/80 to-bjj-red text-xs font-semibold text-bjj-white shadow-[0_0_0_1px_rgba(225,6,0,0.4)]">
         {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={`Avatar de ${user?.name || aluno?.nome || 'Instrutor'}`}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
+          <img src={avatarUrl} alt={`Avatar de ${displayName}`} className="h-full w-full object-cover" loading="lazy" />
         ) : (
           initials
         )}
@@ -146,7 +145,7 @@ export default function Header() {
                   {avatarUrl ? (
                     <img
                       src={avatarUrl}
-                      alt={`Avatar de ${user?.name || aluno?.nome || 'Instrutor'}`}
+                      alt={`Avatar de ${displayName}`}
                       className="h-full w-full object-cover"
                       loading="lazy"
                     />
@@ -155,8 +154,8 @@ export default function Header() {
                   )}
                 </span>
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-bjj-white">{user?.name || aluno?.nome || 'Instrutor'}</span>
-                  <span className="text-[11px] text-bjj-gray-200/60">{user?.email || aluno?.email || 'instrutor@bjj.academy'}</span>
+                  <span className="text-sm font-semibold text-bjj-white">{displayName}</span>
+                  <span className="text-[11px] text-bjj-gray-200/60">{displayEmail}</span>
                 </div>
               </div>
 
