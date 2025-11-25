@@ -23,7 +23,6 @@ import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useAlunoDashboard } from '@/services/dashboard/useAlunoDashboard';
 import { useProfessorDashboard } from '@/services/dashboard/useProfessorDashboard';
 import { BjjBeltProgressCard } from '@/components/bjj/BjjBeltProgressCard';
-import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -74,9 +73,6 @@ function DashboardHero({
           </div>
 
           <div className="flex w-full flex-col gap-3 lg:max-w-md">
-            {faixaConfig && (
-              <BjjBeltStrip config={faixaConfig} grauAtual={grauAtual} />
-            )}
             {faixaConfig && (
               <div className="w-full max-w-2xl">
                 <BjjBeltProgressCard
