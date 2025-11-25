@@ -108,6 +108,27 @@ await atualizarStatus(registro.id, 'PRESENTE');
 - ✅ Histórico de presenças do aluno (`/historico-presencas`)
 - ✅ Presenças do professor/staff (`/presencas`)
 
+## 👥 Perfis e dashboards
+
+- **Perfis suportados**: `ALUNO`, `INSTRUTOR`, `PROFESSOR` (há `ADMIN/TI` mapeados, seguirão o mesmo padrão em fase futura).
+- **Hooks de sessão**: `useCurrentUser` (dados básicos), `useCurrentAluno` (perfil de aluno), `useCurrentInstrutor` (perfil instrutor/professor via store de instrutores).
+- **Dashboards**: `/dashboard` seleciona automaticamente entre visão de professor/instrutor (via `useProfessorDashboard`) ou aluno (`useAlunoDashboard`).
+- **Telas de presença por perfil**: Aluno → `/dashboard`, `/checkin`, `/historico-presencas`; Professor/Instrutor → `/presencas` (listar/fechar treinos) e cards de presença no dashboard staff.
+
+Arquitetura de fluxo (mocks → service → store → hooks → tela):
+
+```
+mockInstrutores/mockPresencas
+        ↓ (services)
+instrutoresService / presencasService
+        ↓ (stores)
+useInstrutoresStore / usePresencasStore / treinosStore
+        ↓ (hooks)
+useCurrentInstrutor · useCurrentAluno · useProfessorDashboard · useAlunoDashboard
+        ↓ (telas)
+Dashboards · Check-in · Histórico · Presenças (staff)
+```
+
 ## 🎯 **O que já está pronto**
 
 | Área | Destaques |
