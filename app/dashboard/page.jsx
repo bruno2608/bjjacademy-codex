@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   Activity,
@@ -19,15 +18,10 @@ import {
 } from 'lucide-react';
 
 import useRole from '../../hooks/useRole';
-import { usePresencasStore } from '../../store/presencasStore';
-import { useAlunosStore } from '../../store/alunosStore';
 import { ROLE_KEYS } from '../../config/roles';
-import { useTreinosStore } from '../../store/treinosStore';
-import { confirmarPresenca, marcarAusencia } from '../../services/presencasService';
-import { MOCK_INSTRUTORES } from '../../data/mockInstrutores';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { useAlunoDashboard } from '@/hooks/useAlunoDashboard';
+import { useAlunoDashboard } from '@/services/dashboard/useAlunoDashboard';
+import { useProfessorDashboard } from '@/services/dashboard/useProfessorDashboard';
 import { BjjBeltProgressCard } from '@/components/bjj/BjjBeltProgressCard';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 
@@ -101,9 +95,7 @@ function DashboardHero({
 }
 
 function StudentDashboard() {
-  const { user, aluno: alunoSelecionado } = useCurrentAluno();
-  const presencas = usePresencasStore((state) => state.presencas);
-  const treinos = useTreinosStore((state) => state.treinos);
+  const { user } = useCurrentAluno();
 
   const {
     aluno,
@@ -111,45 +103,15 @@ function StudentDashboard() {
     faixaSlug,
     grauAtual,
     aulasFeitasNoGrau,
-    aulasMetaNoGrau
-  } = useAlunoDashboard(alunoSelecionado?.id || user?.alunoId);
+    aulasMetaNoGrau,
+    stats,
+    progressoProximoGrau,
+    ultimasPresencas,
+    statusLabel,
+    treinoPorId
+  } = useAlunoDashboard();
 
   const avatarUrl = ensureAvatar(aluno?.nome, aluno?.avatarUrl || user?.avatarUrl || defaultAvatar);
-
-  const stats = useMemo(() => {
-    const registrosAluno = presencas.filter((item) => item.alunoId === aluno?.id);
-    const presentes = registrosAluno.filter((item) => item.status === 'PRESENTE').length;
-    const faltas = registrosAluno.filter((item) => item.status === 'FALTA').length;
-    const pendentes = registrosAluno.filter((item) => item.status === 'PENDENTE').length;
-    return { presentes, faltas, pendentes };
-  }, [aluno?.id, presencas]);
-
-  const progressoProximoGrau = useMemo(() => {
-    const aulasNoGrau = aulasFeitasNoGrau || 0;
-    const alvo = aulasMetaNoGrau ?? 20;
-    const percent = alvo > 0 ? Math.min(100, Math.round((aulasNoGrau / alvo) * 100)) : 0;
-    return { aulasNoGrau, alvo, percent };
-  }, [aulasFeitasNoGrau, aulasMetaNoGrau]);
-
-  const ultimasPresencas = useMemo(
-    () =>
-      presencas
-        .filter((item) => item.alunoId === aluno?.id)
-        .slice(-5)
-        .reverse(),
-    [aluno?.id, presencas]
-  );
-
-  const statusLabel = useMemo(() => {
-    const raw = aluno?.status || 'ativo';
-    return raw.charAt(0).toUpperCase() + raw.slice(1);
-  }, [aluno?.status]);
-
-  const treinoPorId = useMemo(() => {
-    const map = new Map();
-    treinos.forEach((treino) => map.set(treino.id, treino));
-    return map;
-  }, [treinos]);
 
   const formatStatus = (status) => {
     switch (status) {
@@ -272,97 +234,31 @@ function StudentDashboard() {
 }
 
 function ProfessorDashboard() {
-  const { user } = useCurrentUser();
-  const { aluno: alunoAtual } = useCurrentAluno();
-  const presencas = usePresencasStore((state) => state.presencas);
-  const alunos = useAlunosStore((state) => state.alunos);
-  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
-  const treinos = useTreinosStore((state) => state.treinos);
-  const [activeTab, setActiveTab] = useState('visao');
-  const [updatingId, setUpdatingId] = useState(null);
-  const defaultInstrutor = useMemo(() => MOCK_INSTRUTORES[0], []);
-  const instructorName = alunoAtual?.nome || user?.name || defaultInstrutor?.nome || 'Instrutor';
-  const instructorFaixaSlug = alunoAtual?.faixaSlug || alunoAtual?.faixa || defaultInstrutor?.faixa || 'branca-adulto';
-  const faixaConfig =
-    getFaixaConfigBySlug(instructorFaixaSlug) || getFaixaConfigBySlug('branca-adulto');
-  const instructorGraus =
-    typeof alunoAtual?.graus === 'number'
-      ? alunoAtual.graus
-      : typeof defaultInstrutor?.graus === 'number'
-        ? defaultInstrutor.graus
-        : faixaConfig?.grausMaximos ?? 0;
-  const instructorAvatar = alunoAtual?.avatarUrl || user?.avatarUrl || defaultInstrutor?.avatarUrl || defaultAvatar;
-
-  const treinoPorId = useMemo(() => {
-    const map = new Map();
-    treinos.forEach((treino) => map.set(treino.id, treino));
-    return map;
-  }, [treinos]);
-
-  const metrics = useMemo(() => {
-    const totalAlunos = alunos.length;
-    const ativos = alunos.filter((a) => (a.status || '').toString().toUpperCase() === 'ATIVO').length;
-    const inativos = totalAlunos - ativos;
-    const graduados = alunos.filter((a) => (a.faixa || '').toLowerCase() !== 'branca').length;
-    const pendentes = presencas.filter((p) => p.status === 'PENDENTE').length;
-    const presentesSemana = presencas.filter((p) => p.status === 'PRESENTE').length;
-    return { totalAlunos, ativos, inativos, graduados, pendentes, presentesSemana };
-  }, [alunos, presencas]);
-
-  const tabCards = useMemo(
-    () => ({
-      visao: [
-        { title: 'Presenças hoje', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'text-green-300' },
-        { title: 'Registros pendentes', value: metrics.pendentes, icon: Clock3, tone: 'text-yellow-300' },
-        { title: 'Faixas em progresso', value: metrics.graduados, icon: Medal, tone: 'text-white' },
-        { title: 'Alunos ativos', value: metrics.ativos, icon: Users, tone: 'text-bjj-red' }
-      ],
-      alunos: [
-        { title: 'Total de alunos', value: metrics.totalAlunos, icon: Users, tone: 'text-white' },
-        { title: 'Alunos ativos', value: metrics.ativos, icon: Activity, tone: 'text-green-300' },
-        { title: 'Inativos', value: metrics.inativos, icon: BarChart2, tone: 'text-yellow-300' },
-        { title: 'Últimas matrículas', value: 4, icon: TrendingUp, tone: 'text-bjj-red' }
-      ],
-      presencas: [
-        { title: 'Presenças na semana', value: metrics.presentesSemana, icon: CalendarCheck, tone: 'text-green-300' },
-        { title: 'Pendentes de aprovação', value: metrics.pendentes, icon: Clock3, tone: 'text-yellow-300' },
-        {
-          title: 'Ausências',
-          value: presencas.filter((p) => p.status === 'FALTA').length,
-          icon: BarChart3,
-          tone: 'text-bjj-red'
-        },
-        { title: 'Check-ins registrados', value: presencas.length, icon: Activity, tone: 'text-white' }
-      ],
-      graduacoes: [
-        { title: 'Próximas graduações', value: alunos.filter((a) => a.proximaMeta).length || 6, icon: Medal, tone: 'text-white' },
-        { title: 'Faixas avançadas', value: metrics.graduados, icon: ShieldCheck, tone: 'text-bjj-red' },
-        { title: 'Tempo médio na faixa', value: '14 meses', icon: Clock3, tone: 'text-yellow-300' },
-        { title: 'Relatórios emitidos', value: 12, icon: PieChart, tone: 'text-green-300' }
-      ]
-    }),
-    [alunos, metrics, presencas]
-  );
-
-  const handleStatusChange = async (id, action) => {
-    if (!id) return;
-    setUpdatingId(id);
-    try {
-      if (action === 'approve') {
-        await confirmarPresenca(id);
-      } else {
-        await marcarAusencia(id);
-      }
-    } finally {
-      setUpdatingId(null);
-    }
-  };
+  const {
+    instructorName,
+    faixaSlug,
+    faixaConfig,
+    graus: instructorGraus,
+    avatarUrl: instructorAvatar,
+    metrics,
+    tabCards,
+    treinoPorId,
+    pendentes,
+    presencas,
+    treinos,
+    alunos,
+    getAlunoById,
+    activeTab,
+    setActiveTab,
+    handleStatusChange,
+    updatingId
+  } = useProfessorDashboard();
 
   return (
     <div className="space-y-6">
       <DashboardHero
         name={instructorName}
-        faixaSlug={faixaConfig?.slug || instructorFaixaSlug}
+        faixaSlug={faixaConfig?.slug || faixaSlug}
         graus={instructorGraus}
         statusLabel="Professor"
         avatarUrl={ensureAvatar(instructorName, instructorAvatar)}

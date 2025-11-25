@@ -1,9 +1,9 @@
 export const ROLE_KEYS = {
-  aluno: 'aluno',
-  instrutor: 'instrutor',
-  professor: 'professor',
-  admin: 'admin',
-  ti: 'ti'
+  aluno: 'ALUNO',
+  instrutor: 'INSTRUTOR',
+  professor: 'PROFESSOR',
+  admin: 'ADMIN',
+  ti: 'TI'
 } as const;
 
 export type UserRole = (typeof ROLE_KEYS)[keyof typeof ROLE_KEYS];
