@@ -10,6 +10,7 @@ export function useCurrentInstrutor() {
   const getAlunoById = useAlunosStore((s) => s.getAlunoById)
   const carregarInstrutores = useInstrutoresStore((s) => s.carregar)
   const getInstrutorById = useInstrutoresStore((s) => s.getInstrutorById)
+  const atualizarInstrutor = useInstrutoresStore((s) => s.atualizar)
   const instrutores = useInstrutoresStore((s) => s.instrutores)
   const hydrated = useInstrutoresStore((s) => s.hydrated)
 
@@ -19,13 +20,55 @@ export function useCurrentInstrutor() {
     }
   }, [carregarInstrutores, hydrated, instrutores.length, user?.instrutorId, user?.professorId])
 
+  useEffect(() => {
+    const candidatoId = user?.instrutorId || user?.professorId
+    if (!candidatoId) return
+    const atual = getInstrutorById(candidatoId)
+    if (!atual) return
+
+    const nomeResolvido = user?.nomeCompleto || atual.nomeCompleto || atual.nome
+    const avatarResolvido = atual.avatarUrl || user?.avatarUrl || null
+    const emailResolvido = atual.email ?? user?.email ?? null
+
+    if (
+      nomeResolvido !== atual.nomeCompleto ||
+      avatarResolvido !== atual.avatarUrl ||
+      emailResolvido !== atual.email
+    ) {
+      void atualizarInstrutor(candidatoId, {
+        nome: nomeResolvido,
+        nomeCompleto: nomeResolvido,
+        avatarUrl: avatarResolvido,
+        email: emailResolvido,
+        roles: user?.roles,
+      })
+    }
+  }, [
+    atualizarInstrutor,
+    getInstrutorById,
+    instrutores.length,
+    user?.avatarUrl,
+    user?.email,
+    user?.instrutorId,
+    user?.nomeCompleto,
+    user?.professorId,
+    user?.roles,
+  ])
+
   const instrutor = useMemo(() => {
     const candidatoId = user?.instrutorId || user?.professorId
     const instrutorAtual = candidatoId ? getInstrutorById(candidatoId) : null
     if (instrutorAtual) {
+      const nomeResolvido = user?.nomeCompleto || instrutorAtual.nomeCompleto || instrutorAtual.nome
+      const avatarResolvido = instrutorAtual.avatarUrl || user?.avatarUrl || null
+      const emailResolvido = instrutorAtual.email ?? user?.email ?? null
       return {
         ...instrutorAtual,
-        nomeCompleto: instrutorAtual.nomeCompleto || instrutorAtual.nome,
+        nome: nomeResolvido || instrutorAtual.nome,
+        nomeCompleto: nomeResolvido || instrutorAtual.nome,
+        avatarUrl: avatarResolvido,
+        email: emailResolvido,
+        roles: user?.roles || instrutorAtual.roles,
       }
     }
 
