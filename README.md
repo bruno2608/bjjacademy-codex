@@ -55,6 +55,59 @@ npm run dev
 - **Projeção detalhada**: cards destacam a próxima graduação com percentual, aulas realizadas x meta, estimativa de data e lembrete sobre check-ins pendentes fora do horário.
 - **Resumo rápido**: blocos com início na academia, aulas concluídas no grau/faixa e última atualização, todos derivados dos dados normalizados da dashboard.
 
+## 📒 Gestão de Presenças (MVP)
+
+### Fluxo
+
+- **Check-in do aluno**: o usuário logado (`useCurrentAluno`) envia presença do treino do dia pela `usePresencasStore.registrarCheckin`, que cria/atualiza o registro com status `PENDENTE`.
+- **Confirmação pelo professor**: a visão de staff/professor carrega presenças via `usePresencasStore.carregarTodas/PorTreino` e altera status com `atualizarStatus` (ex.: `PRESENTE`, `FALTA`, `JUSTIFICADA`).
+- **Fechamento de treino**: o botão “Fechar treino” chama `presencasStore.fecharTreino`, aplicando a regra atual (pendentes viram `PRESENTE`; ausentes continuam `FALTA`/`JUSTIFICADA`) e bloqueando novos check-ins com `marcarTreinoFechado`.
+- **Reflexo entre telas**: qualquer atualização passa pelo service → store, mantendo dashboard do aluno, check-in, histórico e visão de staff sincronizados.
+
+### Status e significado
+
+- `PENDENTE`: check-in enviado pelo aluno, aguardando confirmação do professor.
+- `PRESENTE`: presença confirmada manualmente ou ao fechar o treino.
+- `FALTA`: ausência registrada ou placeholder automático do dia.
+- `JUSTIFICADA`: falta com justificativa lançada pelo professor/staff.
+
+### Camada de dados
+
+1. `data/mockPresencas.ts` → **somente** lido pelo `services/presencasService.ts`.
+2. `services/presencasService.ts` → centraliza listagens, check-in, atualização de status e fechamento.
+3. `store/presencasStore.ts` → expõe ações/estado para UI, recalculando métricas de alunos.
+4. Telas `/dashboard-aluno`, `/checkin`, `/historico-presencas`, `/presencas` → consomem apenas hooks/stores (nenhum acesso direto a mocks).
+
+### Exemplos de uso
+
+**Check-in do aluno**
+
+```tsx
+const { user, aluno } = useCurrentAluno();
+const registrarCheckin = usePresencasStore((s) => s.registrarCheckin);
+
+const handleCheckin = async (treino) => {
+  await registrarCheckin({ alunoId: aluno?.id || user?.alunoId, treinoId: treino.id, data: hoje });
+};
+```
+
+**Lista/ação do professor**
+
+```tsx
+const presencas = usePresencasStore((s) => s.presencas);
+const atualizarStatus = usePresencasStore((s) => s.atualizarStatus);
+
+// Exemplo de confirmação
+await atualizarStatus(registro.id, 'PRESENTE');
+```
+
+### Checklist de telas alinhadas
+
+- ✅ Dashboard do aluno (sincronizado com presenças mock via service/store)
+- ✅ Check-in do aluno (`/checkin`)
+- ✅ Histórico de presenças do aluno (`/historico-presencas`)
+- ✅ Presenças do professor/staff (`/presencas`)
+
 ## 🎯 **O que já está pronto**
 
 | Área | Destaques |

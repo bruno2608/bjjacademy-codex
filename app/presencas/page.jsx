@@ -24,7 +24,8 @@ const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os status' },
   { value: 'PENDENTE', label: 'Pendente' },
   { value: 'PRESENTE', label: 'Presente' },
-  { value: 'FALTA', label: 'Falta' }
+  { value: 'FALTA', label: 'Falta' },
+  { value: 'JUSTIFICADA', label: 'Justificada' }
 ];
 const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
 
@@ -217,7 +218,8 @@ export default function PresencasPage() {
   const statusOrder = {
     PENDENTE: 0,
     PRESENTE: 1,
-    FALTA: 2
+    FALTA: 2,
+    JUSTIFICADA: 2
   };
 
   const statusLabel = (status) => {
@@ -228,6 +230,8 @@ export default function PresencasPage() {
         return { label: 'PRESENTE', tone: 'text-green-300' };
       case 'FALTA':
         return { label: 'FALTA', tone: 'text-red-300' };
+      case 'JUSTIFICADA':
+        return { label: 'JUSTIFICADA', tone: 'text-indigo-200' };
       default:
         return { label: status || '—', tone: 'text-bjj-gray-200' };
     }
@@ -247,7 +251,7 @@ export default function PresencasPage() {
   const totalFiltrado = registrosFiltrados.length;
 
   const presentesDia = registrosDoDia.filter((item) => item.status === 'PRESENTE').length;
-  const faltasDia = registrosDoDia.filter((item) => item.status === 'FALTA').length;
+  const faltasDia = registrosDoDia.filter((item) => item.status === 'FALTA' || item.status === 'JUSTIFICADA').length;
   const pendentesDia = registrosDoDia.filter((item) => item.status === 'PENDENTE').length;
   const totalDia = registrosDoDia.length || 1;
   const taxaPresencaDia = (presentesDia / totalDia) * 100;
