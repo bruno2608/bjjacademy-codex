@@ -7,6 +7,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Filter, UserPlus2 } from 'lucide-react';
+import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
 import Table from '../../components/ui/Table';
 import Modal from '../../components/ui/Modal';
@@ -139,6 +141,33 @@ export default function AlunosPage() {
       return true;
     });
   }, [alunos, filterFaixas, filterStatuses, filterTreinos, limparSelecao, searchTerm, treinosPorAluno]);
+
+  const alunosComFaixa = useMemo(
+    () =>
+      alunosFiltrados.map((aluno) => {
+        const faixaConfig =
+          getFaixaConfigBySlug(aluno.faixaSlug) || getFaixaConfigBySlug('branca-adulto');
+        const grauAtual = Number.isFinite(Number(aluno.graus))
+          ? Number(aluno.graus)
+          : faixaConfig?.grausMaximos ?? 0;
+        const faixaVisual =
+          faixaConfig && (
+            <div className="w-full max-w-[180px]">
+              <BjjBeltStrip
+                config={faixaConfig}
+                grauAtual={grauAtual}
+                className="scale-[0.75] md:scale-[0.85] origin-left"
+              />
+            </div>
+          );
+
+        return {
+          ...aluno,
+          faixaVisual
+        };
+      }),
+    [alunosFiltrados]
+  );
 
   const totalFiltrado = alunosFiltrados.length;
 
@@ -282,7 +311,7 @@ export default function AlunosPage() {
           </header>
           <Table
             headers={['Ações', 'Aluno', 'Graduação', 'Plano', 'Status', 'Contato']}
-            data={alunosFiltrados}
+            data={alunosComFaixa}
             onEdit={handleEdit}
             onDelete={handleDelete}
             isLoading={isRefreshing}

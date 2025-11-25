@@ -4,6 +4,17 @@ import type { Presenca } from '../types/presenca';
 
 const getCurrentDateISO = () => new Date().toISOString().split('T')[0];
 
+const normalizarSlug = (valor?: string | null) => {
+  if (!valor) return 'branca-adulto';
+  return valor
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/--+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const normalizeHistorico = (historico?: GraduationHistoryEntry[]): GraduationHistoryEntry[] => {
   if (!Array.isArray(historico)) {
     return [];
@@ -20,7 +31,8 @@ export const normalizeAluno = (aluno: Partial<Aluno>): Aluno => ({
   telefone: aluno.telefone ?? '',
   plano: aluno.plano ?? 'Mensal',
   status: (aluno.status as Aluno['status']) ?? 'Ativo',
-  faixa: aluno.faixa ?? 'Branca',
+  faixa: aluno.faixa ?? aluno.faixaSlug ?? 'Branca',
+  faixaSlug: normalizarSlug(aluno.faixaSlug ?? aluno.faixa ?? undefined),
   graus: Number(aluno.graus ?? 0),
   mesesNaFaixa: Number(aluno.mesesNaFaixa ?? 0),
   avatarUrl: aluno.avatarUrl ?? null,
