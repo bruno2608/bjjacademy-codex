@@ -11,7 +11,7 @@ import { useTreinosStore } from '@/store/treinosStore'
 import type { BjjBeltVisualConfig } from '@/types/bjjBelt'
 import type { Aluno } from '@/types/aluno'
 import type { GraduationRecommendation } from '@/types/graduacao'
-import type { Presenca } from '@/types/presenca'
+import type { PresencaRegistro } from '@/types/presenca'
 
 export interface AlunoDashboardData {
   aluno: Aluno | null
@@ -27,8 +27,8 @@ export interface AlunoDashboardData {
   totalFaltas: number
   totalPendentes: number
 
-  ultimaPresenca?: Presenca | null
-  ultimasPresencas: Presenca[]
+  ultimaPresenca?: PresencaRegistro | null
+  ultimasPresencas: PresencaRegistro[]
   treinoPorId: Map<string, { id: string; nome: string; hora?: string }>
 
   proximaGraduacao: GraduationRecommendation | null

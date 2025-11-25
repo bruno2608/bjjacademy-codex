@@ -6,7 +6,6 @@ import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils'
 import { useAlunosStore } from '@/store/alunosStore'
 import { usePresencasStore } from '@/store/presencasStore'
 import { useTreinosStore } from '@/store/treinosStore'
-import { confirmarPresenca, marcarAusencia } from '@/services/presencasService'
 import { normalizeFaixaSlug } from '@/lib/alunoStats'
 import { useCurrentAluno } from '@/hooks/useCurrentAluno'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
@@ -40,6 +39,7 @@ export function useProfessorDashboard(): ProfessorDashboardData {
   const { aluno: alunoAtual } = useCurrentAluno()
   const { instrutor } = useCurrentInstrutor()
   const presencas = usePresencasStore((state) => state.presencas)
+  const atualizarStatus = usePresencasStore((state) => state.atualizarStatus)
   const alunos = useAlunosStore((state) => state.alunos)
   const getAlunoById = useAlunosStore((state) => state.getAlunoById)
   const treinos = useTreinosStore((state) => state.treinos)
@@ -102,11 +102,7 @@ export function useProfessorDashboard(): ProfessorDashboardData {
     if (!id) return
     setUpdatingId(id)
     try {
-      if (action === 'approve') {
-        await confirmarPresenca(id)
-      } else {
-        await marcarAusencia(id)
-      }
+      await atualizarStatus(id, action === 'approve' ? 'PRESENTE' : 'FALTA')
     } finally {
       setUpdatingId(null)
     }
