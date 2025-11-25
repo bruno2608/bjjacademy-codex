@@ -246,12 +246,17 @@ export default function HistoricoPresencasPage() {
                         <span className="rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/85">{aluno?.nome || 'Aluno(a)'}</span>
                         <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-emerald-100">{item.turmaId ? `Turma ${item.turmaId}` : 'Sem turma'}</span>
                         {faixaConfig ? (
-                          <div className="w-[120px]">
-                            <BjjBeltStrip
-                              config={faixaConfig}
-                              grauAtual={grauAtual}
-                              className="scale-[0.6] md:scale-[0.7] origin-left"
-                            />
+                          <div className="flex items-center gap-2 rounded-full border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3 py-1">
+                            <span className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-100/90">
+                              {faixaConfig.nome}
+                            </span>
+                            <div className="w-[120px]">
+                              <BjjBeltStrip
+                                config={faixaConfig}
+                                grauAtual={grauAtual}
+                                className="scale-[0.6] md:scale-[0.7] origin-left"
+                              />
+                            </div>
                           </div>
                         ) : (
                           <span className="text-[11px] text-bjj-gray-300">Sem dados de faixa</span>
