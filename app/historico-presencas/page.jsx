@@ -9,7 +9,9 @@ import { useTreinosStore } from '../../store/treinosStore';
 import { ROLE_KEYS } from '../../config/roles';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
-import { useCurrentAluno } from '@/hooks/useCurrentAluno';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { calcularResumoPresencas } from '@/lib/presencasResumo';
 
 const buildMonthOptions = () => {
   const months = [];
@@ -24,14 +26,16 @@ const buildMonthOptions = () => {
 };
 
 export default function HistoricoPresencasPage() {
-  const { user } = useCurrentAluno();
-  const { alunos, getAlunoById } = useAlunosStore();
+  const { user } = useCurrentUser();
+  const { staff } = useCurrentStaff();
+  const alunos = useAlunosStore((state) => state.alunos);
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const treinos = useTreinosStore((state) => state.treinos);
-  const alunoId = user?.alunoId;
   const presencas = usePresencasStore((state) => state.presencas);
   const carregarTodas = usePresencasStore((state) => state.carregarTodas);
   const carregarPorAluno = usePresencasStore((state) => state.carregarPorAluno);
   const isAluno = user?.roles?.includes(ROLE_KEYS.aluno);
+  const alunoId = user?.alunoId;
   const [meses, setMeses] = useState(buildMonthOptions().slice(0, 1).map((item) => item.value));
   const [alunoSelecionado, setAlunoSelecionado] = useState(alunoId || '');
 
@@ -134,16 +138,13 @@ export default function HistoricoPresencasPage() {
   }, [alunos]);
 
   const totais = useMemo(() => {
-    return registros.reduce(
-      (acc, item) => {
-        if (item.status === 'PRESENTE') acc.presentes += 1;
-        if (item.status === 'PENDENTE') acc.pendentes += 1;
-        if (item.status === 'FALTA' || item.status === 'JUSTIFICADA') acc.ausencias += 1;
-        acc.total += 1;
-        return acc;
-      },
-      { presentes: 0, pendentes: 0, ausencias: 0, total: 0 }
-    );
+    const resumo = calcularResumoPresencas(registros);
+    return {
+      presentes: resumo.presentes,
+      pendentes: resumo.pendentes,
+      ausencias: resumo.faltas,
+      total: registros.length
+    };
   }, [registros]);
 
   return (
@@ -152,7 +153,9 @@ export default function HistoricoPresencasPage() {
         <p className="text-xs uppercase tracking-[0.25em] text-bjj-gray-200/80">Histórico</p>
         <h1 className="text-2xl font-semibold text-white">Presenças</h1>
         <p className="text-sm text-bjj-gray-50/90">
-          Visualize presenças confirmadas, pendentes e ausências com filtros por mês.
+          {isAluno
+            ? 'Visualize seu histórico de presenças com filtros por mês.'
+            : `Controle central para ${staff?.nome || 'instrutores'} acompanharem presenças confirmadas, pendentes e ausências.`}
         </p>
       </header>
 

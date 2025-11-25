@@ -15,6 +15,9 @@ export const normalizeFaixaSlug = (valor?: string | null) => {
     .replace(/^-+|-+$/g, '');
 };
 
+export const normalizeAlunoStatus = (valor?: string | null) =>
+  (valor || '').toString().trim().toUpperCase();
+
 const normalizeHistorico = (historico?: GraduationHistoryEntry[]): GraduationHistoryEntry[] => {
   if (!Array.isArray(historico)) {
     return [];
