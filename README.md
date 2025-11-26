@@ -40,6 +40,51 @@ npm run dev
 - **Lucide React** para ícones
 - **next-pwa** com `manifest.json`, service worker custom e cache offline
 
+## 🗺️ Mapa de telas e fontes de dados
+
+### Visão do aluno
+
+| Rota | Descrição | Hooks/Stores principais | Pronto para Supabase? |
+| --- | --- | --- | --- |
+| `/dashboard` | Cards de presença, progresso e últimos registros do aluno. | `useAlunoDashboard`, `usePresencasStore`, `useCurrentAluno` | Sim |
+| `/evolucao` | Histórico de graduações e projeção da próxima faixa/grau. | `useAlunoDashboard`, `useGraduacoesStore`, `getFaixaConfigBySlug` | Sim |
+| `/checkin` | Registro diário de presença pelo aluno. | `usePresencasStore`, `useTreinosStore`, `useAlunosStore`, `useCurrentAluno` | Sim |
+| `/historico-presencas` | Linha do tempo de presenças com filtros. | `usePresencasStore`, `useTreinosStore`, `useAlunosStore`, `getFaixaConfigBySlug` | Sim |
+| `/perfil` | Dados pessoais do aluno (somente leitura para faixa/grau). | `useCurrentAluno`, `useCurrentUser`, `useAlunosStore`, `getFaixaConfigBySlug` | Sim |
+| `/treinos` | Agenda semanal em modo leitura. | `useTreinosStore` | Sim |
+
+### Visão do professor/instrutor
+
+| Rota | Descrição | Hooks/Stores principais | Pronto para Supabase? |
+| --- | --- | --- | --- |
+| `/dashboard` | Painel com métricas de alunos, presenças e pendências. | `useStaffDashboard`, `usePresencasStore`, `useAlunosStore`, `useTreinosStore` | Sim |
+| `/alunos` | Gestão completa de cadastro, filtros e remoção. | `useAlunosStore`, `usePresencasStore`, `useStaffDashboard`, `getFaixaConfigBySlug` | Sim |
+| `/presencas` | Conferência/fechamento de presenças do dia. | `usePresencasStore`, `useAlunosStore`, `useTreinosStore`, `calcularResumoPresencas` | Sim |
+| `/historico-presencas` | Linha do tempo consolidada para staff. | `usePresencasStore`, `useTreinosStore`, `useAlunosStore`, `getFaixaConfigBySlug` | Sim |
+| `/graduacoes` | Pipeline de graduações e timeline. | `useGraduacoesStore`, `useAlunosStore`, `updateGraduacao`, `getFaixaConfigBySlug` | Sim |
+| `/perfil` | Perfil de staff (nome/contatos/faixa). | `useCurrentStaff`, `useCurrentUser`, `useAlunosStore`, `getFaixaConfigBySlug` | Sim |
+| `/configuracoes/*` | Hub administrativo (regras, treinos, tipos). | `useCurrentUser`, `useCurrentStaff` | Sim |
+| `/relatorios` | Placeholder analítico (sem dados dinâmicos). | — | Sim |
+
+### Rotas utilitárias/demonstração
+
+- `/belt-demo`: demonstração visual dos componentes de faixa usando `MOCK_FAIXAS`/`getFaixaConfigBySlug` (depende diretamente dos mocks de faixa, não faz parte do fluxo produtivo).
+
+## 🔄 Fluxo de dados centralizado
+
+Pipeline padrão: **mocks em `/data` → services → stores (Zustand) → hooks → telas**. A troca para Supabase/API será feita na camada de services, mantendo contratos e UI intactos.
+
+Mocks atuais (únicos pontos que devem ler dados fake):
+
+- `data/mockAlunos.ts`
+- `data/mockPresencas.ts`
+- `data/mockGraduacoes.ts`
+- `data/mockTreinos.ts`
+- `data/mocks/bjjBeltMocks.ts` (config visual de faixas)
+- `data/mocks/bjjBeltUtils.ts` (helpers de faixa)
+
+**Regra:** nenhuma página deve importar esses mocks diretamente. Apenas os services os consomem, popularão as stores e os hooks entregam os dados às telas.
+
 ### 🆕 Atualizações mais recentes (25/11 — gestão de alunos)
 
 - **/alunos alinhado aos stores**: a listagem, filtros e cards usam apenas `useAlunosStore`/`usePresencasStore`/`useStaffDashboard`, sem acessar mocks diretamente.
@@ -60,6 +105,28 @@ npm run dev
 - **Linha do tempo combinada**: histórico real do aluno e planos futuros são exibidos na mesma timeline, com indicação visual de grau/faixa, instrutor e data formatada.
 - **Projeção detalhada**: cards destacam a próxima graduação com percentual, aulas realizadas x meta, estimativa de data e lembrete sobre check-ins pendentes fora do horário.
 - **Resumo rápido**: blocos com início na academia, aulas concluídas no grau/faixa e última atualização, todos derivados dos dados normalizados da dashboard.
+
+### 🆕 Atualizações de graduações e dashboards
+
+- **/graduacoes (staff)**: leitura e atualização passam por `useGraduacoesStore` + `updateGraduacao`; timeline e cards reutilizam `getFaixaConfigBySlug`/`BjjBeltStrip` para manter a identidade visual com `/evolucao`.
+- **Dashboard do aluno**: centralizado em `useAlunoDashboard`, sem import direto de `mockPresencas`/`mockGraduacoes`; cards de presença usam o mesmo estado de `usePresencasStore` consumido em `/checkin` e `/historico-presencas`.
+- **Dashboard do staff**: métricas e pendências vêm de `useStaffDashboard` (que agrega `usePresencasStore`, `useAlunosStore`, `useTreinosStore`, `useGraduacoesStore`), mantendo cards e listas sincronizados com `/alunos` e `/presencas`.
+- **/perfil (aluno e staff)**: formulário e hero usam `useCurrentAluno`/`useCurrentStaff` + `useAlunosStore`, garantindo que faixa/grau venham da mesma fonte dos dashboards.
+
+### Status de preparação para Supabase
+
+- **Alunos (`/alunos`)** — **Pronto**: somente `alunosService` + `useAlunosStore` (nenhum mock direto na página).
+- **Presenças (aluno + staff)** — **Pronto**: todas as rotas usam `presencasService` → `usePresencasStore` (check-in, dashboards, histórico, staff).
+- **Evolução (`/evolucao`)** — **Pronto**: calcula projeções via `useAlunoDashboard` + `useGraduacoesStore`; usa apenas helpers de faixa compartilhados.
+- **Graduações (`/graduacoes`)** — **Parcial para Supabase**: já centraliza em store/service, mas depende de `getFaixaConfigBySlug` para enriquecer faixas; troca do backend deve preservar esse helper ou mover a lógica para o serviço.
+- **Dashboards (`/dashboard` aluno/staff)** — **Pronto**: não há imports diretos de mocks; todo dado vem de hooks centralizados.
+
+### Pontos de atenção atuais
+
+- **Graduações (staff)**: a página não importa `mockGraduacoes` diretamente e usa `updateGraduacao` para sincronizar status, mas depende de `getFaixaConfigBySlug` para nome/visual das faixas. Ao conectar Supabase, manter essa resolução de faixa em um único helper.
+- **Dashboards**: `/dashboard` (aluno) consome apenas `useAlunoDashboard`; `/dashboard` (staff) consome apenas `useStaffDashboard`. Não foram encontrados imports diretos de mocks, mas qualquer nova métrica deve seguir o mesmo hook para evitar divergências.
+- **Presenças**: `/checkin`, `/historico-presencas`, `/presencas` e dashboards leem `usePresencasStore`; status seguem `PENDENTE | PRESENTE | FALTA | JUSTIFICADA`. Se alguma nova rota usar presenças, deve evitar `data/mockPresencas.ts` direto e reutilizar o store.
+- **Rotas utilitárias**: `/belt-demo` depende de `MOCK_FAIXAS` (propósito de demonstração). Não usar como base para telas produtivas ou para preparar a integração com Supabase.
 
 ## 👥 Gestão de Alunos (/alunos)
 
