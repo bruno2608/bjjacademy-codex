@@ -381,7 +381,7 @@ export default function PresencasPage() {
       return [valorTodos];
     }
     const valoresLimpos = lista.filter(Boolean);
-    if (totalDisponivel > 0 && valoresLimpos.length >= totalDisponivel) {
+    if (totalDisponivel > 1 && valoresLimpos.length >= totalDisponivel) {
       return [valorTodos];
     }
     return valoresLimpos;
