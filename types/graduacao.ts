@@ -27,6 +27,11 @@ export type GraduacaoPlanejada = {
   criterioTempo: string;
   mesesRestantes: number;
   previsao: string;
+  /**
+   * Data efetiva de conclusão quando já graduado. Mantém o histórico coerente
+   * com filtros de 30/60/90 dias nas telas de staff/aluno.
+   */
+  dataConclusao?: string | null;
   instrutor: string;
   status: GraduacaoStatus;
 };

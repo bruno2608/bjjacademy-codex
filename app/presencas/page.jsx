@@ -22,12 +22,10 @@ import { normalizeAlunoStatus } from '@/lib/alunoStats';
 import { calcularResumoPresencas, comporRegistrosDoDia } from '@/lib/presencasResumo';
 
 const TODOS_TREINOS = 'all';
+const PRESENCA_STATUSES = ['PENDENTE', 'PRESENTE', 'FALTA', 'JUSTIFICADA'];
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os status' },
-  { value: 'PENDENTE', label: 'Pendente' },
-  { value: 'PRESENTE', label: 'Presente' },
-  { value: 'FALTA', label: 'Falta' },
-  { value: 'JUSTIFICADA', label: 'Justificada' }
+  ...PRESENCA_STATUSES.map((status) => ({ value: status, label: status.charAt(0) + status.slice(1).toLowerCase() }))
 ];
 const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
 
@@ -55,7 +53,7 @@ export default function PresencasPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterFaixas, setFilterFaixas] = useState([]);
   const [filterStatuses, setFilterStatuses] = useState([]);
-  const [filterTreinos, setFilterTreinos] = useState([]);
+  const [filterTreinos, setFilterTreinos] = useState([TODOS_TREINOS]);
   const presencas = usePresencasStore((state) => state.presencas);
   const carregarPresencas = usePresencasStore((state) => state.carregarTodas);
   const salvarPresenca = usePresencasStore((state) => state.salvarPresenca);
@@ -91,37 +89,6 @@ export default function PresencasPage() {
     },
     [hoje, normalizarDiaSemana, treinos]
   );
-
-  useEffect(() => {
-    if (!treinos.length) {
-      setFilterTreinos([]);
-      return;
-    }
-
-    if (filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0) {
-      return;
-    }
-
-    const idsValidos = treinos.map((treino) => treino.id);
-    const filtrados = filterTreinos.filter((id) => idsValidos.includes(id));
-
-    if (!filtrados.length) {
-      const dia = normalizarDiaSemana(hoje);
-      const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
-      const sugestao = (candidatos[0] || treinos[0])?.id || TODOS_TREINOS;
-      setFilterTreinos(sugestao ? [sugestao] : []);
-      return;
-    }
-
-    if (filtrados.length === idsValidos.length) {
-      setFilterTreinos([TODOS_TREINOS]);
-      return;
-    }
-
-    if (filtrados.length !== filterTreinos.length) {
-      setFilterTreinos(filtrados);
-    }
-  }, [filterTreinos, hoje, normalizarDiaSemana, treinos]);
 
   useEffect(() => {
     let active = true;
@@ -180,10 +147,15 @@ export default function PresencasPage() {
     return lista;
   }, []);
 
+  const normalizePresencaStatus = useCallback(
+    (status) => (status || '').toString().trim().toUpperCase(),
+    []
+  );
+
   const registrosFiltrados = useMemo(() => {
     const termo = searchTerm.trim().toLowerCase();
     const faixasAtivas = limparSelecao(filterFaixas);
-    const statusAtivos = limparSelecao(filterStatuses).map((status) => normalizeAlunoStatus(status));
+    const statusAtivos = limparSelecao(filterStatuses).map((status) => normalizePresencaStatus(status));
     const treinosAtivos = limparSelecao(filterTreinos, TODOS_TREINOS);
 
     return registrosDoDia.filter((item) => {
@@ -193,7 +165,7 @@ export default function PresencasPage() {
       if (faixasAtivas.length && !faixasAtivas.includes(item.faixaSlug)) {
         return false;
       }
-      const statusRegistro = normalizeAlunoStatus(item.status);
+      const statusRegistro = normalizePresencaStatus(item.status);
       if (statusAtivos.length && !statusAtivos.includes(statusRegistro)) {
         return false;
       }
@@ -205,17 +177,16 @@ export default function PresencasPage() {
       }
       return true;
     });
-  }, [filterFaixas, filterStatuses, filterTreinos, limparSelecao, registrosDoDia, searchTerm]);
+  }, [filterFaixas, filterStatuses, filterTreinos, limparSelecao, normalizePresencaStatus, registrosDoDia, searchTerm]);
 
-  const statusOrder = {
-    PENDENTE: 0,
-    PRESENTE: 1,
-    FALTA: 2,
-    JUSTIFICADA: 2
-  };
+  const statusOrder = PRESENCA_STATUSES.reduce((acc, status, index) => {
+    const order = status === 'JUSTIFICADA' ? PRESENCA_STATUSES.indexOf('FALTA') : index;
+    return { ...acc, [status]: order };
+  }, {});
 
   const statusLabel = (status) => {
-    switch (status) {
+    const normalized = normalizePresencaStatus(status);
+    switch (normalized) {
       case 'PENDENTE':
         return { label: 'PENDENTE', tone: 'text-yellow-200' };
       case 'PRESENTE':
@@ -225,7 +196,7 @@ export default function PresencasPage() {
       case 'JUSTIFICADA':
         return { label: 'JUSTIFICADA', tone: 'text-indigo-200' };
       default:
-        return { label: status || '—', tone: 'text-bjj-gray-200' };
+        return { label: normalized || '—', tone: 'text-bjj-gray-200' };
     }
   };
 
@@ -260,6 +231,15 @@ export default function PresencasPage() {
     return candidatos.length ? candidatos : treinos;
   }, [hoje, normalizarDiaSemana, treinos]);
 
+  const treinoIdsDoDia = useMemo(() => {
+    const conjunto = new Set(
+      registrosDoDia
+        .map((item) => item.treinoId)
+        .filter((id) => typeof id === 'string' && id.trim().length > 0)
+    );
+    return Array.from(conjunto);
+  }, [registrosDoDia]);
+
   const faixasDisponiveis = useMemo(() => {
     const conjunto = new Set(
       alunosAtivos
@@ -277,14 +257,61 @@ export default function PresencasPage() {
     () => STATUS_FILTER_VALUES.map((option) => ({ value: option.value, label: option.label })),
     []
   );
+  const treinosParaFiltro = useMemo(() => {
+    if (treinoIdsDoDia.length) {
+      const conhecidos = treinos.filter((treino) => treinoIdsDoDia.includes(treino.id));
+      const faltantes = treinoIdsDoDia
+        .filter((id) => !conhecidos.some((treino) => treino.id === id))
+        .map((id) => ({
+          id,
+          nome: 'Sessão principal',
+          hora: '--:--',
+          diaSemana: normalizarDiaSemana(hoje) || ''
+        }));
+      return [...conhecidos, ...faltantes];
+    }
+    return treinosDoDiaPadrao;
+  }, [hoje, normalizarDiaSemana, treinoIdsDoDia, treinos, treinosDoDiaPadrao]);
+
   const opcoesTreinos = useMemo(
     () =>
-      treinosDoDiaPadrao.map((treino) => ({
+      treinosParaFiltro.map((treino) => ({
         value: treino.id,
         label: `${treino.nome} · ${treino.hora}`
       })),
-    [treinosDoDiaPadrao]
+    [treinosParaFiltro]
   );
+
+  useEffect(() => {
+    const idsDisponiveis = opcoesTreinos.map((treino) => treino.value);
+    if (!idsDisponiveis.length) {
+      setFilterTreinos([]);
+      return;
+    }
+
+    if (!filterTreinos.length || filterTreinos.includes(TODOS_TREINOS)) {
+      if (filterTreinos.length !== 1 || filterTreinos[0] !== TODOS_TREINOS) {
+        setFilterTreinos([TODOS_TREINOS]);
+      }
+      return;
+    }
+
+    const filtrados = filterTreinos.filter((id) => idsDisponiveis.includes(id));
+
+    if (!filtrados.length) {
+      setFilterTreinos([TODOS_TREINOS]);
+      return;
+    }
+
+    if (filtrados.length === idsDisponiveis.length) {
+      setFilterTreinos([TODOS_TREINOS]);
+      return;
+    }
+
+    if (filtrados.length !== filterTreinos.length) {
+      setFilterTreinos(filtrados);
+    }
+  }, [filterTreinos, opcoesTreinos]);
 
   const treinoAnaliseLabel = useMemo(
     () => opcoesTreinos.find((item) => item.value === treinoEmAnalise)?.label || 'Treino selecionado',
@@ -299,12 +326,13 @@ export default function PresencasPage() {
 
   const treinosDisponiveisModal = useMemo(() => {
     if (!sessionRecord) {
-      return treinosDoDiaPadrao;
+      return treinosParaFiltro;
     }
     const diaSessao = normalizarDiaSemana(sessionRecord.data);
     const candidatos = treinos.filter((treino) => treino.diaSemana === diaSessao);
-    return candidatos.length ? candidatos : treinosDoDiaPadrao;
-  }, [normalizarDiaSemana, sessionRecord, treinos, treinosDoDiaPadrao]);
+    if (candidatos.length) return candidatos;
+    return treinosParaFiltro;
+  }, [normalizarDiaSemana, sessionRecord, treinos, treinosParaFiltro]);
 
   const handleConfirm = async (registro) => {
     if (!registro?.id) {
@@ -314,21 +342,16 @@ export default function PresencasPage() {
     await atualizarStatus(registro.id, 'PRESENTE');
   };
 
-  const handleMarkAbsent = async (registro, justificativa = false) => {
-    if (!registro?.id) return;
-    await atualizarStatus(registro.id, justificativa ? 'JUSTIFICADA' : 'FALTA');
-  };
-
   const abrirFechamento = () => {
-    const sugestao = filterTreinos.includes(TODOS_TREINOS) ? treinosDoDiaPadrao[0]?.id : filterTreinos[0];
-    setTreinoParaFechar(sugestao || treinosDoDiaPadrao[0]?.id || '');
+    const sugestao = filterTreinos.includes(TODOS_TREINOS) ? treinosParaFiltro[0]?.id : filterTreinos[0];
+    setTreinoParaFechar(sugestao || treinosParaFiltro[0]?.id || '');
     setIsCloseModalOpen(true);
   };
 
   const fecharModalFechamento = () => setIsCloseModalOpen(false);
 
   const fecharTreinoAutomatico = async () => {
-    const alvo = treinoParaFechar || treinosDoDiaPadrao[0]?.id || null;
+    const alvo = treinoParaFechar || treinosParaFiltro[0]?.id || null;
     if (alvo) {
       await fecharTreino(alvo);
     }
@@ -336,7 +359,7 @@ export default function PresencasPage() {
   };
 
   const direcionarParaAnalise = () => {
-    const alvo = treinoParaFechar || treinosDoDiaPadrao[0]?.id || '';
+    const alvo = treinoParaFechar || treinosParaFiltro[0]?.id || '';
     if (alvo) {
       setFilterTreinos([alvo]);
     }
@@ -345,7 +368,7 @@ export default function PresencasPage() {
   };
 
   const salvarFechamentoManual = async () => {
-    const alvo = treinoEmAnalise || treinosDoDiaPadrao[0]?.id || null;
+    const alvo = treinoEmAnalise || treinosParaFiltro[0]?.id || null;
     marcarTreinoFechado(hoje, alvo);
     setTreinoEmAnalise('');
   };
@@ -368,7 +391,7 @@ export default function PresencasPage() {
     setSearchTerm('');
     setFilterFaixas([]);
     setFilterStatuses([]);
-    setFilterTreinos([]);
+    setFilterTreinos([TODOS_TREINOS]);
   };
 
   const normalizarSelecao = useCallback((lista, totalDisponivel, valorTodos = 'all') => {
@@ -379,7 +402,7 @@ export default function PresencasPage() {
       return [valorTodos];
     }
     const valoresLimpos = lista.filter(Boolean);
-    if (totalDisponivel > 0 && valoresLimpos.length >= totalDisponivel) {
+    if (totalDisponivel > 1 && valoresLimpos.length >= totalDisponivel) {
       return [valorTodos];
     }
     return valoresLimpos;
@@ -464,14 +487,23 @@ export default function PresencasPage() {
 
   useEffect(() => {
     if (!sessionRecord) return;
+    const primeiroDisponivel = treinosDisponiveisModal.find(
+      (treino) => !(sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id))
+    );
     const opcaoExiste = treinosDisponiveisModal.some((treino) => treino.id === sessionTreinoId);
-    if (!opcaoExiste) {
-      setSessionTreinoId(treinosDisponiveisModal[0]?.id || '');
+    const opcaoBloqueada =
+      sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId) && !!sessionTreinoId;
+
+    if (!opcaoExiste || opcaoBloqueada) {
+      setSessionTreinoId(primeiroDisponivel?.id || treinosDisponiveisModal[0]?.id || '');
     }
-  }, [sessionRecord, sessionTreinoId, treinosDisponiveisModal]);
+  }, [sessionContext, sessionRecord, sessionTakenTreinos, sessionTreinoId, treinosDisponiveisModal]);
 
   const handleSessionSubmit = async () => {
     if (!sessionRecord) return;
+    if (sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId)) {
+      return;
+    }
     const treinoSelecionado =
       treinos.find((treino) => treino.id === sessionTreinoId) ||
       obterSugestaoTreino(sessionRecord.alunoId, sessionRecord.data, sessionTakenTreinos);
@@ -511,11 +543,29 @@ export default function PresencasPage() {
 
   const handleEditSubmit = async (dados) => {
     if (!selectedRecord?.id) return;
+
+    const novoStatus = normalizePresencaStatus(dados.status || selectedRecord.status);
+    const novoTreinoId = dados.treinoId || selectedRecord.treinoId;
+
+    // Mantém o registro visível mesmo quando o novo status não estava no filtro ativo.
+    setFilterStatuses((prev) => {
+      const limpos = limparSelecao(prev);
+      if (!limpos.length || limpos.includes(novoStatus)) return prev;
+      return [...limpos, novoStatus];
+    });
+
+    // Garante que a mudança de treino permaneça visível dentro dos filtros ativos.
+    setFilterTreinos((prev) => {
+      const limpos = limparSelecao(prev, TODOS_TREINOS);
+      if (!novoTreinoId || limpos.includes(TODOS_TREINOS) || limpos.includes(novoTreinoId)) return prev;
+      return limpos.length ? [...limpos, novoTreinoId] : [novoTreinoId];
+    });
+
     const atualizado = await salvarPresenca({
       id: selectedRecord.id,
       alunoId: dados.alunoId || selectedRecord.alunoId,
-      treinoId: dados.treinoId || selectedRecord.treinoId,
-      status: dados.status || selectedRecord.status,
+      treinoId: novoTreinoId,
+      status: novoStatus,
       data: dados.data || selectedRecord.data,
       origem: dados.origem || 'PROFESSOR',
       observacao: dados.observacao || null,
@@ -657,7 +707,6 @@ export default function PresencasPage() {
       <AttendanceTable
         records={registrosFiltradosOrdenados}
         onConfirm={handleConfirm}
-        onMarkAbsent={(registro) => handleMarkAbsent(registro, false)}
         onDelete={handleDelete}
         onEdit={abrirEdicao}
         onAddSession={abrirSessaoExtra}
@@ -799,19 +848,27 @@ export default function PresencasPage() {
           </p>
           <label className="block text-sm font-medium text-bjj-white">Treino / sessão</label>
           <Select value={sessionTreinoId} onChange={(event) => setSessionTreinoId(event.target.value)}>
-            {treinosDisponiveisModal.map((treino) => (
-              <option key={treino.id} value={treino.id}>
-                {treino.nome} · {treino.hora}
-                {sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id) ? ' (já registrado)' : ''}
-              </option>
-            ))}
+            {treinosDisponiveisModal.map((treino) => {
+              const jaRegistrado = sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id);
+              return (
+                <option key={treino.id} value={treino.id} disabled={jaRegistrado}>
+                  {treino.nome} · {treino.hora}
+                  {jaRegistrado ? ' (já registrado)' : ''}
+                </option>
+              );
+            })}
             {!treinosDisponiveisModal.length && <option value="">Sessão principal</option>}
           </Select>
           <div className="flex flex-col gap-2 md:flex-row md:justify-end">
             <Button type="button" variant="secondary" className="md:w-auto" onClick={fecharSelecaoSessao}>
               Cancelar
             </Button>
-            <Button type="button" className="md:w-auto" onClick={handleSessionSubmit}>
+            <Button
+              type="button"
+              className="md:w-auto"
+              onClick={handleSessionSubmit}
+              disabled={sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId)}
+            >
               Confirmar presença
             </Button>
           </div>

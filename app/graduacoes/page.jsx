@@ -76,7 +76,8 @@ export default function GraduacoesStaffPage() {
           grauAtual,
           grauAlvo,
           mesesRestantes: Number(graduacao.mesesRestantes ?? 0),
-          status: statusCentralizado
+          status: statusCentralizado,
+          dataConclusao: graduacao.dataConclusao
         };
       }),
     [alunoLookup, graduacoes]
@@ -94,7 +95,7 @@ export default function GraduacoesStaffPage() {
     if (!concluenciasPendentes.length) return;
 
     concluenciasPendentes.forEach((graduacao) => {
-      updateGraduacao(graduacao.id, { status: 'Concluído' });
+      updateGraduacao(graduacao.id, { status: 'Concluído', dataConclusao: new Date().toISOString().split('T')[0] });
     });
   }, [graduacoes, graduacoesEnriquecidas]);
 
@@ -145,7 +146,7 @@ export default function GraduacoesStaffPage() {
         faixa: item.proximaFaixa || item.faixaAtual,
         grau: item.tipo === 'Grau' ? item.grauAlvo ?? item.grauAtual ?? null : null,
         tipo: item.tipo,
-        data: item.previsao,
+        data: item.dataConclusao ?? item.previsao,
         descricao:
           item.tipo === 'Faixa'
             ? `${item.faixaAtual} → ${item.proximaFaixa}`
@@ -208,7 +209,8 @@ export default function GraduacoesStaffPage() {
   }, [graduacoesEnriquecidas]);
 
   const handleStatusChange = async (graduacao, status) => {
-    await updateGraduacao(graduacao.id, { status });
+    const dataConclusao = status === 'Concluído' ? new Date().toISOString().split('T')[0] : graduacao.dataConclusao;
+    await updateGraduacao(graduacao.id, { status, dataConclusao });
   };
 
   return (

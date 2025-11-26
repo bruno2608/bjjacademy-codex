@@ -108,9 +108,10 @@ export default function RegrasGraduacaoPage() {
   };
 
   const openEditModal = (beltName, rule) => {
+    const regraSelecionada = rule || rules[beltName];
     setMode('edit');
     setSelectedBelt(beltName);
-    setForm(buildFormFromRule(beltName, rule));
+    setForm(buildFormFromRule(beltName, regraSelecionada || DEFAULT_RULE));
   };
 
   const closeModal = () => {
@@ -236,7 +237,7 @@ export default function RegrasGraduacaoPage() {
           </thead>
           <tbody>
             {belts.map(([belt, rule]) => {
-              const faixaConfig = getFaixaConfigBySlug(rule.faixaSlug);
+              const faixaConfig = getFaixaConfigBySlug(rule.faixaSlug || 'branca-adulto');
 
               return (
                 <tr key={belt} className="align-middle text-sm text-bjj-gray-200">

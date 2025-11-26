@@ -4,14 +4,16 @@
  * PresenceForm permite registrar rapidamente uma nova presença,
  * exibindo os alunos disponíveis e definindo status inicial.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 
-const statusOptions = ['PRESENTE', 'PENDENTE', 'FALTA'];
+const statusOptions = ['PRESENTE', 'PENDENTE', 'FALTA', 'JUSTIFICADA'];
+
+const normalizeStatus = (valor) => (valor || '').toString().trim().toUpperCase() || statusOptions[0];
 
 export default function PresenceForm({ onSubmit, initialData = null, onCancel, submitLabel }) {
   const alunos = useAlunosStore((state) => state.alunos);
@@ -19,17 +21,40 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
   const isEditing = Boolean(initialData?.id);
 
-  const normalizarDiaSemana = (valor) => {
+  const normalizarDiaSemana = useCallback((valor) => {
     const referencia = valor ? new Date(valor) : new Date();
     if (Number.isNaN(referencia.getTime())) return null;
     const nome = referencia.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
     return nome.replace('-feira', '').trim();
-  };
+  }, []);
+
+  const sugerirTreino = useCallback((dataReferencia) => {
+    const dia = normalizarDiaSemana(dataReferencia) || normalizarDiaSemana(hoje);
+    const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
+    return candidatos[0] || treinos[0] || null;
+  }, [hoje, normalizarDiaSemana, treinos]);
+
+  const [form, setForm] = useState({
+    alunoId: initialData?.alunoId || '',
+    data: initialData?.data || hoje,
+    status: normalizeStatus(initialData?.status),
+    treinoId:
+      initialData?.treinoId ||
+      (initialData ? sugerirTreino(initialData.data)?.id : sugerirTreino(hoje)?.id) ||
+      ''
+  });
+
+  const treinosDoDia = useMemo(() => {
+    const dia = normalizarDiaSemana(form.data);
+    const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
+    return candidatos.length ? candidatos : treinos;
+  }, [form.data, normalizarDiaSemana, treinos]);
 
   const treinosDisponiveis = useMemo(() => {
-    if (initialData?.treinoId && !treinos.some((treino) => treino.id === initialData.treinoId)) {
+    const base = treinosDoDia;
+    if (initialData?.treinoId && !base.some((treino) => treino.id === initialData.treinoId)) {
       return [
-        ...treinos,
+        ...base,
         {
           id: initialData.treinoId,
           nome: initialData.tipoTreino || 'Sessão principal',
@@ -38,34 +63,24 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
         }
       ];
     }
-    return treinos;
-  }, [initialData, normalizarDiaSemana, treinos]);
-
-  const sugerirTreino = (dataReferencia) => {
-    const dia = normalizarDiaSemana(dataReferencia) || normalizarDiaSemana(hoje);
-    const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
-    return candidatos[0] || treinos[0] || null;
-  };
-
-  const [form, setForm] = useState({
-    alunoId: initialData?.alunoId || '',
-    data: initialData?.data || hoje,
-    status: initialData?.status || statusOptions[0],
-    treinoId:
-      initialData?.treinoId ||
-      (initialData ? sugerirTreino(initialData.data)?.id : sugerirTreino(hoje)?.id) ||
-      ''
-  });
+    return base;
+  }, [initialData, normalizarDiaSemana, treinosDoDia]);
 
   useEffect(() => {
     if (!initialData) return;
+    const status = normalizeStatus(initialData.status);
+    const treinoId =
+      initialData.treinoId ||
+      sugerirTreino(initialData.data)?.id ||
+      treinosDoDia.find((treino) => treino.id)?.id ||
+      '';
     setForm({
       alunoId: initialData.alunoId,
       data: initialData.data,
-      status: initialData.status,
-      treinoId: initialData.treinoId || sugerirTreino(initialData.data)?.id || ''
+      status,
+      treinoId,
     });
-  }, [initialData, treinos]);
+  }, [initialData, sugerirTreino]);
 
   useEffect(() => {
     if (initialData) return;
@@ -87,12 +102,29 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => {
-      if (name === 'data' && !isEditing) {
+      if (name === 'data') {
         const sugestao = sugerirTreino(value);
-        return { ...prev, data: value, treinoId: sugestao?.id || prev.treinoId };
+        const treinoValido =
+          prev.treinoId && treinosDisponiveis.some((treino) => treino.id === prev.treinoId)
+            ? prev.treinoId
+            : sugestao?.id;
+        return { ...prev, data: value, treinoId: treinoValido || '' };
+      }
+      if (name === 'status') {
+        return { ...prev, status: normalizeStatus(value) };
       }
       return { ...prev, [name]: value };
     });
+  };
+
+  const handleStatusChange = (event) => {
+    const { value } = event.target;
+    setForm((prev) => ({ ...prev, status: normalizeStatus(value) }));
+  };
+
+  const handleTreinoChange = (event) => {
+    const { value } = event.target;
+    setForm((prev) => ({ ...prev, treinoId: value }));
   };
 
   const handleSubmit = (event) => {
@@ -105,7 +137,8 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
 
     onSubmit({
       ...form,
-      treinoId: treinoSelecionado?.id || form.treinoId || null
+      treinoId: treinoSelecionado?.id || form.treinoId || null,
+      status: normalizeStatus(form.status)
     });
 
     if (!isEditing) {
@@ -124,7 +157,7 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         <div className="lg:col-span-2">
           <label className="block text-sm font-medium mb-2">Aluno</label>
-          <Select name="alunoId" value={form.alunoId} onChange={handleChange} disabled={isEditing}>
+          <Select name="alunoId" value={form.alunoId} onChange={handleChange}>
             {alunos.map((aluno) => {
               const faixa = aluno.faixaSlug || aluno.faixa || 'Sem faixa';
               const grauAtual = Number.isFinite(Number(aluno.graus)) ? Number(aluno.graus) : 0;
@@ -143,13 +176,12 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
             type="date"
             value={form.data}
             onChange={handleChange}
-            disabled={isEditing}
             required
           />
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Treino / sessão</label>
-          <Select name="treinoId" value={form.treinoId} onChange={handleChange}>
+          <Select name="treinoId" value={form.treinoId} onChange={handleTreinoChange}>
             {treinosDisponiveis.map((treino) => (
               <option key={treino.id} value={treino.id}>
                 {treino.nome} · {treino.hora}
@@ -160,7 +192,7 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Status</label>
-          <Select name="status" value={form.status} onChange={handleChange}>
+          <Select name="status" value={form.status} onChange={handleStatusChange}>
             {statusOptions.map((status) => (
               <option key={status}>{status}</option>
             ))}
