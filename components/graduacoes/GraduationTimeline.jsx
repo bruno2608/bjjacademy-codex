@@ -85,7 +85,7 @@ export default function GraduationTimeline({ itens = [] }) {
         );
 
         return (
-          <li key={item.id || index}>
+          <li key={item.id || index} className="py-3 md:py-4">
             {isEven ? summary : <div className="timeline-start hidden md:block">{summary}</div>}
             <div className="timeline-middle">
               <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-bjj-red bg-bjj-black text-bjj-red">

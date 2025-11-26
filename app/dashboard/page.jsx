@@ -21,7 +21,7 @@ import useRole from '../../hooks/useRole';
 import { ROLE_KEYS } from '../../config/roles';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useAlunoDashboard } from '@/services/dashboard/useAlunoDashboard';
-import { useProfessorDashboard } from '@/services/dashboard/useProfessorDashboard';
+import { useStaffDashboard } from '@/services/dashboard/useStaffDashboard';
 import { BjjBeltProgressCard } from '@/components/bjj/BjjBeltProgressCard';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
@@ -238,10 +238,10 @@ function StudentDashboard() {
 
 function ProfessorDashboard() {
   const {
-    instructorName,
+    staff,
     faixaConfig,
-    graus: instructorGraus,
-    avatarUrl: instructorAvatar,
+    grauAtual,
+    avatarUrl,
     statusLabel,
     overviewCards,
     semanaCards,
@@ -253,16 +253,18 @@ function ProfessorDashboard() {
     setActiveTab,
     handleStatusChange,
     updatingId
-  } = useProfessorDashboard();
+  } = useStaffDashboard();
+
+  const instructorName = staff?.nome || 'Instrutor';
 
   return (
     <div className="space-y-6">
       <DashboardHero
         name={instructorName}
         faixaConfig={faixaConfig}
-        graus={instructorGraus}
+        graus={grauAtual}
         statusLabel={statusLabel || 'Professor'}
-        avatarUrl={ensureAvatar(instructorName, instructorAvatar)}
+        avatarUrl={ensureAvatar(instructorName, avatarUrl)}
         subtitle="Dashboard do professor"
         className="border-bjj-gray-800/90"
       />

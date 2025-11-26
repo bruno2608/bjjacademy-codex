@@ -11,6 +11,9 @@ import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { useGraduationRulesStore } from '../../../store/graduationRulesStore';
 import { BELT_ORDER } from '../../../config/graduationRules';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { ROLE_KEYS } from '@/config/roles';
 
 /**
  * Permite editar os requisitos mockados de cada faixa sem impactar o módulo principal.
@@ -68,6 +71,8 @@ const buildFormFromRule = (nome, rule) => ({
 });
 
 export default function RegrasGraduacaoPage() {
+  const { user } = useCurrentUser();
+  const { staff } = useCurrentStaff();
   const { rules, updateRule, addRule, removeRule } = useGraduationRulesStore();
   const [selectedBelt, setSelectedBelt] = useState(null);
   const [mode, setMode] = useState(null);
@@ -75,8 +80,26 @@ export default function RegrasGraduacaoPage() {
   const [error, setError] = useState('');
   const [deleteTarget, setDeleteTarget] = useState('');
 
+  const canManageConfigs = Boolean(
+    user?.roles?.some((role) =>
+      [ROLE_KEYS.professor, ROLE_KEYS.instrutor, ROLE_KEYS.admin, ROLE_KEYS.ti].includes(role)
+    )
+  );
+
   const belts = useMemo(() => sortBelts(Object.entries(rules)), [rules]);
   const beltNames = useMemo(() => belts.map(([belt]) => belt), [belts]);
+
+  if (!canManageConfigs) {
+    return (
+      <div className="space-y-4">
+        <header className="card">
+          <p className="text-xs uppercase tracking-[0.3em] text-bjj-gray-200/60">Acesso restrito</p>
+          <h1 className="mt-2 text-xl font-semibold text-bjj-white">Regras de graduação</h1>
+          <p className="mt-2 text-sm text-bjj-gray-200/70">Somente staff autorizado pode editar as regras.</p>
+        </header>
+      </div>
+    );
+  }
 
   const openCreateModal = () => {
     setMode('create');
@@ -188,6 +211,11 @@ export default function RegrasGraduacaoPage() {
         <p className="mt-2 max-w-2xl text-sm text-bjj-gray-200/70">
           Ajuste os requisitos mínimos de cada faixa. O sistema usa esses valores para sugerir próximos passos, mas a confirmação continua manual pelo professor responsável.
         </p>
+        {staff?.nome && (
+          <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-200/70">
+            Responsável: {staff.nome} · {staff.roles?.join(', ') || 'Staff'}
+          </p>
+        )}
       </header>
 
       <div className="flex justify-end">
