@@ -345,6 +345,11 @@ styles/
 - Totais de graduações pendentes/concluídas e a próxima cerimônia refletem o mesmo conjunto de dados usado pelo `useStaffDashboard`, garantindo números alinhados com os cards do dashboard.
 - O histórico usa `historicoGraduacoes` dos alunos e os componentes modernos de faixa (`BjjBeltStrip`), mantendo o visual unificado com `/belt-demo`, com filtro rápido de 30/60/90 dias para focar nos registros mais recentes. Migrar de mocks para API exige apenas trocar o `graduacoesService`.
 
+##### Seeds de graduação alinhados aos filtros 30/60/90 dias
+- `data/mockGraduacoes.ts` agora gera datas relativas (15/45/75 dias atrás + previsões futuras) com `dataConclusao` para registros concluídos, garantindo que os botões 30d/60d/90d exibam sempre itens reais.
+- `data/mockAlunos.ts` foi sincronizado com essas promoções recentes (faixas/graus e `historicoGraduacoes`), mantendo consistência em `/evolucao`, dashboards e timelines.
+- `data/mockPresencas.ts` cobre os últimos 90 dias com diferentes status, reforçando métricas de presença das mesmas pessoas que aparecem em `/graduacoes` e `/dashboard`.
+
 #### Futuro de `/graduacoes`
 - Evoluir o "Histórico recente" para um relatório mais robusto, com filtros adicionais e exportação, mantendo a mesma fonte de dados centralizada e cronologia validada por faixas/graus.
 
