@@ -326,6 +326,29 @@ styles/
 - **Regras de graduação configuráveis:** matriz completa em `config/graduationRules.ts` com requisitos de idade mínima, tempo de faixa, aulas mínimas e faixas seguintes. A `graduationRulesStore` permite ajustes por faixa ou por grau (stripe) com persistência local.
 - **Sincronização de alunos:** toda alteração de presença recalcula progressão de alunos (`presencasStore` → `alunosStore`), mantendo contadores de aulas no grau/faixa atual para dashboards e timelines.
 
+## 🗺️ Mapa de telas e papéis
+
+Visões e rotas principais separadas por perfil:
+
+- **Aluno**
+  - `/dashboard-aluno`: resumo pessoal (faixa atual, próximas graduações, presenças recentes).
+  - `/evolucao`: linha do tempo de graduações e presenças individuais.
+  - `/historico-presencas` (aluno): histórico completo de check-ins e confirmações.
+  - `/checkin`: inicia presença com status `PENDENTE` antes da confirmação do professor.
+- **Professor/Instrutor (staff)**
+  - `/dashboard`: visão geral de alunos, presenças e graduações consolidadas.
+  - `/presencas`: gestão diária de presenças, confirmação, justificativas e fechamento de treino.
+  - `/historico-presencas`: linha do tempo das presenças de toda a academia com filtros avançados.
+  - `/graduacoes`: promoções planejadas/em progresso/concluídas com filtro 30/60/90 dias e histórico recente.
+  - `/alunos`: gestão de perfis, faixas, planos e status dos alunos.
+- **Admin/Coordenação**
+  - `/configuracoes/graduacao`: regras e matrizes de graduação (faixas, requisitos, idades mínimas).
+  - `/configuracoes` (demais abas): cadastros estruturais (treinos, planos) que alimentam stores e serviços.
+- **TI/Componentes compartilhados**
+  - `components/bjj/*`: renderização de faixas/graus (`BjjBeltStrip`, `BjjBeltProgressCard`).
+  - `components/ui/*`: base de UI (Modal, Table, inputs, selectors) utilizada por todas as rotas.
+  - `services/*` + `store/*`: orquestram mocks centralizados e serão substituídos pela API oficial.
+
 ### Gestão de Presenças (visão staff)
 - `/presencas` (professor/staff) agora consome **apenas** `usePresencasStore`/`presencasService` em conjunto com `useAlunosStore` e `useTreinosStore`; não há imports diretos de mocks na página ou nos componentes.
 - Cards e totais (presenças/faltas/pendentes, histórico da semana) reutilizam os mesmos helpers do dashboard (`calcularResumoPresencas`/`comporRegistrosDoDia`), garantindo números idênticos entre /dashboard e /presencas.

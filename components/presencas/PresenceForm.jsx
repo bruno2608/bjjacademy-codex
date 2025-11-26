@@ -43,6 +43,29 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       (initialData ? sugerirTreino(initialData.data)?.id : sugerirTreino(hoje)?.id) ||
       ''
   });
+  const [isDirty, setIsDirty] = useState(false);
+
+  const treinosDoDia = useMemo(() => {
+    const dia = normalizarDiaSemana(form.data);
+    const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
+    return candidatos.length ? candidatos : treinos;
+  }, [form.data, normalizarDiaSemana, treinos]);
+
+  const treinosDisponiveis = useMemo(() => {
+    const base = treinosDoDia;
+    if (initialData?.treinoId && !base.some((treino) => treino.id === initialData.treinoId)) {
+      return [
+        ...base,
+        {
+          id: initialData.treinoId,
+          nome: initialData.tipoTreino || 'Sessão principal',
+          hora: initialData.hora || '--:--',
+          diaSemana: normalizarDiaSemana(initialData.data) || ''
+        }
+      ];
+    }
+    return base;
+  }, [initialData, normalizarDiaSemana, treinosDoDia]);
 
   const treinosDoDia = useMemo(() => {
     const dia = normalizarDiaSemana(form.data);
@@ -80,9 +103,11 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       status,
       treinoId,
     });
-    // Dependências limitadas aos campos da presença para evitar reset enquanto o usuário edita.
+    setIsDirty(false);
+    // Recarrega somente quando trocamos de presença em edição para não sobrescrever
+    // interações de teclado ou clique dentro do dropdown.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialData?.alunoId, initialData?.data, initialData?.id, initialData?.status, initialData?.treinoId]);
+  }, [initialData?.id]);
 
   useEffect(() => {
     if (initialData) return;
@@ -104,6 +129,7 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => {
+      setIsDirty(true);
       if (name === 'data') {
         const sugestao = sugerirTreino(value);
         const treinoValido =
@@ -121,11 +147,13 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
 
   const handleStatusChange = (event) => {
     const { value } = event.target;
+    setIsDirty(true);
     setForm((prev) => ({ ...prev, status: normalizeStatus(value) }));
   };
 
   const handleTreinoChange = (event) => {
     const { value } = event.target;
+    setIsDirty(true);
     setForm((prev) => ({ ...prev, treinoId: value }));
   };
 
@@ -151,6 +179,7 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
         status: statusOptions[0],
         treinoId: sugestao?.id || ''
       });
+      setIsDirty(false);
     }
   };
 

@@ -58,7 +58,7 @@ export default function Modal({ isOpen, title, onClose, children }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className="relative w-full max-w-2xl rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900 text-bjj-white shadow-[0_18px_35px_-18px_rgba(0,0,0,0.6)]"
+        className="relative w-full max-w-2xl rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900 text-bjj-white shadow-[0_18px_35px_-18px_rgba(0,0,0,0.6)] pointer-events-auto"
       >
         <header className="mb-4 flex items-center justify-between border-b border-bjj-gray-800 pb-3">
           <h2 id="modal-title" className="text-lg font-semibold">
