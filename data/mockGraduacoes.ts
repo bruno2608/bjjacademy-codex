@@ -1,4 +1,13 @@
-import type { GraduacaoPlanejada } from '../types';
+import type { GraduacaoPlanejada } from '../types'
+
+const formatOffsetDate = (daysFromToday: number) => {
+  const date = new Date()
+  date.setDate(date.getDate() + daysFromToday)
+  return date.toISOString().split('T')[0]
+}
+
+const diasAtras = (dias: number) => formatOffsetDate(-dias)
+const diasFrente = (dias: number) => formatOffsetDate(dias)
 
 export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
   {
@@ -10,9 +19,10 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Faixa',
     grauAlvo: null,
     criterioTempo: 'Tempo mínimo: 18 meses na faixa roxa',
-    mesesRestantes: 4,
-    previsao: '2024-10-15',
-    status: 'Em progresso',
+    mesesRestantes: 0,
+    previsao: diasAtras(15),
+    dataConclusao: diasAtras(15),
+    status: 'Concluído',
     instrutor: 'Prof. Bruno'
   },
   {
@@ -24,9 +34,10 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Grau',
     grauAlvo: 4,
     criterioTempo: 'Tempo mínimo: 24 meses para o 4º grau',
-    mesesRestantes: 2,
-    previsao: '2024-09-01',
-    status: 'Em avaliação',
+    mesesRestantes: 0,
+    previsao: diasAtras(45),
+    dataConclusao: diasAtras(45),
+    status: 'Concluído',
     instrutor: 'Prof. Carla'
   },
   {
@@ -38,9 +49,10 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Faixa',
     grauAlvo: null,
     criterioTempo: 'Tempo mínimo: 36 meses na faixa roxa',
-    mesesRestantes: 10,
-    previsao: '2025-02-20',
-    status: 'Em progresso',
+    mesesRestantes: 6,
+    previsao: diasAtras(75),
+    dataConclusao: diasAtras(75),
+    status: 'Concluído',
     instrutor: 'Prof. Ana'
   },
   {
@@ -52,9 +64,10 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Grau',
     grauAlvo: 1,
     criterioTempo: 'Tempo mínimo: 6 meses para o 1º grau',
-    mesesRestantes: 0,
-    previsao: '2024-06-10',
-    status: 'Pronto para avaliar',
+    mesesRestantes: 1,
+    previsao: diasFrente(20),
+    dataConclusao: null,
+    status: 'Em progresso',
     instrutor: 'Prof. Carla'
   },
   {
@@ -66,9 +79,10 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Faixa',
     grauAlvo: null,
     criterioTempo: 'Tempo mínimo: 24 meses e 4 graus para faixa azul',
-    mesesRestantes: 6,
-    previsao: '2024-12-01',
-    status: 'Em progresso',
+    mesesRestantes: 4,
+    previsao: diasFrente(55),
+    dataConclusao: null,
+    status: 'Planejado',
     instrutor: 'Prof. Ana'
   },
   {
@@ -80,9 +94,10 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Faixa',
     grauAlvo: null,
     criterioTempo: 'Tempo mínimo: 24 meses com 4 graus completos',
-    mesesRestantes: 1,
-    previsao: '2024-07-22',
-    status: 'Planejado',
+    mesesRestantes: 2,
+    previsao: diasFrente(12),
+    dataConclusao: null,
+    status: 'Em avaliação',
     instrutor: 'Prof. Bruno'
   },
   {
@@ -94,8 +109,9 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Grau',
     grauAlvo: 2,
     criterioTempo: 'Tempo mínimo: 36 meses entre graus de faixa preta',
-    mesesRestantes: 5,
-    previsao: '2025-03-12',
+    mesesRestantes: 8,
+    previsao: diasFrente(80),
+    dataConclusao: null,
     status: 'Em progresso',
     instrutor: 'Prof. Mauro'
   },
@@ -108,9 +124,10 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Grau',
     grauAlvo: 1,
     criterioTempo: 'Novatos com 6 meses ganham 1º grau automático',
-    mesesRestantes: 2,
-    previsao: '2025-01-15',
-    status: 'Planejado',
+    mesesRestantes: 1,
+    previsao: diasFrente(8),
+    dataConclusao: null,
+    status: 'Pronto para avaliar',
     instrutor: 'Prof. Ana'
   },
   {
@@ -123,8 +140,9 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     grauAlvo: null,
     criterioTempo: 'Elegível após 20 meses e 3 graus completos',
     mesesRestantes: 3,
-    previsao: '2025-04-30',
-    status: 'Em avaliação',
+    previsao: diasFrente(95),
+    dataConclusao: null,
+    status: 'Em progresso',
     instrutor: 'Prof. Bruno'
   },
   {
@@ -136,9 +154,10 @@ export const MOCK_GRADUACOES: GraduacaoPlanejada[] = [
     tipo: 'Faixa',
     grauAlvo: null,
     criterioTempo: 'Progresso acelerado após correção de faltas',
-    mesesRestantes: 8,
-    previsao: '2025-08-18',
+    mesesRestantes: 5,
+    previsao: diasFrente(130),
+    dataConclusao: null,
     status: 'Em progresso',
     instrutor: 'Prof. Carla'
   }
-];
+]

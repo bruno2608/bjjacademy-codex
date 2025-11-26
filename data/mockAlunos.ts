@@ -1,6 +1,12 @@
 import type { Aluno } from '../types';
 import { normalizeAluno } from '../lib/alunoStats';
 
+const formatRelativeDate = (daysOffset: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysOffset);
+  return date.toISOString().split('T')[0];
+};
+
 const BIRTHDAYS_BY_ID: Record<string, string> = {
   '1': '1990-01-05',
   '2': '1992-02-14',
@@ -31,12 +37,12 @@ const BASE_MOCK_ALUNOS: Aluno[] = [
     telefone: '(11) 98888-7766',
     plano: 'Mensal',
     status: 'Ativo',
-    faixa: 'Roxa',
-    graus: 2,
-    mesesNaFaixa: 14,
+    faixa: 'Marrom',
+    graus: 0,
+    mesesNaFaixa: 2,
     avatarUrl: 'https://images.unsplash.com/photo-1593104547489-e03a09fd1ccb?auto=format&fit=crop&w=320&q=80',
     dataInicio: '2018-02-12',
-    dataUltimaGraduacao: '2023-03-10',
+    dataUltimaGraduacao: formatRelativeDate(-15),
     historicoGraduacoes: [
       {
         id: 'h1',
@@ -64,6 +70,15 @@ const BASE_MOCK_ALUNOS: Aluno[] = [
         data: '2022-08-20',
         instrutor: 'Prof. Ana',
         descricao: '1º grau em Roxa'
+      },
+      {
+        id: 'h3b',
+        tipo: 'Faixa',
+        faixa: 'Marrom',
+        grau: null,
+        data: formatRelativeDate(-15),
+        instrutor: 'Prof. Bruno',
+        descricao: 'Faixa Roxa → Marrom'
       }
     ]
   }),
@@ -74,11 +89,11 @@ const BASE_MOCK_ALUNOS: Aluno[] = [
     plano: 'Anual',
     status: 'Ativo',
     faixa: 'Azul',
-    graus: 3,
-    mesesNaFaixa: 20,
+    graus: 4,
+    mesesNaFaixa: 22,
     avatarUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80',
     dataInicio: '2019-05-01',
-    dataUltimaGraduacao: '2022-12-01',
+    dataUltimaGraduacao: formatRelativeDate(-45),
     historicoGraduacoes: [
       {
         id: 'h4',
@@ -106,6 +121,15 @@ const BASE_MOCK_ALUNOS: Aluno[] = [
         data: '2022-05-03',
         instrutor: 'Prof. Carla',
         descricao: '2º grau em Azul'
+      },
+      {
+        id: 'h6b',
+        tipo: 'Grau',
+        faixa: 'Azul',
+        grau: 4,
+        data: formatRelativeDate(-45),
+        instrutor: 'Prof. Carla',
+        descricao: '4º grau em Azul'
       }
     ]
   }),
@@ -191,11 +215,11 @@ const BASE_MOCK_ALUNOS: Aluno[] = [
     telefone: '(31) 99876-4455',
     plano: 'Anual',
     status: 'Ativo',
-    faixa: 'Roxa',
-    graus: 3,
-    mesesNaFaixa: 26,
+    faixa: 'Preta',
+    graus: 0,
+    mesesNaFaixa: 2,
     dataInicio: '2016-07-19',
-    dataUltimaGraduacao: '2022-11-05',
+    dataUltimaGraduacao: formatRelativeDate(-75),
     historicoGraduacoes: [
       {
         id: 'h11',
@@ -223,6 +247,15 @@ const BASE_MOCK_ALUNOS: Aluno[] = [
         data: '2022-01-10',
         instrutor: 'Prof. Carla',
         descricao: '2º grau em Roxa'
+      },
+      {
+        id: 'h13b',
+        tipo: 'Faixa',
+        faixa: 'Preta',
+        grau: null,
+        data: formatRelativeDate(-75),
+        instrutor: 'Prof. Ana',
+        descricao: 'Faixa Roxa → Preta'
       }
     ]
   }),
