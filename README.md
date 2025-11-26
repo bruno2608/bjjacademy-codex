@@ -61,6 +61,14 @@ npm run dev
 - **Projeção detalhada**: cards destacam a próxima graduação com percentual, aulas realizadas x meta, estimativa de data e lembrete sobre check-ins pendentes fora do horário.
 - **Resumo rápido**: blocos com início na academia, aulas concluídas no grau/faixa e última atualização, todos derivados dos dados normalizados da dashboard.
 
+## 👥 Gestão de Alunos (/alunos)
+
+- **Fonte única**: a listagem, filtros e cards usam apenas `useAlunosStore`/`alunosService` como origem de alunos, complementados por `usePresencasStore` e `graduacoesStore` para estatísticas contextuais.
+- **Nada de mocks diretos**: nenhuma página sob `/alunos` importa `data/mockAlunos` ou outros mocks; todo acesso passa pelo pipeline oficial (mock → service → store → hooks → tela), alinhado ao dashboard do aluno e staff.
+- **Filtros coerentes**: busca por nome, faixa (`faixaSlug`) e status (`ATIVO/INATIVO`) reaproveitam os mesmos slugs/enums usados em dashboards e presenças; filtros de treino consultam `usePresencasStore`/`useTreinosStore` ao invés de arrays locais.
+- **Visual das faixas**: os elementos de graduação da lista/detalhe usam `getFaixaConfigBySlug` + componentes `BjjBeltStrip`/`BjjBeltProgressCard`, garantindo cores/graus iguais às telas `/dashboard-aluno`, `/dashboard`, `/graduacoes` e `/evolucao`.
+- **Contagens sincronizadas**: totais e alunos ativos mostrados no hero são os mesmos do `useStaffDashboard` (derivado das stores), mantendo consistência com `/dashboard` e com as telas de presenças.
+
 ## 📒 Gestão de Presenças (MVP)
 
 ### Fluxo
@@ -328,7 +336,10 @@ styles/
 - `/graduacoes` consome **somente** `useGraduacoesStore` (seedado pelo `graduacoesService`) e `useAlunosStore`, mais contexto de sessão via `useCurrentStaff`, para listar promoções planejadas e o histórico consolidado.
 - Filtros por nome, faixa (via `faixaSlug` + `getFaixaConfigBySlug`), status e tipo reaproveitam os mesmos slugs e enums usados em dashboards, sem importar mocks diretamente na página.
 - Totais de graduações pendentes/concluídas e a próxima cerimônia refletem o mesmo conjunto de dados usado pelo `useStaffDashboard`, garantindo números alinhados com os cards do dashboard.
-- O histórico usa `historicoGraduacoes` dos alunos e os componentes modernos de faixa (`BjjBeltStrip`), mantendo o visual unificado com `/belt-demo`. Migrar de mocks para API exige apenas trocar o `graduacoesService`.
+- O histórico usa `historicoGraduacoes` dos alunos e os componentes modernos de faixa (`BjjBeltStrip`), mantendo o visual unificado com `/belt-demo`, com filtro rápido de 30/60/90 dias para focar nos registros mais recentes. Migrar de mocks para API exige apenas trocar o `graduacoesService`.
+
+#### Futuro de `/graduacoes`
+- Evoluir o "Histórico recente" para um relatório mais robusto, com filtros adicionais e exportação, mantendo a mesma fonte de dados centralizada e cronologia validada por faixas/graus.
 
 ### Componentes compartilhados de UI
 
