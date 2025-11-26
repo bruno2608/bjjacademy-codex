@@ -80,7 +80,9 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       status,
       treinoId,
     });
-  }, [initialData, sugerirTreino, treinosDoDia]);
+    // Dependências limitadas aos campos da presença para evitar reset enquanto o usuário edita.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?.alunoId, initialData?.data, initialData?.id, initialData?.status, initialData?.treinoId]);
 
   useEffect(() => {
     if (initialData) return;
