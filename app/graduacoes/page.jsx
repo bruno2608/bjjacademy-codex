@@ -28,6 +28,7 @@ export default function GraduacoesStaffPage() {
   const [faixaFiltro, setFaixaFiltro] = useState('');
   const [statusFiltro, setStatusFiltro] = useState('');
   const [tipoFiltro, setTipoFiltro] = useState('');
+  const [janelaHistoricoDias, setJanelaHistoricoDias] = useState(30);
 
   const alunoLookup = useMemo(
     () =>
@@ -142,14 +143,18 @@ export default function GraduacoesStaffPage() {
       dedup.set(key, item);
     });
 
+    const limiteMs = janelaHistoricoDias ? Date.now() - janelaHistoricoDias * 24 * 60 * 60 * 1000 : null;
+
     return Array.from(dedup.values())
       .filter((item) => {
         const nomeMatch = buscaNome ? item.alunoNome?.toLowerCase().includes(buscaNome.toLowerCase()) : true;
         const faixaMatch = faixaFiltro ? normalizeFaixaSlug(item.faixaSlug) === faixaFiltro : true;
-        return nomeMatch && faixaMatch;
+        const dataMs = item.data ? new Date(item.data).getTime() : NaN;
+        const dentroDaJanela = limiteMs ? Number.isFinite(dataMs) && dataMs >= limiteMs : true;
+        return nomeMatch && faixaMatch && dentroDaJanela;
       })
       .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-  }, [alunos, buscaNome, faixaFiltro, graduacoesEnriquecidas]);
+  }, [alunos, buscaNome, faixaFiltro, graduacoesEnriquecidas, janelaHistoricoDias]);
 
   const cards = useMemo(() => {
     const pendentes = graduacoesEnriquecidas.filter((g) => g.status !== 'Concluído');
@@ -295,8 +300,29 @@ export default function GraduacoesStaffPage() {
           />
         </div>
         <div className="space-y-4">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
-            <UserRound size={14} /> Histórico recente
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
+              <UserRound size={14} /> Histórico recente
+            </div>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-bjj-gray-200/60 text-[11px]">
+              Mostrar últimos:
+              <div className="flex gap-2">
+                {[30, 60, 90].map((dias) => (
+                  <button
+                    key={dias}
+                    type="button"
+                    onClick={() => setJanelaHistoricoDias(dias)}
+                    className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+                      janelaHistoricoDias === dias
+                        ? 'border-bjj-red bg-bjj-red/10 text-bjj-white shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
+                        : 'border-bjj-gray-800/70 bg-bjj-gray-900/50 text-bjj-gray-200 hover:border-bjj-gray-700'
+                    }`}
+                  >
+                    {dias}d
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
           <GraduationTimeline itens={historico} />
         </div>

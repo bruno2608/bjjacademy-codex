@@ -336,7 +336,10 @@ styles/
 - `/graduacoes` consome **somente** `useGraduacoesStore` (seedado pelo `graduacoesService`) e `useAlunosStore`, mais contexto de sessão via `useCurrentStaff`, para listar promoções planejadas e o histórico consolidado.
 - Filtros por nome, faixa (via `faixaSlug` + `getFaixaConfigBySlug`), status e tipo reaproveitam os mesmos slugs e enums usados em dashboards, sem importar mocks diretamente na página.
 - Totais de graduações pendentes/concluídas e a próxima cerimônia refletem o mesmo conjunto de dados usado pelo `useStaffDashboard`, garantindo números alinhados com os cards do dashboard.
-- O histórico usa `historicoGraduacoes` dos alunos e os componentes modernos de faixa (`BjjBeltStrip`), mantendo o visual unificado com `/belt-demo`. Migrar de mocks para API exige apenas trocar o `graduacoesService`.
+- O histórico usa `historicoGraduacoes` dos alunos e os componentes modernos de faixa (`BjjBeltStrip`), mantendo o visual unificado com `/belt-demo`, com filtro rápido de 30/60/90 dias para focar nos registros mais recentes. Migrar de mocks para API exige apenas trocar o `graduacoesService`.
+
+#### Futuro de `/graduacoes`
+- Evoluir o "Histórico recente" para um relatório mais robusto, com filtros adicionais e exportação, mantendo a mesma fonte de dados centralizada e cronologia validada por faixas/graus.
 
 ### Componentes compartilhados de UI
 
