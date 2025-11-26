@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Award, Clock3, Filter, Medal, ShieldCheck, UserRound } from 'lucide-react';
 
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
@@ -28,6 +28,7 @@ export default function GraduacoesStaffPage() {
   const [faixaFiltro, setFaixaFiltro] = useState('');
   const [statusFiltro, setStatusFiltro] = useState('');
   const [tipoFiltro, setTipoFiltro] = useState('');
+  const [janelaHistoricoDias, setJanelaHistoricoDias] = useState(30);
 
   const alunoLookup = useMemo(
     () =>
@@ -49,21 +50,53 @@ export default function GraduacoesStaffPage() {
       graduacoes.map((graduacao) => {
         const aluno = alunoLookup[graduacao.alunoId];
         const faixaSlugAtual = normalizeFaixaSlug(aluno?.faixaSlug ?? graduacao.faixaAtual);
-        const proximaFaixaSlug = normalizeFaixaSlug(graduacao.proximaFaixa ?? aluno?.faixaSlug ?? faixaSlugAtual);
+        const proximaFaixaSlug = normalizeFaixaSlug(graduacao.proximaFaixa ?? graduacao.proximaFaixaSlug);
         const grauAtual = Number(aluno?.graus ?? aluno?.grauAtual ?? graduacao.grauAtual ?? 0);
+        const grauAlvo =
+          graduacao.tipo === 'Grau'
+            ? Number.isFinite(Number(graduacao.grauAlvo))
+              ? Number(graduacao.grauAlvo)
+              : Number(graduacao.grauAtual ?? 0)
+            : null;
+
+        const atingiuFaixa = graduacao.tipo === 'Faixa' && faixaSlugAtual === proximaFaixaSlug && !!faixaSlugAtual;
+        const atingiuGrau = graduacao.tipo === 'Grau' && grauAlvo !== null && grauAtual >= grauAlvo;
+        const statusCentralizado = atingiuFaixa || atingiuGrau ? 'Concluído' : graduacao.status;
+
+        const faixaAtualConfig = faixaSlugAtual ? getFaixaConfigBySlug(faixaSlugAtual) : null;
+        const proximaFaixaConfig = proximaFaixaSlug ? getFaixaConfigBySlug(proximaFaixaSlug) : null;
 
         return {
           ...graduacao,
-          alunoNome: aluno?.nome || graduacao.alunoNome,
+          alunoNome: aluno?.nomeCompleto || aluno?.nome || graduacao.alunoNome,
           faixaSlugAtual,
           proximaFaixaSlug,
-          faixaAtual: aluno?.faixa || graduacao.faixaAtual,
+          faixaAtual: faixaAtualConfig?.nome || aluno?.faixa || graduacao.faixaAtual,
+          proximaFaixa: proximaFaixaConfig?.nome || graduacao.proximaFaixa || proximaFaixaSlug,
           grauAtual,
-          mesesRestantes: Number(graduacao.mesesRestantes ?? 0)
+          grauAlvo,
+          mesesRestantes: Number(graduacao.mesesRestantes ?? 0),
+          status: statusCentralizado
         };
       }),
     [alunoLookup, graduacoes]
   );
+
+  // Se o aluno já atingiu a meta manualmente (ex.: faixa ou grau ajustado via edição),
+  // sincronizamos o status da graduação e aplicamos os efeitos colaterais centrais
+  // (atualizar histórico e recomputar dados do aluno) para manter todas as telas alinhadas.
+  useEffect(() => {
+    const concluenciasPendentes = graduacoesEnriquecidas.filter((item) => {
+      const original = graduacoes.find((g) => g.id === item.id);
+      return item.status === 'Concluído' && original?.status !== 'Concluído';
+    });
+
+    if (!concluenciasPendentes.length) return;
+
+    concluenciasPendentes.forEach((graduacao) => {
+      updateGraduacao(graduacao.id, { status: 'Concluído' });
+    });
+  }, [graduacoes, graduacoesEnriquecidas]);
 
   const faixasDisponiveis = useMemo(() => {
     const slugs = new Set(
@@ -85,6 +118,11 @@ export default function GraduacoesStaffPage() {
     });
   }, [alunoLookup, buscaNome, faixaFiltro, graduacoesEnriquecidas, statusFiltro, tipoFiltro]);
 
+  const graduacoesPendentes = useMemo(
+    () => graduacoesFiltradas.filter((item) => item.status !== 'Concluído'),
+    [graduacoesFiltradas]
+  );
+
   const historico = useMemo(() => {
     const entries = alunos.flatMap((aluno) =>
       (aluno.historicoGraduacoes || []).map((item) => ({
@@ -97,14 +135,42 @@ export default function GraduacoesStaffPage() {
       }))
     );
 
-    return entries
+    const concluidas = graduacoesEnriquecidas
+      .filter((item) => item.status === 'Concluído')
+      .map((item) => ({
+        id: item.id,
+        alunoId: item.alunoId,
+        alunoNome: item.alunoNome,
+        faixaSlug: item.proximaFaixaSlug || item.faixaSlugAtual,
+        faixa: item.proximaFaixa || item.faixaAtual,
+        grau: item.tipo === 'Grau' ? item.grauAlvo ?? item.grauAtual ?? null : null,
+        tipo: item.tipo,
+        data: item.previsao,
+        descricao:
+          item.tipo === 'Faixa'
+            ? `${item.faixaAtual} → ${item.proximaFaixa}`
+            : `${item.grauAlvo ?? item.grauAtual ?? ''}º grau em ${item.faixaAtual}`,
+        instrutor: item.instrutor
+      }));
+
+    const dedup = new Map();
+    [...entries, ...concluidas].forEach((item) => {
+      const key = item.id || `${item.alunoId}-${item.tipo}-${item.faixaSlug}-${item.grau}-${item.data}`;
+      dedup.set(key, item);
+    });
+
+    const limiteMs = janelaHistoricoDias ? Date.now() - janelaHistoricoDias * 24 * 60 * 60 * 1000 : null;
+
+    return Array.from(dedup.values())
       .filter((item) => {
         const nomeMatch = buscaNome ? item.alunoNome?.toLowerCase().includes(buscaNome.toLowerCase()) : true;
         const faixaMatch = faixaFiltro ? normalizeFaixaSlug(item.faixaSlug) === faixaFiltro : true;
-        return nomeMatch && faixaMatch;
+        const dataMs = item.data ? new Date(item.data).getTime() : NaN;
+        const dentroDaJanela = limiteMs ? Number.isFinite(dataMs) && dataMs >= limiteMs : true;
+        return nomeMatch && faixaMatch && dentroDaJanela;
       })
       .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-  }, [alunos, buscaNome, faixaFiltro]);
+  }, [alunos, buscaNome, faixaFiltro, graduacoesEnriquecidas, janelaHistoricoDias]);
 
   const cards = useMemo(() => {
     const pendentes = graduacoesEnriquecidas.filter((g) => g.status !== 'Concluído');
@@ -244,14 +310,35 @@ export default function GraduacoesStaffPage() {
             <ShieldCheck size={14} /> Próximas graduações
           </div>
           <GraduationList
-            graduacoes={graduacoesFiltradas}
+            graduacoes={graduacoesPendentes}
             onStatusChange={handleStatusChange}
             alunoLookup={alunoLookup}
           />
         </div>
         <div className="space-y-4">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
-            <UserRound size={14} /> Histórico recente
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
+              <UserRound size={14} /> Histórico recente
+            </div>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-bjj-gray-200/60 text-[11px]">
+              Mostrar últimos:
+              <div className="flex gap-2">
+                {[30, 60, 90].map((dias) => (
+                  <button
+                    key={dias}
+                    type="button"
+                    onClick={() => setJanelaHistoricoDias(dias)}
+                    className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+                      janelaHistoricoDias === dias
+                        ? 'border-bjj-red bg-bjj-red/10 text-bjj-white shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
+                        : 'border-bjj-gray-800/70 bg-bjj-gray-900/50 text-bjj-gray-200 hover:border-bjj-gray-700'
+                    }`}
+                  >
+                    {dias}d
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
           <GraduationTimeline itens={historico} />
         </div>
