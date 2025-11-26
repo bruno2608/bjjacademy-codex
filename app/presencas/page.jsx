@@ -318,7 +318,17 @@ export default function PresencasPage() {
 
   const handleMarkAbsent = async (registro, justificativa = false) => {
     if (!registro?.id) return;
-    await atualizarStatus(registro.id, justificativa ? 'JUSTIFICADA' : 'FALTA');
+    const novoStatus = justificativa ? 'JUSTIFICADA' : 'FALTA';
+
+    // Garantimos que o filtro de status atual continue exibindo o registro,
+    // evitando a sensação de "exclusão" quando o status sai do conjunto filtrado.
+    setFilterStatuses((prev) => {
+      const limpos = limparSelecao(prev);
+      if (!limpos.length || limpos.includes(novoStatus)) return prev;
+      return [...limpos, novoStatus];
+    });
+
+    await atualizarStatus(registro.id, novoStatus);
   };
 
   const abrirFechamento = () => {
