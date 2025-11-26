@@ -13,6 +13,8 @@ import Button from '../ui/Button';
 
 const statusOptions = ['PRESENTE', 'PENDENTE', 'FALTA', 'JUSTIFICADA'];
 
+const normalizeStatus = (valor) => (valor || '').toString().trim().toUpperCase() || statusOptions[0];
+
 export default function PresenceForm({ onSubmit, initialData = null, onCancel, submitLabel }) {
   const alunos = useAlunosStore((state) => state.alunos);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
@@ -26,21 +28,6 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
     return nome.replace('-feira', '').trim();
   };
 
-  const treinosDisponiveis = useMemo(() => {
-    if (initialData?.treinoId && !treinos.some((treino) => treino.id === initialData.treinoId)) {
-      return [
-        ...treinos,
-        {
-          id: initialData.treinoId,
-          nome: initialData.tipoTreino || 'Sessão principal',
-          hora: initialData.hora || '--:--',
-          diaSemana: normalizarDiaSemana(initialData.data) || ''
-        }
-      ];
-    }
-    return treinos;
-  }, [initialData, normalizarDiaSemana, treinos]);
-
   const sugerirTreino = (dataReferencia) => {
     const dia = normalizarDiaSemana(dataReferencia) || normalizarDiaSemana(hoje);
     const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
@@ -50,22 +37,50 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
   const [form, setForm] = useState({
     alunoId: initialData?.alunoId || '',
     data: initialData?.data || hoje,
-    status: initialData?.status || statusOptions[0],
+    status: normalizeStatus(initialData?.status),
     treinoId:
       initialData?.treinoId ||
       (initialData ? sugerirTreino(initialData.data)?.id : sugerirTreino(hoje)?.id) ||
       ''
   });
 
+  const treinosDoDia = useMemo(() => {
+    const dia = normalizarDiaSemana(form.data);
+    const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
+    return candidatos.length ? candidatos : treinos;
+  }, [form.data, normalizarDiaSemana, treinos]);
+
+  const treinosDisponiveis = useMemo(() => {
+    const base = treinosDoDia;
+    if (initialData?.treinoId && !base.some((treino) => treino.id === initialData.treinoId)) {
+      return [
+        ...base,
+        {
+          id: initialData.treinoId,
+          nome: initialData.tipoTreino || 'Sessão principal',
+          hora: initialData.hora || '--:--',
+          diaSemana: normalizarDiaSemana(initialData.data) || ''
+        }
+      ];
+    }
+    return base;
+  }, [initialData, normalizarDiaSemana, treinosDoDia]);
+
   useEffect(() => {
     if (!initialData) return;
+    const status = normalizeStatus(initialData.status);
+    const treinoId =
+      initialData.treinoId ||
+      sugerirTreino(initialData.data)?.id ||
+      treinosDoDia.find((treino) => treino.id)?.id ||
+      '';
     setForm({
       alunoId: initialData.alunoId,
       data: initialData.data,
-      status: initialData.status,
-      treinoId: initialData.treinoId || sugerirTreino(initialData.data)?.id || ''
+      status,
+      treinoId,
     });
-  }, [initialData, treinos]);
+  }, [initialData, sugerirTreino, treinosDoDia]);
 
   useEffect(() => {
     if (initialData) return;
@@ -95,6 +110,9 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
             : sugestao?.id;
         return { ...prev, data: value, treinoId: treinoValido || '' };
       }
+      if (name === 'status') {
+        return { ...prev, status: normalizeStatus(value) };
+      }
       return { ...prev, [name]: value };
     });
   };
@@ -109,7 +127,8 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
 
     onSubmit({
       ...form,
-      treinoId: treinoSelecionado?.id || form.treinoId || null
+      treinoId: treinoSelecionado?.id || form.treinoId || null,
+      status: normalizeStatus(form.status)
     });
 
     if (!isEditing) {

@@ -53,7 +53,7 @@ export default function PresencasPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterFaixas, setFilterFaixas] = useState([]);
   const [filterStatuses, setFilterStatuses] = useState([]);
-  const [filterTreinos, setFilterTreinos] = useState([]);
+  const [filterTreinos, setFilterTreinos] = useState([TODOS_TREINOS]);
   const presencas = usePresencasStore((state) => state.presencas);
   const carregarPresencas = usePresencasStore((state) => state.carregarTodas);
   const salvarPresenca = usePresencasStore((state) => state.salvarPresenca);
@@ -89,37 +89,6 @@ export default function PresencasPage() {
     },
     [hoje, normalizarDiaSemana, treinos]
   );
-
-  useEffect(() => {
-    if (!treinos.length) {
-      setFilterTreinos([]);
-      return;
-    }
-
-    if (filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0) {
-      return;
-    }
-
-    const idsValidos = treinos.map((treino) => treino.id);
-    const filtrados = filterTreinos.filter((id) => idsValidos.includes(id));
-
-    if (!filtrados.length) {
-      const dia = normalizarDiaSemana(hoje);
-      const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
-      const sugestao = (candidatos[0] || treinos[0])?.id || TODOS_TREINOS;
-      setFilterTreinos(sugestao ? [sugestao] : []);
-      return;
-    }
-
-    if (filtrados.length === idsValidos.length) {
-      setFilterTreinos([TODOS_TREINOS]);
-      return;
-    }
-
-    if (filtrados.length !== filterTreinos.length) {
-      setFilterTreinos(filtrados);
-    }
-  }, [filterTreinos, hoje, normalizarDiaSemana, treinos]);
 
   useEffect(() => {
     let active = true;
@@ -262,6 +231,15 @@ export default function PresencasPage() {
     return candidatos.length ? candidatos : treinos;
   }, [hoje, normalizarDiaSemana, treinos]);
 
+  const treinoIdsDoDia = useMemo(() => {
+    const conjunto = new Set(
+      registrosDoDia
+        .map((item) => item.treinoId)
+        .filter((id) => typeof id === 'string' && id.trim().length > 0)
+    );
+    return Array.from(conjunto);
+  }, [registrosDoDia]);
+
   const faixasDisponiveis = useMemo(() => {
     const conjunto = new Set(
       alunosAtivos
@@ -279,14 +257,61 @@ export default function PresencasPage() {
     () => STATUS_FILTER_VALUES.map((option) => ({ value: option.value, label: option.label })),
     []
   );
+  const treinosParaFiltro = useMemo(() => {
+    if (treinoIdsDoDia.length) {
+      const conhecidos = treinos.filter((treino) => treinoIdsDoDia.includes(treino.id));
+      const faltantes = treinoIdsDoDia
+        .filter((id) => !conhecidos.some((treino) => treino.id === id))
+        .map((id) => ({
+          id,
+          nome: 'Sessão principal',
+          hora: '--:--',
+          diaSemana: normalizarDiaSemana(hoje) || ''
+        }));
+      return [...conhecidos, ...faltantes];
+    }
+    return treinosDoDiaPadrao;
+  }, [hoje, normalizarDiaSemana, treinoIdsDoDia, treinos, treinosDoDiaPadrao]);
+
   const opcoesTreinos = useMemo(
     () =>
-      treinosDoDiaPadrao.map((treino) => ({
+      treinosParaFiltro.map((treino) => ({
         value: treino.id,
         label: `${treino.nome} · ${treino.hora}`
       })),
-    [treinosDoDiaPadrao]
+    [treinosParaFiltro]
   );
+
+  useEffect(() => {
+    const idsDisponiveis = opcoesTreinos.map((treino) => treino.value);
+    if (!idsDisponiveis.length) {
+      setFilterTreinos([]);
+      return;
+    }
+
+    if (!filterTreinos.length || filterTreinos.includes(TODOS_TREINOS)) {
+      if (filterTreinos.length !== 1 || filterTreinos[0] !== TODOS_TREINOS) {
+        setFilterTreinos([TODOS_TREINOS]);
+      }
+      return;
+    }
+
+    const filtrados = filterTreinos.filter((id) => idsDisponiveis.includes(id));
+
+    if (!filtrados.length) {
+      setFilterTreinos([TODOS_TREINOS]);
+      return;
+    }
+
+    if (filtrados.length === idsDisponiveis.length) {
+      setFilterTreinos([TODOS_TREINOS]);
+      return;
+    }
+
+    if (filtrados.length !== filterTreinos.length) {
+      setFilterTreinos(filtrados);
+    }
+  }, [filterTreinos, opcoesTreinos]);
 
   const treinoAnaliseLabel = useMemo(
     () => opcoesTreinos.find((item) => item.value === treinoEmAnalise)?.label || 'Treino selecionado',
@@ -301,12 +326,13 @@ export default function PresencasPage() {
 
   const treinosDisponiveisModal = useMemo(() => {
     if (!sessionRecord) {
-      return treinosDoDiaPadrao;
+      return treinosParaFiltro;
     }
     const diaSessao = normalizarDiaSemana(sessionRecord.data);
     const candidatos = treinos.filter((treino) => treino.diaSemana === diaSessao);
-    return candidatos.length ? candidatos : treinosDoDiaPadrao;
-  }, [normalizarDiaSemana, sessionRecord, treinos, treinosDoDiaPadrao]);
+    if (candidatos.length) return candidatos;
+    return treinosParaFiltro;
+  }, [normalizarDiaSemana, sessionRecord, treinos, treinosParaFiltro]);
 
   const handleConfirm = async (registro) => {
     if (!registro?.id) {
@@ -317,15 +343,15 @@ export default function PresencasPage() {
   };
 
   const abrirFechamento = () => {
-    const sugestao = filterTreinos.includes(TODOS_TREINOS) ? treinosDoDiaPadrao[0]?.id : filterTreinos[0];
-    setTreinoParaFechar(sugestao || treinosDoDiaPadrao[0]?.id || '');
+    const sugestao = filterTreinos.includes(TODOS_TREINOS) ? treinosParaFiltro[0]?.id : filterTreinos[0];
+    setTreinoParaFechar(sugestao || treinosParaFiltro[0]?.id || '');
     setIsCloseModalOpen(true);
   };
 
   const fecharModalFechamento = () => setIsCloseModalOpen(false);
 
   const fecharTreinoAutomatico = async () => {
-    const alvo = treinoParaFechar || treinosDoDiaPadrao[0]?.id || null;
+    const alvo = treinoParaFechar || treinosParaFiltro[0]?.id || null;
     if (alvo) {
       await fecharTreino(alvo);
     }
@@ -333,7 +359,7 @@ export default function PresencasPage() {
   };
 
   const direcionarParaAnalise = () => {
-    const alvo = treinoParaFechar || treinosDoDiaPadrao[0]?.id || '';
+    const alvo = treinoParaFechar || treinosParaFiltro[0]?.id || '';
     if (alvo) {
       setFilterTreinos([alvo]);
     }
@@ -342,7 +368,7 @@ export default function PresencasPage() {
   };
 
   const salvarFechamentoManual = async () => {
-    const alvo = treinoEmAnalise || treinosDoDiaPadrao[0]?.id || null;
+    const alvo = treinoEmAnalise || treinosParaFiltro[0]?.id || null;
     marcarTreinoFechado(hoje, alvo);
     setTreinoEmAnalise('');
   };
@@ -365,7 +391,7 @@ export default function PresencasPage() {
     setSearchTerm('');
     setFilterFaixas([]);
     setFilterStatuses([]);
-    setFilterTreinos([]);
+    setFilterTreinos([TODOS_TREINOS]);
   };
 
   const normalizarSelecao = useCallback((lista, totalDisponivel, valorTodos = 'all') => {
