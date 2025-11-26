@@ -532,11 +532,21 @@ export default function PresencasPage() {
 
   const handleEditSubmit = async (dados) => {
     if (!selectedRecord?.id) return;
+
+    const novoStatus = normalizePresencaStatus(dados.status || selectedRecord.status);
+
+    // Mantém o registro visível mesmo quando o novo status não estava no filtro ativo.
+    setFilterStatuses((prev) => {
+      const limpos = limparSelecao(prev);
+      if (!limpos.length || limpos.includes(novoStatus)) return prev;
+      return [...limpos, novoStatus];
+    });
+
     const atualizado = await salvarPresenca({
       id: selectedRecord.id,
       alunoId: dados.alunoId || selectedRecord.alunoId,
       treinoId: dados.treinoId || selectedRecord.treinoId,
-      status: dados.status || selectedRecord.status,
+      status: novoStatus,
       data: dados.data || selectedRecord.data,
       origem: dados.origem || 'PROFESSOR',
       observacao: dados.observacao || null,
