@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Award, Clock3, Filter, Medal, ShieldCheck, UserRound } from 'lucide-react';
 
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
@@ -81,6 +81,22 @@ export default function GraduacoesStaffPage() {
       }),
     [alunoLookup, graduacoes]
   );
+
+  // Se o aluno já atingiu a meta manualmente (ex.: faixa ou grau ajustado via edição),
+  // sincronizamos o status da graduação e aplicamos os efeitos colaterais centrais
+  // (atualizar histórico e recomputar dados do aluno) para manter todas as telas alinhadas.
+  useEffect(() => {
+    const concluenciasPendentes = graduacoesEnriquecidas.filter((item) => {
+      const original = graduacoes.find((g) => g.id === item.id);
+      return item.status === 'Concluído' && original?.status !== 'Concluído';
+    });
+
+    if (!concluenciasPendentes.length) return;
+
+    concluenciasPendentes.forEach((graduacao) => {
+      updateGraduacao(graduacao.id, { status: 'Concluído' });
+    });
+  }, [graduacoes, graduacoesEnriquecidas]);
 
   const faixasDisponiveis = useMemo(() => {
     const slugs = new Set(
