@@ -67,28 +67,6 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
     return base;
   }, [initialData, normalizarDiaSemana, treinosDoDia]);
 
-  const treinosDoDia = useMemo(() => {
-    const dia = normalizarDiaSemana(form.data);
-    const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
-    return candidatos.length ? candidatos : treinos;
-  }, [form.data, normalizarDiaSemana, treinos]);
-
-  const treinosDisponiveis = useMemo(() => {
-    const base = treinosDoDia;
-    if (initialData?.treinoId && !base.some((treino) => treino.id === initialData.treinoId)) {
-      return [
-        ...base,
-        {
-          id: initialData.treinoId,
-          nome: initialData.tipoTreino || 'Sessão principal',
-          hora: initialData.hora || '--:--',
-          diaSemana: normalizarDiaSemana(initialData.data) || ''
-        }
-      ];
-    }
-    return base;
-  }, [initialData, normalizarDiaSemana, treinosDoDia]);
-
   useEffect(() => {
     if (!initialData) return;
     const status = normalizeStatus(initialData.status);
