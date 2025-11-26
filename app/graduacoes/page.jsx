@@ -101,6 +101,11 @@ export default function GraduacoesStaffPage() {
     });
   }, [alunoLookup, buscaNome, faixaFiltro, graduacoesEnriquecidas, statusFiltro, tipoFiltro]);
 
+  const graduacoesPendentes = useMemo(
+    () => graduacoesFiltradas.filter((item) => item.status !== 'Concluído'),
+    [graduacoesFiltradas]
+  );
+
   const historico = useMemo(() => {
     const entries = alunos.flatMap((aluno) =>
       (aluno.historicoGraduacoes || []).map((item) => ({
@@ -113,14 +118,38 @@ export default function GraduacoesStaffPage() {
       }))
     );
 
-    return entries
+    const concluidas = graduacoesEnriquecidas
+      .filter((item) => item.status === 'Concluído')
+      .map((item) => ({
+        id: item.id,
+        alunoId: item.alunoId,
+        alunoNome: item.alunoNome,
+        faixaSlug: item.proximaFaixaSlug || item.faixaSlugAtual,
+        faixa: item.proximaFaixa || item.faixaAtual,
+        grau: item.tipo === 'Grau' ? item.grauAlvo ?? item.grauAtual ?? null : null,
+        tipo: item.tipo,
+        data: item.previsao,
+        descricao:
+          item.tipo === 'Faixa'
+            ? `${item.faixaAtual} → ${item.proximaFaixa}`
+            : `${item.grauAlvo ?? item.grauAtual ?? ''}º grau em ${item.faixaAtual}`,
+        instrutor: item.instrutor
+      }));
+
+    const dedup = new Map();
+    [...entries, ...concluidas].forEach((item) => {
+      const key = item.id || `${item.alunoId}-${item.tipo}-${item.faixaSlug}-${item.grau}-${item.data}`;
+      dedup.set(key, item);
+    });
+
+    return Array.from(dedup.values())
       .filter((item) => {
         const nomeMatch = buscaNome ? item.alunoNome?.toLowerCase().includes(buscaNome.toLowerCase()) : true;
         const faixaMatch = faixaFiltro ? normalizeFaixaSlug(item.faixaSlug) === faixaFiltro : true;
         return nomeMatch && faixaMatch;
       })
       .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-  }, [alunos, buscaNome, faixaFiltro]);
+  }, [alunos, buscaNome, faixaFiltro, graduacoesEnriquecidas]);
 
   const cards = useMemo(() => {
     const pendentes = graduacoesEnriquecidas.filter((g) => g.status !== 'Concluído');
@@ -260,7 +289,7 @@ export default function GraduacoesStaffPage() {
             <ShieldCheck size={14} /> Próximas graduações
           </div>
           <GraduationList
-            graduacoes={graduacoesFiltradas}
+            graduacoes={graduacoesPendentes}
             onStatusChange={handleStatusChange}
             alunoLookup={alunoLookup}
           />
