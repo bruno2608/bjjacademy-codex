@@ -80,7 +80,9 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       status,
       treinoId,
     });
-  }, [initialData, sugerirTreino]);
+    // Dependências limitadas aos campos da presença para evitar reset enquanto o usuário edita.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?.alunoId, initialData?.data, initialData?.id, initialData?.status, initialData?.treinoId]);
 
   useEffect(() => {
     if (initialData) return;
@@ -181,7 +183,12 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Treino / sessão</label>
-          <Select name="treinoId" value={form.treinoId} onChange={handleTreinoChange}>
+          <Select
+            name="treinoId"
+            value={form.treinoId}
+            onChange={handleTreinoChange}
+            aria-label="Selecionar treino ou sessão"
+          >
             {treinosDisponiveis.map((treino) => (
               <option key={treino.id} value={treino.id}>
                 {treino.nome} · {treino.hora}
@@ -192,9 +199,16 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Status</label>
-          <Select name="status" value={form.status} onChange={handleStatusChange}>
+          <Select
+            name="status"
+            value={form.status}
+            onChange={handleStatusChange}
+            aria-label="Selecionar status da presença"
+          >
             {statusOptions.map((status) => (
-              <option key={status}>{status}</option>
+              <option key={status} value={status}>
+                {status}
+              </option>
             ))}
           </Select>
         </div>

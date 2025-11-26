@@ -48,19 +48,18 @@ export default function Modal({ isOpen, title, onClose, children }) {
   };
 
   const content = (
-    <dialog
-      className={`modal ${isOpen ? 'modal-open' : ''} z-50`}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      onClick={handleBackdropClick}
-      open={isOpen}
-      onCancel={(event) => {
-        event.preventDefault();
-        onClose?.();
-      }}
-    >
-      <div className="modal-box w-full max-w-2xl border border-bjj-gray-800/70 bg-bjj-gray-900 text-bjj-white shadow-[0_18px_35px_-18px_rgba(0,0,0,0.6)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
+        className="absolute inset-0 bg-bjj-black/80 backdrop-blur-sm"
+        onClick={handleBackdropClick}
+        role="presentation"
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        className="relative w-full max-w-2xl rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900 text-bjj-white shadow-[0_18px_35px_-18px_rgba(0,0,0,0.6)]"
+      >
         <header className="mb-4 flex items-center justify-between border-b border-bjj-gray-800 pb-3">
           <h2 id="modal-title" className="text-lg font-semibold">
             {title}
@@ -76,7 +75,7 @@ export default function Modal({ isOpen, title, onClose, children }) {
         </header>
         <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1 lg:max-h-[75vh]">{children}</div>
       </div>
-    </dialog>
+    </div>
   );
 
   return createPortal(content, document.body);
