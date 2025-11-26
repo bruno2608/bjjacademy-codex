@@ -22,12 +22,10 @@ import { normalizeAlunoStatus } from '@/lib/alunoStats';
 import { calcularResumoPresencas, comporRegistrosDoDia } from '@/lib/presencasResumo';
 
 const TODOS_TREINOS = 'all';
+const PRESENCA_STATUSES = ['PENDENTE', 'PRESENTE', 'FALTA', 'JUSTIFICADA'];
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os status' },
-  { value: 'PENDENTE', label: 'Pendente' },
-  { value: 'PRESENTE', label: 'Presente' },
-  { value: 'FALTA', label: 'Falta' },
-  { value: 'JUSTIFICADA', label: 'Justificada' }
+  ...PRESENCA_STATUSES.map((status) => ({ value: status, label: status.charAt(0) + status.slice(1).toLowerCase() }))
 ];
 const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
 
@@ -180,10 +178,15 @@ export default function PresencasPage() {
     return lista;
   }, []);
 
+  const normalizePresencaStatus = useCallback(
+    (status) => (status || '').toString().trim().toUpperCase(),
+    []
+  );
+
   const registrosFiltrados = useMemo(() => {
     const termo = searchTerm.trim().toLowerCase();
     const faixasAtivas = limparSelecao(filterFaixas);
-    const statusAtivos = limparSelecao(filterStatuses).map((status) => normalizeAlunoStatus(status));
+    const statusAtivos = limparSelecao(filterStatuses).map((status) => normalizePresencaStatus(status));
     const treinosAtivos = limparSelecao(filterTreinos, TODOS_TREINOS);
 
     return registrosDoDia.filter((item) => {
@@ -193,7 +196,7 @@ export default function PresencasPage() {
       if (faixasAtivas.length && !faixasAtivas.includes(item.faixaSlug)) {
         return false;
       }
-      const statusRegistro = normalizeAlunoStatus(item.status);
+      const statusRegistro = normalizePresencaStatus(item.status);
       if (statusAtivos.length && !statusAtivos.includes(statusRegistro)) {
         return false;
       }
@@ -205,17 +208,16 @@ export default function PresencasPage() {
       }
       return true;
     });
-  }, [filterFaixas, filterStatuses, filterTreinos, limparSelecao, registrosDoDia, searchTerm]);
+  }, [filterFaixas, filterStatuses, filterTreinos, limparSelecao, normalizePresencaStatus, registrosDoDia, searchTerm]);
 
-  const statusOrder = {
-    PENDENTE: 0,
-    PRESENTE: 1,
-    FALTA: 2,
-    JUSTIFICADA: 2
-  };
+  const statusOrder = PRESENCA_STATUSES.reduce((acc, status, index) => {
+    const order = status === 'JUSTIFICADA' ? PRESENCA_STATUSES.indexOf('FALTA') : index;
+    return { ...acc, [status]: order };
+  }, {});
 
   const statusLabel = (status) => {
-    switch (status) {
+    const normalized = normalizePresencaStatus(status);
+    switch (normalized) {
       case 'PENDENTE':
         return { label: 'PENDENTE', tone: 'text-yellow-200' };
       case 'PRESENTE':
@@ -225,7 +227,7 @@ export default function PresencasPage() {
       case 'JUSTIFICADA':
         return { label: 'JUSTIFICADA', tone: 'text-indigo-200' };
       default:
-        return { label: status || '—', tone: 'text-bjj-gray-200' };
+        return { label: normalized || '—', tone: 'text-bjj-gray-200' };
     }
   };
 

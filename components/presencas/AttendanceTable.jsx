@@ -8,6 +8,8 @@
 import { CheckCircle2, Loader2, Pencil, Plus, Trash2, XCircle } from 'lucide-react';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useTreinosStore } from '@/store/treinosStore';
+import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import Badge from '../ui/Badge';
 
 const baseActionButtonClasses =
@@ -75,7 +77,8 @@ export default function AttendanceTable({
         {records.map((record) => {
           const aluno = getAlunoById(record.alunoId);
           const alunoNome = aluno?.nome ?? 'Aluno não encontrado';
-          const faixa = aluno?.faixaSlug || aluno?.faixa || 'Sem faixa';
+          const faixaSlug = aluno?.faixaSlug || aluno?.faixa || 'branca-adulto';
+          const faixaConfig = getFaixaConfigBySlug(faixaSlug);
           const graus = Number.isFinite(Number(aluno?.graus)) ? Number(aluno?.graus) : 0;
           const formattedDate = record.data
             ? new Date(record.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '')
@@ -106,7 +109,7 @@ export default function AttendanceTable({
                   <div>
                     <p className="text-sm font-semibold text-bjj-white">{alunoNome}</p>
                     <p className="text-[11px] text-bjj-gray-200/70">
-                      {faixa} · {graus}º grau
+                      {(faixaConfig?.nomeCurto || faixaConfig?.nome || faixaSlug) ?? 'Sem faixa'} · {graus}º grau
                     </p>
                   </div>
                   <Badge
@@ -203,8 +206,18 @@ export default function AttendanceTable({
                   <p className="text-sm font-semibold text-bjj-white">{alunoNome}</p>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px]">
-                  <span className="font-medium text-bjj-white/90">{faixa}</span>
-                  <span className="block text-[11px] text-bjj-gray-200/70">{graus}º grau</span>
+                  {faixaConfig ? (
+                    <BjjBeltStrip
+                      config={faixaConfig}
+                      grauAtual={graus}
+                      className="h-12 min-w-[10rem] scale-[0.78] origin-left"
+                    />
+                  ) : (
+                    <>
+                      <span className="font-medium text-bjj-white/90">{faixaSlug}</span>
+                      <span className="block text-[11px] text-bjj-gray-200/70">{graus}º grau</span>
+                    </>
+                  )}
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3 py-3 text-[11px] text-bjj-gray-200/80">
                   <span className="block whitespace-nowrap text-[11px] text-bjj-gray-200/80" title={dataTreinoLabel}>

@@ -11,23 +11,24 @@ import Card from '../../../components/ui/Card';
 import LoadingState from '../../../components/ui/LoadingState';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
-import { getAlunos, updateAluno } from '../../../services/alunosService';
+import { updateAluno } from '../../../services/alunosService';
 import { getMaxStripes, getRuleForBelt } from '../../../lib/graduationRules';
+import { useAlunosStore } from '../../../store/alunosStore';
+import { normalizeFaixaSlug } from '../../../lib/alunoStats';
 
 export default function EditarAlunoPage() {
   const router = useRouter();
   const params = useParams();
+  const alunos = useAlunosStore((state) => state.alunos);
+  const getAlunoById = useAlunosStore((state) => state.getAlunoById);
   const [aluno, setAluno] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    getAlunos().then((list) => {
-      const encontrado = list.find((item) => item.id === params.id);
-      setAluno(encontrado || null);
-      setLoading(false);
-    });
-  }, [params.id]);
+    setAluno(getAlunoById(params.id) || null);
+    setLoading(false);
+  }, [alunos, getAlunoById, params.id]);
 
   const heroStats = useMemo(() => {
     if (!aluno) return [];
@@ -70,8 +71,9 @@ export default function EditarAlunoPage() {
     return <p className="text-sm text-bjj-red">Aluno não encontrado.</p>;
   }
 
+  const faixaSlugNormalizada = normalizeFaixaSlug(aluno.faixaSlug || aluno.faixa);
   const faixaConfig =
-    getFaixaConfigBySlug(aluno.faixaSlug) || getFaixaConfigBySlug('branca-adulto');
+    getFaixaConfigBySlug(faixaSlugNormalizada) || getFaixaConfigBySlug('branca-adulto');
 
   return (
     <div className="space-y-6">
