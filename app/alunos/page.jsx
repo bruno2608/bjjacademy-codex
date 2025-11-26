@@ -145,7 +145,7 @@ export default function AlunosPage() {
             : aluno.status;
         const faixaVisual =
           faixaConfig && (
-            <div className="w-full max-w-[180px]">
+            <div className="w-full max-w-[150px] md:max-w-[170px]">
               <BjjBeltStrip
                 config={faixaConfig}
                 grauAtual={grauAtual}

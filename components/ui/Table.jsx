@@ -19,14 +19,16 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
       aria-busy={isLoading}
     >
       <div className="absolute right-[-20%] top-[-20%] h-28 w-28 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-      <div className="hidden md:grid md:grid-cols-[180px_minmax(0,1.6fr)_minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.85fr)_minmax(0,1.1fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
-        {tableHeaders.map((header, index) => (
-          <div key={header} className={`px-3.5 py-3 ${index === 0 ? 'text-center' : ''}`}>
-            {header}
-          </div>
-        ))}
+      <div className="hidden overflow-x-auto md:block">
+        <div className="min-w-[980px] grid grid-cols-[160px_minmax(180px,1.1fr)_minmax(230px,1.35fr)_minmax(150px,1fr)_minmax(120px,0.9fr)_minmax(170px,1fr)] bg-bjj-gray-900/60 text-[11px] uppercase tracking-[0.14em] text-bjj-gray-200/60">
+          {tableHeaders.map((header, index) => (
+            <div key={header} className={`px-3.5 py-3 ${index === 0 ? 'text-center' : ''}`}>
+              {header}
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="relative divide-y divide-bjj-gray-800/80">
+      <div className="relative divide-y divide-bjj-gray-800/80 md:overflow-x-auto">
         {data.map((row) => {
           const faixa = row.faixa || row.faixaSlug || 'Sem faixa';
           const faixaVisual = row.faixaVisual;
@@ -74,7 +76,7 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
                   </button>
                 </div>
               </div>
-              <div className="hidden md:grid md:grid-cols-[180px_minmax(0,1.6fr)_minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.85fr)_minmax(0,1.1fr)]">
+              <div className="hidden min-w-[980px] grid grid-cols-[160px_minmax(180px,1.1fr)_minmax(230px,1.35fr)_minmax(150px,1fr)_minmax(120px,0.9fr)_minmax(170px,1fr)] md:grid">
                 <div className="flex items-center justify-center gap-2 border-b border-bjj-gray-800/60 px-3.5 py-3">
                   <button className={actionButtonClasses} onClick={() => onEdit?.(row)}>
                     <Pencil size={14} />
@@ -86,7 +88,7 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
                   </button>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3">
-                  <p className="text-sm font-semibold text-bjj-white">{row.nome}</p>
+                  <p className="text-sm font-semibold text-bjj-white break-words leading-tight">{row.nome}</p>
                 </div>
                 <div className="border-b border-bjj-gray-800/60 px-3.5 py-3 text-[11px]">
                   <div className="flex items-center gap-3">
