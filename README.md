@@ -82,8 +82,46 @@ Mocks atuais (únicos pontos que devem ler dados fake):
 - `data/mockTreinos.ts`
 - `data/mocks/bjjBeltMocks.ts` (config visual de faixas)
 - `data/mocks/bjjBeltUtils.ts` (helpers de faixa)
+- `data/mocks/mockAcademias.ts`
+- `data/mocks/mockUsuarios.ts`
+- `data/mocks/mockPapeis.ts`
+- `data/mocks/mockUsuariosPapeis.ts`
+- `data/mocks/mockMatriculas.ts`
+- `data/mocks/mockTurmas.ts`
+- `data/mocks/mockAulasInstancias.ts`
 
 **Regra:** nenhuma página deve importar esses mocks diretamente. Apenas os services os consomem, popularão as stores e os hooks entregam os dados às telas.
+
+### Modelo conceitual do banco (MVP)
+
+Entidades já refletidas em mocks e prontas para virar tabelas (Supabase/Postgres):
+
+- academias
+- usuarios + usuarios_papeis
+- alunos
+- matriculas
+- turmas
+- aulas_instancias
+- presencas
+- faixas
+- graduacoes
+
+### Próximos passos (antes de login/cadastro/banco real)
+
+Refatorar telas da visão professor/instrutor para usar as novas entidades de domínio:
+
+- `/dashboard` (staff) → usar academias, turmas, aulas_instancias, presencasStore.
+- `/presencas` → separar “Chamada do dia” e “Pendências”, usando turmas + aulas_instancias + presencas.
+- `/alunos` e `/alunos/[id]` → continuar usando `useAlunosStore`, agora com contexto de matriculas/academia.
+- `/graduacoes` → alinhar com graduacoesStore + faixas + presencas usando esse modelo de domínio.
+
+Ajustar menus/navegação para destacar o fluxo principal do professor (Dashboard → Presenças → Alunos/Graduacoes).
+
+Só depois dessas refatorações de tela, iniciar a implementação de:
+
+- Tela de login (usuário)
+- Cadastro self-service do aluno (com código de convite da academia)
+- Criação/migração do banco real (Supabase/Postgres) refletindo esse mesmo modelo.
 
 ### 🆕 Atualizações mais recentes (25/11 — gestão de alunos)
 
