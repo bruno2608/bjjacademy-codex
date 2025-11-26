@@ -110,6 +110,7 @@ export default function GraduacoesStaffPage() {
     const proximas = [...pendentes].sort((a, b) => new Date(a.previsao).getTime() - new Date(b.previsao).getTime());
     const proxima = proximas[0];
     const faixaConfig = proxima?.proximaFaixaSlug ? getFaixaConfigBySlug(proxima.proximaFaixaSlug) : undefined;
+    const proximaTipo = proxima?.tipo ? proxima.tipo.toLowerCase() : null;
 
     return [
       {
@@ -132,7 +133,8 @@ export default function GraduacoesStaffPage() {
           ? new Date(proxima.previsao).toLocaleDateString('pt-BR')
           : 'Sem data definida',
         belt: faixaConfig,
-        grau: proxima?.grauAlvo ?? null
+        grau: proxima?.grauAlvo ?? null,
+        tipo: proximaTipo
       }
     ];
   }, [graduacoesEnriquecidas]);
@@ -176,11 +178,15 @@ export default function GraduacoesStaffPage() {
                 </span>
               </div>
               {card.belt ? (
-                <div className="flex items-center gap-3 rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-3">
+                <div className="flex flex-wrap items-center gap-3 rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-3">
                   <BjjBeltStrip config={card.belt} grauAtual={card.grau} className="w-40" />
-                  <div className="text-xs text-bjj-gray-200/70">
-                    <p className="font-semibold text-bjj-white">Faixa alvo</p>
-                    <p>{card.belt.nome}</p>
+                  <div className="space-y-1 text-xs text-bjj-gray-200/80">
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-bjj-gray-200/60">Próxima cerimônia</p>
+                    <p className="font-semibold text-bjj-white">{card.belt.nome}</p>
+                    <p>
+                      {card.tipo ? `Tipo: ${card.tipo}` : null}
+                      {card.grau ? ` · Grau alvo: ${card.grau}º` : ''}
+                    </p>
                   </div>
                 </div>
               ) : null}
@@ -190,45 +196,43 @@ export default function GraduacoesStaffPage() {
       </section>
 
       <section className="card space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
-            <Filter size={14} /> Filtros
-          </div>
-          <div className="flex flex-1 flex-wrap gap-2">
-            <Input
-              placeholder="Buscar aluno"
-              value={buscaNome}
-              onChange={(event) => setBuscaNome(event.target.value)}
-              className="w-full min-w-[220px] flex-1"
-            />
-            <Select value={faixaFiltro} onChange={(event) => setFaixaFiltro(event.target.value)} className="w-48">
-              <option value="">Faixa</option>
-              {faixasDisponiveis.map((slug) => {
-                const config = slug ? getFaixaConfigBySlug(slug) : null;
-                return (
-                  <option key={slug} value={slug}>
-                    {config?.nome || slug}
-                  </option>
-                );
-              })}
-            </Select>
-            <Select value={tipoFiltro} onChange={(event) => setTipoFiltro(event.target.value)} className="w-44">
-              <option value="">Tipo</option>
-              {TIPO_OPTIONS.map((tipo) => (
-                <option key={tipo} value={tipo}>
-                  {tipo}
+        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
+          <Filter size={14} /> Filtros
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Input
+            placeholder="Buscar aluno"
+            value={buscaNome}
+            onChange={(event) => setBuscaNome(event.target.value)}
+            className="w-full"
+          />
+          <Select value={faixaFiltro} onChange={(event) => setFaixaFiltro(event.target.value)} className="w-full">
+            <option value="">Faixa</option>
+            {faixasDisponiveis.map((slug) => {
+              const config = slug ? getFaixaConfigBySlug(slug) : null;
+              return (
+                <option key={slug} value={slug}>
+                  {config?.nome || slug}
                 </option>
-              ))}
-            </Select>
-            <Select value={statusFiltro} onChange={(event) => setStatusFiltro(event.target.value)} className="w-48">
-              <option value="">Status</option>
-              {STATUS_OPTIONS.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </Select>
-          </div>
+              );
+            })}
+          </Select>
+          <Select value={tipoFiltro} onChange={(event) => setTipoFiltro(event.target.value)} className="w-full">
+            <option value="">Tipo</option>
+            {TIPO_OPTIONS.map((tipo) => (
+              <option key={tipo} value={tipo}>
+                {tipo}
+              </option>
+            ))}
+          </Select>
+          <Select value={statusFiltro} onChange={(event) => setStatusFiltro(event.target.value)} className="w-full">
+            <option value="">Status</option>
+            {STATUS_OPTIONS.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </Select>
         </div>
       </section>
 
