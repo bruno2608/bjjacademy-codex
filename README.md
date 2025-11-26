@@ -332,6 +332,13 @@ styles/
 - Listagem, filtros e ações de presença operam sobre `alunoId`/`treinoId` vindos das stores; qualquer criação/edição/exclusão chama as ações da store (`carregarTodas`, `salvarPresenca`, `atualizarStatus`, `fecharTreino`), mantendo os snapshots sincronizados com dashboards e histórico.
 - `/historico-presencas` (staff) usa exclusivamente `usePresencasStore` + `useAlunosStore` + `useCurrentStaff` para compor a linha do tempo, aplicando os mesmos agregadores de status (`calcularResumoPresencas`) e filtros de faixa/status/treino usados na visão diária. A página está pronta para troca dos mocks por API apenas alterando `presencasService`.
 
+#### Tela `/presencas` (professor/instrutor)
+- A listagem diária e o formulário/modal de correção leem somente `usePresencasStore` (dados + ações) e `useAlunosStore`/`useTreinosStore` para resolver nomes, faixas e horários; nenhum componente importa mocks diretamente.
+- Status são sempre os padronizados (`PENDENTE`, `PRESENTE`, `FALTA`, `JUSTIFICADA`), reaproveitando os mesmos rótulos usados em `/checkin`, `/historico-presencas` e nos cards do dashboard.
+- Faixa/grau do aluno são renderizados via `faixaSlug` centralizado com `getFaixaConfigBySlug` + `BjjBeltStrip`, mantendo o visual idêntico a `/dashboard-aluno`, `/alunos` e `/belt-demo`.
+- Ações de "Confirmar", "Falta/Justificar" e "Fechar treino" chamam diretamente `atualizarStatus`, `salvarPresenca` e `fecharTreino` da store/service, propagando os resultados para dashboards e histórico sem estados locais paralelos.
+- Futuro: a mesma base servirá para um relatório avançado de frequência (exportáveis/intervalos customizados) sem mudar a UI, apenas evoluindo `presencasService`.
+
 ### Graduações (visão professor/instrutor)
 - `/graduacoes` consome **somente** `useGraduacoesStore` (seedado pelo `graduacoesService`) e `useAlunosStore`, mais contexto de sessão via `useCurrentStaff`, para listar promoções planejadas e o histórico consolidado.
 - Filtros por nome, faixa (via `faixaSlug` + `getFaixaConfigBySlug`), status e tipo reaproveitam os mesmos slugs e enums usados em dashboards, sem importar mocks diretamente na página.
