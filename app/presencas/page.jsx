@@ -466,14 +466,23 @@ export default function PresencasPage() {
 
   useEffect(() => {
     if (!sessionRecord) return;
+    const primeiroDisponivel = treinosDisponiveisModal.find(
+      (treino) => !(sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id))
+    );
     const opcaoExiste = treinosDisponiveisModal.some((treino) => treino.id === sessionTreinoId);
-    if (!opcaoExiste) {
-      setSessionTreinoId(treinosDisponiveisModal[0]?.id || '');
+    const opcaoBloqueada =
+      sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId) && !!sessionTreinoId;
+
+    if (!opcaoExiste || opcaoBloqueada) {
+      setSessionTreinoId(primeiroDisponivel?.id || treinosDisponiveisModal[0]?.id || '');
     }
-  }, [sessionRecord, sessionTreinoId, treinosDisponiveisModal]);
+  }, [sessionContext, sessionRecord, sessionTakenTreinos, sessionTreinoId, treinosDisponiveisModal]);
 
   const handleSessionSubmit = async () => {
     if (!sessionRecord) return;
+    if (sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId)) {
+      return;
+    }
     const treinoSelecionado =
       treinos.find((treino) => treino.id === sessionTreinoId) ||
       obterSugestaoTreino(sessionRecord.alunoId, sessionRecord.data, sessionTakenTreinos);
@@ -801,19 +810,27 @@ export default function PresencasPage() {
           </p>
           <label className="block text-sm font-medium text-bjj-white">Treino / sessão</label>
           <Select value={sessionTreinoId} onChange={(event) => setSessionTreinoId(event.target.value)}>
-            {treinosDisponiveisModal.map((treino) => (
-              <option key={treino.id} value={treino.id}>
-                {treino.nome} · {treino.hora}
-                {sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id) ? ' (já registrado)' : ''}
-              </option>
-            ))}
+            {treinosDisponiveisModal.map((treino) => {
+              const jaRegistrado = sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id);
+              return (
+                <option key={treino.id} value={treino.id} disabled={jaRegistrado}>
+                  {treino.nome} · {treino.hora}
+                  {jaRegistrado ? ' (já registrado)' : ''}
+                </option>
+              );
+            })}
             {!treinosDisponiveisModal.length && <option value="">Sessão principal</option>}
           </Select>
           <div className="flex flex-col gap-2 md:flex-row md:justify-end">
             <Button type="button" variant="secondary" className="md:w-auto" onClick={fecharSelecaoSessao}>
               Cancelar
             </Button>
-            <Button type="button" className="md:w-auto" onClick={handleSessionSubmit}>
+            <Button
+              type="button"
+              className="md:w-auto"
+              onClick={handleSessionSubmit}
+              disabled={sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId)}
+            >
               Confirmar presença
             </Button>
           </div>

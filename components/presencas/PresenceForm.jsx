@@ -11,7 +11,7 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 
-const statusOptions = ['PRESENTE', 'PENDENTE', 'FALTA'];
+const statusOptions = ['PRESENTE', 'PENDENTE', 'FALTA', 'JUSTIFICADA'];
 
 export default function PresenceForm({ onSubmit, initialData = null, onCancel, submitLabel }) {
   const alunos = useAlunosStore((state) => state.alunos);
@@ -87,9 +87,13 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => {
-      if (name === 'data' && !isEditing) {
+      if (name === 'data') {
         const sugestao = sugerirTreino(value);
-        return { ...prev, data: value, treinoId: sugestao?.id || prev.treinoId };
+        const treinoValido =
+          prev.treinoId && treinosDisponiveis.some((treino) => treino.id === prev.treinoId)
+            ? prev.treinoId
+            : sugestao?.id;
+        return { ...prev, data: value, treinoId: treinoValido || '' };
       }
       return { ...prev, [name]: value };
     });
@@ -124,7 +128,7 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         <div className="lg:col-span-2">
           <label className="block text-sm font-medium mb-2">Aluno</label>
-          <Select name="alunoId" value={form.alunoId} onChange={handleChange} disabled={isEditing}>
+          <Select name="alunoId" value={form.alunoId} onChange={handleChange}>
             {alunos.map((aluno) => {
               const faixa = aluno.faixaSlug || aluno.faixa || 'Sem faixa';
               const grauAtual = Number.isFinite(Number(aluno.graus)) ? Number(aluno.graus) : 0;
@@ -143,7 +147,6 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
             type="date"
             value={form.data}
             onChange={handleChange}
-            disabled={isEditing}
             required
           />
         </div>
