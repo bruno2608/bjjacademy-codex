@@ -49,17 +49,33 @@ export default function GraduacoesStaffPage() {
       graduacoes.map((graduacao) => {
         const aluno = alunoLookup[graduacao.alunoId];
         const faixaSlugAtual = normalizeFaixaSlug(aluno?.faixaSlug ?? graduacao.faixaAtual);
-        const proximaFaixaSlug = normalizeFaixaSlug(graduacao.proximaFaixa ?? aluno?.faixaSlug ?? faixaSlugAtual);
+        const proximaFaixaSlug = normalizeFaixaSlug(graduacao.proximaFaixa ?? graduacao.proximaFaixaSlug);
         const grauAtual = Number(aluno?.graus ?? aluno?.grauAtual ?? graduacao.grauAtual ?? 0);
+        const grauAlvo =
+          graduacao.tipo === 'Grau'
+            ? Number.isFinite(Number(graduacao.grauAlvo))
+              ? Number(graduacao.grauAlvo)
+              : Number(graduacao.grauAtual ?? 0)
+            : null;
+
+        const atingiuFaixa = graduacao.tipo === 'Faixa' && faixaSlugAtual === proximaFaixaSlug && !!faixaSlugAtual;
+        const atingiuGrau = graduacao.tipo === 'Grau' && grauAlvo !== null && grauAtual >= grauAlvo;
+        const statusCentralizado = atingiuFaixa || atingiuGrau ? 'Concluído' : graduacao.status;
+
+        const faixaAtualConfig = faixaSlugAtual ? getFaixaConfigBySlug(faixaSlugAtual) : null;
+        const proximaFaixaConfig = proximaFaixaSlug ? getFaixaConfigBySlug(proximaFaixaSlug) : null;
 
         return {
           ...graduacao,
-          alunoNome: aluno?.nome || graduacao.alunoNome,
+          alunoNome: aluno?.nomeCompleto || aluno?.nome || graduacao.alunoNome,
           faixaSlugAtual,
           proximaFaixaSlug,
-          faixaAtual: aluno?.faixa || graduacao.faixaAtual,
+          faixaAtual: faixaAtualConfig?.nome || aluno?.faixa || graduacao.faixaAtual,
+          proximaFaixa: proximaFaixaConfig?.nome || graduacao.proximaFaixa || proximaFaixaSlug,
           grauAtual,
-          mesesRestantes: Number(graduacao.mesesRestantes ?? 0)
+          grauAlvo,
+          mesesRestantes: Number(graduacao.mesesRestantes ?? 0),
+          status: statusCentralizado
         };
       }),
     [alunoLookup, graduacoes]
