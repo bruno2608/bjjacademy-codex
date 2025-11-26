@@ -50,6 +50,7 @@ export default function GraduacoesStaffPage() {
         const aluno = alunoLookup[graduacao.alunoId];
         const faixaSlugAtual = normalizeFaixaSlug(aluno?.faixaSlug ?? graduacao.faixaAtual);
         const proximaFaixaSlug = normalizeFaixaSlug(graduacao.proximaFaixa ?? aluno?.faixaSlug ?? faixaSlugAtual);
+        const grauAtual = Number(aluno?.graus ?? aluno?.grauAtual ?? graduacao.grauAtual ?? 0);
 
         return {
           ...graduacao,
@@ -57,6 +58,7 @@ export default function GraduacoesStaffPage() {
           faixaSlugAtual,
           proximaFaixaSlug,
           faixaAtual: aluno?.faixa || graduacao.faixaAtual,
+          grauAtual,
           mesesRestantes: Number(graduacao.mesesRestantes ?? 0)
         };
       }),
@@ -133,7 +135,7 @@ export default function GraduacoesStaffPage() {
           ? new Date(proxima.previsao).toLocaleDateString('pt-BR')
           : 'Sem data definida',
         belt: faixaConfig,
-        grau: proxima?.grauAlvo ?? null,
+        grau: proxima?.tipo === 'Grau' ? proxima?.grauAtual ?? 0 : proxima?.grauAlvo ?? null,
         tipo: proximaTipo
       }
     ];
