@@ -61,6 +61,14 @@ npm run dev
 - **Projeção detalhada**: cards destacam a próxima graduação com percentual, aulas realizadas x meta, estimativa de data e lembrete sobre check-ins pendentes fora do horário.
 - **Resumo rápido**: blocos com início na academia, aulas concluídas no grau/faixa e última atualização, todos derivados dos dados normalizados da dashboard.
 
+## 👥 Gestão de Alunos (/alunos)
+
+- **Fonte única**: a listagem, filtros e cards usam apenas `useAlunosStore`/`alunosService` como origem de alunos, complementados por `usePresencasStore` e `graduacoesStore` para estatísticas contextuais.
+- **Nada de mocks diretos**: nenhuma página sob `/alunos` importa `data/mockAlunos` ou outros mocks; todo acesso passa pelo pipeline oficial (mock → service → store → hooks → tela), alinhado ao dashboard do aluno e staff.
+- **Filtros coerentes**: busca por nome, faixa (`faixaSlug`) e status (`ATIVO/INATIVO`) reaproveitam os mesmos slugs/enums usados em dashboards e presenças; filtros de treino consultam `usePresencasStore`/`useTreinosStore` ao invés de arrays locais.
+- **Visual das faixas**: os elementos de graduação da lista/detalhe usam `getFaixaConfigBySlug` + componentes `BjjBeltStrip`/`BjjBeltProgressCard`, garantindo cores/graus iguais às telas `/dashboard-aluno`, `/dashboard`, `/graduacoes` e `/evolucao`.
+- **Contagens sincronizadas**: totais e alunos ativos mostrados no hero são os mesmos do `useStaffDashboard` (derivado das stores), mantendo consistência com `/dashboard` e com as telas de presenças.
+
 ## 📒 Gestão de Presenças (MVP)
 
 ### Fluxo
