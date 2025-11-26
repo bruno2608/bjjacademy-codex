@@ -22,12 +22,10 @@ import { normalizeAlunoStatus } from '@/lib/alunoStats';
 import { calcularResumoPresencas, comporRegistrosDoDia } from '@/lib/presencasResumo';
 
 const TODOS_TREINOS = 'all';
+const PRESENCA_STATUSES = ['PENDENTE', 'PRESENTE', 'FALTA', 'JUSTIFICADA'];
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os status' },
-  { value: 'PENDENTE', label: 'Pendente' },
-  { value: 'PRESENTE', label: 'Presente' },
-  { value: 'FALTA', label: 'Falta' },
-  { value: 'JUSTIFICADA', label: 'Justificada' }
+  ...PRESENCA_STATUSES.map((status) => ({ value: status, label: status.charAt(0) + status.slice(1).toLowerCase() }))
 ];
 const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
 
@@ -180,10 +178,15 @@ export default function PresencasPage() {
     return lista;
   }, []);
 
+  const normalizePresencaStatus = useCallback(
+    (status) => (status || '').toString().trim().toUpperCase(),
+    []
+  );
+
   const registrosFiltrados = useMemo(() => {
     const termo = searchTerm.trim().toLowerCase();
     const faixasAtivas = limparSelecao(filterFaixas);
-    const statusAtivos = limparSelecao(filterStatuses).map((status) => normalizeAlunoStatus(status));
+    const statusAtivos = limparSelecao(filterStatuses).map((status) => normalizePresencaStatus(status));
     const treinosAtivos = limparSelecao(filterTreinos, TODOS_TREINOS);
 
     return registrosDoDia.filter((item) => {
@@ -193,7 +196,7 @@ export default function PresencasPage() {
       if (faixasAtivas.length && !faixasAtivas.includes(item.faixaSlug)) {
         return false;
       }
-      const statusRegistro = normalizeAlunoStatus(item.status);
+      const statusRegistro = normalizePresencaStatus(item.status);
       if (statusAtivos.length && !statusAtivos.includes(statusRegistro)) {
         return false;
       }
@@ -205,17 +208,16 @@ export default function PresencasPage() {
       }
       return true;
     });
-  }, [filterFaixas, filterStatuses, filterTreinos, limparSelecao, registrosDoDia, searchTerm]);
+  }, [filterFaixas, filterStatuses, filterTreinos, limparSelecao, normalizePresencaStatus, registrosDoDia, searchTerm]);
 
-  const statusOrder = {
-    PENDENTE: 0,
-    PRESENTE: 1,
-    FALTA: 2,
-    JUSTIFICADA: 2
-  };
+  const statusOrder = PRESENCA_STATUSES.reduce((acc, status, index) => {
+    const order = status === 'JUSTIFICADA' ? PRESENCA_STATUSES.indexOf('FALTA') : index;
+    return { ...acc, [status]: order };
+  }, {});
 
   const statusLabel = (status) => {
-    switch (status) {
+    const normalized = normalizePresencaStatus(status);
+    switch (normalized) {
       case 'PENDENTE':
         return { label: 'PENDENTE', tone: 'text-yellow-200' };
       case 'PRESENTE':
@@ -225,7 +227,7 @@ export default function PresencasPage() {
       case 'JUSTIFICADA':
         return { label: 'JUSTIFICADA', tone: 'text-indigo-200' };
       default:
-        return { label: status || '—', tone: 'text-bjj-gray-200' };
+        return { label: normalized || '—', tone: 'text-bjj-gray-200' };
     }
   };
 
@@ -314,11 +316,6 @@ export default function PresencasPage() {
     await atualizarStatus(registro.id, 'PRESENTE');
   };
 
-  const handleMarkAbsent = async (registro, justificativa = false) => {
-    if (!registro?.id) return;
-    await atualizarStatus(registro.id, justificativa ? 'JUSTIFICADA' : 'FALTA');
-  };
-
   const abrirFechamento = () => {
     const sugestao = filterTreinos.includes(TODOS_TREINOS) ? treinosDoDiaPadrao[0]?.id : filterTreinos[0];
     setTreinoParaFechar(sugestao || treinosDoDiaPadrao[0]?.id || '');
@@ -379,7 +376,7 @@ export default function PresencasPage() {
       return [valorTodos];
     }
     const valoresLimpos = lista.filter(Boolean);
-    if (totalDisponivel > 0 && valoresLimpos.length >= totalDisponivel) {
+    if (totalDisponivel > 1 && valoresLimpos.length >= totalDisponivel) {
       return [valorTodos];
     }
     return valoresLimpos;
@@ -464,14 +461,23 @@ export default function PresencasPage() {
 
   useEffect(() => {
     if (!sessionRecord) return;
+    const primeiroDisponivel = treinosDisponiveisModal.find(
+      (treino) => !(sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id))
+    );
     const opcaoExiste = treinosDisponiveisModal.some((treino) => treino.id === sessionTreinoId);
-    if (!opcaoExiste) {
-      setSessionTreinoId(treinosDisponiveisModal[0]?.id || '');
+    const opcaoBloqueada =
+      sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId) && !!sessionTreinoId;
+
+    if (!opcaoExiste || opcaoBloqueada) {
+      setSessionTreinoId(primeiroDisponivel?.id || treinosDisponiveisModal[0]?.id || '');
     }
-  }, [sessionRecord, sessionTreinoId, treinosDisponiveisModal]);
+  }, [sessionContext, sessionRecord, sessionTakenTreinos, sessionTreinoId, treinosDisponiveisModal]);
 
   const handleSessionSubmit = async () => {
     if (!sessionRecord) return;
+    if (sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId)) {
+      return;
+    }
     const treinoSelecionado =
       treinos.find((treino) => treino.id === sessionTreinoId) ||
       obterSugestaoTreino(sessionRecord.alunoId, sessionRecord.data, sessionTakenTreinos);
@@ -511,11 +517,21 @@ export default function PresencasPage() {
 
   const handleEditSubmit = async (dados) => {
     if (!selectedRecord?.id) return;
+
+    const novoStatus = normalizePresencaStatus(dados.status || selectedRecord.status);
+
+    // Mantém o registro visível mesmo quando o novo status não estava no filtro ativo.
+    setFilterStatuses((prev) => {
+      const limpos = limparSelecao(prev);
+      if (!limpos.length || limpos.includes(novoStatus)) return prev;
+      return [...limpos, novoStatus];
+    });
+
     const atualizado = await salvarPresenca({
       id: selectedRecord.id,
       alunoId: dados.alunoId || selectedRecord.alunoId,
       treinoId: dados.treinoId || selectedRecord.treinoId,
-      status: dados.status || selectedRecord.status,
+      status: novoStatus,
       data: dados.data || selectedRecord.data,
       origem: dados.origem || 'PROFESSOR',
       observacao: dados.observacao || null,
@@ -657,7 +673,6 @@ export default function PresencasPage() {
       <AttendanceTable
         records={registrosFiltradosOrdenados}
         onConfirm={handleConfirm}
-        onMarkAbsent={(registro) => handleMarkAbsent(registro, false)}
         onDelete={handleDelete}
         onEdit={abrirEdicao}
         onAddSession={abrirSessaoExtra}
@@ -799,19 +814,27 @@ export default function PresencasPage() {
           </p>
           <label className="block text-sm font-medium text-bjj-white">Treino / sessão</label>
           <Select value={sessionTreinoId} onChange={(event) => setSessionTreinoId(event.target.value)}>
-            {treinosDisponiveisModal.map((treino) => (
-              <option key={treino.id} value={treino.id}>
-                {treino.nome} · {treino.hora}
-                {sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id) ? ' (já registrado)' : ''}
-              </option>
-            ))}
+            {treinosDisponiveisModal.map((treino) => {
+              const jaRegistrado = sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id);
+              return (
+                <option key={treino.id} value={treino.id} disabled={jaRegistrado}>
+                  {treino.nome} · {treino.hora}
+                  {jaRegistrado ? ' (já registrado)' : ''}
+                </option>
+              );
+            })}
             {!treinosDisponiveisModal.length && <option value="">Sessão principal</option>}
           </Select>
           <div className="flex flex-col gap-2 md:flex-row md:justify-end">
             <Button type="button" variant="secondary" className="md:w-auto" onClick={fecharSelecaoSessao}>
               Cancelar
             </Button>
-            <Button type="button" className="md:w-auto" onClick={handleSessionSubmit}>
+            <Button
+              type="button"
+              className="md:w-auto"
+              onClick={handleSessionSubmit}
+              disabled={sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId)}
+            >
               Confirmar presença
             </Button>
           </div>
