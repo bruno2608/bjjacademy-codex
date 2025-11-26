@@ -49,7 +49,7 @@ export default function GraduationTimeline({ itens = [] }) {
         const isEven = index % 2 === 0;
 
         const detail = (
-          <div className="timeline-box border border-bjj-gray-800/60 bg-bjj-gray-900/80 text-left shadow-[0_18px_35px_-18px_rgba(0,0,0,0.45)]">
+          <div className="timeline-box w-full max-w-[22rem] border border-bjj-gray-800/60 bg-bjj-gray-900/80 text-left shadow-[0_18px_35px_-18px_rgba(0,0,0,0.45)] md:w-auto">
             <div className="flex items-center gap-2.5 pb-2 text-xs text-bjj-gray-200/70">
               <CalendarDays size={13} /> {formatDate(item.data)}
             </div>
@@ -78,7 +78,7 @@ export default function GraduationTimeline({ itens = [] }) {
         );
 
         const summary = (
-          <div className="timeline-start md:text-right">
+          <div className="timeline-start md:text-right md:pr-6 md:[min-width:10rem] md:[max-width:13rem]">
             <p className="text-sm font-semibold text-white">{tipo === 'Grau' ? `${item.grau}º grau` : item.faixa}</p>
             <p className="text-xs text-bjj-gray-300/80">{formatDate(item.data)}</p>
           </div>
@@ -92,7 +92,11 @@ export default function GraduationTimeline({ itens = [] }) {
                 <Medal size={18} />
               </span>
             </div>
-            {isEven ? <div className="timeline-end md:timeline-start">{detail}</div> : <div className="timeline-end">{detail}</div>}
+            {isEven ? (
+              <div className="timeline-end md:timeline-start md:pl-6 md:[max-width:26rem]">{detail}</div>
+            ) : (
+              <div className="timeline-end md:pl-6 md:[max-width:26rem]">{detail}</div>
+            )}
             {index < ordenados.length - 1 && <hr className="border-bjj-gray-800" />}
           </li>
         );
