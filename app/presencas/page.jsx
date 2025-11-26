@@ -545,6 +545,7 @@ export default function PresencasPage() {
     if (!selectedRecord?.id) return;
 
     const novoStatus = normalizePresencaStatus(dados.status || selectedRecord.status);
+    const novoTreinoId = dados.treinoId || selectedRecord.treinoId;
 
     // Mantém o registro visível mesmo quando o novo status não estava no filtro ativo.
     setFilterStatuses((prev) => {
@@ -553,10 +554,17 @@ export default function PresencasPage() {
       return [...limpos, novoStatus];
     });
 
+    // Garante que a mudança de treino permaneça visível dentro dos filtros ativos.
+    setFilterTreinos((prev) => {
+      const limpos = limparSelecao(prev, TODOS_TREINOS);
+      if (!novoTreinoId || limpos.includes(TODOS_TREINOS) || limpos.includes(novoTreinoId)) return prev;
+      return limpos.length ? [...limpos, novoTreinoId] : [novoTreinoId];
+    });
+
     const atualizado = await salvarPresenca({
       id: selectedRecord.id,
       alunoId: dados.alunoId || selectedRecord.alunoId,
-      treinoId: dados.treinoId || selectedRecord.treinoId,
+      treinoId: novoTreinoId,
       status: novoStatus,
       data: dados.data || selectedRecord.data,
       origem: dados.origem || 'PROFESSOR',

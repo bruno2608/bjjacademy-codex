@@ -4,7 +4,7 @@
  * PresenceForm permite registrar rapidamente uma nova presença,
  * exibindo os alunos disponíveis e definindo status inicial.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAlunosStore } from '../../store/alunosStore';
 import { useTreinosStore } from '../../store/treinosStore';
 import Input from '../ui/Input';
@@ -21,18 +21,18 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
   const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
   const isEditing = Boolean(initialData?.id);
 
-  const normalizarDiaSemana = (valor) => {
+  const normalizarDiaSemana = useCallback((valor) => {
     const referencia = valor ? new Date(valor) : new Date();
     if (Number.isNaN(referencia.getTime())) return null;
     const nome = referencia.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
     return nome.replace('-feira', '').trim();
-  };
+  }, []);
 
-  const sugerirTreino = (dataReferencia) => {
+  const sugerirTreino = useCallback((dataReferencia) => {
     const dia = normalizarDiaSemana(dataReferencia) || normalizarDiaSemana(hoje);
     const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
     return candidatos[0] || treinos[0] || null;
-  };
+  }, [hoje, normalizarDiaSemana, treinos]);
 
   const [form, setForm] = useState({
     alunoId: initialData?.alunoId || '',
@@ -80,7 +80,7 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       status,
       treinoId,
     });
-  }, [initialData, sugerirTreino, treinosDoDia]);
+  }, [initialData, sugerirTreino]);
 
   useEffect(() => {
     if (initialData) return;
@@ -115,6 +115,16 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
       }
       return { ...prev, [name]: value };
     });
+  };
+
+  const handleStatusChange = (event) => {
+    const { value } = event.target;
+    setForm((prev) => ({ ...prev, status: normalizeStatus(value) }));
+  };
+
+  const handleTreinoChange = (event) => {
+    const { value } = event.target;
+    setForm((prev) => ({ ...prev, treinoId: value }));
   };
 
   const handleSubmit = (event) => {
@@ -171,7 +181,7 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Treino / sessão</label>
-          <Select name="treinoId" value={form.treinoId} onChange={handleChange}>
+          <Select name="treinoId" value={form.treinoId} onChange={handleTreinoChange}>
             {treinosDisponiveis.map((treino) => (
               <option key={treino.id} value={treino.id}>
                 {treino.nome} · {treino.hora}
@@ -182,7 +192,7 @@ export default function PresenceForm({ onSubmit, initialData = null, onCancel, s
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Status</label>
-          <Select name="status" value={form.status} onChange={handleChange}>
+          <Select name="status" value={form.status} onChange={handleStatusChange}>
             {statusOptions.map((status) => (
               <option key={status}>{status}</option>
             ))}
