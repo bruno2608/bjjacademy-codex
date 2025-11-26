@@ -3,3 +3,8 @@ export * from './aluno';
 export * from './presenca';
 export * from './graduacao';
 export * from './treino';
+export * from './academia';
+export * from './papel';
+export * from './matricula';
+export * from './turma';
+export * from './aula';
