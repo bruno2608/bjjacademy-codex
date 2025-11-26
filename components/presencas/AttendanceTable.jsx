@@ -5,7 +5,7 @@
  * alternar status rapidamente, mantendo o novo visual gamificado e
  * preparado para mobile-first.
  */
-import { CheckCircle2, Loader2, Pencil, Plus, Trash2, XCircle } from 'lucide-react';
+import { CheckCircle2, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useTreinosStore } from '@/store/treinosStore';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
@@ -17,7 +17,6 @@ const baseActionButtonClasses =
 
 const actionTone = {
   confirm: 'hover:border-green-400/80 hover:text-green-300 focus-visible:ring-1 focus-visible:ring-green-400/70',
-  absent: 'hover:border-red-400/80 hover:text-red-300 focus-visible:ring-1 focus-visible:ring-red-400/70',
   add: 'hover:border-sky-400/80 hover:text-sky-300 focus-visible:ring-1 focus-visible:ring-sky-400/70',
   edit: 'hover:border-amber-400/80 hover:text-amber-200 focus-visible:ring-1 focus-visible:ring-amber-300/70',
   delete: 'hover:border-bjj-red hover:text-bjj-red focus-visible:ring-1 focus-visible:ring-bjj-red/70'
@@ -28,7 +27,6 @@ const actionButtonClasses = (tone) => `${baseActionButtonClasses} ${actionTone[t
 export default function AttendanceTable({
   records,
   onConfirm,
-  onMarkAbsent,
   onDelete,
   onEdit,
   onAddSession,
@@ -58,8 +56,6 @@ export default function AttendanceTable({
   const findTreino = (treinoId) => treinos.find((treino) => treino.id === treinoId);
 
   const canConfirm = (status) => status === 'PENDENTE';
-  const canAbsent = (status) => status === 'PENDENTE' || status === 'PRESENTE';
-
   return (
     <div
       className="relative overflow-hidden rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 shadow-[0_12px_28px_-20px_rgba(0,0,0,0.45)]"
@@ -98,7 +94,6 @@ export default function AttendanceTable({
             }
           };
 
-          const handleAbsent = () => onMarkAbsent?.(record);
           return (
             <div
               key={record.id || `${record.alunoId}-${record.treinoId || record.data}`}
@@ -148,14 +143,6 @@ export default function AttendanceTable({
                           <span className="sr-only">Adicionar outra sessão</span>
                         </button>
                       )}
-                      <button
-                        className={actionButtonClasses('absent')}
-                        onClick={handleAbsent}
-                        disabled={!canAbsent(record.status)}
-                      >
-                        <XCircle size={15} />
-                        <span className="sr-only">Registrar falta</span>
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -176,14 +163,6 @@ export default function AttendanceTable({
                   >
                     <CheckCircle2 size={14} />
                     <span className="sr-only">Confirmar presença</span>
-                  </button>
-                  <button
-                    className={actionButtonClasses('absent')}
-                    onClick={handleAbsent}
-                    disabled={!canAbsent(record.status)}
-                  >
-                    <XCircle size={13} />
-                    <span className="sr-only">Registrar falta</span>
                   </button>
                   {!isPlaceholder && (
                     <button className={actionButtonClasses('add')} onClick={() => onAddSession?.(record)}>

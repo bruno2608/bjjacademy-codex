@@ -316,21 +316,6 @@ export default function PresencasPage() {
     await atualizarStatus(registro.id, 'PRESENTE');
   };
 
-  const handleMarkAbsent = async (registro, justificativa = false) => {
-    if (!registro?.id) return;
-    const novoStatus = justificativa ? 'JUSTIFICADA' : 'FALTA';
-
-    // Garantimos que o filtro de status atual continue exibindo o registro,
-    // evitando a sensação de "exclusão" quando o status sai do conjunto filtrado.
-    setFilterStatuses((prev) => {
-      const limpos = limparSelecao(prev);
-      if (!limpos.length || limpos.includes(novoStatus)) return prev;
-      return [...limpos, novoStatus];
-    });
-
-    await atualizarStatus(registro.id, novoStatus);
-  };
-
   const abrirFechamento = () => {
     const sugestao = filterTreinos.includes(TODOS_TREINOS) ? treinosDoDiaPadrao[0]?.id : filterTreinos[0];
     setTreinoParaFechar(sugestao || treinosDoDiaPadrao[0]?.id || '');
@@ -688,7 +673,6 @@ export default function PresencasPage() {
       <AttendanceTable
         records={registrosFiltradosOrdenados}
         onConfirm={handleConfirm}
-        onMarkAbsent={(registro) => handleMarkAbsent(registro, false)}
         onDelete={handleDelete}
         onEdit={abrirEdicao}
         onAddSession={abrirSessaoExtra}
