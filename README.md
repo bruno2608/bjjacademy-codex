@@ -324,6 +324,12 @@ styles/
 - Listagem, filtros e ações de presença operam sobre `alunoId`/`treinoId` vindos das stores; qualquer criação/edição/exclusão chama as ações da store (`carregarTodas`, `salvarPresenca`, `atualizarStatus`, `fecharTreino`), mantendo os snapshots sincronizados com dashboards e histórico.
 - `/historico-presencas` (staff) usa exclusivamente `usePresencasStore` + `useAlunosStore` + `useCurrentStaff` para compor a linha do tempo, aplicando os mesmos agregadores de status (`calcularResumoPresencas`) e filtros de faixa/status/treino usados na visão diária. A página está pronta para troca dos mocks por API apenas alterando `presencasService`.
 
+### Graduações (visão professor/instrutor)
+- `/graduacoes` consome **somente** `useGraduacoesStore` (seedado pelo `graduacoesService`) e `useAlunosStore`, mais contexto de sessão via `useCurrentStaff`, para listar promoções planejadas e o histórico consolidado.
+- Filtros por nome, faixa (via `faixaSlug` + `getFaixaConfigBySlug`), status e tipo reaproveitam os mesmos slugs e enums usados em dashboards, sem importar mocks diretamente na página.
+- Totais de graduações pendentes/concluídas e a próxima cerimônia refletem o mesmo conjunto de dados usado pelo `useStaffDashboard`, garantindo números alinhados com os cards do dashboard.
+- O histórico usa `historicoGraduacoes` dos alunos e os componentes modernos de faixa (`BjjBeltStrip`), mantendo o visual unificado com `/belt-demo`. Migrar de mocks para API exige apenas trocar o `graduacoesService`.
+
 ### Componentes compartilhados de UI
 
 - `PageHero`: cartão heroico reutilizado nas páginas do painel.

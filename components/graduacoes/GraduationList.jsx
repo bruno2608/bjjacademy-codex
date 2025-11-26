@@ -9,8 +9,10 @@ import Badge from '../ui/Badge';
 import ToggleTag from '../ui/ToggleTag';
 
 const statusBadgeVariant = {
+  Planejado: 'neutral',
   'Em progresso': 'accent',
-  Planejado: 'muted',
+  'Em avaliação': 'warning',
+  'Pronto para avaliar': 'warning',
   Concluído: 'success'
 };
 
@@ -88,8 +90,8 @@ export default function GraduationList({ graduacoes, onStatusChange, alunoLookup
               </span>
               <h3 className="text-lg font-semibold text-bjj-white">{graduacao.alunoNome}</h3>
               <div className="flex flex-wrap items-center gap-3 text-sm text-bjj-gray-200/80">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700 px-2.5 py-1 text-xs">
-                  <Award size={13} className="text-bjj-red" /> {graduacao.tipo}
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700/80 bg-bjj-gray-900/70 px-2.5 py-1 text-xs">
+                  <Award size={13} className="text-bjj-red" /> Próxima {graduacao.tipo.toLowerCase()}
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-xs text-bjj-gray-200/70">
                   <ArrowRight size={13} /> {alvoLabel}
