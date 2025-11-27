@@ -82,8 +82,46 @@ Mocks atuais (únicos pontos que devem ler dados fake):
 - `data/mockTreinos.ts`
 - `data/mocks/bjjBeltMocks.ts` (config visual de faixas)
 - `data/mocks/bjjBeltUtils.ts` (helpers de faixa)
+- `data/mocks/mockAcademias.ts`
+- `data/mocks/mockUsuarios.ts`
+- `data/mocks/mockPapeis.ts`
+- `data/mocks/mockUsuariosPapeis.ts`
+- `data/mocks/mockMatriculas.ts`
+- `data/mocks/mockTurmas.ts`
+- `data/mocks/mockAulasInstancias.ts`
 
 **Regra:** nenhuma página deve importar esses mocks diretamente. Apenas os services os consomem, popularão as stores e os hooks entregam os dados às telas.
+
+### Modelo conceitual do banco (MVP)
+
+Entidades já refletidas em mocks e prontas para virar tabelas (Supabase/Postgres):
+
+- academias
+- usuarios + usuarios_papeis
+- alunos
+- matriculas
+- turmas
+- aulas_instancias
+- presencas
+- faixas
+- graduacoes
+
+### Próximos passos (antes de login/cadastro/banco real)
+
+Refatorar telas da visão professor/instrutor para usar as novas entidades de domínio:
+
+- `/dashboard` (staff) → usar academias, turmas, aulas_instancias, presencasStore.
+- `/presencas` → separar “Chamada do dia” e “Pendências”, usando turmas + aulas_instancias + presencas.
+- `/alunos` e `/alunos/[id]` → continuar usando `useAlunosStore`, agora com contexto de matriculas/academia.
+- `/graduacoes` → alinhar com graduacoesStore + faixas + presencas usando esse modelo de domínio.
+
+Ajustar menus/navegação para destacar o fluxo principal do professor (Dashboard → Presenças → Alunos/Graduacoes).
+
+Só depois dessas refatorações de tela, iniciar a implementação de:
+
+- Tela de login (usuário)
+- Cadastro self-service do aluno (com código de convite da academia)
+- Criação/migração do banco real (Supabase/Postgres) refletindo esse mesmo modelo.
 
 ### 🆕 Atualizações mais recentes (25/11 — gestão de alunos)
 
@@ -417,17 +455,14 @@ Visões e rotas principais separadas por perfil:
   - `services/*` + `store/*`: orquestram mocks centralizados e serão substituídos pela API oficial.
 
 ### Gestão de Presenças (visão staff)
-- `/presencas` (professor/staff) agora consome **apenas** `usePresencasStore`/`presencasService` em conjunto com `useAlunosStore` e `useTreinosStore`; não há imports diretos de mocks na página ou nos componentes.
-- Cards e totais (presenças/faltas/pendentes, histórico da semana) reutilizam os mesmos helpers do dashboard (`calcularResumoPresencas`/`comporRegistrosDoDia`), garantindo números idênticos entre /dashboard e /presencas.
-- Listagem, filtros e ações de presença operam sobre `alunoId`/`treinoId` vindos das stores; qualquer criação/edição/exclusão chama as ações da store (`carregarTodas`, `salvarPresenca`, `atualizarStatus`, `fecharTreino`), mantendo os snapshots sincronizados com dashboards e histórico.
-- `/historico-presencas` (staff) usa exclusivamente `usePresencasStore` + `useAlunosStore` + `useCurrentStaff` para compor a linha do tempo, aplicando os mesmos agregadores de status (`calcularResumoPresencas`) e filtros de faixa/status/treino usados na visão diária. A página está pronta para troca dos mocks por API apenas alterando `presencasService`.
+- `/presencas` (professor/staff) usa o modelo de domínio novo: `academiasStore` + `turmasStore` + `aulasStore` + `matriculasStore` + `presencasStore` + `alunosStore`, sem importar mocks diretamente.
+- Todas as operações de presença continuam passando por `presencasService`/`presencasStore`, facilitando a troca por API real.
+- `/historico-presencas` (staff) reaproveita as mesmas stores e agregadores, mantendo consistência de status (`PENDENTE`, `PRESENTE`, `FALTA`, `JUSTIFICADA`) e filtros.
 
 #### Tela `/presencas` (professor/instrutor)
-- A listagem diária e o formulário/modal de correção leem somente `usePresencasStore` (dados + ações) e `useAlunosStore`/`useTreinosStore` para resolver nomes, faixas e horários; nenhum componente importa mocks diretamente.
-- Status são sempre os padronizados (`PENDENTE`, `PRESENTE`, `FALTA`, `JUSTIFICADA`), reaproveitando os mesmos rótulos usados em `/checkin`, `/historico-presencas` e nos cards do dashboard.
-- Faixa/grau do aluno são renderizados via `faixaSlug` centralizado com `getFaixaConfigBySlug` + `BjjBeltStrip`, mantendo o visual idêntico a `/dashboard-aluno`, `/alunos` e `/belt-demo`.
-- Ações de "Confirmar", "Falta/Justificar" e "Fechar treino" chamam diretamente `atualizarStatus`, `salvarPresenca` e `fecharTreino` da store/service, propagando os resultados para dashboards e histórico sem estados locais paralelos.
-- Futuro: a mesma base servirá para um relatório avançado de frequência (exportáveis/intervalos customizados) sem mudar a UI, apenas evoluindo `presencasService`.
+- **Chamada do dia:** seleciona data + turma da academia do usuário, cria/resolve a `aula_instancia` correspondente e monta a lista de alunos a partir das matrículas ativas. Ações marcam `PRESENTE`, `FALTA` ou `JUSTIFICADA` via `presencasStore.registrarPresencaEmAula`; o botão "Fechar treino" troca todas as pendências da aula para `PRESENTE` e encerra a instância.
+- **Pendências:** lista apenas presenças `PENDENTE` no intervalo escolhido (7/30 dias, etc.), exibindo aluno, turma e horário da aula. A aprovação/recusa usa `presencasStore.atualizarStatus`, mantendo o snapshot global alinhado com dashboards e histórico.
+- Faixa/grau do aluno continuam vindo de `getFaixaConfigBySlug` e `alunosStore`, preservando o visual existente.
 
 ### Graduações (visão professor/instrutor)
 - `/graduacoes` consome **somente** `useGraduacoesStore` (seedado pelo `graduacoesService`) e `useAlunosStore`, mais contexto de sessão via `useCurrentStaff`, para listar promoções planejadas e o histórico consolidado.

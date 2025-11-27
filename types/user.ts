@@ -30,3 +30,25 @@ export type LoginPayload = {
   email: string;
   roles?: UserRole[];
 };
+
+export type Genero = 'Masculino' | 'Feminino' | 'Outro' | null;
+
+export interface Usuario {
+  id: string;
+  nome: string;
+  email: string;
+  ativo: boolean;
+  telefone?: string | null;
+  genero?: Genero;
+  dataNascimento?: string | null;
+  fotoUrl?: string | null;
+  alunoId?: string | null;
+}
+
+export interface UsuarioPapel {
+  id: string;
+  usuarioId: string;
+  papelId: number;
+  dataConcessao: string;
+  concedidoPor?: string | null;
+}

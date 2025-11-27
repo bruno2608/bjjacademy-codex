@@ -10,6 +10,8 @@ export interface PresencaRegistro {
   id: string
   alunoId: string
   treinoId: string
+  turmaId?: string | null
+  aulaId?: string | null
   status: PresencaStatus
   origem: PresencaOrigem
   observacao?: string | null

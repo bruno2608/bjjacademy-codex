@@ -19,7 +19,7 @@ const TOKEN_KEY = 'bjj_token';
 const ROLES_KEY = 'bjj_roles';
 const DEFAULT_ALUNO_ID = 'aluno_joao_silva';
 const DEFAULT_INSTRUTOR_ID = 'instrutor-vilmar';
-const DEFAULT_ACADEMIA_ID = 'academia_usgo';
+const DEFAULT_ACADEMIA_ID = 'academia_bjj_central';
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80';
 
 const fallbackUser: AuthUser = {
