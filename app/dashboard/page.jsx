@@ -1,28 +1,25 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  Activity,
-  ArrowRight,
-  BarChart2,
-  BarChart3,
-  CalendarCheck,
-  CheckCircle2,
-  Clock3,
-  Medal,
-  PieChart,
-  ShieldCheck,
-  TrendingUp,
-  Users,
-  XCircle
-} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Activity, ArrowRight, BarChart2, CalendarCheck, CheckCircle2, Clock3, Medal } from 'lucide-react';
 
 import useRole from '../../hooks/useRole';
 import { ROLE_KEYS } from '../../config/roles';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useAlunoDashboard } from '@/services/dashboard/useAlunoDashboard';
-import { useStaffDashboard } from '@/services/dashboard/useStaffDashboard';
+import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { BjjBeltProgressCard } from '@/components/bjj/BjjBeltProgressCard';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
+import { normalizeFaixaSlug } from '@/lib/alunoStats';
+import { useAcademiasStore } from '@/store/academiasStore';
+import { useAlunosStore } from '@/store/alunosStore';
+import { useAulasStore } from '@/store/aulasStore';
+import { useGraduacoesStore } from '@/store/graduacoesStore';
+import { useMatriculasStore } from '@/store/matriculasStore';
+import { usePresencasStore } from '@/store/presencasStore';
+import { useTurmasStore } from '@/store/turmasStore';
+import { useUserStore } from '@/store/userStore';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -236,268 +233,339 @@ function StudentDashboard() {
   );
 }
 
-function ProfessorDashboard() {
-  const {
-    staff,
-    faixaConfig,
-    grauAtual,
-    avatarUrl,
-    statusLabel,
-    overviewCards,
-    semanaCards,
-    tabCards,
-    analytics,
-    pendencias,
-    pendentesTotal,
-    activeTab,
-    setActiveTab,
-    handleStatusChange,
-    updatingId
-  } = useStaffDashboard();
 
-  const instructorName = staff?.nome || 'Instrutor';
+function ProfessorDashboard() {
+  const user = useUserStore((state) => state.user);
+  const academias = useAcademiasStore((state) => state.academias);
+  const carregarAcademias = useAcademiasStore((state) => state.carregarAcademias);
+  const turmas = useTurmasStore((state) => state.turmas);
+  const carregarTurmas = useTurmasStore((state) => state.carregarTurmas);
+  const aulas = useAulasStore((state) => state.aulas);
+  const carregarAulas = useAulasStore((state) => state.carregarAulas);
+  const presencas = usePresencasStore((state) => state.presencas);
+  const carregarPresencas = usePresencasStore((state) => state.carregarTodas);
+  const matriculasAtivasDaAcademia = useMatriculasStore((state) => state.listarAtivasDaAcademia);
+  const carregarMatriculas = useMatriculasStore((state) => state.carregarMatriculas);
+  const alunos = useAlunosStore((state) => state.alunos);
+  const graduacoes = useGraduacoesStore((state) => state.graduacoes);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      await Promise.all([
+        carregarAcademias(),
+        carregarTurmas(),
+        carregarAulas(),
+        carregarPresencas(),
+        carregarMatriculas()
+      ]);
+      if (active) setIsLoading(false);
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [carregarAcademias, carregarAulas, carregarMatriculas, carregarPresencas, carregarTurmas]);
+
+  const currentAcademiaId = useMemo(
+    () => user?.academiaId || academias[0]?.id || 'academia_bjj_central',
+    [academias, user?.academiaId]
+  );
+
+  const academiaAtual = useMemo(
+    () => academias.find((item) => item.id === currentAcademiaId) || null,
+    [academias, currentAcademiaId]
+  );
+
+  const matriculasAtivas = useMemo(
+    () => matriculasAtivasDaAcademia(currentAcademiaId),
+    [currentAcademiaId, matriculasAtivasDaAcademia]
+  );
+
+  const turmaPorId = useMemo(() => {
+    const map = new Map();
+    turmas.forEach((turma) => map.set(turma.id, turma));
+    return map;
+  }, [turmas]);
+
+  const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
+
+  const aulasDeHoje = useMemo(() => {
+    return aulas
+      .filter((aula) => aula.data === hoje)
+      .filter((aula) => turmaPorId.get(aula.turmaId)?.academiaId === currentAcademiaId)
+      .map((aula) => {
+        const turma = turmaPorId.get(aula.turmaId);
+        const presencasDaAula = presencas.filter((p) => p.aulaId === aula.id);
+        const esperados = matriculasAtivas.filter(
+          (matricula) => !matricula.turmaId || matricula.turmaId === aula.turmaId
+        ).length;
+        const presentes = presencasDaAula.filter((item) => item.status === 'PRESENTE').length;
+        const pendentes = presencasDaAula.filter((item) => item.status === 'PENDENTE').length;
+        return {
+          aula,
+          turma,
+          esperados: Math.max(esperados, presencasDaAula.length),
+          presentes,
+          pendentes,
+        };
+      })
+      .sort((a, b) => a.aula.horaInicio.localeCompare(b.aula.horaInicio));
+  }, [aulas, currentAcademiaId, hoje, matriculasAtivas, presencas, turmaPorId]);
+
+  const pendenciasRecentes = useMemo(() => {
+    const hojeData = new Date(hoje);
+    const limiteInferior = new Date(hojeData);
+    limiteInferior.setDate(limiteInferior.getDate() - 7);
+
+    return presencas
+      .filter((presenca) => presenca.status === 'PENDENTE' && presenca.data)
+      .map((presenca) => {
+        const turma = turmaPorId.get(presenca.turmaId || presenca.treinoId);
+        if (!turma || turma.academiaId !== currentAcademiaId) return null;
+        const dataRegistro = new Date(presenca.data);
+        if (Number.isNaN(dataRegistro.getTime())) return null;
+        if (dataRegistro < limiteInferior || dataRegistro > hojeData) return null;
+        const aula = presenca.aulaId ? aulas.find((item) => item.id === presenca.aulaId) : null;
+        const aluno = alunos.find((item) => item.id === presenca.alunoId);
+        return {
+          id: presenca.id,
+          turma,
+          aula,
+          aluno,
+          data: presenca.data,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => new Date(b.data) - new Date(a.data));
+  }, [aulas, alunos, currentAcademiaId, hoje, presencas, turmaPorId]);
+
+  const proximasGraduacoes = useMemo(() => {
+    return graduacoes
+      .filter((item) => item.status !== 'Concluído')
+      .sort((a, b) => a.mesesRestantes - b.mesesRestantes)
+      .slice(0, 3)
+      .map((graduacao) => {
+        const aluno = alunos.find((item) => item.id === graduacao.alunoId);
+        const faixaSlug = normalizeFaixaSlug(graduacao.faixaAtual) || 'branca-adulto';
+        const faixaConfig = getFaixaConfigBySlug(faixaSlug);
+        return { graduacao, aluno, faixaConfig };
+      });
+  }, [alunos, graduacoes]);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-6 text-bjj-gray-200">
+        Carregando painel...
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <DashboardHero
-        name={instructorName}
-        faixaConfig={faixaConfig}
-        graus={grauAtual}
-        statusLabel={statusLabel || 'Professor'}
-        avatarUrl={ensureAvatar(instructorName, avatarUrl)}
-        subtitle="Dashboard do professor"
-        className="border-bjj-gray-800/90"
-      />
-
-      <div className="grid gap-4 lg:grid-cols-[1.15fr,1fr]">
-        <div className={`${cardBase} border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-950/80 via-bjj-gray-900/60 to-bjj-black p-5`}>
-          <div className="flex items-center justify-between gap-3">
-            <div className="space-y-1">
-              <p className={badge}>Visão geral</p>
-              <h1 className="text-xl font-semibold leading-tight text-white">{instructorName}</h1>
-              <p className="text-xs text-bjj-gray-300/90">Painel compacto com atalhos para aprovar presenças e gerenciar alunos.</p>
-            </div>
-            <span className="badge badge-outline border-green-500/70 bg-green-600/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-green-200 shadow-[0_0_0_1px_rgba(74,222,128,0.25)]">
-              {statusLabel || 'Ativo'}
+    <div className="space-y-5">
+      <div className={`${cardBase} flex flex-col gap-4 border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-950/90 to-bjj-black p-5`}>
+        <div className="flex flex-col gap-2">
+          <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80">Painel do professor</p>
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+            <h1 className="text-2xl font-semibold text-white">{user?.name || 'Instrutor'}</h1>
+            <span className="rounded-full bg-bjj-gray-800/80 px-3 py-1 text-xs font-semibold text-bjj-gray-100">
+              {academiaAtual?.nome || 'Academia'}
             </span>
           </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            {overviewCards.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="group flex items-center justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-4 py-3 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_14px_32px_rgba(0,0,0,0.35)]"
-              >
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                  <p className="text-2xl font-bold leading-tight text-white">{item.value}</p>
-                </div>
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
-                  <item.icon size={18} />
-                </span>
-              </Link>
-            ))}
-          </div>
+          <p className="text-sm text-bjj-gray-200">
+            Hub diário de turmas, presenças pendentes e destaques dos alunos.
+          </p>
         </div>
 
-        <div className={`${cardBase} border-bjj-gray-800/80 bg-bjj-gray-900/60 p-5`}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {semanaCards.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="group rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 transition hover:-translate-y-0.5 hover:border-bjj-red/60 hover:shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">{item.label}</p>
-                    <p className="mt-2 text-3xl font-bold leading-none text-white">{item.value}</p>
-                  </div>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-black/60 text-bjj-gray-100 group-hover:text-bjj-red">
-                    <item.icon size={18} />
-                  </span>
-                </div>
-                <div className="mt-3 h-1.5 rounded-full bg-bjj-gray-800">
-                  <div className="h-full rounded-full bg-gradient-to-r from-bjj-red to-red-500" style={{ width: `${Math.min(100, Number(item.value) || 0)}%` }} />
-                </div>
-              </Link>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-2">
+          {[{ label: 'Abrir chamada', href: '/presencas' }, { label: 'Ver alunos', href: '/alunos' }, { label: 'Ver graduações', href: '/graduacoes' }].map((action) => (
+            <Link
+              key={action.label}
+              href={action.href}
+              className="rounded-full bg-bjj-red px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-red-600"
+            >
+              {action.label}
+            </Link>
+          ))}
         </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
-            <div className={`${cardBase} p-5`}>
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Visão analítica</h3>
-                <span className="rounded-full bg-bjj-gray-800/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-white shadow-inner">
-                  Atualizado
-                </span>
-              </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-bjj-gray-200/90">Check-ins por status</p>
-                  <Clock3 size={16} className="text-bjj-gray-200" />
-                </div>
-                <div className="mt-4 space-y-3">
-                  {[{ label: 'Confirmados', value: analytics.checkinsPorStatus.confirmados, tone: 'bg-green-500' },
-                    { label: 'Pendentes', value: analytics.checkinsPorStatus.pendentes, tone: 'bg-yellow-400' },
-                    { label: 'Ausentes', value: analytics.checkinsPorStatus.faltas, tone: 'bg-bjj-red' }
-                  ].map((row) => (
-                    <div key={row.label} className="space-y-2">
-                      <div className="flex items-center justify-between text-sm text-bjj-gray-200">
-                        <span>{row.label}</span>
-                        <span className="font-semibold text-white">{row.value}</span>
-                      </div>
-                      <div className="h-2 rounded-full bg-bjj-gray-800">
-                        <div className={`h-full rounded-full ${row.tone}`} style={{ width: `${Math.min(100, row.value * 10)}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-bjj-gray-200/90">Presenças na semana</p>
-                  <BarChart2 size={16} className="text-bjj-gray-200" />
-                </div>
-                <div className="mt-4 flex items-end gap-3">
-                  {analytics.presencasNaSemana.map((dia, idx) => (
-                    <div key={idx} className="flex flex-1 flex-col items-center gap-2">
-                      <div className="w-full rounded-t-xl bg-gradient-to-t from-bjj-red to-red-400" style={{ height: `${dia.total * 6}px` }} />
-                      <span className="text-[11px] text-bjj-gray-300">{dia.dia}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <div className={`${cardBase} space-y-4 border-bjj-gray-800/80 bg-bjj-gray-900/70 p-5 lg:col-span-2`}>
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className={badge}>Treinos de hoje</p>
+              <h3 className="text-xl font-semibold text-white">Presenças por turma</h3>
+              <p className="text-sm text-bjj-gray-300">Filtrado automaticamente pela sua academia e data atual.</p>
             </div>
+            <span className="rounded-full bg-bjj-gray-800/80 px-3 py-1 text-xs font-semibold text-bjj-gray-100">
+              {hoje.split('-').reverse().join('/')}
+            </span>
           </div>
 
-          <div className={`${cardBase} p-6`}>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className={badge}>Painel da academia</p>
-                <h3 className="text-xl font-semibold text-white">Resumo detalhado</h3>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 rounded-full border border-bjj-gray-800 bg-bjj-gray-900/70 p-1">
-                {[{ key: 'visao', label: 'Visão Geral' }, { key: 'alunos', label: 'Alunos' }, { key: 'presencas', label: 'Presenças' }, { key: 'graduacoes', label: 'Graduações' }].map((tab) => (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      activeTab === tab.key
-                        ? 'bg-bjj-red text-white shadow-[0_12px_30px_rgba(225,6,0,0.25)]'
-                        : 'text-bjj-gray-200 hover:bg-bjj-gray-800'
-                    }`}
-                    onClick={() => setActiveTab(tab.key)}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          {aulasDeHoje.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 text-sm text-bjj-gray-300">
+              Nenhuma aula instância programada para hoje na sua academia.
+            </p>
+          )}
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {tabCards[activeTab].map((card) => {
-                const Icon = card.icon;
-                return (
-                  <div
-                    key={card.title}
-                    className="rounded-2xl border border-bjj-gray-800/80 bg-gradient-to-br from-bjj-gray-900 to-bjj-black p-4 shadow-[0_18px_45px_rgba(0,0,0,0.35)]"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-bjj-gray-200/90">{card.title}</p>
-                        <p className="mt-1 text-3xl font-bold text-white">{card.value}</p>
-                      </div>
-                      <span className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-900/80 ${card.tone}`}>
-                        <Icon size={18} />
-                      </span>
-                    </div>
-                    <div className="mt-3 h-1.5 rounded-full bg-bjj-gray-800">
-                      <div className="h-full rounded-full bg-bjj-red/70" style={{ width: '75%' }} />
-                    </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            {aulasDeHoje.map(({ aula, turma, esperados, presentes, pendentes }) => (
+              <div
+                key={aula.id}
+                className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 p-4 shadow-inner"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-white leading-tight">{turma?.nome || 'Turma'}</p>
+                    <p className="text-xs text-bjj-gray-300">{`${aula.horaInicio} - ${aula.horaFim}`}</p>
                   </div>
-                );
-              })}
-            </div>
+                  <span className="rounded-full bg-bjj-gray-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-bjj-gray-100">
+                    {esperados} esperados
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-xl bg-bjj-gray-800/80 py-2">
+                    <p className="text-lg font-bold text-white">{presentes}</p>
+                    <p className="text-[11px] uppercase tracking-wide text-green-300">Presentes</p>
+                  </div>
+                  <div className="rounded-xl bg-bjj-gray-800/80 py-2">
+                    <p className="text-lg font-bold text-white">{pendentes}</p>
+                    <p className="text-[11px] uppercase tracking-wide text-yellow-200">Pendentes</p>
+                  </div>
+                  <div className="rounded-xl bg-bjj-gray-800/80 py-2">
+                    <p className="text-lg font-bold text-white">{Math.max(esperados - presentes - pendentes, 0)}</p>
+                    <p className="text-[11px] uppercase tracking-wide text-bjj-gray-200">Restantes</p>
+                  </div>
+                </div>
+
+                <Link
+                  href={`/presencas?turmaId=${aula.turmaId}&data=${aula.data}`}
+                  className="inline-flex items-center justify-center rounded-xl bg-bjj-red px-3 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-red-600"
+                >
+                  Abrir chamada
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className={`${cardBase} flex flex-col gap-4 bg-gradient-to-b from-bjj-gray-900 to-bjj-black p-5`}>
-          <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className={`${cardBase} space-y-4 border-bjj-gray-800/80 bg-gradient-to-b from-bjj-gray-900 to-bjj-black p-5`}>
+          <div className="flex items-center justify-between">
             <div>
-              <p className={badge}>Pendências</p>
-              <h3 className="text-lg font-semibold text-white">Check-ins em análise</h3>
+              <p className={badge}>Presenças pendentes</p>
+              <h3 className="text-xl font-semibold text-white">Revisar últimos envios</h3>
             </div>
-            <span className="badge badge-warning badge-sm text-[10px] font-semibold uppercase tracking-wide text-bjj-gray-950 shadow">
-              {pendentesTotal} aguardando
+            <span className="rounded-full bg-bjj-gray-800 px-3 py-1 text-sm font-semibold text-white">
+              {pendenciasRecentes.length}
             </span>
           </div>
-          <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
-            {pendencias.map((item) => {
-              const badgeTone = 'bg-amber-500/20 text-amber-200';
 
-              return (
-                <div
-                  key={item.id}
-                  className="flex items-start justify-between gap-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3"
-                >
-                  <div className="space-y-1">
-                    <p className="text-sm font-semibold text-white leading-tight">{item.alunoNome}</p>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-400">{item.treinoNome}</p>
-                    <p className="text-[11px] text-bjj-gray-400">
-                      {item.dataLabel} · {item.treinoHora || '--:--'}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-green-500/30 bg-green-600/15 text-green-100 transition hover:border-green-400/60 hover:text-green-50 disabled:opacity-50"
-                        onClick={() => handleStatusChange(item.id, 'approve')}
-                        disabled={updatingId === item.id}
-                        aria-label="Confirmar presença"
-                        title="Confirmar presença"
-                      >
-                        <CheckCircle2 size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-bjj-red/40 bg-bjj-red/15 text-red-100 transition hover:border-bjj-red hover:text-white disabled:opacity-50"
-                        onClick={() => handleStatusChange(item.id, 'reject')}
-                        disabled={updatingId === item.id}
-                        aria-label="Marcar falta"
-                        title="Marcar falta"
-                      >
-                        <XCircle size={16} />
-                      </button>
-                    </div>
-                  </div>
-                  <span className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${badgeTone}`}>
-                    Pendente
+          <div className="space-y-3">
+            {pendenciasRecentes.slice(0, 3).map((item) => (
+              <div
+                key={item.id}
+                className="flex flex-col gap-1 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 p-3"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-white">{item.aluno?.nome || 'Aluno'}</p>
+                  <span className="text-[11px] uppercase tracking-wide text-bjj-gray-300">
+                    {new Date(item.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '')}
                   </span>
                 </div>
-              );
-            })}
-            {pendencias.length === 0 && (
-              <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/50 p-4 text-sm text-bjj-gray-300">
-                Nenhum check-in pendente no momento. Acompanhe novos envios em tempo real.
+                <p className="text-xs text-bjj-gray-300">{item.turma?.nome || 'Turma'} · {item.aula?.horaInicio || '--:--'}</p>
+              </div>
+            ))}
+
+            {pendenciasRecentes.length === 0 && (
+              <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 text-sm text-bjj-gray-300">
+                Nenhuma presença pendente nos últimos 7 dias.
               </p>
             )}
           </div>
+
           <Link
-            href="/presencas"
-            className="btn btn-sm rounded-full border-none bg-bjj-red text-white shadow-lg hover:bg-red-600"
+            href="/presencas?tab=pendencias"
+            className="inline-flex items-center justify-center rounded-xl bg-bjj-red px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-red-600"
           >
-            Ir para presenças
+            Ver pendências
+          </Link>
+        </div>
+      </div>
+
+      <div className={`${cardBase} space-y-4 border-bjj-gray-800/80 bg-bjj-gray-900/70 p-5`}>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className={badge}>Destaques de alunos</p>
+            <h3 className="text-xl font-semibold text-white">Próximas graduações</h3>
+            <p className="text-sm text-bjj-gray-300">3 alunos mais próximos da próxima faixa ou grau.</p>
+          </div>
+          <Medal size={20} className="text-bjj-red" />
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-3">
+          {proximasGraduacoes.map(({ graduacao, aluno, faixaConfig }) => (
+            <div
+              key={graduacao.id}
+              className="flex flex-col gap-2 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 p-4"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-white">{graduacao.alunoNome || aluno?.nome}</p>
+                  <p className="text-xs text-bjj-gray-300">{graduacao.faixaAtual}</p>
+                </div>
+                {faixaConfig && (
+                  <BjjBeltStrip
+                    className="scale-90"
+                    faixaConfig={faixaConfig}
+                    faixaSlug={faixaConfig.slug}
+                    grauAtual={aluno?.graus ?? 0}
+                  />
+                )}
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-bjj-gray-200">
+                <span className="rounded-full bg-bjj-gray-800 px-2 py-1 font-semibold text-white">
+                  {graduacao.tipo === 'Grau' ? `${graduacao.grauAlvo}º grau` : graduacao.proximaFaixa}
+                </span>
+                <span className="text-bjj-gray-300">{graduacao.mesesRestantes} meses</span>
+              </div>
+
+              <p className="text-xs text-bjj-gray-300">
+                Previsão: {new Date(graduacao.previsao).toLocaleDateString('pt-BR')}
+              </p>
+            </div>
+          ))}
+
+          {proximasGraduacoes.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 text-sm text-bjj-gray-300">
+              Sem graduações previstas. Acompanhe os alunos em /graduacoes.
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/graduacoes"
+            className="rounded-full bg-bjj-red px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-red-600"
+          >
+            Ver todos em /graduacoes
+          </Link>
+          <Link
+            href="/alunos"
+            className="rounded-full bg-bjj-gray-800 px-4 py-2 text-sm font-semibold text-white ring-1 ring-bjj-gray-700 hover:-translate-y-0.5"
+          >
+            Ver alunos
           </Link>
         </div>
       </div>
     </div>
   );
 }
+
 export default function DashboardPage() {
   const { isInstructor, isAdmin, roles } = useRole();
   const isProfessorLayout = isInstructor || isAdmin || roles.includes(ROLE_KEYS.professor) || roles.includes(ROLE_KEYS.instrutor);

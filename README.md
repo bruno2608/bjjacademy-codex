@@ -57,7 +57,7 @@ npm run dev
 
 | Rota | Descrição | Hooks/Stores principais | Pronto para Supabase? |
 | --- | --- | --- | --- |
-| `/dashboard` | Painel com métricas de alunos, presenças e pendências. | `useStaffDashboard`, `usePresencasStore`, `useAlunosStore`, `useTreinosStore` | Sim |
+| `/dashboard` | Hub diário do professor com turmas do dia, pendências e destaques de alunos. | `useUserStore`, `useAcademiasStore`, `useTurmasStore`, `useAulasStore`, `usePresencasStore`, `useMatriculasStore`, `useAlunosStore`, `useGraduacoesStore` | Sim |
 | `/alunos` | Gestão completa de cadastro, filtros e remoção. | `useAlunosStore`, `usePresencasStore`, `useStaffDashboard`, `getFaixaConfigBySlug` | Sim |
 | `/presencas` | Conferência/fechamento de presenças do dia. | `usePresencasStore`, `useAlunosStore`, `useTreinosStore`, `calcularResumoPresencas` | Sim |
 | `/historico-presencas` | Linha do tempo consolidada para staff. | `usePresencasStore`, `useTreinosStore`, `useAlunosStore`, `getFaixaConfigBySlug` | Sim |
@@ -69,6 +69,8 @@ npm run dev
 ### Rotas utilitárias/demonstração
 
 - `/belt-demo`: demonstração visual dos componentes de faixa usando `MOCK_FAIXAS`/`getFaixaConfigBySlug` (depende diretamente dos mocks de faixa, não faz parte do fluxo produtivo).
+
+**/dashboard (staff):** mostra treinos de hoje, presenças pendentes e destaques de alunos. Usa exclusivamente dados de academias, turmas, aulas_instancias, presencas, alunos e graduacoes via stores/services, em layout mobile first com cards empilhados e ações rápidas para `/presencas`, `/alunos` e `/graduacoes`.
 
 ## 🔄 Fluxo de dados centralizado
 
