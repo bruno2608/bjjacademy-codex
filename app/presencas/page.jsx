@@ -13,7 +13,7 @@ import { useMatriculasStore } from '@/store/matriculasStore';
 import { usePresencasStore } from '@/store/presencasStore';
 import { useTurmasStore } from '@/store/turmasStore';
 import { useUserStore } from '@/store/userStore';
-import { getFaixaConfigBySlug } from '@/data/bjjBeltMocks';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 
 const STATUS_LABELS = {
   PENDENTE: { label: 'Pendente', tone: 'text-yellow-200' },
