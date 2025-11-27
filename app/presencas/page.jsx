@@ -1,894 +1,511 @@
 'use client';
 
-/**
- * Tela de presenças com identidade visual alinhada à experiência gamificada
- * do restante do painel. Registro e listagem permanecem em uma única página.
- */
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { PieChart } from 'lucide-react';
-import AttendanceTable from '../../components/presencas/AttendanceTable';
-import PresenceForm from '../../components/presencas/PresenceForm';
-import LoadingState from '../../components/ui/LoadingState';
-import Modal from '../../components/ui/Modal';
-import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
+import { useEffect, useMemo, useState } from 'react';
+import { AlertCircle, CalendarDays, CheckCircle2, Clock, PieChart } from 'lucide-react';
+
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import { useAcademiasStore } from '@/store/academiasStore';
+import { useAlunosStore } from '@/store/alunosStore';
+import { useAulasStore } from '@/store/aulasStore';
+import { useMatriculasStore } from '@/store/matriculasStore';
 import { usePresencasStore } from '@/store/presencasStore';
-import { useAlunosStore } from '../../store/alunosStore';
-import { useTreinosStore } from '../../store/treinosStore';
-import { normalizeAlunoStatus } from '@/lib/alunoStats';
-import { calcularResumoPresencas, comporRegistrosDoDia } from '@/lib/presencasResumo';
+import { useTurmasStore } from '@/store/turmasStore';
+import { useUserStore } from '@/store/userStore';
+import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 
-const TODOS_TREINOS = 'all';
-const PRESENCA_STATUSES = ['PENDENTE', 'PRESENTE', 'FALTA', 'JUSTIFICADA'];
-const STATUS_OPTIONS = [
-  { value: 'all', label: 'Todos os status' },
-  ...PRESENCA_STATUSES.map((status) => ({ value: status, label: status.charAt(0) + status.slice(1).toLowerCase() }))
-];
-const STATUS_FILTER_VALUES = STATUS_OPTIONS.filter((option) => option.value !== 'all');
+const STATUS_LABELS = {
+  PENDENTE: { label: 'Pendente', tone: 'text-yellow-200' },
+  PRESENTE: { label: 'Presente', tone: 'text-green-300' },
+  FALTA: { label: 'Falta', tone: 'text-red-300' },
+  JUSTIFICADA: { label: 'Justificada', tone: 'text-indigo-200' },
+};
 
-const formatPercent = (value) => `${Math.round(value)}%`;
-const formatTime = () =>
-  new Date()
-    .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    .padStart(5, '0');
+const hoje = () => new Date().toISOString().split('T')[0];
+const formatRangeDate = (days) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+};
+
+const formatDateBr = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+};
+
+const StatusBadge = ({ status }) => {
+  const statusInfo = STATUS_LABELS[status];
+  if (!statusInfo) return null;
+
+  const icon = (() => {
+    switch (status) {
+      case 'PENDENTE':
+        return <Clock size={14} />;
+      case 'PRESENTE':
+        return <CheckCircle2 size={14} />;
+      case 'FALTA':
+        return <AlertCircle size={14} />;
+      case 'JUSTIFICADA':
+        return <CalendarDays size={14} />;
+      default:
+        return null;
+    }
+  })();
+
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold ${statusInfo.tone}`}>
+      {icon}
+      {statusInfo.label}
+    </span>
+  );
+};
 
 export default function PresencasPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isSessionOpen, setIsSessionOpen] = useState(false);
-  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [sessionRecord, setSessionRecord] = useState(null);
-  const [sessionTreinoId, setSessionTreinoId] = useState('');
-  const [sessionTakenTreinos, setSessionTakenTreinos] = useState([]);
-  const [sessionContext, setSessionContext] = useState('placeholder');
-  const [treinoParaFechar, setTreinoParaFechar] = useState('');
-  const [treinoEmAnalise, setTreinoEmAnalise] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterFaixas, setFilterFaixas] = useState([]);
-  const [filterStatuses, setFilterStatuses] = useState([]);
-  const [filterTreinos, setFilterTreinos] = useState([TODOS_TREINOS]);
+  const [selectedDate, setSelectedDate] = useState(hoje());
+  const [selectedTurmaId, setSelectedTurmaId] = useState('');
+  const [currentAulaId, setCurrentAulaId] = useState('');
+  const [pendenciasInicio, setPendenciasInicio] = useState(formatRangeDate(-7));
+  const [pendenciasFim, setPendenciasFim] = useState(hoje());
+
+  const user = useUserStore((state) => state.user);
+  const turmas = useTurmasStore((state) => state.turmas);
+  const carregarTurmas = useTurmasStore((state) => state.carregarTurmas);
+  const listarTurmasDaAcademia = useTurmasStore((state) => state.listarTurmasDaAcademia);
+  const aulas = useAulasStore((state) => state.aulas);
+  const carregarAulas = useAulasStore((state) => state.carregarAulas);
+  const getAulaByTurmaAndDate = useAulasStore((state) => state.getAulaByTurmaAndDate);
   const presencas = usePresencasStore((state) => state.presencas);
   const carregarPresencas = usePresencasStore((state) => state.carregarTodas);
-  const salvarPresenca = usePresencasStore((state) => state.salvarPresenca);
+  const carregarPorAula = usePresencasStore((state) => state.carregarPorAula);
+  const registrarPresencaEmAula = usePresencasStore((state) => state.registrarPresencaEmAula);
   const atualizarStatus = usePresencasStore((state) => state.atualizarStatus);
-  const excluirPresenca = usePresencasStore((state) => state.excluirPresenca);
-  const fecharTreino = usePresencasStore((state) => state.fecharTreino);
-  const marcarTreinoFechado = usePresencasStore((state) => state.marcarTreinoFechado);
+  const fecharAulaStore = usePresencasStore((state) => state.fecharAula);
   const alunos = useAlunosStore((state) => state.alunos);
   const getAlunoById = useAlunosStore((state) => state.getAlunoById);
-  const resolveAlunoNome = useCallback(
-    (alunoId) => getAlunoById(alunoId)?.nome || 'Aluno não encontrado',
-    [getAlunoById]
-  );
-  // Treinos ativos são carregados do store dedicado para alimentar dropdowns e sugestões.
-  const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
-  const hoje = useMemo(() => new Date().toISOString().split('T')[0], []);
-  const normalizarDiaSemana = useCallback((valor) => {
-    const referencia = valor ? new Date(valor) : new Date();
-    if (Number.isNaN(referencia.getTime())) return null;
-    const nome = referencia.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
-    return nome.replace('-feira', '').trim();
-  }, []);
-  const sugerirTreino = useCallback(
-    (dataReferencia, preferenciaId) => {
-      const dia = normalizarDiaSemana(dataReferencia) || normalizarDiaSemana(hoje);
-      const preferenciaValida = preferenciaId && preferenciaId !== TODOS_TREINOS ? preferenciaId : null;
-      if (preferenciaValida) {
-        const preferido = treinos.find((treino) => treino.id === preferenciaValida);
-        if (preferido) return preferido;
-      }
-      const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
-      return candidatos[0] || treinos[0] || null;
-    },
-    [hoje, normalizarDiaSemana, treinos]
-  );
+  const academias = useAcademiasStore((state) => state.academias);
+  const carregarAcademias = useAcademiasStore((state) => state.carregarAcademias);
+  const carregarMatriculas = useMatriculasStore((state) => state.carregarMatriculas);
+  const matriculasAtivasDaAcademia = useMatriculasStore((state) => state.listarAtivasDaAcademia);
 
   useEffect(() => {
     let active = true;
-    async function carregar() {
-      try {
-        await carregarPresencas();
-      } finally {
-        if (active) {
-          setIsLoading(false);
-        }
-      }
-    }
-    carregar();
+    const load = async () => {
+      await Promise.all([
+        carregarPresencas(),
+        carregarTurmas(),
+        carregarAulas(),
+        carregarAcademias(),
+        carregarMatriculas(),
+      ]);
+      if (active) setIsLoading(false);
+    };
+    load();
     return () => {
       active = false;
     };
-  }, [carregarPresencas]);
+  }, [carregarAulas, carregarAcademias, carregarMatriculas, carregarPresencas, carregarTurmas]);
 
-  const atualizarLista = useCallback(async () => {
-    setIsRefreshing(true);
-    await carregarPresencas();
-    setIsRefreshing(false);
-  }, [carregarPresencas]);
-
-  // Lista reativa de alunos ativos para preencher a visão diária.
-  const alunosAtivos = useMemo(
-    () => alunos.filter((aluno) => normalizeAlunoStatus(aluno.status) === 'ATIVO'),
-    [alunos]
+  const currentAcademiaId = useMemo(
+    () => user?.academiaId || academias[0]?.id || 'academia_bjj_central',
+    [academias, user?.academiaId]
   );
 
-  const sugerirTreinoDoAluno = useCallback(
-    (dataReferencia) => {
-      const preferencia =
-        filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0 ? null : filterTreinos[0];
-      return sugerirTreino(dataReferencia, preferencia);
-    },
-    [filterTreinos, sugerirTreino]
-  );
-
-  // Para o dia atual, combinamos registros reais com placeholders ausentes reaproveitando helper compartilhado.
-  const registrosDoDia = useMemo(
-    () =>
-      comporRegistrosDoDia({
-        data: hoje,
-        presencas,
-        alunos: alunosAtivos,
-        sugerirTreino: (data) => sugerirTreinoDoAluno(data),
-      }),
-    [alunosAtivos, hoje, presencas, sugerirTreinoDoAluno]
-  );
-
-  const limparSelecao = useCallback((lista, valorTodos = 'all') => {
-    if (!Array.isArray(lista) || lista.length === 0 || lista.includes(valorTodos)) {
-      return [];
-    }
-    return lista;
-  }, []);
-
-  const normalizePresencaStatus = useCallback(
-    (status) => (status || '').toString().trim().toUpperCase(),
-    []
-  );
-
-  const registrosFiltrados = useMemo(() => {
-    const termo = searchTerm.trim().toLowerCase();
-    const faixasAtivas = limparSelecao(filterFaixas);
-    const statusAtivos = limparSelecao(filterStatuses).map((status) => normalizePresencaStatus(status));
-    const treinosAtivos = limparSelecao(filterTreinos, TODOS_TREINOS);
-
-    return registrosDoDia.filter((item) => {
-      if (termo.length >= 3 && !item.alunoNome.toLowerCase().includes(termo)) {
-        return false;
-      }
-      if (faixasAtivas.length && !faixasAtivas.includes(item.faixaSlug)) {
-        return false;
-      }
-      const statusRegistro = normalizePresencaStatus(item.status);
-      if (statusAtivos.length && !statusAtivos.includes(statusRegistro)) {
-        return false;
-      }
-      if (treinosAtivos.length) {
-        const valorTreino = item.treinoId || 'sem-treino';
-        if (!treinosAtivos.includes(valorTreino)) {
-          return false;
-        }
-      }
-      return true;
-    });
-  }, [filterFaixas, filterStatuses, filterTreinos, limparSelecao, normalizePresencaStatus, registrosDoDia, searchTerm]);
-
-  const statusOrder = PRESENCA_STATUSES.reduce((acc, status, index) => {
-    const order = status === 'JUSTIFICADA' ? PRESENCA_STATUSES.indexOf('FALTA') : index;
-    return { ...acc, [status]: order };
-  }, {});
-
-  const statusLabel = (status) => {
-    const normalized = normalizePresencaStatus(status);
-    switch (normalized) {
-      case 'PENDENTE':
-        return { label: 'PENDENTE', tone: 'text-yellow-200' };
-      case 'PRESENTE':
-        return { label: 'PRESENTE', tone: 'text-green-300' };
-      case 'FALTA':
-        return { label: 'FALTA', tone: 'text-red-300' };
-      case 'JUSTIFICADA':
-        return { label: 'JUSTIFICADA', tone: 'text-indigo-200' };
-      default:
-        return { label: normalized || '—', tone: 'text-bjj-gray-200' };
-    }
-  };
-
-  const registrosFiltradosOrdenados = useMemo(
-    () =>
-      [...registrosFiltrados].sort((a, b) => {
-        const ordemA = statusOrder[a.status] ?? 5;
-        const ordemB = statusOrder[b.status] ?? 5;
-        if (ordemA !== ordemB) return ordemA - ordemB;
-        return a.alunoNome.localeCompare(b.alunoNome, 'pt-BR');
-      }),
-    [registrosFiltrados]
-  );
-
-  const totalFiltrado = registrosFiltrados.length;
-
-  const resumoDia = useMemo(() => calcularResumoPresencas(registrosDoDia), [registrosDoDia]);
-  const presentesDia = resumoDia.presentes;
-  const faltasDia = resumoDia.faltas;
-  const pendentesDia = resumoDia.pendentes;
-  const totalDia = registrosDoDia.length || 1;
-  const taxaPresencaDia = (presentesDia / totalDia) * 100;
-
-  const diasAtivos = useMemo(() => {
-    const conjunto = new Set(presencas.map((item) => item.data));
-    return conjunto.size;
-  }, [presencas]);
-
-  const treinosDoDiaPadrao = useMemo(() => {
-    const dia = normalizarDiaSemana(hoje);
-    const candidatos = treinos.filter((treino) => treino.diaSemana === dia);
-    return candidatos.length ? candidatos : treinos;
-  }, [hoje, normalizarDiaSemana, treinos]);
-
-  const treinoIdsDoDia = useMemo(() => {
-    const conjunto = new Set(
-      registrosDoDia
-        .map((item) => item.treinoId)
-        .filter((id) => typeof id === 'string' && id.trim().length > 0)
-    );
-    return Array.from(conjunto);
-  }, [registrosDoDia]);
-
-  const faixasDisponiveis = useMemo(() => {
-    const conjunto = new Set(
-      alunosAtivos
-        .map((aluno) => aluno.faixaSlug || aluno.faixa)
-        .filter((faixa) => typeof faixa === 'string' && faixa.trim().length > 0)
-    );
-    return Array.from(conjunto).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  }, [alunosAtivos]);
-
-  const opcoesFaixa = useMemo(
-    () => faixasDisponiveis.map((faixa) => ({ value: faixa, label: faixa })),
-    [faixasDisponiveis]
-  );
-  const opcoesStatus = useMemo(
-    () => STATUS_FILTER_VALUES.map((option) => ({ value: option.value, label: option.label })),
-    []
-  );
-  const treinosParaFiltro = useMemo(() => {
-    if (treinoIdsDoDia.length) {
-      const conhecidos = treinos.filter((treino) => treinoIdsDoDia.includes(treino.id));
-      const faltantes = treinoIdsDoDia
-        .filter((id) => !conhecidos.some((treino) => treino.id === id))
-        .map((id) => ({
-          id,
-          nome: 'Sessão principal',
-          hora: '--:--',
-          diaSemana: normalizarDiaSemana(hoje) || ''
-        }));
-      return [...conhecidos, ...faltantes];
-    }
-    return treinosDoDiaPadrao;
-  }, [hoje, normalizarDiaSemana, treinoIdsDoDia, treinos, treinosDoDiaPadrao]);
-
-  const opcoesTreinos = useMemo(
-    () =>
-      treinosParaFiltro.map((treino) => ({
-        value: treino.id,
-        label: `${treino.nome} · ${treino.hora}`
-      })),
-    [treinosParaFiltro]
+  const turmasDaAcademia = useMemo(
+    () => listarTurmasDaAcademia(currentAcademiaId),
+    [currentAcademiaId, listarTurmasDaAcademia]
   );
 
   useEffect(() => {
-    const idsDisponiveis = opcoesTreinos.map((treino) => treino.value);
-    if (!idsDisponiveis.length) {
-      setFilterTreinos([]);
-      return;
+    if (!selectedTurmaId && turmasDaAcademia.length > 0) {
+      setSelectedTurmaId(turmasDaAcademia[0].id);
     }
-
-    if (!filterTreinos.length || filterTreinos.includes(TODOS_TREINOS)) {
-      if (filterTreinos.length !== 1 || filterTreinos[0] !== TODOS_TREINOS) {
-        setFilterTreinos([TODOS_TREINOS]);
-      }
-      return;
-    }
-
-    const filtrados = filterTreinos.filter((id) => idsDisponiveis.includes(id));
-
-    if (!filtrados.length) {
-      setFilterTreinos([TODOS_TREINOS]);
-      return;
-    }
-
-    if (filtrados.length === idsDisponiveis.length) {
-      setFilterTreinos([TODOS_TREINOS]);
-      return;
-    }
-
-    if (filtrados.length !== filterTreinos.length) {
-      setFilterTreinos(filtrados);
-    }
-  }, [filterTreinos, opcoesTreinos]);
-
-  const treinoAnaliseLabel = useMemo(
-    () => opcoesTreinos.find((item) => item.value === treinoEmAnalise)?.label || 'Treino selecionado',
-    [opcoesTreinos, treinoEmAnalise]
-  );
+  }, [selectedTurmaId, turmasDaAcademia]);
 
   useEffect(() => {
-    if (!treinoParaFechar && opcoesTreinos.length) {
-      setTreinoParaFechar(opcoesTreinos[0].value);
-    }
-  }, [opcoesTreinos, treinoParaFechar]);
+    if (!selectedTurmaId || !selectedDate) return;
+    const turma = turmasDaAcademia.find((item) => item.id === selectedTurmaId);
+    if (!turma) return;
 
-  const treinosDisponiveisModal = useMemo(() => {
-    if (!sessionRecord) {
-      return treinosParaFiltro;
-    }
-    const diaSessao = normalizarDiaSemana(sessionRecord.data);
-    const candidatos = treinos.filter((treino) => treino.diaSemana === diaSessao);
-    if (candidatos.length) return candidatos;
-    return treinosParaFiltro;
-  }, [normalizarDiaSemana, sessionRecord, treinos, treinosParaFiltro]);
+    (async () => {
+      const aula = await getAulaByTurmaAndDate(selectedTurmaId, selectedDate, {
+        horaInicio: turma.horaInicio,
+        horaFim: turma.horaFim,
+      });
+      setCurrentAulaId(aula.id);
+      await carregarPorAula(aula.id);
+    })();
+  }, [selectedDate, selectedTurmaId, turmasDaAcademia, getAulaByTurmaAndDate, carregarPorAula]);
 
-  const handleConfirm = async (registro) => {
-    if (!registro?.id) {
-      abrirSelecaoSessao(registro);
-      return;
-    }
-    await atualizarStatus(registro.id, 'PRESENTE');
-  };
-
-  const abrirFechamento = () => {
-    const sugestao = filterTreinos.includes(TODOS_TREINOS) ? treinosParaFiltro[0]?.id : filterTreinos[0];
-    setTreinoParaFechar(sugestao || treinosParaFiltro[0]?.id || '');
-    setIsCloseModalOpen(true);
-  };
-
-  const fecharModalFechamento = () => setIsCloseModalOpen(false);
-
-  const fecharTreinoAutomatico = async () => {
-    const alvo = treinoParaFechar || treinosParaFiltro[0]?.id || null;
-    if (alvo) {
-      await fecharTreino(alvo);
-    }
-    setIsCloseModalOpen(false);
-  };
-
-  const direcionarParaAnalise = () => {
-    const alvo = treinoParaFechar || treinosParaFiltro[0]?.id || '';
-    if (alvo) {
-      setFilterTreinos([alvo]);
-    }
-    setTreinoEmAnalise(alvo);
-    setIsCloseModalOpen(false);
-  };
-
-  const salvarFechamentoManual = async () => {
-    const alvo = treinoEmAnalise || treinosParaFiltro[0]?.id || null;
-    marcarTreinoFechado(hoje, alvo);
-    setTreinoEmAnalise('');
-  };
-
-  const handleDelete = (registro) => {
-    if (!registro?.id) return;
-    setDeleteTarget(registro);
-  };
-
-  const confirmarExclusao = async () => {
-    if (!deleteTarget) return;
-    await excluirPresenca(deleteTarget.id);
-    setDeleteTarget(null);
-  };
-
-  const abrirResumo = () => setIsSummaryOpen(true);
-  const fecharResumo = () => setIsSummaryOpen(false);
-
-  const limparFiltros = () => {
-    setSearchTerm('');
-    setFilterFaixas([]);
-    setFilterStatuses([]);
-    setFilterTreinos([TODOS_TREINOS]);
-  };
-
-  const normalizarSelecao = useCallback((lista, totalDisponivel, valorTodos = 'all') => {
-    if (!Array.isArray(lista) || !lista.length) {
-      return [];
-    }
-    if (lista.includes(valorTodos)) {
-      return [valorTodos];
-    }
-    const valoresLimpos = lista.filter(Boolean);
-    if (totalDisponivel > 1 && valoresLimpos.length >= totalDisponivel) {
-      return [valorTodos];
-    }
-    return valoresLimpos;
-  }, []);
-
-  const abrirEdicao = (registro) => {
-    setSelectedRecord(registro);
-    setIsEditOpen(true);
-  };
-
-  const fecharEdicao = () => {
-    setSelectedRecord(null);
-    setIsEditOpen(false);
-  };
-
-  const obterTreinosUtilizados = useCallback(
-    (alunoId, data, ignorarId) =>
-      presencas
-        .filter((item) => item.alunoId === alunoId && item.data === data && item.id !== ignorarId)
-        .map((item) => item.treinoId)
-        .filter(Boolean),
-    [presencas]
+  const alunosDaAcademia = useMemo(
+    () =>
+      matriculasAtivasDaAcademia(currentAcademiaId)
+        .map((matricula) => ({
+          matricula,
+          aluno: getAlunoById(matricula.alunoId),
+        }))
+        .filter((item) => Boolean(item.aluno)),
+    [currentAcademiaId, getAlunoById, matriculasAtivasDaAcademia]
   );
 
-  const obterSugestaoTreino = useCallback(
-    (alunoId, data, utilizados = []) => {
-      const dia = normalizarDiaSemana(data) || normalizarDiaSemana(hoje);
-      const preferencia =
-        filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0 ? null : filterTreinos[0];
-      if (preferencia && !utilizados.includes(preferencia)) {
-        const preferido = treinos.find((treino) => treino.id === preferencia);
-        if (preferido) return preferido;
-      }
-      const porDiaDisponivel = treinos.find(
-        (treino) => treino.diaSemana === dia && !utilizados.includes(treino.id)
+  const presencasDaAulaAtual = useMemo(
+    () => presencas.filter((registro) => registro.aulaId === currentAulaId),
+    [currentAulaId, presencas]
+  );
+
+  const resumoAula = useMemo(() => {
+    const total = presencasDaAulaAtual.length;
+    const presentes = presencasDaAulaAtual.filter((item) => item.status === 'PRESENTE').length;
+    const faltas = presencasDaAulaAtual.filter((item) => item.status === 'FALTA').length;
+    const justificadas = presencasDaAulaAtual.filter((item) => item.status === 'JUSTIFICADA').length;
+    const pendentes = presencasDaAulaAtual.filter((item) => item.status === 'PENDENTE').length;
+    return { total, presentes, faltas, justificadas, pendentes };
+  }, [presencasDaAulaAtual]);
+
+  const alunosDaChamada = useMemo(() => {
+    const matriculasTurma = alunosDaAcademia.filter((entry) => entry.matricula.turmaId === selectedTurmaId);
+    return matriculasTurma.map((entry) => {
+      const presenca = presencas.find(
+        (registro) => registro.aulaId === currentAulaId && registro.alunoId === entry.matricula.alunoId
       );
-      if (porDiaDisponivel) return porDiaDisponivel;
-
-      const qualquerDisponivel = treinos.find((treino) => !utilizados.includes(treino.id));
-      if (qualquerDisponivel) return qualquerDisponivel;
-
-      const porDia = treinos.find((treino) => treino.diaSemana === dia);
-      if (porDia) return porDia;
-
-      return treinos[0] || null;
-    },
-    [filterTreinos, hoje, normalizarDiaSemana, treinos]
-  );
-
-  const abrirSelecaoSessao = (registro, contexto = 'placeholder') => {
-    const dataRegistro = registro.data || hoje;
-    const utilizados = obterTreinosUtilizados(registro.alunoId, dataRegistro, registro.id);
-    const sugestaoDireta =
-      registro.treinoId && !utilizados.includes(registro.treinoId)
-        ? treinos.find((treino) => treino.id === registro.treinoId)
-        : null;
-    const sugestao = sugestaoDireta || obterSugestaoTreino(registro.alunoId, dataRegistro, utilizados);
-    const aluno = getAlunoById(registro.alunoId);
-
-    setSessionContext(contexto);
-    setSessionTakenTreinos(utilizados);
-    setSessionTreinoId(sugestao?.id || registro.treinoId || '');
-    setSessionRecord({
-      alunoId: registro.alunoId,
-      alunoNome: aluno?.nome || 'Aluno não encontrado',
-      faixaSlug: aluno?.faixaSlug || aluno?.faixa,
-      graus: aluno?.graus,
-      data: dataRegistro,
-      status: 'PRESENTE',
-      tipoTreino: sugestao?.nome || registro.tipoTreino || 'Sessão principal'
+      return {
+        aluno: entry.aluno,
+        matricula: entry.matricula,
+        presenca,
+      };
     });
-    setIsSessionOpen(true);
-  };
+  }, [alunosDaAcademia, currentAulaId, presencas, selectedTurmaId]);
 
-  const fecharSelecaoSessao = () => {
-    setIsSessionOpen(false);
-    setSessionRecord(null);
-    setSessionContext('placeholder');
-    setSessionTreinoId('');
-    setSessionTakenTreinos([]);
-  };
+  const pendencias = useMemo(() => {
+    const inicio = new Date(pendenciasInicio);
+    const fim = new Date(pendenciasFim);
 
-  useEffect(() => {
-    if (!sessionRecord) return;
-    const primeiroDisponivel = treinosDisponiveisModal.find(
-      (treino) => !(sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id))
-    );
-    const opcaoExiste = treinosDisponiveisModal.some((treino) => treino.id === sessionTreinoId);
-    const opcaoBloqueada =
-      sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId) && !!sessionTreinoId;
+    return presencas
+      .filter((presenca) => presenca.status === 'PENDENTE')
+      .filter((presenca) => {
+        const data = presenca.data ? new Date(presenca.data) : null;
+        if (!data) return false;
+        return data >= inicio && data <= fim;
+      })
+      .map((presenca) => {
+        const turma = turmas.find((item) => item.id === (presenca.turmaId || presenca.treinoId));
+        if (!turma || turma.academiaId !== currentAcademiaId) return null;
+        const aula = presenca.aulaId ? aulas.find((item) => item.id === presenca.aulaId) : null;
+        const aluno = alunos.find((item) => item.id === presenca.alunoId);
+        if (!aluno) return null;
+        return { presenca, turma, aula, aluno };
+      })
+      .filter(Boolean);
+  }, [aulas, alunos, currentAcademiaId, pendenciasFim, pendenciasInicio, presencas, turmas]);
 
-    if (!opcaoExiste || opcaoBloqueada) {
-      setSessionTreinoId(primeiroDisponivel?.id || treinosDisponiveisModal[0]?.id || '');
-    }
-  }, [sessionContext, sessionRecord, sessionTakenTreinos, sessionTreinoId, treinosDisponiveisModal]);
-
-  const handleSessionSubmit = async () => {
-    if (!sessionRecord) return;
-    if (sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId)) {
-      return;
-    }
-    const treinoSelecionado =
-      treinos.find((treino) => treino.id === sessionTreinoId) ||
-      obterSugestaoTreino(sessionRecord.alunoId, sessionRecord.data, sessionTakenTreinos);
-    const novaPresenca = await salvarPresenca({
-      id: sessionRecord.id || `presenca-${Date.now()}`,
-      alunoId: sessionRecord.alunoId,
-      data: sessionRecord.data,
-      status: 'PRESENTE',
-      treinoId: treinoSelecionado?.id || '',
+  const handleStatusChange = async (alunoId, status) => {
+    if (!currentAulaId) return;
+    await registrarPresencaEmAula({
+      alunoId,
+      turmaId: selectedTurmaId,
+      treinoId: selectedTurmaId,
+      aulaId: currentAulaId,
+      status,
+      data: selectedDate,
       origem: 'PROFESSOR',
-      observacao: sessionRecord.observacao || null,
-      createdAt: `${sessionRecord.data || hoje}T00:00:00.000Z`,
-      updatedAt: new Date().toISOString(),
     });
-    if (
-      novaPresenca.treinoId &&
-      !(filterTreinos.includes(TODOS_TREINOS) || filterTreinos.length === 0) &&
-      !filterTreinos.includes(novaPresenca.treinoId)
-    ) {
-      setFilterTreinos([TODOS_TREINOS]);
-    }
-    fecharSelecaoSessao();
-    await atualizarLista();
   };
 
-  const abrirSessaoExtra = (registro) => {
-    abrirSelecaoSessao(
-      {
-        alunoId: registro.alunoId,
-        data: registro.data || hoje,
-        treinoId: null,
-        tipoTreino: registro.tipoTreino
-      },
-      'extra'
-    );
+  const handlePendenciaStatus = async (presencaId, status) => {
+    await atualizarStatus(presencaId, status);
   };
 
-  const handleEditSubmit = async (dados) => {
-    if (!selectedRecord?.id) return;
-
-    const novoStatus = normalizePresencaStatus(dados.status || selectedRecord.status);
-    const novoTreinoId = dados.treinoId || selectedRecord.treinoId;
-
-    // Mantém o registro visível mesmo quando o novo status não estava no filtro ativo.
-    setFilterStatuses((prev) => {
-      const limpos = limparSelecao(prev);
-      if (!limpos.length || limpos.includes(novoStatus)) return prev;
-      return [...limpos, novoStatus];
-    });
-
-    // Garante que a mudança de treino permaneça visível dentro dos filtros ativos.
-    setFilterTreinos((prev) => {
-      const limpos = limparSelecao(prev, TODOS_TREINOS);
-      if (!novoTreinoId || limpos.includes(TODOS_TREINOS) || limpos.includes(novoTreinoId)) return prev;
-      return limpos.length ? [...limpos, novoTreinoId] : [novoTreinoId];
-    });
-
-    const atualizado = await salvarPresenca({
-      id: selectedRecord.id,
-      alunoId: dados.alunoId || selectedRecord.alunoId,
-      treinoId: novoTreinoId,
-      status: novoStatus,
-      data: dados.data || selectedRecord.data,
-      origem: dados.origem || 'PROFESSOR',
-      observacao: dados.observacao || null,
-      createdAt: selectedRecord.createdAt || `${dados.data || selectedRecord.data || hoje}T00:00:00.000Z`,
-      updatedAt: new Date().toISOString(),
-    });
-    if (!atualizado) return;
-    fecharEdicao();
+  const handleFecharAula = async () => {
+    if (!currentAulaId) return;
+    await fecharAulaStore(currentAulaId, selectedTurmaId);
   };
 
   if (isLoading) {
-    return <LoadingState title="Sincronizando presenças" message="Carregando histórico recente de treinos." />;
+    return (
+      <div className="flex h-64 items-center justify-center rounded-xl bg-bjj-gray-800 text-bjj-gray-100">
+        Carregando presenças...
+      </div>
+    );
   }
 
+  const aulaAtual = currentAulaId ? aulas.find((aula) => aula.id === currentAulaId) : null;
+  const turmaAtual = turmasDaAcademia.find((turma) => turma.id === selectedTurmaId);
+
   return (
-    <div className="space-y-5">
-      <header className="space-y-3 rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-1">
-            <h1 className="text-base font-semibold text-bjj-white">Check-in do treino</h1>
-            <p className="text-sm text-bjj-gray-200/70">
-              Visualize todos os alunos ativos de hoje e registre presença com apenas um clique.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-            <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={abrirResumo}>
-              <PieChart size={16} /> Resumo do dia
-            </Button>
-            <Button type="button" className="w-full sm:w-auto" onClick={abrirFechamento}>
-              Fechar treino
-            </Button>
-          </div>
+    <div className="space-y-6">
+      <header className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-sm uppercase tracking-wide text-bjj-gray-200">Painel do professor</p>
+          <h1 className="text-3xl font-bold text-white">Presenças</h1>
+          <p className="text-bjj-gray-100">Chamada em tempo real e revisão de pendências</p>
         </div>
-        {!treinos.length && (
-          <p className="rounded-xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3 text-xs text-bjj-gray-200/70">
-            Nenhum horário de treino cadastrado para hoje. Cadastre sessões na aba Configurações para agilizar o check-in.
-          </p>
-        )}
+        <div className="flex flex-col items-start gap-2 rounded-2xl bg-bjj-gray-800/70 px-4 py-3 text-bjj-blue-200 ring-1 ring-bjj-gray-700 md:flex-row md:items-center">
+          <div className="flex items-center gap-2 text-bjj-blue-100">
+            <PieChart size={20} />
+            <span className="text-sm uppercase tracking-wide">Visão professor</span>
+          </div>
+          <span className="rounded-full bg-bjj-gray-900/80 px-3 py-1 text-xs font-semibold text-white">
+            {turmaAtual ? turmaAtual.nome : 'Selecione uma turma'}
+          </span>
+        </div>
       </header>
 
-      <section className="grid grid-cols-1 gap-2 text-sm text-bjj-gray-200/80 md:grid-cols-3">
-        <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
-          <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Presenças</p>
-          <p className="mt-1 text-xl font-semibold text-bjj-white">{presentesDia}</p>
-          <p className="text-xs text-bjj-gray-200/60">{formatPercent(taxaPresencaDia)} dos registros do dia</p>
-        </div>
-        <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
-          <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Faltas</p>
-          <p className="mt-1 text-xl font-semibold text-bjj-white">{faltasDia}</p>
-          <p className="text-xs text-bjj-gray-200/60">Ausências e justificativas registradas</p>
-        </div>
-        <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-3">
-          <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Pendentes</p>
-          <p className="mt-1 text-xl font-semibold text-bjj-white">{pendentesDia}</p>
-          <p className="text-xs text-bjj-gray-200/60">Check-ins aguardando confirmação</p>
-        </div>
-      </section>
-
-      <article className="card space-y-4 overflow-visible">
-        <header className="space-y-1">
-          <h2 className="text-base font-semibold text-bjj-white">Filtros inteligentes</h2>
-          <p className="text-sm text-bjj-gray-200/70">
-            Combine os filtros abaixo para focar em faixas, status ou treinos específicos. A busca por nome é habilitada a partir de
-            três letras.
+      <div className="grid gap-3 md:grid-cols-3">
+        <div className="rounded-2xl bg-gradient-to-r from-bjj-gray-900 to-bjj-gray-800 p-4 ring-1 ring-bjj-gray-700">
+          <p className="text-xs uppercase tracking-wide text-bjj-gray-300">Academia</p>
+          <p className="text-lg font-semibold text-white">
+            {academias.find((a) => a.id === currentAcademiaId)?.nome || 'Academia não definida'}
           </p>
-        </header>
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/60">Nome</label>
-            <Input
-              type="search"
-              placeholder="Buscar por nome do aluno"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
-          </div>
-          <MultiSelectDropdown
-            label="Faixa"
-            options={opcoesFaixa}
-            value={filterFaixas}
-            onChange={(lista) => setFilterFaixas(normalizarSelecao(lista, faixasDisponiveis.length))}
-            allLabel="Todas as faixas"
-            placeholder="Selecionar faixas"
-            className="h-full"
-          />
-          <MultiSelectDropdown
-            label="Status"
-            options={opcoesStatus}
-            value={filterStatuses}
-            onChange={(lista) => setFilterStatuses(normalizarSelecao(lista, STATUS_FILTER_VALUES.length))}
-            allLabel="Todos os status"
-            placeholder="Selecionar status"
-            className="h-full"
-          />
-          <MultiSelectDropdown
-            label="Treino"
-            options={opcoesTreinos}
-            value={filterTreinos}
-            onChange={(lista) => setFilterTreinos(normalizarSelecao(lista, opcoesTreinos.length, TODOS_TREINOS))}
-            allValue={TODOS_TREINOS}
-            allLabel="Todos do dia"
-            placeholder={opcoesTreinos.length ? 'Selecionar treinos' : 'Nenhum treino cadastrado'}
-            disabled={!opcoesTreinos.length}
-            className="h-full"
-          />
+          <p className="text-xs text-bjj-gray-200">Contexto filtrado automaticamente</p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-bjj-gray-200/60">
-            Exibindo {totalFiltrado} de {registrosDoDia.length} aluno(s) ativos hoje.
-          </p>
-          <button
-            type="button"
-            onClick={limparFiltros}
-            className="text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/70 transition hover:text-bjj-red"
-          >
-            Limpar filtros
-          </button>
+        <div className="rounded-2xl bg-gradient-to-r from-bjj-blue-900/60 via-bjj-blue-800/40 to-bjj-gray-800 p-4 ring-1 ring-bjj-gray-700">
+          <div className="flex items-center justify-between text-bjj-gray-100">
+            <p className="text-xs uppercase tracking-wide">Aula atual</p>
+            {aulaAtual && <StatusBadge status={aulaAtual.status === 'encerrada' ? 'PRESENTE' : 'PENDENTE'} />}
+          </div>
+          <p className="text-lg font-semibold text-white">{turmaAtual ? turmaAtual.nome : 'Escolha uma turma'}</p>
+          <p className="text-xs text-bjj-gray-200">{formatDateBr(selectedDate)}</p>
         </div>
-      </article>
-
-      {treinoEmAnalise && (
-        <div className="flex flex-col gap-2 rounded-xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/70 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.18em] text-bjj-gray-200/60">Fechamento em análise</p>
-            <p className="text-sm font-semibold text-bjj-white">{treinoAnaliseLabel}</p>
-            <p className="text-xs text-bjj-gray-200/70">Revise check-ins pendentes antes de encerrar o treino.</p>
-          </div>
-          <div className="flex gap-2">
-            <Button type="button" variant="secondary" onClick={() => setTreinoEmAnalise('')} className="w-full sm:w-auto">
-              Cancelar
-            </Button>
-            <Button type="button" onClick={salvarFechamentoManual} className="w-full sm:w-auto">
-              Salvar & Fechar treino
-            </Button>
-          </div>
-        </div>
-      )}
-
-      <AttendanceTable
-        records={registrosFiltradosOrdenados}
-        onConfirm={handleConfirm}
-        onDelete={handleDelete}
-        onEdit={abrirEdicao}
-        onAddSession={abrirSessaoExtra}
-        onRequestSession={abrirSelecaoSessao}
-        isLoading={isRefreshing}
-      />
-
-      <Modal isOpen={isCloseModalOpen} onClose={fecharModalFechamento} title="Fechar treino">
-        <div className="space-y-4 text-sm text-bjj-gray-200/80">
-          <p>Fechar treino e registrar faltas para quem não confirmou presença?</p>
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Treino</p>
-            <Select value={treinoParaFechar} onChange={(event) => setTreinoParaFechar(event.target.value)}>
-              {opcoesTreinos.map((treino) => (
-                <option key={treino.value} value={treino.value}>
-                  {treino.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <Button type="button" variant="ghost" onClick={fecharModalFechamento} className="w-full">
-              Não
-            </Button>
-            <Button type="button" variant="secondary" onClick={direcionarParaAnalise} className="w-full">
-              Analisar
-            </Button>
-            <Button type="button" onClick={fecharTreinoAutomatico} className="w-full">
-              Sim, fechar agora
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      <Modal isOpen={isSummaryOpen} onClose={fecharResumo} title="Resumo do treino">
-        <div className="space-y-4 text-sm text-bjj-gray-200/80">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 p-4">
-              <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Total de alunos</p>
-              <p className="mt-1 text-2xl font-semibold text-bjj-white">{registrosDoDia.length}</p>
+        <div className="rounded-2xl bg-bjj-gray-900/80 p-4 ring-1 ring-bjj-gray-700">
+          <p className="text-xs uppercase tracking-wide text-bjj-gray-300">Resumo da chamada</p>
+          <div className="mt-2 grid grid-cols-4 gap-2 text-center text-white">
+            <div className="rounded-xl bg-bjj-gray-800 py-2">
+              <p className="text-lg font-bold">{resumoAula.presentes}</p>
+              <p className="text-xs text-bjj-gray-200">Presentes</p>
             </div>
-            <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/70 p-4">
-              <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Pendentes</p>
-              <p className="mt-1 text-2xl font-semibold text-bjj-white">{pendentesDia}</p>
+            <div className="rounded-xl bg-bjj-gray-800 py-2">
+              <p className="text-lg font-bold">{resumoAula.pendentes}</p>
+              <p className="text-xs text-bjj-gray-200">Pendentes</p>
+            </div>
+            <div className="rounded-xl bg-bjj-gray-800 py-2">
+              <p className="text-lg font-bold">{resumoAula.faltas}</p>
+              <p className="text-xs text-bjj-gray-200">Faltas</p>
+            </div>
+            <div className="rounded-xl bg-bjj-gray-800 py-2">
+              <p className="text-lg font-bold">{resumoAula.justificadas}</p>
+              <p className="text-xs text-bjj-gray-200">Justificadas</p>
             </div>
           </div>
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Distribuição do dia</p>
-              <div className="space-y-2">
-                {[{ rotulo: 'Presenças', valor: presentesDia, cor: 'bg-bjj-red' }, { rotulo: 'Faltas', valor: faltasDia, cor: 'bg-bjj-gray-800' }].map((item) => {
-                  const percentual = Math.round((item.valor / totalDia) * 100);
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="rounded-2xl bg-bjj-gray-800/70 p-5 shadow-lg ring-1 ring-bjj-gray-700">
+          <div className="flex flex-col gap-3 border-b border-bjj-gray-700 pb-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-bjj-gray-200">Operação em tempo real</p>
+              <h2 className="text-xl font-semibold text-white">Chamada do dia</h2>
+              <p className="text-sm text-bjj-gray-200">
+                Defina a turma e a data para registrar presenças imediatamente.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <Input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full sm:w-auto"
+              />
+              <Select
+                value={selectedTurmaId}
+                onChange={(e) => setSelectedTurmaId(e.target.value)}
+                className="w-full sm:w-auto"
+              >
+                {turmasDaAcademia.map((turma) => (
+                  <option key={turma.id} value={turma.id}>
+                    {turma.nome}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          {turmasDaAcademia.length === 0 ? (
+            <div className="mt-4 flex items-center gap-3 rounded-xl border border-dashed border-bjj-gray-700 bg-bjj-gray-900/60 p-4 text-bjj-gray-100">
+              <AlertCircle size={20} className="text-yellow-300" />
+              <div>
+                <p className="font-semibold text-white">Nenhuma turma encontrada</p>
+                <p className="text-sm text-bjj-gray-200">Cadastre turmas na academia para iniciar a chamada.</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mt-4 flex items-center justify-between rounded-xl bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200 ring-1 ring-bjj-gray-700">
+                <div className="flex items-center gap-2 text-white">
+                  <Clock size={16} />
+                  <span>
+                    {turmaAtual ? turmaAtual.nome : 'Turma não selecionada'} • {formatDateBr(selectedDate)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <StatusBadge status={aulaAtual?.status === 'encerrada' ? 'PRESENTE' : 'PENDENTE'} />
+                  <span className="rounded-full bg-bjj-gray-800 px-2 py-1 text-bjj-gray-100">
+                    {resumoAula.total || alunosDaChamada.length} alunos na chamada
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {alunosDaChamada.length === 0 && (
+                  <p className="text-bjj-gray-100">Nenhum aluno ativo vinculado a esta turma.</p>
+                )}
+                {alunosDaChamada.map(({ aluno, matricula, presenca }) => {
+                  const faixa = aluno?.faixaSlug ? getFaixaConfigBySlug(aluno.faixaSlug) : null;
+                  const status = presenca ? presenca.status : 'PENDENTE';
                   return (
-                    <div key={item.rotulo}>
-                      <div className="flex items-center justify-between text-xs">
-                        <span>{item.rotulo}</span>
-                        <span>{item.valor} · {percentual}%</span>
+                    <div
+                      key={matricula.id}
+                      className="flex flex-col gap-3 rounded-xl border border-bjj-gray-700 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div className="space-y-1">
+                        <p className="text-lg font-semibold text-white">{aluno?.nome}</p>
+                        <p className="text-sm text-bjj-gray-200">Matrícula #{matricula.numero}</p>
+                        {faixa && <p className={`inline-flex rounded-full bg-bjj-gray-800 px-2 py-1 text-xs ${faixa.textColor}`}>{faixa.nome}</p>}
                       </div>
-                      <div className="mt-1 h-2 rounded-full bg-bjj-gray-800/60">
-                        <div className={`h-full rounded-full ${item.cor}`} style={{ width: `${percentual}%` }} />
+                      <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
+                        <StatusBadge status={status} />
+                        <div className="flex flex-wrap gap-1">
+                          <Button size="sm" variant="success" onClick={() => handleStatusChange(aluno.id, 'PRESENTE')}>
+                            Presente
+                          </Button>
+                          <Button size="sm" variant="secondary" onClick={() => handleStatusChange(aluno.id, 'FALTA')}>
+                            Falta
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleStatusChange(aluno.id, 'JUSTIFICADA')}>
+                            Justificar
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
+
+              <div className="mt-4 flex flex-col gap-2 rounded-xl bg-bjj-gray-900/60 p-4 ring-1 ring-bjj-gray-700 md:flex-row md:items-center md:justify-between">
+                <div className="text-sm text-bjj-gray-200">
+                  <p className="font-semibold text-white">Fechar treino</p>
+                  <p>Marca pendentes como presentes e encerra a aula instância.</p>
+                </div>
+                <Button variant="primary" onClick={handleFecharAula} disabled={!currentAulaId}>
+                  Fechar treino
+                </Button>
+              </div>
+            </>
+          )}
+        </section>
+
+        <section className="rounded-2xl bg-bjj-gray-800/70 p-5 shadow-lg ring-1 ring-bjj-gray-700">
+          <div className="flex flex-col gap-3 border-b border-bjj-gray-700 pb-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-bjj-gray-200">Operação pós-aula</p>
+              <h2 className="text-xl font-semibold text-white">Pendências de aprovação</h2>
+              <p className="text-sm text-bjj-gray-200">Revisão rápida de presenças pendentes no período.</p>
             </div>
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-wide text-bjj-gray-200/60">Lista rápida</p>
-            <ul className="space-y-2.5">
-              {registrosDoDia.map((item) => {
-                const treino = treinos.find((treino) => treino.id === item.treinoId);
-                const treinoLabel = treino?.nome || 'Sessão principal';
-                const statusInfo = statusLabel(item.status);
-                const statusMessage =
-                  item.status === 'PRESENTE'
-                    ? 'Presença confirmada'
-                    : item.status === 'PENDENTE'
-                    ? 'Aguardando confirmação'
-                    : 'Falta registrada';
-
-                return (
-                  <li
-                    key={item.id || `${item.alunoId}-${item.treinoId || item.data}`}
-                    className="flex items-center justify-between rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-3 py-2"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-bjj-white">{resolveAlunoNome(item.alunoId)}</p>
-                      <p className="text-[11px] text-bjj-gray-200/60">{statusMessage}</p>
-                      <p className="text-[11px] text-bjj-gray-200/50">{treinoLabel}</p>
-                    </div>
-                    <span
-                      className={`text-xs font-semibold ${statusInfo.tone}`}
-                    >
-                      {statusInfo.label}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <Input
+                type="date"
+                value={pendenciasInicio}
+                onChange={(e) => setPendenciasInicio(e.target.value)}
+                className="w-full sm:w-auto"
+              />
+              <Input
+                type="date"
+                value={pendenciasFim}
+                onChange={(e) => setPendenciasFim(e.target.value)}
+                className="w-full sm:w-auto"
+              />
+              <div className="flex flex-wrap gap-1 text-xs">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setPendenciasInicio(formatRangeDate(-7));
+                    setPendenciasFim(hoje());
+                  }}
+                >
+                  Últimos 7 dias
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setPendenciasInicio(formatRangeDate(-30));
+                    setPendenciasFim(hoje());
+                  }}
+                >
+                  Últimos 30 dias
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    const hojeData = hoje();
+                    setPendenciasInicio(hojeData);
+                    setPendenciasFim(hojeData);
+                  }}
+                >
+                  Hoje
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      </Modal>
 
-      <Modal
-        isOpen={isEditOpen}
-        onClose={fecharEdicao}
-        title={
-          selectedRecord ? `Corrigir presença de ${resolveAlunoNome(selectedRecord.alunoId)}` : 'Corrigir presença'
-        }
-      >
-        {selectedRecord && (
-          <PresenceForm
-            initialData={selectedRecord}
-            onSubmit={handleEditSubmit}
-            onCancel={fecharEdicao}
-            submitLabel="Salvar ajustes"
-          />
-        )}
-      </Modal>
+          <div className="mt-4 flex flex-col gap-2 rounded-xl bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200 ring-1 ring-bjj-gray-700 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-white">
+              <AlertCircle size={16} className="text-yellow-300" />
+              <span>Presenças pendentes: {pendencias.length}</span>
+            </div>
+            <span className="inline-flex items-center justify-center rounded-full bg-bjj-gray-800 px-3 py-1 text-xs text-bjj-gray-100">
+              {formatDateBr(pendenciasInicio)} → {formatDateBr(pendenciasFim)}
+            </span>
+          </div>
 
-      <Modal
-        isOpen={isSessionOpen}
-        onClose={fecharSelecaoSessao}
-        title={
-          sessionRecord
-              ? sessionContext === 'extra'
-                ? `Adicionar nova sessão para ${resolveAlunoNome(sessionRecord.alunoId)}`
-                : `Selecionar sessão para ${resolveAlunoNome(sessionRecord.alunoId)}`
-              : 'Selecionar sessão'
-        }
-      >
-        <div className="space-y-4 text-sm text-bjj-gray-200/80">
-          <p>
-            Escolha o treino correspondente para registrar a presença de
-            <strong className="text-bjj-white"> {sessionRecord ? resolveAlunoNome(sessionRecord.alunoId) : ''}</strong> no dia{' '}
-            {sessionRecord
-              ? new Date(sessionRecord.data).toLocaleDateString('pt-BR')
-              : new Date().toLocaleDateString('pt-BR')}. Você pode adicionar mais de uma sessão no mesmo dia,
-            como treinos de Gi e No-Gi.
-          </p>
-          <label className="block text-sm font-medium text-bjj-white">Treino / sessão</label>
-          <Select value={sessionTreinoId} onChange={(event) => setSessionTreinoId(event.target.value)}>
-            {treinosDisponiveisModal.map((treino) => {
-              const jaRegistrado = sessionContext === 'extra' && sessionTakenTreinos.includes(treino.id);
+          <div className="mt-4 space-y-3">
+            {pendencias.length === 0 && (
+              <p className="rounded-xl border border-dashed border-bjj-gray-700 bg-bjj-gray-900/60 px-4 py-3 text-bjj-gray-100">
+                Nenhuma pendência no período selecionado.
+              </p>
+            )}
+            {pendencias.map((item) => {
+              const { presenca, turma, aula, aluno } = item;
               return (
-                <option key={treino.id} value={treino.id} disabled={jaRegistrado}>
-                  {treino.nome} · {treino.hora}
-                  {jaRegistrado ? ' (já registrado)' : ''}
-                </option>
+                <div
+                  key={presenca.id}
+                  className="flex flex-col gap-3 rounded-xl border border-bjj-gray-700 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="space-y-1">
+                    <p className="text-lg font-semibold text-white">{aluno.nome}</p>
+                    <p className="text-sm text-bjj-gray-200">
+                      {turma.nome} • {formatDateBr(presenca.data)} {aula ? `• ${aula.horaInicio}` : ''}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
+                    <StatusBadge status={presenca.status} />
+                    <div className="flex flex-wrap gap-1">
+                      <Button size="sm" variant="success" onClick={() => handlePendenciaStatus(presenca.id, 'PRESENTE')}>
+                        Presente
+                      </Button>
+                      <Button size="sm" variant="secondary" onClick={() => handlePendenciaStatus(presenca.id, 'FALTA')}>
+                        Falta
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => handlePendenciaStatus(presenca.id, 'JUSTIFICADA')}>
+                        Justificar
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               );
             })}
-            {!treinosDisponiveisModal.length && <option value="">Sessão principal</option>}
-          </Select>
-          <div className="flex flex-col gap-2 md:flex-row md:justify-end">
-            <Button type="button" variant="secondary" className="md:w-auto" onClick={fecharSelecaoSessao}>
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              className="md:w-auto"
-              onClick={handleSessionSubmit}
-              disabled={sessionContext === 'extra' && sessionTakenTreinos.includes(sessionTreinoId)}
-            >
-              Confirmar presença
-            </Button>
           </div>
-        </div>
-      </Modal>
-
-      <ConfirmDialog
-        isOpen={Boolean(deleteTarget)}
-        title="Confirmar exclusão"
-        message={
-          deleteTarget
-            ? `Deseja remover o registro de ${resolveAlunoNome(deleteTarget.alunoId)} em ${new Date(deleteTarget.data).toLocaleDateString(
-                'pt-BR'
-              )}?`
-            : ''
-        }
-        confirmLabel="Remover registro"
-        onConfirm={confirmarExclusao}
-        onCancel={() => setDeleteTarget(null)}
-      />
+        </section>
+      </div>
     </div>
   );
 }

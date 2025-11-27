@@ -1,6 +1,35 @@
 import type { AulaInstancia } from '@/types';
 
+const formatDate = (daysOffset: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysOffset);
+  return date.toISOString().split('T')[0];
+};
+
+const buildAulaId = (turmaId: string, date: string) => `aula_${turmaId}_${date.replaceAll('-', '_')}`;
+
+const aulaRecente = (turmaId: string, daysOffset: number, status: AulaInstancia['status']): AulaInstancia => {
+  const data = formatDate(daysOffset);
+  return {
+    id: buildAulaId(turmaId, data),
+    turmaId,
+    data,
+    horaInicio: turmaId === 'turma_kids_fundamental' ? '18:00' : turmaId === 'turma_adulto_gi' ? '19:00' : '20:30',
+    horaFim: turmaId === 'turma_kids_fundamental' ? '19:00' : turmaId === 'turma_adulto_gi' ? '20:30' : '22:00',
+    status
+  };
+};
+
 export const MOCK_AULAS_INSTANCIAS: AulaInstancia[] = [
+  aulaRecente('turma_kids_fundamental', -2, 'encerrada'),
+  aulaRecente('turma_kids_fundamental', 0, 'prevista'),
+  aulaRecente('turma_kids_fundamental', 2, 'prevista'),
+  aulaRecente('turma_adulto_gi', -1, 'encerrada'),
+  aulaRecente('turma_adulto_gi', 0, 'prevista'),
+  aulaRecente('turma_adulto_gi', 3, 'prevista'),
+  aulaRecente('turma_competicao_noite', -3, 'encerrada'),
+  aulaRecente('turma_competicao_noite', 0, 'prevista'),
+  aulaRecente('turma_competicao_noite', 4, 'prevista'),
   {
     id: 'aula_turma_kids_2024_05_20',
     turmaId: 'turma_kids_fundamental',

@@ -3,16 +3,22 @@ import { create } from 'zustand'
 import {
   atualizarStatusPresenca,
   criarPresenca,
+  fecharAula as serviceFecharAula,
   fecharTreino as serviceFecharTreino,
   listarPresencasPorAluno,
+  listarPresencasPorAula,
   listarPresencasPorTreino,
   listarTodasPresencas,
   registrarCheckin as serviceRegistrarCheckin,
+  registrarOuAtualizarPresenca,
   removerPresenca,
   snapshotPresencas,
 } from '@/services/presencasService'
-import type { PresencaRegistro, PresencaStatus } from '@/types/presenca'
+import type { PresencaOrigem, PresencaRegistro, PresencaStatus } from '@/types/presenca'
 import { useAlunosStore } from './alunosStore'
+import { useAulasStore } from './aulasStore'
+
+const hoje = () => new Date().toISOString().split('T')[0]
 
 type RegistroCheckinPayload = {
   alunoId: string
@@ -30,8 +36,13 @@ type PresencasState = {
   carregarTodas: () => Promise<void>
   carregarPorAluno: (alunoId: string) => Promise<void>
   carregarPorTreino: (treinoId: string) => Promise<void>
+  carregarPorAula: (aulaId: string) => Promise<void>
   registrarCheckin: (payload: RegistroCheckinPayload) => Promise<{ registro: PresencaRegistro | null; status: CheckinStatus }>
-  salvarPresenca: (presenca: Omit<PresencaRegistro, 'createdAt' | 'updatedAt'> & { createdAt?: string; updatedAt?: string }) => Promise<PresencaRegistro>
+  registrarPresencaEmAula: (
+    payload: Omit<PresencaRegistro, 'id' | 'createdAt' | 'updatedAt' | 'origem'> & { status?: PresencaStatus; origem?: PresencaOrigem }
+  ) => Promise<PresencaRegistro>
+  salvarPresenca: (presenca: Omit<PresencaRegistro, 'createdAt' | 'updatedAt'> & { createdAt?: string; updatedAt?: string }) =>
+    Promise<PresencaRegistro>
   atualizarStatus: (
     id: string,
     status: PresencaStatus,
@@ -39,6 +50,7 @@ type PresencasState = {
   ) => Promise<PresencaRegistro | null>
   excluirPresenca: (id: string) => Promise<void>
   fecharTreino: (treinoId: string) => Promise<void>
+  fecharAula: (aulaId: string, turmaId?: string) => Promise<void>
   marcarTreinoFechado: (data: string, treinoId: string | null) => void
   isTreinoFechado: (data: string, treinoId: string | null) => boolean
 }
@@ -74,6 +86,12 @@ export const usePresencasStore = create<PresencasState>((set, get) => ({
     set({ presencas: combinadas })
     syncAlunos(combinadas)
   },
+  carregarPorAula: async (aulaId) => {
+    const lista = await listarPresencasPorAula(aulaId)
+    const combinadas = [...get().presencas.filter((item) => item.aulaId !== aulaId), ...lista]
+    set({ presencas: combinadas })
+    syncAlunos(combinadas)
+  },
   registrarCheckin: async (payload) => {
     const sessionKey = `${payload.data || ''}::${payload.treinoId || 'principal'}`
     if (get().treinosFechados[sessionKey]) {
@@ -93,6 +111,21 @@ export const usePresencasStore = create<PresencasState>((set, get) => ({
     set({ presencas: atualizadas })
     syncAlunos(atualizadas)
     return { registro, status: 'checkin' }
+  },
+  registrarPresencaEmAula: async (payload) => {
+    const registro = await registrarOuAtualizarPresenca({
+      alunoId: payload.alunoId,
+      turmaId: payload.turmaId ?? payload.treinoId,
+      aulaId: payload.aulaId ?? '',
+      status: payload.status,
+      origem: payload.origem ?? 'PROFESSOR',
+      data: payload.data,
+    })
+
+    const atualizadas = [...get().presencas.filter((item) => item.id !== registro.id), registro]
+    set({ presencas: atualizadas })
+    syncAlunos(atualizadas)
+    return registro
   },
   salvarPresenca: async (presenca) => {
     const registro = await criarPresenca(presenca)
@@ -121,6 +154,18 @@ export const usePresencasStore = create<PresencasState>((set, get) => ({
     const lista = snapshotPresencas()
     set({ presencas: lista })
     syncAlunos(lista)
+  },
+  fecharAula: async (aulaId, turmaId) => {
+    await serviceFecharAula(aulaId)
+    const lista = snapshotPresencas()
+    set({ presencas: lista })
+    syncAlunos(lista)
+    if (aulaId) {
+      useAulasStore.getState().atualizarStatusLocal(aulaId, 'encerrada')
+    }
+    if (turmaId) {
+      get().marcarTreinoFechado(hoje(), turmaId)
+    }
   },
   marcarTreinoFechado: (data, treinoId) => {
     set((state) => ({
