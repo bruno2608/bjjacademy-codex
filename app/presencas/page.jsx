@@ -29,6 +29,17 @@ const formatRangeDate = (days) => {
   return d.toISOString().split('T')[0];
 };
 
+const formatDateBr = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+};
+
 const StatusBadge = ({ status }) => {
   const statusInfo = STATUS_LABELS[status];
   if (!statusInfo) return null;
@@ -260,7 +271,7 @@ export default function PresencasPage() {
             {aulaAtual && <StatusBadge status={aulaAtual.status === 'encerrada' ? 'PRESENTE' : 'PENDENTE'} />}
           </div>
           <p className="text-lg font-semibold text-white">{turmaAtual ? turmaAtual.nome : 'Escolha uma turma'}</p>
-          <p className="text-xs text-bjj-gray-200">{selectedDate}</p>
+          <p className="text-xs text-bjj-gray-200">{formatDateBr(selectedDate)}</p>
         </div>
         <div className="rounded-2xl bg-bjj-gray-900/80 p-4 ring-1 ring-bjj-gray-700">
           <p className="text-xs uppercase tracking-wide text-bjj-gray-300">Resumo da chamada</p>
@@ -295,9 +306,18 @@ export default function PresencasPage() {
                 Defina a turma e a data para registrar presenças imediatamente.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
-              <Select value={selectedTurmaId} onChange={(e) => setSelectedTurmaId(e.target.value)}>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <Input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full sm:w-auto"
+              />
+              <Select
+                value={selectedTurmaId}
+                onChange={(e) => setSelectedTurmaId(e.target.value)}
+                className="w-full sm:w-auto"
+              >
                 {turmasDaAcademia.map((turma) => (
                   <option key={turma.id} value={turma.id}>
                     {turma.nome}
@@ -321,7 +341,7 @@ export default function PresencasPage() {
                 <div className="flex items-center gap-2 text-white">
                   <Clock size={16} />
                   <span>
-                    {turmaAtual ? turmaAtual.nome : 'Turma não selecionada'} • {selectedDate}
+                    {turmaAtual ? turmaAtual.nome : 'Turma não selecionada'} • {formatDateBr(selectedDate)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
@@ -388,10 +408,20 @@ export default function PresencasPage() {
               <h2 className="text-xl font-semibold text-white">Pendências de aprovação</h2>
               <p className="text-sm text-bjj-gray-200">Revisão rápida de presenças pendentes no período.</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Input type="date" value={pendenciasInicio} onChange={(e) => setPendenciasInicio(e.target.value)} />
-              <Input type="date" value={pendenciasFim} onChange={(e) => setPendenciasFim(e.target.value)} />
-              <div className="flex gap-1 text-xs">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <Input
+                type="date"
+                value={pendenciasInicio}
+                onChange={(e) => setPendenciasInicio(e.target.value)}
+                className="w-full sm:w-auto"
+              />
+              <Input
+                type="date"
+                value={pendenciasFim}
+                onChange={(e) => setPendenciasFim(e.target.value)}
+                className="w-full sm:w-auto"
+              />
+              <div className="flex flex-wrap gap-1 text-xs">
                 <Button
                   size="sm"
                   variant="ghost"
@@ -427,12 +457,14 @@ export default function PresencasPage() {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between rounded-xl bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200 ring-1 ring-bjj-gray-700">
+          <div className="mt-4 flex flex-col gap-2 rounded-xl bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200 ring-1 ring-bjj-gray-700 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-white">
               <AlertCircle size={16} className="text-yellow-300" />
               <span>Presenças pendentes: {pendencias.length}</span>
             </div>
-            <span className="rounded-full bg-bjj-gray-800 px-3 py-1 text-xs text-bjj-gray-100">{pendenciasInicio} → {pendenciasFim}</span>
+            <span className="inline-flex items-center justify-center rounded-full bg-bjj-gray-800 px-3 py-1 text-xs text-bjj-gray-100">
+              {formatDateBr(pendenciasInicio)} → {formatDateBr(pendenciasFim)}
+            </span>
           </div>
 
           <div className="mt-4 space-y-3">
@@ -451,7 +483,7 @@ export default function PresencasPage() {
                   <div className="space-y-1">
                     <p className="text-lg font-semibold text-white">{aluno.nome}</p>
                     <p className="text-sm text-bjj-gray-200">
-                      {turma.nome} • {presenca.data} {aula ? `• ${aula.horaInicio}` : ''}
+                      {turma.nome} • {formatDateBr(presenca.data)} {aula ? `• ${aula.horaInicio}` : ''}
                     </p>
                   </div>
                   <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
