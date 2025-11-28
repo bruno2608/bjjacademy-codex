@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Award, Clock3, Filter, Medal, ShieldCheck, UserRound } from 'lucide-react';
+import { Award, Clock3, Filter, Medal, ShieldCheck } from 'lucide-react';
 
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import GraduationList from '@/components/graduacoes/GraduationList';
@@ -31,6 +31,7 @@ export default function GraduacoesStaffPage() {
   const [statusFiltro, setStatusFiltro] = useState('');
   const [tipoFiltro, setTipoFiltro] = useState('');
   const [periodoFiltro, setPeriodoFiltro] = useState(30);
+  const [abaAtiva, setAbaAtiva] = useState('proximas');
 
   // Se o aluno já atingiu a meta manualmente (ex.: faixa ou grau ajustado via edição),
   // sincronizamos o status da graduação e aplicamos os efeitos colaterais centrais
@@ -189,10 +190,10 @@ export default function GraduacoesStaffPage() {
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <article
-              key={card.label}
-              className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800/70 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black p-5"
-            >
+              <article
+                key={card.label}
+                className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800/70 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black p-5"
+              >
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-200/70">{card.label}</p>
@@ -203,8 +204,8 @@ export default function GraduacoesStaffPage() {
                   {Icon ? <Icon size={18} /> : null}
                 </span>
               </div>
-              {card.belt ? (
-                <div className="flex flex-wrap items-center gap-3 rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-3">
+                {card.belt ? (
+                  <div className="flex flex-wrap items-center gap-3 rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-3">
                   <BjjBeltStrip config={card.belt} grauAtual={card.grau} className="w-40" />
                   <div className="space-y-1 text-xs text-bjj-gray-200/80">
                     <p className="text-[11px] uppercase tracking-[0.15em] text-bjj-gray-200/60">Próxima cerimônia</p>
@@ -283,28 +284,50 @@ export default function GraduacoesStaffPage() {
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.5fr_minmax(320px,1fr)]">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
-            <ShieldCheck size={14} /> Próximas graduações
-          </div>
-          <GraduationList
-            graduacoes={graduacoesPendentes}
-            onStatusChange={handleStatusChange}
-            alunoLookup={alunoLookup}
-          />
+      <section className="card space-y-4">
+        <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
+          <ShieldCheck size={14} /> Visão de graduações
         </div>
-        <div className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
-              <UserRound size={14} /> Histórico recente
+        <div className="flex flex-wrap gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-2 text-sm font-semibold">
+          {[
+            { id: 'proximas', label: 'Próximas graduações' },
+            { id: 'historico', label: 'Histórico recente' }
+          ].map((aba) => (
+            <button
+              key={aba.id}
+              type="button"
+              onClick={() => setAbaAtiva(aba.id)}
+              className={`flex-1 rounded-lg px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-bjj-red/60 focus:ring-offset-0 sm:flex-none ${
+                abaAtiva === aba.id
+                  ? 'bg-bjj-red text-bjj-white shadow-[0_10px_25px_-15px_rgba(248,113,113,0.8)]'
+                  : 'bg-bjj-gray-900/70 text-bjj-gray-200 hover:text-bjj-white'
+              }`}
+            >
+              {aba.label}
+            </button>
+          ))}
+        </div>
+
+        {abaAtiva === 'proximas' ? (
+          <div className="space-y-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">Próximas promoções</p>
+            <GraduationList
+              graduacoes={graduacoesPendentes}
+              onStatusChange={handleStatusChange}
+              alunoLookup={alunoLookup}
+            />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">Histórico recente</p>
+              <p className="text-[11px] uppercase tracking-[0.12em] text-bjj-gray-200/60">
+                Janela: {periodoFiltro === 0 ? 'todos os registros' : `últimos ${periodoFiltro} dias`}
+              </p>
             </div>
-            <p className="text-[11px] uppercase tracking-[0.12em] text-bjj-gray-200/60">
-              Janela: {periodoFiltro === 0 ? 'todos os registros' : `últimos ${periodoFiltro} dias`}
-            </p>
+            <GraduationTimeline itens={historico} />
           </div>
-          <GraduationTimeline itens={historico} />
-        </div>
+        )}
       </section>
     </div>
   );
