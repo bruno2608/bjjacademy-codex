@@ -236,18 +236,18 @@ function StudentDashboard() {
 
 function ProfessorDashboard() {
   const user = useUserStore((state) => state.user);
-  const academias = useAcademiasStore((state) => state.academias);
+  const academias = useAcademiasStore((state) => state.academias) || [];
   const carregarAcademias = useAcademiasStore((state) => state.carregarAcademias);
-  const turmas = useTurmasStore((state) => state.turmas);
+  const turmas = useTurmasStore((state) => state.turmas) || [];
   const carregarTurmas = useTurmasStore((state) => state.carregarTurmas);
-  const aulas = useAulasStore((state) => state.aulas);
+  const aulas = useAulasStore((state) => state.aulas) || [];
   const carregarAulas = useAulasStore((state) => state.carregarAulas);
-  const presencas = usePresencasStore((state) => state.presencas);
+  const presencas = usePresencasStore((state) => state.presencas) || [];
   const carregarPresencas = usePresencasStore((state) => state.carregarTodas);
   const matriculasAtivasDaAcademia = useMatriculasStore((state) => state.listarAtivasDaAcademia);
   const carregarMatriculas = useMatriculasStore((state) => state.carregarMatriculas);
-  const alunos = useAlunosStore((state) => state.alunos);
-  const graduacoes = useGraduacoesStore((state) => state.graduacoes);
+  const alunos = useAlunosStore((state) => state.alunos) || [];
+  const graduacoes = useGraduacoesStore((state) => state.graduacoes) || [];
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -568,7 +568,12 @@ function ProfessorDashboard() {
 
 export default function DashboardPage() {
   const { isInstructor, isAdmin, roles } = useRole();
-  const isProfessorLayout = isInstructor || isAdmin || roles.includes(ROLE_KEYS.professor) || roles.includes(ROLE_KEYS.instrutor);
+  const normalizedRoles = Array.isArray(roles) ? roles : [];
+  const isProfessorLayout =
+    isInstructor ||
+    isAdmin ||
+    normalizedRoles.includes(ROLE_KEYS.professor) ||
+    normalizedRoles.includes(ROLE_KEYS.instrutor);
 
   if (isProfessorLayout) {
     return <ProfessorDashboard />;
