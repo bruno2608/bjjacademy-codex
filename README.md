@@ -309,7 +309,7 @@ Dashboards · Check-in · Histórico · Presenças (staff)
 - `hooks/useCurrentInstrutor.ts`: hook legado que ainda consulta `instrutoresStore` (nenhuma tela atual consome esse caminho).
 - `app/dashboard/page.jsx` e `services/dashboard/useStaffDashboard.ts`: nome/avatar/faixa/grau/status do professor vêm de `useCurrentStaff` → `AuthUser` + `alunosStore`; métricas de presenças/alunos usam apenas stores e helpers compartilhados.
 - `app/perfil/page.jsx`: perfil do professor usa `useCurrentStaff` para preencher headline/faixa/avatar/status e grava alterações via `useCurrentUser` + `useAlunosStore` (sem ler mocks diretos).
-- `components/ui/AppShell.jsx`, `components/ui/Header.jsx`, `components/ui/UserMenu.jsx`: cabeçalhos e menus exibem nome/email/avatar via `useCurrentUser`/`useCurrentStaff`; não há imports diretos de mocks.
+- Navegação autenticada: `components/ui/AppShell.jsx` monta sidebar + menu mobile a partir de `config/staffRoutes.ts`, agrupando seções por papel (professor/instrutor/admin) e mantendo o menu clicável em telas pequenas; `UserMenu.jsx` continua exibindo nome/email/avatar via `useCurrentUser`/`useCurrentStaff`.
 
 ### Exemplo de atualização consistente
 
@@ -334,7 +334,8 @@ Dashboards · Check-in · Histórico · Presenças (staff)
 | Presenças (staff) | Registro rápido focado no check-in do dia, dropdown de sessão do dia, múltiplos treinos e correção via modal dedicado. |
 | Graduações | Tela inspirada no app com hero, cards progressivos, linha do tempo e agendamento por grau/faixa. |
 | Configurações | Hub com Regras de Graduação editáveis, Horários de Treino com persistência local e Tipos de Treino customizáveis. |
-| Permissões | Site map centralizado, middleware de RBAC e navegação (sidebar/mobile/tablet) filtrada pelos papéis do usuário. |
+| Permissões | Site map centralizado, middleware de RBAC e navegação (sidebar/mobile/tablet) filtrada pelos papéis do usuário; `config/staffRoutes.ts` é a fonte de verdade do menu staff. |
+| Área autenticada staff | AppShell único com header mobile + sidebar desktop, montado de forma declarativa pela config de rotas do staff (sections: Dia a dia, Alunos, Graduações, Outros). |
 | Área do Aluno | Layout separado com dashboard próprio, check-in, treinos do aluno, evolução e perfil editável (nome/contato/foto) via `/perfil`; histórico de presenças e relatórios pessoais acessíveis pelo menu do usuário. |
 | Check-in do Aluno | Tela dedicada com lógica automática/pendente conforme horário do treino e status visível ao professor. |
 | PWA | Manifesto completo, service worker com cache básico e ícones em múltiplos tamanhos. |
