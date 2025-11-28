@@ -59,6 +59,7 @@ npm run dev
 | --- | --- | --- | --- |
 | `/dashboard` | Hub diário do professor com turmas do dia, pendências e destaques de alunos. | `useUserStore`, `useAcademiasStore`, `useTurmasStore`, `useAulasStore`, `usePresencasStore`, `useMatriculasStore`, `useAlunosStore`, `useGraduacoesStore` | Sim |
 | `/alunos` | Gestão completa de cadastro, filtros e remoção. | `useAlunosStore`, `usePresencasStore`, `useStaffDashboard`, `getFaixaConfigBySlug` | Sim |
+| `/alunos/[id]` | Ficha compacta do aluno para staff (perfil/faixa, presenças recentes, evolução). | `useAlunoDetalhesStaff`, `useAlunosStore`, `useMatriculasStore`, `usePresencasStore`, `useGraduacoesStore`, `getFaixaConfigBySlug` | Sim |
 | `/presencas` | Conferência/fechamento de presenças do dia. | `usePresencasStore`, `useAlunosStore`, `useTreinosStore`, `calcularResumoPresencas` | Sim |
 | `/historico-presencas` | Linha do tempo consolidada para staff. | `usePresencasStore`, `useTreinosStore`, `useAlunosStore`, `getFaixaConfigBySlug` | Sim |
 | `/graduacoes` | Cards mobile-first de próximas graduações com filtros (busca, faixa, tipo, status, 30/60/90d) e histórico. | `useGraduacoesProfessorView`, `useGraduacoesStore`, `useAlunosStore`, `usePresencasStore`, `updateGraduacao`, `getFaixaConfigBySlug` | Sim |
@@ -174,6 +175,7 @@ Só depois dessas refatorações de tela, iniciar a implementação de:
 - **Nada de mocks diretos**: nenhuma página sob `/alunos` importa `data/mockAlunos` ou outros mocks; todo acesso passa pelo pipeline oficial (mock → service → store → hooks → tela), alinhado ao dashboard do aluno e staff.
 - **Filtros coerentes**: busca por nome, faixa (`faixaSlug`) e status (`ATIVO/INATIVO`) reaproveitam os mesmos slugs/enums usados em dashboards e presenças; filtros de treino consultam `usePresencasStore`/`useTreinosStore` ao invés de arrays locais.
 - **Visual das faixas**: os elementos de graduação da lista/detalhe usam `getFaixaConfigBySlug` + componentes `BjjBeltStrip`/`BjjBeltProgressCard`, garantindo cores/graus iguais às telas `/dashboard-aluno`, `/dashboard`, `/graduacoes` e `/evolucao`.
+- **Ficha detalhada (`/alunos/[id]`)**: painel mobile-first com cabeçalho de faixa/status de matrícula, resumo de presenças (percentual, últimas aulas) e evolução (próxima graduação + histórico resumido) via `useAlunoDetalhesStaff` — hook que orquestra `useAlunosStore`, `useMatriculasStore`, `usePresencasStore`, `useGraduacoesStore` e helpers de faixa.
 - **Contagens sincronizadas**: totais e alunos ativos mostrados no hero são os mesmos do `useStaffDashboard` (derivado das stores), mantendo consistência com `/dashboard` e com as telas de presenças.
 
 ## 📒 Gestão de Presenças (MVP)
