@@ -61,7 +61,7 @@ npm run dev
 | `/alunos` | Gestão completa de cadastro, filtros e remoção. | `useAlunosStore`, `usePresencasStore`, `useStaffDashboard`, `getFaixaConfigBySlug` | Sim |
 | `/presencas` | Conferência/fechamento de presenças do dia. | `usePresencasStore`, `useAlunosStore`, `useTreinosStore`, `calcularResumoPresencas` | Sim |
 | `/historico-presencas` | Linha do tempo consolidada para staff. | `usePresencasStore`, `useTreinosStore`, `useAlunosStore`, `getFaixaConfigBySlug` | Sim |
-| `/graduacoes` | Pipeline de graduações e timeline. | `useGraduacoesStore`, `useAlunosStore`, `updateGraduacao`, `getFaixaConfigBySlug` | Sim |
+| `/graduacoes` | Cards mobile-first de próximas graduações com filtros (busca, faixa, tipo, status, 30/60/90d) e histórico. | `useGraduacoesProfessorView`, `useGraduacoesStore`, `useAlunosStore`, `usePresencasStore`, `updateGraduacao`, `getFaixaConfigBySlug` | Sim |
 | `/perfil` | Perfil de staff (nome/contatos/faixa). | `useCurrentStaff`, `useCurrentUser`, `useAlunosStore`, `getFaixaConfigBySlug` | Sim |
 | `/configuracoes/*` | Hub administrativo (regras, treinos, tipos). | `useCurrentUser`, `useCurrentStaff` | Sim |
 | `/relatorios` | Placeholder analítico (sem dados dinâmicos). | — | Sim |
@@ -148,7 +148,7 @@ Só depois dessas refatorações de tela, iniciar a implementação de:
 
 ### 🆕 Atualizações de graduações e dashboards
 
-- **/graduacoes (staff)**: leitura e atualização passam por `useGraduacoesStore` + `updateGraduacao`; timeline e cards reutilizam `getFaixaConfigBySlug`/`BjjBeltStrip` para manter a identidade visual com `/evolucao`.
+- **/graduacoes (staff)**: cards e timeline agora usam o view model `useGraduacoesProfessorView`, que combina `graduacoesStore`, `useAlunosStore`, `usePresencasStore` e helpers de faixa. Busca, faixa, tipo, status e janela de 30/60/90 dias filtram a lista sem depender de mocks diretos, e os cards exibem faixas/graus com `BjjBeltStrip`.
 - **Dashboard do aluno**: centralizado em `useAlunoDashboard`, sem import direto de `mockPresencas`/`mockGraduacoes`; cards de presença usam o mesmo estado de `usePresencasStore` consumido em `/checkin` e `/historico-presencas`.
 - **Dashboard do staff**: métricas e pendências vêm de `useStaffDashboard` (que agrega `usePresencasStore`, `useAlunosStore`, `useTreinosStore`, `useGraduacoesStore`), mantendo cards e listas sincronizados com `/alunos` e `/presencas`.
 - **/perfil (aluno e staff)**: formulário e hero usam `useCurrentAluno`/`useCurrentStaff` + `useAlunosStore`, garantindo que faixa/grau venham da mesma fonte dos dashboards.
@@ -158,12 +158,12 @@ Só depois dessas refatorações de tela, iniciar a implementação de:
 - **Alunos (`/alunos`)** — **Pronto**: somente `alunosService` + `useAlunosStore` (nenhum mock direto na página).
 - **Presenças (aluno + staff)** — **Pronto**: todas as rotas usam `presencasService` → `usePresencasStore` (check-in, dashboards, histórico, staff).
 - **Evolução (`/evolucao`)** — **Pronto**: calcula projeções via `useAlunoDashboard` + `useGraduacoesStore`; usa apenas helpers de faixa compartilhados.
-- **Graduações (`/graduacoes`)** — **Parcial para Supabase**: já centraliza em store/service, mas depende de `getFaixaConfigBySlug` para enriquecer faixas; troca do backend deve preservar esse helper ou mover a lógica para o serviço.
+- **Graduações (`/graduacoes`)** — **Pronto**: lista e timeline dependem apenas de `useGraduacoesProfessorView` (que orquestra `graduacoesStore` + `useAlunosStore` + `usePresencasStore`) e dos helpers visuais de faixa (`getFaixaConfigBySlug`/`BjjBeltStrip`). Não há imports diretos de mocks.
 - **Dashboards (`/dashboard` aluno/staff)** — **Pronto**: não há imports diretos de mocks; todo dado vem de hooks centralizados.
 
 ### Pontos de atenção atuais
 
-- **Graduações (staff)**: a página não importa `mockGraduacoes` diretamente e usa `updateGraduacao` para sincronizar status, mas depende de `getFaixaConfigBySlug` para nome/visual das faixas. Ao conectar Supabase, manter essa resolução de faixa em um único helper.
+- **Graduações (staff)**: usa `useGraduacoesProfessorView` + `updateGraduacao` para sincronizar status e renderiza faixas/graus com `getFaixaConfigBySlug`/`BjjBeltStrip`. Os filtros de faixa/tipo/status/período (30/60/90 dias) operam sobre o view model centralizado, sem mocks diretos.
 - **Dashboards**: `/dashboard` (aluno) consome apenas `useAlunoDashboard`; `/dashboard` (staff) consome apenas `useStaffDashboard`. Não foram encontrados imports diretos de mocks, mas qualquer nova métrica deve seguir o mesmo hook para evitar divergências.
 - **Presenças**: `/checkin`, `/historico-presencas`, `/presencas` e dashboards leem `usePresencasStore`; status seguem `PENDENTE | PRESENTE | FALTA | JUSTIFICADA`. Se alguma nova rota usar presenças, deve evitar `data/mockPresencas.ts` direto e reutilizar o store.
 - **Rotas utilitárias**: `/belt-demo` depende de `MOCK_FAIXAS` (propósito de demonstração). Não usar como base para telas produtivas ou para preparar a integração com Supabase.
