@@ -244,8 +244,8 @@ function ProfessorDashboard() {
   const carregarAulas = useAulasStore((state) => state.carregarAulas);
   const presencas = usePresencasStore((state) => state.presencas) || [];
   const carregarPresencas = usePresencasStore((state) => state.carregarTodas);
-  const matriculasAtivasDaAcademia = useMatriculasStore((state) => state.listarAtivasDaAcademia);
   const carregarMatriculas = useMatriculasStore((state) => state.carregarMatriculas);
+  const matriculas = useMatriculasStore((state) => state.matriculas) || [];
   const alunos = useAlunosStore((state) => state.alunos) || [];
   const graduacoes = useGraduacoesStore((state) => state.graduacoes) || [];
 
@@ -287,8 +287,8 @@ function ProfessorDashboard() {
   );
 
   const matriculasAtivas = useMemo(
-    () => matriculasAtivasDaAcademia(currentAcademiaId),
-    [currentAcademiaId, matriculasAtivasDaAcademia]
+    () => matriculas.filter((matricula) => matricula.academiaId === currentAcademiaId && matricula.status === 'ativo'),
+    [currentAcademiaId, matriculas]
   );
 
   const turmaPorId = useMemo(() => {
