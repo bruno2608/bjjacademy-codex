@@ -5,7 +5,7 @@
  * de evolução do aluno (graduações concluídas ou planejadas), destacando
  * faixas, graus e responsáveis pela cerimônia.
  */
-import { CalendarDays, Medal } from 'lucide-react';
+import { ArrowRight, CalendarDays, Medal, UserRound } from 'lucide-react';
 
 const badgeColors = {
   Faixa: 'bg-bjj-red/20 text-bjj-red',
@@ -23,13 +23,75 @@ const formatDate = (value) => {
   });
 };
 
+function GraduationTimelineItem({ item, isLast }) {
+  const tipo = item.tipo === 'Grau' ? 'Grau' : 'Faixa';
+  const grauLabel = tipo === 'Grau' && Number.isFinite(Number(item.grau)) ? `${item.grau}º grau` : null;
+  const faixaLabel = item.faixa || item.faixaSlug || 'Faixa indefinida';
+  const descricao =
+    item.descricao || (tipo === 'Faixa' ? `Promoção para ${faixaLabel}` : `Reconhecimento na faixa ${faixaLabel}`);
+
+  return (
+    <li className="grid grid-cols-[auto,1fr] gap-4 sm:gap-5">
+      <div className="flex flex-col items-center pt-1">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-bjj-red bg-bjj-black text-bjj-red shadow-[0_8px_18px_-10px_rgba(248,113,113,0.6)]">
+          <Medal size={18} />
+        </span>
+        {!isLast && <span className="mt-2 h-full w-px flex-1 bg-bjj-gray-800/80" />}
+      </div>
+
+      <article className="w-full space-y-3 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/80 p-4 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.45)]">
+        <header className="flex flex-wrap items-center gap-2 justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                badgeColors[tipo] || 'bg-bjj-gray-800 text-bjj-gray-200'
+              }`}
+            >
+              <Medal size={13} /> {tipo === 'Grau' ? 'Conquista de grau' : 'Troca de faixa'}
+            </span>
+            {grauLabel && <span className="text-xs text-bjj-gray-200/80">{grauLabel}</span>}
+          </div>
+          <div className="flex items-center gap-2 text-xs text-bjj-gray-200/70">
+            <CalendarDays size={13} /> {formatDate(item.data)}
+          </div>
+        </header>
+
+        <div className="space-y-2 text-sm text-bjj-gray-200/80 leading-relaxed">
+          <p className="text-base font-semibold leading-snug text-bjj-white">{descricao}</p>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-bjj-gray-200/70">
+            <span className="inline-flex items-center gap-1 rounded-full bg-bjj-gray-900/70 px-2.5 py-1">
+              {tipo === 'Faixa' ? 'Faixa' : 'Faixa base'}: <span className="font-semibold text-bjj-white">{faixaLabel}</span>
+            </span>
+            {tipo === 'Faixa' && item.proximaFaixa ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-bjj-gray-900/70 px-2.5 py-1 text-bjj-white">
+                {faixaLabel}
+                <ArrowRight size={14} />
+                {item.proximaFaixa}
+              </span>
+            ) : null}
+          </div>
+          {item.alunoNome && (
+            <p className="flex items-center gap-2 text-xs text-bjj-gray-200/70">
+              <UserRound size={14} /> Aluno: <span className="font-semibold text-bjj-white">{item.alunoNome}</span>
+            </p>
+          )}
+          {item.instrutor && (
+            <p className="text-xs text-bjj-gray-200/70">
+              Responsável: <span className="font-semibold text-bjj-white">{item.instrutor}</span>
+            </p>
+          )}
+        </div>
+      </article>
+    </li>
+  );
+}
+
 export default function GraduationTimeline({ itens = [] }) {
   if (!itens.length) {
     return (
       <div className="card">
         <p className="text-sm text-bjj-gray-200/70">
-          Nenhum histórico cadastrado ainda. Conclua ou importe graduações para
-          começar a contar a jornada do atleta.
+          Nenhum histórico cadastrado ainda. Conclua ou importe graduações para começar a contar a jornada do atleta.
         </p>
       </div>
     );
@@ -42,65 +104,13 @@ export default function GraduationTimeline({ itens = [] }) {
   });
 
   return (
-    <ul className="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical text-bjj-gray-100">
-      {ordenados.map((item, index) => {
-        const tipo = item.tipo === 'Grau' ? 'Grau' : 'Faixa';
-        const grauLabel = tipo === 'Grau' && Number.isFinite(Number(item.grau)) ? `${item.grau}º grau` : null;
-        const isEven = index % 2 === 0;
-
-        const detail = (
-          <div className="timeline-box w-full max-w-[22rem] border border-bjj-gray-800/60 bg-bjj-gray-900/80 text-left shadow-[0_18px_35px_-18px_rgba(0,0,0,0.45)] md:w-auto">
-            <div className="flex items-center gap-2.5 pb-2 text-xs text-bjj-gray-200/70">
-              <CalendarDays size={13} /> {formatDate(item.data)}
-            </div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                  badgeColors[tipo] || 'bg-bjj-gray-800 text-bjj-gray-200'
-                }`}
-              >
-                <Medal size={13} /> {tipo === 'Grau' ? 'Conquista de grau' : 'Troca de faixa'}
-              </span>
-              {grauLabel && <span className="text-sm text-bjj-gray-200/80">{grauLabel}</span>}
-            </div>
-            <div className="mt-3 space-y-1.5 text-sm text-bjj-gray-200/80">
-              <p className="text-[15px] font-semibold text-bjj-white">
-                {item.descricao ||
-                  (tipo === 'Faixa' ? `Promoção para ${item.faixa}` : `Reconhecimento na faixa ${item.faixa}`)}
-              </p>
-              {item.instrutor && (
-                <p className="text-xs text-bjj-gray-200/60">
-                  Responsável: <span className="font-medium">{item.instrutor}</span>
-                </p>
-              )}
-            </div>
-          </div>
-        );
-
-        const summary = (
-          <div className="timeline-start md:text-right md:pr-6 md:[min-width:10rem] md:[max-width:13rem]">
-            <p className="text-sm font-semibold text-white">{tipo === 'Grau' ? `${item.grau}º grau` : item.faixa}</p>
-            <p className="text-xs text-bjj-gray-300/80">{formatDate(item.data)}</p>
-          </div>
-        );
-
-        return (
-          <li key={item.id || index} className="py-3 md:py-4">
-            {isEven ? summary : <div className="timeline-start hidden md:block">{summary}</div>}
-            <div className="timeline-middle">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-bjj-red bg-bjj-black text-bjj-red">
-                <Medal size={18} />
-              </span>
-            </div>
-            {isEven ? (
-              <div className="timeline-end md:timeline-start md:pl-6 md:[max-width:26rem]">{detail}</div>
-            ) : (
-              <div className="timeline-end md:pl-6 md:[max-width:26rem]">{detail}</div>
-            )}
-            {index < ordenados.length - 1 && <hr className="border-bjj-gray-800" />}
-          </li>
-        );
-      })}
-    </ul>
+    <div className="relative">
+      <span className="absolute left-[18px] top-2 bottom-2 w-px bg-bjj-gray-800/70 sm:left-[20px]" aria-hidden="true" />
+      <ul className="space-y-6 pl-6 sm:space-y-8 sm:pl-10">
+        {ordenados.map((item, index) => (
+          <GraduationTimelineItem key={item.id || index} item={item} isLast={index === ordenados.length - 1} />
+        ))}
+      </ul>
+    </div>
   );
 }
