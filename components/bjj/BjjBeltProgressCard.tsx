@@ -8,6 +8,14 @@ export function BjjBeltProgressCard({
   aulasMetaNoGrau,
   className = "",
 }: BjjBeltProgressCardProps) {
+  if (!config) {
+    return (
+      <div className={`w-full rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-5 text-sm text-bjj-gray-200 ${className}`}>
+        Configuração de faixa não encontrada
+      </div>
+    )
+  }
+
   const safeGrau = Math.max(0, Math.min(grauAtual, config.grausMaximos))
 
   const hasMeta = typeof aulasMetaNoGrau === "number" && aulasMetaNoGrau > 0

@@ -277,6 +277,7 @@ Dashboards · Check-in · Histórico · Presenças (staff)
 ### Fluxo único para faixa/grau e presenças
 
 - Faixas sempre resolvidas por `faixaSlug` + `getFaixaConfigBySlug` + `BjjBeltStrip` (sem arrays duplicados).
+- Configurações de faixa (`MOCK_FAIXAS`/`BjjBeltVisualConfig`) devem sempre fornecer `slug`, `categoria`, `grausMaximos` e cores de faixa/ponteira/listras; telas como `/dashboard`, `/evolucao`, `/graduacoes` e `/perfil` assumem esses campos para evitar quebras ao renderizar progresso.
 - Presenças sempre via `presencasService` → `presencasStore`; totais em dashboards, histórico e visão staff leem o mesmo estado.
 
 ### Fluxo de dados para perfis de Professor/Instrutor/Admin

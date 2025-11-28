@@ -1,6 +1,14 @@
 import type { BjjBeltStripProps } from "../../types/bjjBelt"
 
 export function BjjBeltStrip({ config, grauAtual, className = "" }: BjjBeltStripProps) {
+  if (!config) {
+    return (
+      <div className={`rounded-md border border-bjj-gray-800 bg-bjj-gray-900 px-3 py-2 text-xs text-bjj-gray-200 ${className}`}>
+        Faixa não encontrada
+      </div>
+    )
+  }
+
   const safeGrau = Math.max(0, Math.min(grauAtual, config.grausMaximos))
   const isProfessor = config.tipoPreta === "professor"
   const textColor = config.textColorClass || "text-white"

@@ -534,12 +534,7 @@ function ProfessorDashboard() {
                   <p className="text-xs text-bjj-gray-300">{graduacao.faixaAtual}</p>
                 </div>
                 {faixaConfig && (
-                  <BjjBeltStrip
-                    className="scale-90"
-                    faixaConfig={faixaConfig}
-                    faixaSlug={faixaConfig.slug}
-                    grauAtual={aluno?.graus ?? 0}
-                  />
+                  <BjjBeltStrip className="scale-90" config={faixaConfig} grauAtual={aluno?.graus ?? 0} />
                 )}
               </div>
 
