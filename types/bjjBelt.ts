@@ -23,13 +23,13 @@ export interface BjjBeltVisualConfig {
 }
 
 export interface BjjBeltStripProps {
-  config: BjjBeltVisualConfig
+  config?: BjjBeltVisualConfig
   grauAtual: number
   className?: string
 }
 
 export interface BjjBeltProgressCardProps {
-  config: BjjBeltVisualConfig
+  config?: BjjBeltVisualConfig
   grauAtual: number
   aulasFeitasNoGrau: number
   aulasMetaNoGrau?: number | null
