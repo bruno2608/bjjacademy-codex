@@ -250,18 +250,25 @@ function ProfessorDashboard() {
   const graduacoes = useGraduacoesStore((state) => state.graduacoes) || [];
 
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     let active = true;
     const load = async () => {
-      await Promise.all([
-        carregarAcademias(),
-        carregarTurmas(),
-        carregarAulas(),
-        carregarPresencas(),
-        carregarMatriculas()
-      ]);
-      if (active) setIsLoading(false);
+      try {
+        await Promise.all([
+          carregarAcademias?.(),
+          carregarTurmas?.(),
+          carregarAulas?.(),
+          carregarPresencas?.(),
+          carregarMatriculas?.()
+        ]);
+      } catch (error) {
+        console.error('Erro ao carregar dados do dashboard do professor', error);
+        if (active) setLoadError('Não foi possível carregar os dados. Tente novamente.');
+      } finally {
+        if (active) setIsLoading(false);
+      }
     };
     load();
     return () => {
@@ -359,6 +366,15 @@ function ProfessorDashboard() {
     return (
       <div className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-6 text-bjj-gray-200">
         Carregando painel...
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="space-y-3 rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-6 text-bjj-gray-200">
+        <p className="text-sm font-semibold text-white">Erro ao carregar dashboard</p>
+        <p className="text-sm text-bjj-gray-300">{loadError}</p>
       </div>
     );
   }
@@ -569,11 +585,13 @@ function ProfessorDashboard() {
 export default function DashboardPage() {
   const { isInstructor, isAdmin, roles } = useRole();
   const normalizedRoles = Array.isArray(roles) ? roles : [];
+  const user = useUserStore((state) => state.user);
   const isProfessorLayout =
     isInstructor ||
     isAdmin ||
     normalizedRoles.includes(ROLE_KEYS.professor) ||
-    normalizedRoles.includes(ROLE_KEYS.instrutor);
+    normalizedRoles.includes(ROLE_KEYS.instrutor) ||
+    Boolean(user?.instrutorId || user?.professorId);
 
   if (isProfessorLayout) {
     return <ProfessorDashboard />;
