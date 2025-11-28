@@ -7,6 +7,7 @@
 import { ArrowRight, CalendarClock, Award, Timer } from 'lucide-react';
 import Badge from '../ui/Badge';
 import ToggleTag from '../ui/ToggleTag';
+import { BjjBeltStrip } from '../bjj/BjjBeltStrip';
 
 const statusBadgeVariant = {
   Planejado: 'neutral',
@@ -30,6 +31,9 @@ const parseTempoNecessario = (criterioTempo) => {
 };
 
 const calcularProgresso = (graduacao, alunoLookup) => {
+  if (Number.isFinite(graduacao?.progressoPercentual)) {
+    return Math.min(100, Math.max(0, Math.round(graduacao.progressoPercentual)));
+  }
   if (graduacao.status === 'Concluído') return 100;
   const aluno = alunoLookup?.[graduacao.alunoId];
   const mesesRestantes = Number(graduacao.mesesRestantes ?? 0);
@@ -78,6 +82,8 @@ export default function GraduationList({ graduacoes, onStatusChange, alunoLookup
           graduacao.tipo === 'Grau'
             ? `${graduacao.grauAlvo}º grau`
             : graduacao.proximaFaixa || graduacao.faixaAtual;
+        const faixaAtualConfig = graduacao.faixaAtualConfig;
+        const faixaAlvoConfig = graduacao.proximaFaixaConfig || faixaAtualConfig;
         return (
           <article
             key={graduacao.id}
@@ -99,6 +105,41 @@ export default function GraduationList({ graduacoes, onStatusChange, alunoLookup
               </div>
             </header>
 
+            {(faixaAtualConfig || faixaAlvoConfig) && (
+              <div className="relative mt-4 grid gap-3 rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-4 sm:grid-cols-2">
+                {faixaAtualConfig && (
+                  <div className="flex items-center gap-3">
+                    <BjjBeltStrip config={faixaAtualConfig} grauAtual={graduacao.grauAtual} className="w-32" />
+                    <div className="text-xs text-bjj-gray-200/80">
+                      <p className="text-[11px] uppercase tracking-[0.14em] text-bjj-gray-300/60">Faixa atual</p>
+                      <p className="font-semibold text-bjj-white">{faixaAtualConfig.nome}</p>
+                      <p>Grau {graduacao.grauAtual}</p>
+                    </div>
+                  </div>
+                )}
+                {faixaAlvoConfig && (
+                  <div className="flex items-center gap-3">
+                    <BjjBeltStrip
+                      config={faixaAlvoConfig}
+                      grauAtual={
+                        graduacao.tipo === 'Grau'
+                          ? Number.isFinite(Number(graduacao.grauAlvo))
+                            ? Number(graduacao.grauAlvo)
+                            : graduacao.grauAtual
+                          : graduacao.grauAtual
+                      }
+                      className="w-32"
+                    />
+                    <div className="text-xs text-bjj-gray-200/80">
+                      <p className="text-[11px] uppercase tracking-[0.14em] text-bjj-gray-300/60">Próxima meta</p>
+                      <p className="font-semibold text-bjj-white">{faixaAlvoConfig.nome}</p>
+                      <p>{graduacao.tipo === 'Grau' ? `${graduacao.grauAlvo}º grau` : 'Próxima faixa'}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="relative mt-5 space-y-3.5">
               <div>
                 <div className="flex items-center justify-between text-xs text-bjj-gray-200/70">
@@ -111,11 +152,17 @@ export default function GraduationList({ graduacoes, onStatusChange, alunoLookup
                     style={{ width: `${progresso}%` }}
                   />
                 </div>
+                {Number.isFinite(graduacao.aulasFeitas) && (
+                  <p className="mt-1 text-[11px] text-bjj-gray-200/70">
+                    Aulas registradas: {graduacao.aulasFeitas}
+                    {Number.isFinite(graduacao.aulasMeta) ? ` / ${graduacao.aulasMeta}` : ''}
+                  </p>
+                )}
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs text-bjj-gray-200/70">
                 <span className="inline-flex items-center gap-1.5">
                   <CalendarClock size={13} />
-                  {formatDate(graduacao.previsao)}
+                  {formatDate(graduacao.dataPrevista || graduacao.previsao)}
                 </span>
                 {tempoRestanteLabel && (
                   <span className="inline-flex items-center gap-1.5">

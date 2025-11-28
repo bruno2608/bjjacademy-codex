@@ -1,15 +1,16 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Award, Clock3, Filter, Medal, ShieldCheck, UserRound } from 'lucide-react';
+import { Award, Clock3, Filter, Medal, ShieldCheck } from 'lucide-react';
 
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import GraduationList from '@/components/graduacoes/GraduationList';
 import GraduationTimeline from '@/components/graduacoes/GraduationTimeline';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import { normalizeFaixaSlug } from '@/lib/alunoStats';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
+import { useGraduacoesProfessorView } from '@/hooks/useGraduacoesProfessorView';
+import { normalizeFaixaSlug } from '@/lib/alunoStats';
 import { updateGraduacao } from '@/services/graduacoesService';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useGraduacoesStore } from '@/store/graduacoesStore';
@@ -21,93 +22,41 @@ const TIPO_OPTIONS = ['Faixa', 'Grau'];
 
 export default function GraduacoesStaffPage() {
   const { staff } = useCurrentStaff();
-  const graduacoes = useGraduacoesStore((state) => state.graduacoes);
+  const graduacoesRaw = useGraduacoesStore((state) => state.graduacoes);
   const alunos = useAlunosStore((state) => state.alunos);
+  const { graduacoes, alunoLookup, faixasDisponiveis } = useGraduacoesProfessorView();
 
   const [buscaNome, setBuscaNome] = useState('');
   const [faixaFiltro, setFaixaFiltro] = useState('');
   const [statusFiltro, setStatusFiltro] = useState('');
   const [tipoFiltro, setTipoFiltro] = useState('');
-  const [janelaHistoricoDias, setJanelaHistoricoDias] = useState(30);
-
-  const alunoLookup = useMemo(
-    () =>
-      Object.fromEntries(
-        alunos.map((aluno) => [
-          aluno.id,
-          {
-            ...aluno,
-            faixaSlug: normalizeFaixaSlug(aluno.faixaSlug ?? aluno.faixa),
-            nomeCompleto: aluno.nomeCompleto || aluno.nome
-          }
-        ])
-      ),
-    [alunos]
-  );
-
-  const graduacoesEnriquecidas = useMemo(
-    () =>
-      graduacoes.map((graduacao) => {
-        const aluno = alunoLookup[graduacao.alunoId];
-        const faixaSlugAtual = normalizeFaixaSlug(aluno?.faixaSlug ?? graduacao.faixaAtual);
-        const proximaFaixaSlug = normalizeFaixaSlug(graduacao.proximaFaixa ?? graduacao.proximaFaixaSlug);
-        const grauAtual = Number(aluno?.graus ?? aluno?.grauAtual ?? graduacao.grauAtual ?? 0);
-        const grauAlvo =
-          graduacao.tipo === 'Grau'
-            ? Number.isFinite(Number(graduacao.grauAlvo))
-              ? Number(graduacao.grauAlvo)
-              : Number(graduacao.grauAtual ?? 0)
-            : null;
-
-        const atingiuFaixa = graduacao.tipo === 'Faixa' && faixaSlugAtual === proximaFaixaSlug && !!faixaSlugAtual;
-        const atingiuGrau = graduacao.tipo === 'Grau' && grauAlvo !== null && grauAtual >= grauAlvo;
-        const statusCentralizado = atingiuFaixa || atingiuGrau ? 'Concluído' : graduacao.status;
-
-        const faixaAtualConfig = faixaSlugAtual ? getFaixaConfigBySlug(faixaSlugAtual) : null;
-        const proximaFaixaConfig = proximaFaixaSlug ? getFaixaConfigBySlug(proximaFaixaSlug) : null;
-
-        return {
-          ...graduacao,
-          alunoNome: aluno?.nomeCompleto || aluno?.nome || graduacao.alunoNome,
-          faixaSlugAtual,
-          proximaFaixaSlug,
-          faixaAtual: faixaAtualConfig?.nome || aluno?.faixa || graduacao.faixaAtual,
-          proximaFaixa: proximaFaixaConfig?.nome || graduacao.proximaFaixa || proximaFaixaSlug,
-          grauAtual,
-          grauAlvo,
-          mesesRestantes: Number(graduacao.mesesRestantes ?? 0),
-          status: statusCentralizado,
-          dataConclusao: graduacao.dataConclusao
-        };
-      }),
-    [alunoLookup, graduacoes]
-  );
+  const [periodoFiltro, setPeriodoFiltro] = useState(30);
+  const [abaAtiva, setAbaAtiva] = useState('proximas');
 
   // Se o aluno já atingiu a meta manualmente (ex.: faixa ou grau ajustado via edição),
   // sincronizamos o status da graduação e aplicamos os efeitos colaterais centrais
   // (atualizar histórico e recomputar dados do aluno) para manter todas as telas alinhadas.
   useEffect(() => {
-    const concluenciasPendentes = graduacoesEnriquecidas.filter((item) => {
-      const original = graduacoes.find((g) => g.id === item.id);
+    const concluenciasPendentes = graduacoes.filter((item) => {
+      const original = graduacoesRaw.find((g) => g.id === item.id);
       return item.status === 'Concluído' && original?.status !== 'Concluído';
     });
 
     if (!concluenciasPendentes.length) return;
 
     concluenciasPendentes.forEach((graduacao) => {
-      updateGraduacao(graduacao.id, { status: 'Concluído', dataConclusao: new Date().toISOString().split('T')[0] });
+      updateGraduacao(graduacao.id, {
+        status: 'Concluído',
+        dataConclusao: graduacao.dataConclusao || new Date().toISOString().split('T')[0]
+      });
     });
-  }, [graduacoes, graduacoesEnriquecidas]);
-
-  const faixasDisponiveis = useMemo(() => {
-    const slugs = new Set(
-      graduacoesEnriquecidas.flatMap((item) => [item.faixaSlugAtual, item.proximaFaixaSlug].filter(Boolean))
-    );
-    return Array.from(slugs).filter(Boolean);
-  }, [graduacoesEnriquecidas]);
+  }, [graduacoes, graduacoesRaw]);
 
   const graduacoesFiltradas = useMemo(() => {
-    return graduacoesEnriquecidas.filter((item) => {
+    const limiteMs = periodoFiltro ? periodoFiltro * 24 * 60 * 60 * 1000 : null;
+    const agora = Date.now();
+
+    return graduacoes.filter((item) => {
       const nomeMatch = buscaNome
         ? item.alunoNome?.toLowerCase().includes(buscaNome.toLowerCase()) ||
           alunoLookup[item.alunoId]?.nomeCompleto?.toLowerCase().includes(buscaNome.toLowerCase())
@@ -115,9 +64,15 @@ export default function GraduacoesStaffPage() {
       const faixaMatch = faixaFiltro ? [item.faixaSlugAtual, item.proximaFaixaSlug].includes(faixaFiltro) : true;
       const statusMatch = statusFiltro ? item.status === statusFiltro : true;
       const tipoMatch = tipoFiltro ? item.tipo === tipoFiltro : true;
-      return nomeMatch && faixaMatch && statusMatch && tipoMatch;
+      const dataMs = item.dataPrevista ? new Date(item.dataPrevista).getTime() : NaN;
+      const periodoMatch = limiteMs
+        ? Number.isFinite(dataMs) && Math.abs(dataMs - agora) <= limiteMs
+        : true;
+      const semDataPermitido = !limiteMs && !item.dataPrevista;
+
+      return nomeMatch && faixaMatch && statusMatch && tipoMatch && (periodoMatch || semDataPermitido);
     });
-  }, [alunoLookup, buscaNome, faixaFiltro, graduacoesEnriquecidas, statusFiltro, tipoFiltro]);
+  }, [alunoLookup, buscaNome, faixaFiltro, graduacoes, statusFiltro, tipoFiltro, periodoFiltro]);
 
   const graduacoesPendentes = useMemo(
     () => graduacoesFiltradas.filter((item) => item.status !== 'Concluído'),
@@ -130,13 +85,13 @@ export default function GraduacoesStaffPage() {
         ...item,
         alunoId: aluno.id,
         alunoNome: aluno.nome,
-        faixaSlug: normalizeFaixaSlug(item.faixaSlug || item.faixa),
+        faixaSlug: item.faixaSlug || item.faixa,
         faixa: item.faixa || item.faixaSlug || aluno.faixa,
         grau: item.grau ?? item.grauAtual ?? null
       }))
     );
 
-    const concluidas = graduacoesEnriquecidas
+    const concluidas = graduacoes
       .filter((item) => item.status === 'Concluído')
       .map((item) => ({
         id: item.id,
@@ -160,7 +115,7 @@ export default function GraduacoesStaffPage() {
       dedup.set(key, item);
     });
 
-    const limiteMs = janelaHistoricoDias ? Date.now() - janelaHistoricoDias * 24 * 60 * 60 * 1000 : null;
+    const limiteMs = periodoFiltro ? Date.now() - periodoFiltro * 24 * 60 * 60 * 1000 : null;
 
     return Array.from(dedup.values())
       .filter((item) => {
@@ -171,12 +126,14 @@ export default function GraduacoesStaffPage() {
         return nomeMatch && faixaMatch && dentroDaJanela;
       })
       .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-  }, [alunos, buscaNome, faixaFiltro, graduacoesEnriquecidas, janelaHistoricoDias]);
+  }, [alunos, buscaNome, faixaFiltro, graduacoes, periodoFiltro]);
 
   const cards = useMemo(() => {
-    const pendentes = graduacoesEnriquecidas.filter((g) => g.status !== 'Concluído');
-    const concluidas = graduacoesEnriquecidas.filter((g) => g.status === 'Concluído');
-    const proximas = [...pendentes].sort((a, b) => new Date(a.previsao).getTime() - new Date(b.previsao).getTime());
+    const pendentes = graduacoes.filter((g) => g.status !== 'Concluído');
+    const concluidas = graduacoes.filter((g) => g.status === 'Concluído');
+    const proximas = [...pendentes].sort(
+      (a, b) => new Date(a.dataPrevista || a.previsao || '').getTime() - new Date(b.dataPrevista || b.previsao || '').getTime()
+    );
     const proxima = proximas[0];
     const faixaConfig = proxima?.proximaFaixaSlug ? getFaixaConfigBySlug(proxima.proximaFaixaSlug) : undefined;
     const proximaTipo = proxima?.tipo ? proxima.tipo.toLowerCase() : null;
@@ -198,15 +155,15 @@ export default function GraduacoesStaffPage() {
         label: 'Próxima cerimônia',
         value: proxima?.alunoNome || '—',
         icon: Award,
-        description: proxima?.previsao
-          ? new Date(proxima.previsao).toLocaleDateString('pt-BR')
+        description: proxima?.dataPrevista || proxima?.previsao
+          ? new Date(proxima.dataPrevista || proxima.previsao).toLocaleDateString('pt-BR')
           : 'Sem data definida',
         belt: faixaConfig,
         grau: proxima?.tipo === 'Grau' ? proxima?.grauAtual ?? 0 : proxima?.grauAlvo ?? null,
         tipo: proximaTipo
       }
     ];
-  }, [graduacoesEnriquecidas]);
+  }, [graduacoes]);
 
   const handleStatusChange = async (graduacao, status) => {
     const dataConclusao = status === 'Concluído' ? new Date().toISOString().split('T')[0] : graduacao.dataConclusao;
@@ -233,10 +190,10 @@ export default function GraduacoesStaffPage() {
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <article
-              key={card.label}
-              className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800/70 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black p-5"
-            >
+              <article
+                key={card.label}
+                className="flex flex-col gap-3 rounded-2xl border border-bjj-gray-800/70 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black p-5"
+              >
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-200/70">{card.label}</p>
@@ -247,8 +204,8 @@ export default function GraduacoesStaffPage() {
                   {Icon ? <Icon size={18} /> : null}
                 </span>
               </div>
-              {card.belt ? (
-                <div className="flex flex-wrap items-center gap-3 rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-3">
+                {card.belt ? (
+                  <div className="flex flex-wrap items-center gap-3 rounded-xl border border-bjj-gray-800/60 bg-bjj-gray-900/60 p-3">
                   <BjjBeltStrip config={card.belt} grauAtual={card.grau} className="w-40" />
                   <div className="space-y-1 text-xs text-bjj-gray-200/80">
                     <p className="text-[11px] uppercase tracking-[0.15em] text-bjj-gray-200/60">Próxima cerimônia</p>
@@ -269,81 +226,108 @@ export default function GraduacoesStaffPage() {
         <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
           <Filter size={14} /> Filtros
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Input
-            placeholder="Buscar aluno"
-            value={buscaNome}
-            onChange={(event) => setBuscaNome(event.target.value)}
-            className="w-full"
-          />
-          <Select value={faixaFiltro} onChange={(event) => setFaixaFiltro(event.target.value)} className="w-full">
-            <option value="">Faixa</option>
-            {faixasDisponiveis.map((slug) => {
-              const config = slug ? getFaixaConfigBySlug(slug) : null;
-              return (
-                <option key={slug} value={slug}>
-                  {config?.nome || slug}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-3xl lg:grid-cols-4">
+            <Input
+              placeholder="Buscar aluno"
+              value={buscaNome}
+              onChange={(event) => setBuscaNome(event.target.value)}
+              className="w-full"
+            />
+            <Select value={faixaFiltro} onChange={(event) => setFaixaFiltro(event.target.value)} className="w-full">
+              <option value="">Faixa</option>
+              {faixasDisponiveis.map((slug) => {
+                const config = slug ? getFaixaConfigBySlug(slug) : null;
+                return (
+                  <option key={slug} value={slug}>
+                    {config?.nome || slug}
+                  </option>
+                );
+              })}
+            </Select>
+            <Select value={tipoFiltro} onChange={(event) => setTipoFiltro(event.target.value)} className="w-full">
+              <option value="">Tipo</option>
+              {TIPO_OPTIONS.map((tipo) => (
+                <option key={tipo} value={tipo}>
+                  {tipo}
                 </option>
-              );
-            })}
-          </Select>
-          <Select value={tipoFiltro} onChange={(event) => setTipoFiltro(event.target.value)} className="w-full">
-            <option value="">Tipo</option>
-            {TIPO_OPTIONS.map((tipo) => (
-              <option key={tipo} value={tipo}>
-                {tipo}
-              </option>
-            ))}
-          </Select>
-          <Select value={statusFiltro} onChange={(event) => setStatusFiltro(event.target.value)} className="w-full">
-            <option value="">Status</option>
-            {STATUS_OPTIONS.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </Select>
+              ))}
+            </Select>
+            <Select value={statusFiltro} onChange={(event) => setStatusFiltro(event.target.value)} className="w-full">
+              <option value="">Status</option>
+              {STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.12em] text-bjj-gray-200/70">
+            Período:
+            <div className="flex flex-wrap gap-2">
+              {[0, 30, 60, 90].map((dias) => (
+                <button
+                  key={dias}
+                  type="button"
+                  onClick={() => setPeriodoFiltro(dias)}
+                  className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+                    periodoFiltro === dias
+                      ? 'border-bjj-red bg-bjj-red/10 text-bjj-white shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
+                      : 'border-bjj-gray-800/70 bg-bjj-gray-900/50 text-bjj-gray-200 hover:border-bjj-gray-700'
+                  }`}
+                >
+                  {dias === 0 ? 'Todos' : `${dias}d`}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.5fr_minmax(320px,1fr)]">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
-            <ShieldCheck size={14} /> Próximas graduações
-          </div>
-          <GraduationList
-            graduacoes={graduacoesPendentes}
-            onStatusChange={handleStatusChange}
-            alunoLookup={alunoLookup}
-          />
+      <section className="card space-y-4">
+        <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
+          <ShieldCheck size={14} /> Visão de graduações
         </div>
-        <div className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
-              <UserRound size={14} /> Histórico recente
-            </div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-bjj-gray-200/60 text-[11px]">
-              Mostrar últimos:
-              <div className="flex gap-2">
-                {[30, 60, 90].map((dias) => (
-                  <button
-                    key={dias}
-                    type="button"
-                    onClick={() => setJanelaHistoricoDias(dias)}
-                    className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
-                      janelaHistoricoDias === dias
-                        ? 'border-bjj-red bg-bjj-red/10 text-bjj-white shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
-                        : 'border-bjj-gray-800/70 bg-bjj-gray-900/50 text-bjj-gray-200 hover:border-bjj-gray-700'
-                    }`}
-                  >
-                    {dias}d
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <GraduationTimeline itens={historico} />
+        <div className="flex flex-wrap gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-2 text-sm font-semibold">
+          {[
+            { id: 'proximas', label: 'Próximas graduações' },
+            { id: 'historico', label: 'Histórico recente' }
+          ].map((aba) => (
+            <button
+              key={aba.id}
+              type="button"
+              onClick={() => setAbaAtiva(aba.id)}
+              className={`flex-1 rounded-lg px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-bjj-red/60 focus:ring-offset-0 sm:flex-none ${
+                abaAtiva === aba.id
+                  ? 'bg-bjj-red text-bjj-white shadow-[0_10px_25px_-15px_rgba(248,113,113,0.8)]'
+                  : 'bg-bjj-gray-900/70 text-bjj-gray-200 hover:text-bjj-white'
+              }`}
+            >
+              {aba.label}
+            </button>
+          ))}
         </div>
+
+        {abaAtiva === 'proximas' ? (
+          <div className="space-y-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">Próximas promoções</p>
+            <GraduationList
+              graduacoes={graduacoesPendentes}
+              onStatusChange={handleStatusChange}
+              alunoLookup={alunoLookup}
+            />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">Histórico recente</p>
+              <p className="text-[11px] uppercase tracking-[0.12em] text-bjj-gray-200/60">
+                Janela: {periodoFiltro === 0 ? 'todos os registros' : `últimos ${periodoFiltro} dias`}
+              </p>
+            </div>
+            <GraduationTimeline itens={historico} />
+          </div>
+        )}
       </section>
     </div>
   );
