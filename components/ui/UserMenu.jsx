@@ -144,8 +144,8 @@ export default function UserMenu({ inline = false }) {
     <div
       className={`${
         inline
-          ? 'relative w-full rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/95 p-4'
-          : 'absolute right-0 z-40 mt-3 w-64 rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/95 p-4 shadow-[0_25px_65px_rgba(0,0,0,0.5)]'
+          ? 'relative w-full max-w-sm rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/95 p-4'
+          : 'absolute right-0 z-40 mt-3 w-[min(18rem,90vw)] rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/95 p-4 shadow-[0_25px_65px_rgba(0,0,0,0.5)] sm:w-72'
       }`}
     >
       <header className="flex items-center gap-3">

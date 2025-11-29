@@ -96,3 +96,12 @@ export const STAFF_ROUTE_SECTIONS: Record<StaffRouteSection, string> = {
   graduacoes: 'Graduações',
   outros: 'Outros'
 };
+
+export const getVisibleStaffRoutes = (roles?: UserRole[]) => {
+  const effectiveRoles = roles?.length ? roles : ALL_STAFF_ROLES;
+
+  return STAFF_ROUTES.filter((route) => route.visible !== false).filter((route) => {
+    if (!route.roles || route.roles.length === 0) return true;
+    return route.roles.some((role) => effectiveRoles.includes(role));
+  });
+};
