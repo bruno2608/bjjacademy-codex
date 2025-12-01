@@ -7,6 +7,7 @@ import TabletNav from './TabletNav';
 import useUserStore from '../../store/userStore';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { STAFF_ROUTES } from '@/config/staffRoutes';
 
 const BARE_PATHS = ['/login', '/unauthorized'];
 
@@ -15,6 +16,11 @@ export default function AppShell({ children }) {
   const { hydrateFromStorage, hydrated, updateUser } = useUserStore();
   const { user, aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
+
+  const staffPaths = useMemo(
+    () => STAFF_ROUTES.filter((route) => route.visible !== false).map((route) => route.path),
+    []
+  );
 
   useEffect(() => {
     if (!hydrated) {
@@ -35,7 +41,12 @@ export default function AppShell({ children }) {
     [pathname]
   );
 
-  if (isBareLayout) {
+  const isStaffLayout = useMemo(
+    () => staffPaths.some((path) => pathname?.startsWith(path)),
+    [pathname, staffPaths]
+  );
+
+  if (isBareLayout || isStaffLayout) {
     return children;
   }
 

@@ -6,15 +6,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Crown, CalendarClock } from 'lucide-react';
-import AlunoForm from '../../../components/alunos/AlunoForm';
-import Card from '../../../components/ui/Card';
-import LoadingState from '../../../components/ui/LoadingState';
+import AlunoForm from '@/components/alunos/AlunoForm';
+import Card from '@/components/ui/Card';
+import LoadingState from '@/components/ui/LoadingState';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
-import { updateAluno } from '../../../services/alunosService';
-import { getMaxStripes, getRuleForBelt } from '../../../lib/graduationRules';
-import { useAlunosStore } from '../../../store/alunosStore';
-import { normalizeFaixaSlug } from '../../../lib/alunoStats';
+import { updateAluno } from '@/services/alunosService';
+import { getMaxStripes, getRuleForBelt } from '@/lib/graduationRules';
+import { useAlunosStore } from '@/store/alunosStore';
+import { normalizeFaixaSlug } from '@/lib/alunoStats';
 
 export default function EditarAlunoPage() {
   const router = useRouter();
