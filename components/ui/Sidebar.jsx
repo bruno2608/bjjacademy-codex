@@ -1,31 +1,24 @@
 'use client';
 
 /**
- * Sidebar component controla navegação principal para telas grandes,
- * agora respeitando o mapa de rotas central e as permissões de papéis.
+ * Sidebar com o visual original aprovado, agora lendo as rotas centralizadas
+ * mas sem alterar markup ou classes responsivas.
  */
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { getNavigationItemsForRoles } from '../../lib/navigation';
-import useUserStore from '../../store/userStore';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { STAFF_ROUTES } from '@/config/staffRoutes';
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const roles = useUserStore((state) => state.user?.roles || []);
-
-  // Exibe apenas itens realmente relevantes na navegação principal,
-  // mas garante que "Configurações" permaneça disponível para perfis autorizados.
-  const allowedItems = useMemo(() => {
-    const items = getNavigationItemsForRoles(roles, { includeHidden: true });
-    return items.filter((item) => item.showInMainNav !== false || item.path === '/configuracoes');
-  }, [roles]);
-
   const [openSections, setOpenSections] = useState({});
 
-  // Mantém seções com submenus abertas quando a rota atual pertence a elas
-  // e cria estado padrão somente quando necessário (evitando sobrescrever preferências).
+  const allowedItems = useMemo(
+    () => STAFF_ROUTES.filter((route) => route.visible !== false),
+    []
+  );
+
   useEffect(() => {
     setOpenSections((previous) => {
       const nextState = { ...previous };
@@ -89,7 +82,7 @@ export default function Sidebar() {
                   {Icon ? <Icon size={18} /> : null}
                 </span>
                 <div className="flex flex-col leading-tight">
-                  <span className="text-sm font-medium">{item.title}</span>
+                  <span className="text-sm font-medium">{item.label || item.title}</span>
                 </div>
                 <span
                   aria-hidden="true"
@@ -106,10 +99,10 @@ export default function Sidebar() {
               <button
                 type="button"
                 onClick={() => toggleSection(item.path)}
-                className={`group relative flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all ${
+                className={`group relative flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all${
                   active
-                    ? 'border-bjj-red/70 bg-bjj-red/10 text-bjj-white shadow-[0_18px_45px_rgba(225,6,0,0.18)]'
-                    : 'border-transparent text-bjj-gray-200 hover:border-bjj-gray-700/70 hover:bg-bjj-gray-900/60 hover:text-bjj-white'
+                    ? ' border-bjj-red/70 bg-bjj-red/10 text-bjj-white shadow-[0_18px_45px_rgba(225,6,0,0.18)]'
+                    : ' border-transparent text-bjj-gray-200 hover:border-bjj-gray-700/70 hover:bg-bjj-gray-900/60 hover:text-bjj-white'
                 }`}
                 aria-expanded={isOpen}
               >
@@ -123,7 +116,7 @@ export default function Sidebar() {
                   {Icon ? <Icon size={18} /> : null}
                 </span>
                 <div className="flex flex-1 flex-col leading-tight">
-                  <span className="text-sm font-medium">{item.title}</span>
+                  <span className="text-sm font-medium">{item.label || item.title}</span>
                   <span className="text-[11px] text-bjj-gray-200/60">{item.children.length} seção(ões)</span>
                 </div>
                 <ChevronDown
@@ -159,7 +152,7 @@ export default function Sidebar() {
                           <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-bjj-gray-900/70 text-bjj-gray-200/80">
                             {ChildIcon ? <ChildIcon size={12} /> : <ChevronRight size={12} className="text-bjj-gray-400" />}
                           </span>
-                          {child.title}
+                          {child.title || child.label}
                         </Link>
                       </li>
                     );

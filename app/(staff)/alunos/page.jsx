@@ -12,17 +12,17 @@ import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { normalizeAlunoStatus, normalizeFaixaSlug } from '@/lib/alunoStats';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 import { useStaffDashboard } from '@/services/dashboard/useStaffDashboard';
-import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
-import Table from '../../components/ui/Table';
-import Modal from '../../components/ui/Modal';
-import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import AlunoForm from '../../components/alunos/AlunoForm';
-import PageHero from '../../components/ui/PageHero';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
-import { usePresencasStore } from '../../store/presencasStore';
-import { useTreinosStore } from '../../store/treinosStore';
-import { useAlunosStore } from '../../store/alunosStore';
+import MultiSelectDropdown from '@/components/ui/MultiSelectDropdown';
+import Table from '@/components/ui/Table';
+import Modal from '@/components/ui/Modal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import AlunoForm from '@/components/alunos/AlunoForm';
+import PageHero from '@/components/ui/PageHero';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import { usePresencasStore } from '@/store/presencasStore';
+import { useTreinosStore } from '@/store/treinosStore';
+import { useAlunosStore } from '@/store/alunosStore';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [

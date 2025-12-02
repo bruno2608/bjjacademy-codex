@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { Activity, ArrowRight, BarChart2, CalendarCheck, CheckCircle2, Clock3, Medal } from 'lucide-react';
 
-import useRole from '../../hooks/useRole';
-import { ROLE_KEYS } from '../../config/roles';
+import useRole from '@/hooks/useRole';
+import { ROLE_KEYS } from '@/config/roles';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useAlunoDashboard } from '@/services/dashboard/useAlunoDashboard';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';

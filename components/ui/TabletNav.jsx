@@ -12,14 +12,14 @@ import { getTopNavigationItemsForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import UserMenu from './UserMenu';
 
-export default function TabletNav() {
+export default function TabletNav({ items }) {
   const pathname = usePathname();
   const { roles } = useRole();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navigationItems = useMemo(
-    () => getTopNavigationItemsForRoles(roles),
-    [roles]
+    () => (items?.length ? items : getTopNavigationItemsForRoles(roles)),
+    [items, roles]
   );
 
   const renderNavLink = (item, { condensed = false } = {}) => {

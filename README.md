@@ -40,6 +40,17 @@ npm run dev
 - **Lucide React** para ícones
 - **next-pwa** com `manifest.json`, service worker custom e cache offline
 
+## 🧱 **AppShell da área STAFF**
+
+- As rotas de staff estão agrupadas em `app/(staff)` e compartilham o layout `app/(staff)/layout.jsx`, que aplica o `StaffAppShell` (`components/layout/StaffAppShell`).
+- O Sidebar reutiliza a UI existente (`components/ui/Sidebar`) e lê os itens diretamente da configuração única de rotas em `config/staffRoutes.ts`, preservando o visual aprovado (gradiente, card “Zenko Focus / BJJ Academy” e estados de hover/ativo).
+- No mobile/tablet, o menu hamburguer original (`components/ui/Header`) continua sendo exibido dentro do `StaffAppShell`, garantindo o comportamento de overlay/slide idêntico ao layout antigo.
+- O header comum do staff (`components/layout/StaffHeader`) usa `STAFF_ROUTES` para mostrar breadcrumb/título e um usuário mockado, deixando o espaço pronto para integrar hooks de autenticação e perfis no futuro.
+- Rotas atuais cobertas: `/dashboard`, `/presencas`, `/alunos`, `/alunos/[id]`, `/graduacoes` — os caminhos permanecem os mesmos por conta do group segment `app/(staff)`.
+- Estrutura já preparada para diferenciar perfis (professor/instrutor/admin) e receber dados reais de usuário/academia quando a camada de auth for conectada.
+
+Na visão do aluno, o AppShell mantém a navegação superior em abas/pills original (`components/ui/TabletNav`) sem alterações visuais, exibindo `Dashboard Aluno`, `Check-in do Aluno`, `Treinos do Aluno` e `Evolução` conforme o papel carregado.
+
 ## 🗺️ Mapa de telas e fontes de dados
 
 ### Visão do aluno
