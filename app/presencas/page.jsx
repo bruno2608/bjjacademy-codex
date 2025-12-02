@@ -140,6 +140,11 @@ export default function PresencasPage() {
         horaInicio: turma.horaInicio,
         horaFim: turma.horaFim,
       });
+      if (!aula) {
+        setCurrentAulaId('');
+        return;
+      }
+
       setCurrentAulaId(aula.id);
       await carregarPorAula(aula.id);
     })();
