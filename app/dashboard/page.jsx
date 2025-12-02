@@ -396,7 +396,7 @@ function ProfessorDashboard() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {[{ label: 'Abrir chamada', href: '/presencas' }, { label: 'Ver alunos', href: '/alunos' }, { label: 'Ver graduações', href: '/graduacoes' }].map((action) => (
+          {[{ label: 'Abrir chamada', href: '/presencas/chamada' }, { label: 'Ver alunos', href: '/alunos' }, { label: 'Ver graduações', href: '/graduacoes/proximas' }].map((action) => (
             <Link
               key={action.label}
               href={action.href}
@@ -459,7 +459,7 @@ function ProfessorDashboard() {
                 </div>
 
                 <Link
-                  href={`/presencas?turmaId=${aula.turmaId}&data=${aula.data}`}
+                  href="/presencas/chamada"
                   className="inline-flex items-center justify-center rounded-xl bg-bjj-red px-3 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-red-600"
                 >
                   Abrir chamada
@@ -504,7 +504,7 @@ function ProfessorDashboard() {
           </div>
 
           <Link
-            href="/presencas?tab=pendencias"
+            href="/presencas/pendencias"
             className="inline-flex items-center justify-center rounded-xl bg-bjj-red px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-red-600"
           >
             Ver pendências
@@ -553,17 +553,17 @@ function ProfessorDashboard() {
 
           {proximasGraduacoes.length === 0 && (
             <p className="rounded-2xl border border-dashed border-bjj-gray-800/70 bg-bjj-gray-900/60 p-4 text-sm text-bjj-gray-300">
-              Sem graduações previstas. Acompanhe os alunos em /graduacoes.
+              Sem graduações previstas. Acompanhe os alunos em /graduacoes/proximas.
             </p>
           )}
         </div>
 
         <div className="flex flex-wrap gap-2">
           <Link
-            href="/graduacoes"
+            href="/graduacoes/proximas"
             className="rounded-full bg-bjj-red px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-red-600"
           >
-            Ver todos em /graduacoes
+            Ver todos em /graduacoes/proximas
           </Link>
           <Link
             href="/alunos"

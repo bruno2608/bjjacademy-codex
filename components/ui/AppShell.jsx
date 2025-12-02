@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 import useUserStore from '../../store/userStore';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
@@ -13,6 +13,7 @@ const BARE_PATHS = ['/login', '/unauthorized'];
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { hydrateFromStorage, hydrated, updateUser } = useUserStore();
   const { user, aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
@@ -22,6 +23,13 @@ export default function AppShell({ children }) {
       hydrateFromStorage();
     }
   }, [hydrateFromStorage, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated || isBareLayout) return;
+    if (!user) {
+      router.replace(`/login?redirect=${encodeURIComponent(pathname || '/')}`);
+    }
+  }, [hydrated, isBareLayout, pathname, router, user]);
 
   useEffect(() => {
     const nextAvatar = aluno?.avatarUrl || staff?.avatarUrl || user?.avatarUrl;

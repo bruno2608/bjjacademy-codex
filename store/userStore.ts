@@ -2,13 +2,14 @@ import { create } from 'zustand';
 
 import { ROLE_KEYS, normalizeRoles, type UserRole } from '../config/roles';
 import { ALL_ROLES } from '../config/userRoles';
+import { authMockService } from '../services/authMockService';
 import type { AuthUser, LoginPayload } from '../types/user';
 
 type UserState = {
   user: AuthUser | null;
   token: string | null;
   hydrated: boolean;
-  login: (payload: LoginPayload) => void;
+  login: (payload: LoginPayload) => Promise<void>;
   updateUser?: (payload: Partial<AuthUser>) => void;
   logout: () => void;
   hydrate: (payload: Partial<{ user: AuthUser | null; token: string | null }>) => void;
@@ -77,30 +78,27 @@ export const useUserStore = create<UserState>((set) => ({
   user: null,
   token: null,
   hydrated: false,
-  login: ({ email, roles }) => {
+  login: async ({ email, roles }) => {
     if (typeof window === 'undefined') return;
-    const fakeToken = `bjj-token-${Date.now()}`;
-    window.localStorage.setItem(TOKEN_KEY, fakeToken);
+    const { user, token } = await authMockService.login({ email, roles });
 
-    const resolvedRoles = normalizeRoles(roles);
-    const finalRoles = resolvedRoles.length ? resolvedRoles : deriveRolesFromEmail(email);
+    window.localStorage.setItem(TOKEN_KEY, token);
+
+    const resolvedRoles = normalizeRoles(user.roles?.length ? user.roles : deriveRolesFromEmail(email));
+    const finalRoles = resolvedRoles.length ? resolvedRoles : ALL_ROLES;
     const finalUser: AuthUser = {
-      id: fallbackUser.id,
-      name: email.split('@')[0] || 'Instrutor',
-      nomeCompleto: email.split('@')[0] || 'Instrutor',
-      email,
-      roles: finalRoles.length ? finalRoles : ALL_ROLES,
-      avatarUrl: DEFAULT_AVATAR,
-      telefone: null,
-      alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null,
-      instrutorId: finalRoles.includes(ROLE_KEYS.instrutor) ? DEFAULT_INSTRUTOR_ID : null,
-      professorId: finalRoles.includes(ROLE_KEYS.professor) ? 'professor-admin' : null,
-      academiaId: DEFAULT_ACADEMIA_ID
+      ...fallbackUser,
+      ...user,
+      roles: finalRoles,
+      alunoId: user.alunoId ?? (finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null),
+      instrutorId: user.instrutorId ?? (finalRoles.includes(ROLE_KEYS.instrutor) ? DEFAULT_INSTRUTOR_ID : null),
+      professorId: user.professorId ?? (finalRoles.includes(ROLE_KEYS.professor) ? 'professor-admin' : null),
+      academiaId: user.academiaId ?? DEFAULT_ACADEMIA_ID
     };
 
     persistRoles(finalUser.roles);
-    persistUser({ ...finalUser, alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null });
-    set({ user: finalUser, token: fakeToken, hydrated: true });
+    persistUser(finalUser);
+    set({ user: finalUser, token, hydrated: true });
   },
   updateUser: (payload) =>
     set((state) => {

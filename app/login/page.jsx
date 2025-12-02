@@ -56,8 +56,10 @@ export default function LoginPage() {
 
     const savedToken = window.localStorage.getItem('bjj_token');
     if (savedToken && !token) {
-      login({ email: 'instrutor@bjj.academy', roles: rolesParaLogin });
-      router.replace('/dashboard');
+      (async () => {
+        await login({ email: 'instrutor@bjj.academy', roles: rolesParaLogin });
+        router.replace('/dashboard');
+      })();
     }
   }, [login, router, selectedRoles, token]);
 
@@ -77,15 +79,19 @@ export default function LoginPage() {
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!form.email || !form.password) {
       setError('Informe e-mail e senha.');
       return;
     }
     setError('');
-    login({ email: form.email, roles: selectedRoles });
-    router.push('/dashboard');
+    try {
+      await login({ email: form.email, roles: selectedRoles });
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err?.message || 'Não foi possível entrar.');
+    }
   };
 
   return (
