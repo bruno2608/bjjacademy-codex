@@ -12,6 +12,7 @@ import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { BjjBeltProgressCard } from '@/components/bjj/BjjBeltProgressCard';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { normalizeFaixaSlug } from '@/lib/alunoStats';
+import { getUserAvatarData } from '@/lib/userAvatar';
 import { useAcademiasStore } from '@/store/academiasStore';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useAulasStore } from '@/store/aulasStore';
@@ -30,6 +31,7 @@ const ensureAvatar = (name, avatarUrl) =>
 
 function DashboardHero({
   name,
+  initials,
   subtitle,
   statusLabel,
   avatarUrl,
@@ -50,7 +52,13 @@ function DashboardHero({
       <div className="hero-content w-full flex-col gap-6 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
         <figure className="avatar">
           <div className="w-28 rounded-full ring ring-bjj-red/70 ring-offset-2 ring-offset-bjj-gray-950 lg:w-32">
-            <img src={avatarUrl} alt={`Avatar de ${name || 'Aluno'}`} loading="lazy" />
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={`Avatar de ${name || 'Aluno'}`} loading="lazy" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-bjj-gray-800 text-xl font-semibold text-white">
+                {initials}
+              </div>
+            )}
           </div>
         </figure>
 
@@ -103,7 +111,12 @@ function StudentDashboard() {
     treinoPorId
   } = data;
 
-  const avatarUrl = ensureAvatar(aluno?.nome, aluno?.avatarUrl || user?.avatarUrl || defaultAvatar);
+  const avatarData = getUserAvatarData({
+    nome: aluno?.nome ?? user?.nome ?? user?.name,
+    avatarUrl: aluno?.avatarUrl ?? user?.avatarUrl,
+    email: aluno?.email ?? user?.email
+  });
+  const avatarUrl = ensureAvatar(avatarData.nome, avatarData.avatarUrl || defaultAvatar);
 
   const formatStatus = (status) => {
     switch (status) {
@@ -126,7 +139,8 @@ function StudentDashboard() {
   return (
     <div className="space-y-6">
       <DashboardHero
-        name={aluno?.nome || 'Aluno'}
+        name={avatarData.nome || 'Aluno'}
+        initials={avatarData.initials}
         faixaConfig={faixaConfig}
         graus={grauAtual}
         aulasFeitasNoGrau={aulasNoGrau}
