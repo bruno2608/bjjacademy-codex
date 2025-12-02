@@ -10,6 +10,7 @@ import { useAlunoDashboard } from '@/hooks/useAlunoDashboard';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { normalizeFaixaSlug } from '@/lib/alunoStats';
 import { useGraduacoesStore } from '@/store/graduacoesStore';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 export default function EvolucaoPage() {
   const { aluno: alunoFromUser } = useCurrentAluno();
@@ -107,7 +108,7 @@ export default function EvolucaoPage() {
                   <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">Linha do tempo</p>
                 <h3 className="text-lg font-semibold">Histórico de graduações</h3>
               </div>
-              <Medal size={18} className="text-bjj-red" />
+              <Medal className={`${iconSizes.sm} ${iconColors.default}`} />
             </header>
 
             {historicoGraduacoes.length ? (
@@ -127,7 +128,7 @@ export default function EvolucaoPage() {
                         <span
                           className={`flex h-8 w-8 items-center justify-center rounded-full border bg-bjj-black/60 ${indicadorClasse}`}
                         >
-                          <Medal size={18} />
+                          <Medal className={`${iconSizes.sm} ${iconColors.default}`} />
                         </span>
                       </div>
                       <div className="timeline-end mb-6 w-full">
@@ -180,7 +181,7 @@ export default function EvolucaoPage() {
                   <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-400">Próxima meta</p>
                   <h3 className="text-lg font-semibold">Projeção</h3>
                 </div>
-                <TrendingUp size={18} className="text-bjj-red" />
+                <TrendingUp className={`${iconSizes.sm} ${iconColors.default}`} />
               </header>
               <div className="space-y-2 text-sm text-bjj-gray-100">
                 <div className="flex items-center justify-between text-bjj-gray-200/80">

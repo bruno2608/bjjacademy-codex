@@ -6,6 +6,7 @@
  * faixas, graus e responsáveis pela cerimônia.
  */
 import { CalendarDays, Medal } from 'lucide-react';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 const badgeColors = {
   Faixa: 'bg-bjj-red/20 text-bjj-red',
@@ -66,12 +67,12 @@ export default function GraduationTimeline({ itens = [] }) {
                         badgeColors[tipo] || 'bg-bjj-gray-800 text-bjj-gray-200'
                       }`}
                     >
-                      <Medal size={13} /> {tipo === 'Grau' ? 'Conquista de grau' : 'Troca de faixa'}
+                      <Medal className={`${iconSizes.xs} ${iconColors.default}`} /> {tipo === 'Grau' ? 'Conquista de grau' : 'Troca de faixa'}
                     </span>
                     {grauLabel && <span className="text-sm text-bjj-gray-200/80">{grauLabel}</span>}
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-bjj-gray-200/70">
-                    <CalendarDays size={13} />
+                    <CalendarDays className={`${iconSizes.xs} ${iconColors.default}`} />
                     {formatDate(item.data)}
                   </div>
                 </header>

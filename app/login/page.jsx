@@ -10,6 +10,7 @@ import useUserStore from '../../store/userStore';
 import ValidatedField from '../../components/ui/ValidatedField';
 import Button from '../../components/ui/Button';
 import { ROLE_KEYS, normalizeRoles } from '../../config/roles';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 const AVAILABLE_ROLES = [
   ROLE_KEYS.ti,
@@ -97,7 +98,7 @@ export default function LoginPage() {
 
         <section className="relative max-w-xl space-y-5">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-bjj-gray-200/70">
-            <ShieldCheck size={13} className="text-bjj-red" /> Portal do instrutor
+            <ShieldCheck className={`${iconSizes.xs} ${iconColors.default}`} /> Portal do instrutor
           </span>
           <div className="space-y-3.5">
             <h1 className="text-3xl font-semibold">BJJ Academy</h1>
@@ -177,7 +178,7 @@ export default function LoginPage() {
               </div>
             </fieldset>
             <Button type="submit" className="w-full justify-center">
-              Acessar painel <ArrowRight size={15} />
+              Acessar painel <ArrowRight className={`${iconSizes.sm} ${iconColors.default}`} />
             </Button>
           </form>
           <p className="mt-5 text-center text-xs text-bjj-gray-200/60">

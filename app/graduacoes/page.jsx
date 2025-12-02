@@ -17,6 +17,7 @@ import { updateGraduacao } from '@/services/graduacoesService';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useGraduacoesStore } from '@/store/graduacoesStore';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 const STATUS_OPTIONS = ['Planejado', 'Em progresso', 'Em avaliação', 'Pronto para avaliar', 'Concluído'];
 
@@ -215,7 +216,7 @@ function GraduacoesStaffPageContent() {
                   <p className="text-xs text-bjj-gray-200/70">{card.description}</p>
                 </div>
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-bjj-gray-900/70 text-bjj-red">
-                  {Icon ? <Icon size={18} /> : null}
+                  {Icon ? <Icon className={`${iconSizes.sm} ${iconColors.default}`} /> : null}
                 </span>
               </div>
                 {card.belt ? (
@@ -238,7 +239,7 @@ function GraduacoesStaffPageContent() {
 
       <section className="card space-y-4">
         <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
-          <Filter size={14} /> Filtros
+          <Filter className={`${iconSizes.xs} ${iconColors.default}`} /> Filtros
         </div>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-3xl lg:grid-cols-4">
@@ -300,7 +301,7 @@ function GraduacoesStaffPageContent() {
 
       <section className="card space-y-4">
         <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
-          <ShieldCheck size={14} /> Visão de graduações
+          <ShieldCheck className={`${iconSizes.xs} ${iconColors.default}`} /> Visão de graduações
         </div>
 
         <MinimalTabs
