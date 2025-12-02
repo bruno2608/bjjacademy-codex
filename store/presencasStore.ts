@@ -9,6 +9,7 @@ import {
   listarPresencasPorAula,
   listarPresencasPorTreino,
   listarTodasPresencas,
+  registrarCheckinManual as serviceRegistrarCheckinManual,
   registrarCheckin as serviceRegistrarCheckin,
   registrarOuAtualizarPresenca,
   removerPresenca,
@@ -38,6 +39,11 @@ type PresencasState = {
   carregarPorTreino: (treinoId: string) => Promise<void>
   carregarPorAula: (aulaId: string) => Promise<void>
   registrarCheckin: (payload: RegistroCheckinPayload) => Promise<{ registro: PresencaRegistro | null; status: CheckinStatus }>
+  registrarCheckinManual: (
+    alunoId: string,
+    origem?: PresencaOrigem,
+    dataReferencia?: Date
+  ) => Promise<PresencaRegistro>
   registrarPresencaEmAula: (
     payload: Omit<PresencaRegistro, 'id' | 'createdAt' | 'updatedAt' | 'origem'> & { status?: PresencaStatus; origem?: PresencaOrigem }
   ) => Promise<PresencaRegistro>
@@ -122,6 +128,13 @@ export const usePresencasStore = create<PresencasState>((set, get) => ({
       data: payload.data,
     })
 
+    const atualizadas = [...get().presencas.filter((item) => item.id !== registro.id), registro]
+    set({ presencas: atualizadas })
+    syncAlunos(atualizadas)
+    return registro
+  },
+  registrarCheckinManual: async (alunoId, origem, dataReferencia) => {
+    const registro = await serviceRegistrarCheckinManual(alunoId, origem, dataReferencia)
     const atualizadas = [...get().presencas.filter((item) => item.id !== registro.id), registro]
     set({ presencas: atualizadas })
     syncAlunos(atualizadas)

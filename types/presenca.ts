@@ -4,7 +4,7 @@ export type PresencaStatus =
   | 'FALTA' // não apareceu / não registrou check-in
   | 'JUSTIFICADA' // falta com justificativa (opcional)
 
-export type PresencaOrigem = 'ALUNO' | 'PROFESSOR'
+export type PresencaOrigem = 'ALUNO' | 'PROFESSOR' | 'SISTEMA'
 
 export interface PresencaRegistro {
   id: string

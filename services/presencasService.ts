@@ -1,5 +1,5 @@
 import { MOCK_PRESENCAS } from '@/data/mockPresencas'
-import type { PresencaRegistro, PresencaStatus } from '@/types/presenca'
+import type { PresencaOrigem, PresencaRegistro, PresencaStatus } from '@/types/presenca'
 
 type RegistrarPresencaPayload = {
   alunoId: string
@@ -15,6 +15,8 @@ let presencasDb: PresencaRegistro[] = [...MOCK_PRESENCAS]
 const clone = (lista: PresencaRegistro[]) => lista.map((item) => ({ ...item }))
 const agoraIso = () => new Date().toISOString()
 const hoje = () => new Date().toISOString().split('T')[0]
+const dataDe = (entrada?: Date | string | null) =>
+  entrada instanceof Date ? entrada.toISOString().split('T')[0] : entrada?.split('T')[0]
 
 const localizarPorId = (id: string) => presencasDb.find((item) => item.id === id)
 
@@ -49,6 +51,45 @@ export async function listarPresencasPorTreino(treinoId: string): Promise<Presen
 
 export async function listarPresencasPorAula(aulaId: string): Promise<PresencaRegistro[]> {
   return clone(presencasDb.filter((item) => item.aulaId === aulaId))
+}
+
+export async function registrarCheckinManual(
+  alunoId: string,
+  origem: PresencaOrigem = 'ALUNO',
+  dataReferencia?: Date
+): Promise<PresencaRegistro> {
+  const data = dataDe(dataReferencia) ?? hoje()
+  const agora = dataReferencia?.toISOString() ?? agoraIso()
+
+  const existente = presencasDb.find((item) => item.alunoId === alunoId && dataDe(item.data) === data)
+
+  if (existente) {
+    const atualizado: PresencaRegistro = {
+      ...existente,
+      status: 'PRESENTE',
+      origem: existente.origem || origem,
+      updatedAt: agora,
+    }
+    presencasDb = presencasDb.map((item) => (item.id === existente.id ? atualizado : item))
+    return { ...atualizado }
+  }
+
+  const registro: PresencaRegistro = {
+    id: `manual-${Date.now()}`,
+    alunoId,
+    treinoId: 'manual_checkin',
+    turmaId: 'manual_checkin',
+    aulaId: null,
+    status: 'PRESENTE',
+    origem,
+    observacao: null,
+    data,
+    createdAt: agora,
+    updatedAt: agora,
+  }
+
+  presencasDb = [...presencasDb, registro]
+  return { ...registro }
 }
 
 export async function registrarCheckin(
@@ -188,4 +229,25 @@ export async function fecharAula(aulaId: string): Promise<void> {
 
 export function resetPresencasMock(): void {
   presencasDb = [...MOCK_PRESENCAS]
+}
+
+export async function getPresencasUltimos30Dias(): Promise<PresencaRegistro[]> {
+  const hojeData = new Date()
+  const limite = new Date()
+  limite.setDate(hojeData.getDate() - 30)
+
+  return clone(
+    presencasDb
+      .filter((item) => {
+        const referencia = dataDe(item.data) ?? dataDe(item.createdAt)
+        if (!referencia) return false
+        const dataItem = new Date(referencia)
+        return dataItem >= limite
+      })
+      .sort((a, b) => {
+        const dataA = dataDe(a.data) ?? dataDe(a.createdAt) ?? ''
+        const dataB = dataDe(b.data) ?? dataDe(b.createdAt) ?? ''
+        return dataB.localeCompare(dataA)
+      })
+  )
 }
