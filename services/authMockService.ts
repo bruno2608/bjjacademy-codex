@@ -62,6 +62,19 @@ const allowedPilotUsers: AuthUser[] = [
     academiaId: DEFAULT_ACADEMIA_ID,
     avatarUrl: null,
     telefone: null
+  },
+  {
+    id: 'admin-001',
+    email: 'admin@bjjacademy.com',
+    nomeCompleto: 'Admin Piloto',
+    name: 'Admin Piloto',
+    roles: [ROLE_KEYS.admin, ROLE_KEYS.professor],
+    alunoId: null,
+    instrutorId: null,
+    professorId: 'admin-001',
+    academiaId: DEFAULT_ACADEMIA_ID,
+    avatarUrl: DEFAULT_AVATAR,
+    telefone: null
   }
 ];
 

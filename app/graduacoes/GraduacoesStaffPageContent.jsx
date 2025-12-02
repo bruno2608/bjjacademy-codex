@@ -22,7 +22,7 @@ const STATUS_OPTIONS = ['Planejado', 'Em progresso', 'Em avaliação', 'Pronto p
 
 const TIPO_OPTIONS = ['Faixa', 'Grau'];
 
-export function GraduacoesStaffPageContent({ forcedView }) {
+export function GraduacoesStaffPageContent({ forcedView, showTabs = !forcedView }) {
   const router = useRouter();
   const pathname = usePathname();
   const { staff } = useCurrentStaff();
@@ -303,14 +303,16 @@ export function GraduacoesStaffPageContent({ forcedView }) {
           <ShieldCheck size={14} /> Visão de graduações
         </div>
 
-        <MinimalTabs
-          items={[
-            { id: 'proximas', label: 'Próximas graduações' },
-            { id: 'historico', label: 'Histórico recente' }
-          ]}
-          activeId={activeView}
-          onChange={handleViewChange}
-        />
+        {showTabs && (
+          <MinimalTabs
+            items={[
+              { id: 'proximas', label: 'Próximas graduações' },
+              { id: 'historico', label: 'Histórico recente' }
+            ]}
+            activeId={activeView}
+            onChange={handleViewChange}
+          />
+        )}
 
         {activeView === 'proximas' && (
           <GraduacoesProximasView

@@ -86,7 +86,7 @@ Comportamento:
 
 ### 3. Fluxo STAFF – Tela “Check-in de Alunos”
 
-Rota sugerida: `app/presencas/chamada/page.tsx`.
+Rota sugerida: `app/presencas/check-in/page.tsx`.
 
 Layout/UX:
 * Título **“Check-in de Alunos”** e subtítulo “Registre a presença dos alunos nas aulas”.
@@ -125,7 +125,7 @@ Dados/lógica:
 * Aluno:
   * Acessa `/aluno/checkin`, vê card “Check-in Manual”, abre `/aluno/checkin/manual`, registra presença manual, vê presença em “Check-ins Recentes”.
 * Professor/Staff:
-  * Acessa `/presencas/chamada`, vê cards-resumo, busca aluno por nome, confirma presença de pendentes.
+  * Acessa `/presencas/check-in`, vê cards-resumo, busca aluno por nome, confirma presença de pendentes.
 * Revisão:
   * `/presencas/revisao` mostra presenças agrupadas por dia (últimos 30 dias) e permite excluir com confirmação.
   * Nenhuma segunda tela de revisão competindo com `/presencas/revisao`.
