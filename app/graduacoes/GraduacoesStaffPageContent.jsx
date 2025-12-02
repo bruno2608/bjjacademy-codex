@@ -1,18 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
 import { Award, Clock3, Filter, Medal, ShieldCheck } from 'lucide-react';
 
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import MinimalTabs from '@/components/ui/Tabs';
-import GraduacoesHistoricoView from '@/components/graduacoes/GraduacoesHistoricoView';
 import GraduacoesProximasView from '@/components/graduacoes/GraduacoesProximasView';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { useGraduacoesProfessorView } from '@/hooks/useGraduacoesProfessorView';
-import { normalizeFaixaSlug } from '@/lib/alunoStats';
 import { updateGraduacao } from '@/services/graduacoesService';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useGraduacoesStore } from '@/store/graduacoesStore';
@@ -22,9 +18,7 @@ const STATUS_OPTIONS = ['Planejado', 'Em progresso', 'Em avaliação', 'Pronto p
 
 const TIPO_OPTIONS = ['Faixa', 'Grau'];
 
-export function GraduacoesStaffPageContent({ forcedView, showTabs = !forcedView }) {
-  const router = useRouter();
-  const pathname = usePathname();
+export function GraduacoesStaffPageContent() {
   const { staff } = useCurrentStaff();
   const graduacoesRaw = useGraduacoesStore((state) => state.graduacoes);
   const alunos = useAlunosStore((state) => state.alunos);
@@ -35,13 +29,6 @@ export function GraduacoesStaffPageContent({ forcedView, showTabs = !forcedView 
   const [statusFiltro, setStatusFiltro] = useState('');
   const [tipoFiltro, setTipoFiltro] = useState('');
   const [periodoFiltro, setPeriodoFiltro] = useState(30);
-  const activeView = useMemo(() => {
-    if (forcedView) return forcedView;
-    if (pathname?.includes('/graduacoes/historico')) return 'historico';
-    if (pathname?.includes('/graduacoes/proximas')) return 'proximas';
-    return 'proximas';
-  }, [forcedView, pathname]);
-
   // Se o aluno já atingiu a meta manualmente (ex.: faixa ou grau ajustado via edição),
   // sincronizamos o status da graduação e aplicamos os efeitos colaterais centrais
   // (atualizar histórico e recomputar dados do aluno) para manter todas as telas alinhadas.
@@ -88,55 +75,6 @@ export function GraduacoesStaffPageContent({ forcedView, showTabs = !forcedView 
     [graduacoesFiltradas]
   );
 
-  const historico = useMemo(() => {
-    const entries = alunos.flatMap((aluno) =>
-      (aluno.historicoGraduacoes || []).map((item) => ({
-        ...item,
-        alunoId: aluno.id,
-        alunoNome: aluno.nome,
-        faixaSlug: item.faixaSlug || item.faixa,
-        faixa: item.faixa || item.faixaSlug || aluno.faixa,
-        grau: item.grau ?? item.grauAtual ?? null
-      }))
-    );
-
-    const concluidas = graduacoes
-      .filter((item) => item.status === 'Concluído')
-      .map((item) => ({
-        id: item.id,
-        alunoId: item.alunoId,
-        alunoNome: item.alunoNome,
-        faixaSlug: item.proximaFaixaSlug || item.faixaSlugAtual,
-        faixa: item.proximaFaixa || item.faixaAtual,
-        grau: item.tipo === 'Grau' ? item.grauAlvo ?? item.grauAtual ?? null : null,
-        tipo: item.tipo,
-        data: item.dataConclusao ?? item.previsao,
-        descricao:
-          item.tipo === 'Faixa'
-            ? `${item.faixaAtual} → ${item.proximaFaixa}`
-            : `${item.grauAlvo ?? item.grauAtual ?? ''}º grau em ${item.faixaAtual}`,
-        instrutor: item.instrutor
-      }));
-
-    const dedup = new Map();
-    [...entries, ...concluidas].forEach((item) => {
-      const key = item.id || `${item.alunoId}-${item.tipo}-${item.faixaSlug}-${item.grau}-${item.data}`;
-      dedup.set(key, item);
-    });
-
-    const limiteMs = periodoFiltro ? Date.now() - periodoFiltro * 24 * 60 * 60 * 1000 : null;
-
-    return Array.from(dedup.values())
-      .filter((item) => {
-        const nomeMatch = buscaNome ? item.alunoNome?.toLowerCase().includes(buscaNome.toLowerCase()) : true;
-        const faixaMatch = faixaFiltro ? normalizeFaixaSlug(item.faixaSlug) === faixaFiltro : true;
-        const dataMs = item.data ? new Date(item.data).getTime() : NaN;
-        const dentroDaJanela = limiteMs ? Number.isFinite(dataMs) && dataMs >= limiteMs : true;
-        return nomeMatch && faixaMatch && dentroDaJanela;
-      })
-      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-  }, [alunos, buscaNome, faixaFiltro, graduacoes, periodoFiltro]);
-
   const cards = useMemo(() => {
     const pendentes = graduacoes.filter((g) => g.status !== 'Concluído');
     const concluidas = graduacoes.filter((g) => g.status === 'Concluído');
@@ -177,11 +115,6 @@ export function GraduacoesStaffPageContent({ forcedView, showTabs = !forcedView 
   const handleStatusChange = async (graduacao, status) => {
     const dataConclusao = status === 'Concluído' ? new Date().toISOString().split('T')[0] : graduacao.dataConclusao;
     await updateGraduacao(graduacao.id, { status, dataConclusao });
-  };
-
-  const handleViewChange = (nextView) => {
-    const target = nextView === 'historico' ? '/graduacoes/historico' : '/graduacoes/proximas';
-    router.push(target);
   };
 
   return (
@@ -303,26 +236,11 @@ export function GraduacoesStaffPageContent({ forcedView, showTabs = !forcedView 
           <ShieldCheck size={14} /> Visão de graduações
         </div>
 
-        {showTabs && (
-          <MinimalTabs
-            items={[
-              { id: 'proximas', label: 'Próximas graduações' },
-              { id: 'historico', label: 'Histórico recente' }
-            ]}
-            activeId={activeView}
-            onChange={handleViewChange}
-          />
-        )}
-
-        {activeView === 'proximas' && (
-          <GraduacoesProximasView
-            graduacoesPendentes={graduacoesPendentes}
-            alunoLookup={alunoLookup}
-            onStatusChange={handleStatusChange}
-          />
-        )}
-
-        {activeView === 'historico' && <GraduacoesHistoricoView historico={historico} periodoFiltro={periodoFiltro} />}
+        <GraduacoesProximasView
+          graduacoesPendentes={graduacoesPendentes}
+          alunoLookup={alunoLookup}
+          onStatusChange={handleStatusChange}
+        />
       </section>
     </div>
   );
