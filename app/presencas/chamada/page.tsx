@@ -211,19 +211,19 @@ export default function PresencasChamadaPage() {
             <p className="text-sm text-bjj-gray-200">Acesse as telas beta de QR Code para testar o fluxo de validação.</p>
             <div className="mt-3 flex flex-wrap gap-2 text-sm">
               <Link
-                href="/staff/qr/academia"
+                href="/presencas/qr"
                 className="rounded-full bg-bjj-blue-700/20 px-3 py-1 font-semibold text-bjj-blue-100 ring-1 ring-bjj-blue-700/60 hover:bg-bjj-blue-700/30"
               >
                 QR Code da Academia
               </Link>
               <Link
-                href="/staff/qr/validar"
+                href="/presencas/qr/validar"
                 className="rounded-full bg-bjj-gray-800 px-3 py-1 font-semibold text-bjj-gray-100 ring-1 ring-bjj-gray-700 hover:bg-bjj-gray-700"
               >
                 Validar QR Code
               </Link>
               <Link
-                href="/staff/qr/historico"
+                href="/presencas/qr/historico"
                 className="rounded-full bg-bjj-gray-800 px-3 py-1 font-semibold text-bjj-gray-100 ring-1 ring-bjj-gray-700 hover:bg-bjj-gray-700"
               >
                 Histórico de Validações

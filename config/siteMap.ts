@@ -32,9 +32,9 @@ export const siteMap = {
     '/presencas/chamada',
     '/presencas/pendencias',
     '/presencas/revisao',
-    '/staff/qr/academia',
-    '/staff/qr/validar',
-    '/staff/qr/historico'
+    '/presencas/qr',
+    '/presencas/qr/validar',
+    '/presencas/qr/historico'
   ],
   [ROLE_KEYS.professor]: [
     '/dashboard',
@@ -54,9 +54,9 @@ export const siteMap = {
     '/presencas/chamada',
     '/presencas/pendencias',
     '/presencas/revisao',
-    '/staff/qr/academia',
-    '/staff/qr/validar',
-    '/staff/qr/historico',
+    '/presencas/qr',
+    '/presencas/qr/validar',
+    '/presencas/qr/historico',
     '/alunos',
     '/relatorios',
     '/configuracoes/graduacao',
