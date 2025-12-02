@@ -28,11 +28,11 @@ export default function PerfilAlunoPage() {
   const deriveInitialForm = () => ({
     nome:
       (isAluno
-        ? aluno?.nome
+        ? aluno?.nome || user?.nomeCompleto || user?.name
         : staff?.nome || user?.nomeCompleto || user?.name) || '',
-    telefone: (isAluno ? aluno?.telefone : user?.telefone) || '',
-    email: (isAluno ? aluno?.email : user?.email) || '',
-    avatarUrl: (isAluno ? aluno?.avatarUrl : user?.avatarUrl || staff?.avatarUrl) || ''
+    telefone: (isAluno ? aluno?.telefone || user?.telefone : user?.telefone) || '',
+    email: (isAluno ? aluno?.email || user?.email : user?.email) || '',
+    avatarUrl: (isAluno ? aluno?.avatarUrl || user?.avatarUrl : user?.avatarUrl || staff?.avatarUrl) || ''
   });
 
   const [form, setForm] = useState(deriveInitialForm);
@@ -81,6 +81,13 @@ export default function PerfilAlunoPage() {
     event.preventDefault();
     if (isAluno && aluno) {
       updateAluno(aluno.id, form);
+      updateUser?.({
+        name: form.nome,
+        nomeCompleto: form.nome,
+        telefone: form.telefone,
+        email: form.email,
+        avatarUrl: form.avatarUrl
+      });
     } else {
       const alunoId = staff?.alunoId || user?.alunoId;
       if (alunoId) {

@@ -27,41 +27,41 @@ const allowedPilotUsers: AuthUser[] = [
   {
     id: 'aluno-001',
     email: 'aluno1@bjjacademy.com',
-    nomeCompleto: 'Aluno Piloto 1',
-    name: 'Aluno Piloto 1',
+    nomeCompleto: 'João Silva',
+    name: 'João Silva',
     roles: [ROLE_KEYS.aluno],
-    alunoId: 'aluno-001',
+    alunoId: 'aluno_joao_silva',
     instrutorId: null,
     professorId: null,
     academiaId: DEFAULT_ACADEMIA_ID,
-    avatarUrl: null,
-    telefone: null
+    avatarUrl: 'https://images.unsplash.com/photo-1593104547489-e03a09fd1ccb?auto=format&fit=crop&w=320&q=80',
+    telefone: '(11) 98888-7766'
   },
   {
     id: 'aluno-002',
     email: 'aluno2@bjjacademy.com',
-    nomeCompleto: 'Aluno Piloto 2',
-    name: 'Aluno Piloto 2',
+    nomeCompleto: 'Maria Souza',
+    name: 'Maria Souza',
     roles: [ROLE_KEYS.aluno],
-    alunoId: 'aluno-002',
+    alunoId: '2',
     instrutorId: null,
     professorId: null,
     academiaId: DEFAULT_ACADEMIA_ID,
-    avatarUrl: null,
-    telefone: null
+    avatarUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80',
+    telefone: '(21) 97777-6655'
   },
   {
     id: 'aluno-003',
     email: 'aluno3@bjjacademy.com',
-    nomeCompleto: 'Aluno Piloto 3',
-    name: 'Aluno Piloto 3',
+    nomeCompleto: 'Carlos Pereira',
+    name: 'Carlos Pereira',
     roles: [ROLE_KEYS.aluno],
-    alunoId: 'aluno-003',
+    alunoId: '3',
     instrutorId: null,
     professorId: null,
     academiaId: DEFAULT_ACADEMIA_ID,
     avatarUrl: null,
-    telefone: null
+    telefone: '(31) 96666-5544'
   },
   {
     id: 'admin-001',

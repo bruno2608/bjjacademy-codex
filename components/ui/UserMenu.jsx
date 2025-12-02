@@ -13,16 +13,14 @@ import { ChevronDown, LogOut, UserCircle2 } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import { getNavigationConfigForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
-import { useAlunosStore } from '@/store/alunosStore';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { getUserAvatarData } from '@/lib/userAvatar';
 
 export default function UserMenu({ inline = false }) {
   const router = useRouter();
   const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
-  const aluno = useAlunosStore((state) =>
-    user?.alunoId ? state.getAlunoById(user.alunoId) : null
-  );
+  const { aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
   const { roles } = useRole();
   const [open, setOpen] = useState(inline);
