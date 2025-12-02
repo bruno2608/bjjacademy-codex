@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Award, Clock3, Filter, Medal, ShieldCheck } from 'lucide-react';
 
@@ -22,7 +22,7 @@ const STATUS_OPTIONS = ['Planejado', 'Em progresso', 'Em avaliação', 'Pronto p
 
 const TIPO_OPTIONS = ['Faixa', 'Grau'];
 
-export default function GraduacoesStaffPage() {
+function GraduacoesStaffPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { staff } = useCurrentStaff();
@@ -323,5 +323,13 @@ export default function GraduacoesStaffPage() {
         {activeView === 'historico' && <GraduacoesHistoricoView historico={historico} periodoFiltro={periodoFiltro} />}
       </section>
     </div>
+  );
+}
+
+export default function GraduacoesStaffPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-bjj-gray-200">Carregando graduações...</div>}>
+      <GraduacoesStaffPageContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, CalendarDays, CheckCircle2, Clock, PieChart } from 'lucide-react';
 
@@ -71,7 +71,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-export default function PresencasPage() {
+function PresencasPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -440,5 +440,13 @@ export default function PresencasPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function PresencasPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-bjj-gray-200">Carregando presenças...</div>}>
+      <PresencasPageContent />
+    </Suspense>
   );
 }
