@@ -5,10 +5,13 @@ import {
   criarPresenca,
   fecharAula as serviceFecharAula,
   fecharTreino as serviceFecharTreino,
+  listarPresencasDoAluno,
   listarPresencasPorAluno,
   listarPresencasPorAula,
   listarPresencasPorTreino,
+  listarPresencasUltimos30Dias,
   listarTodasPresencas,
+  registrarCheckinManual as serviceRegistrarCheckinManual,
   registrarCheckin as serviceRegistrarCheckin,
   registrarOuAtualizarPresenca,
   removerPresenca,
@@ -37,7 +40,14 @@ type PresencasState = {
   carregarPorAluno: (alunoId: string) => Promise<void>
   carregarPorTreino: (treinoId: string) => Promise<void>
   carregarPorAula: (aulaId: string) => Promise<void>
+  listarDoAluno: (alunoId: string) => Promise<PresencaRegistro[]>
+  listarUltimos30Dias: () => Promise<PresencaRegistro[]>
   registrarCheckin: (payload: RegistroCheckinPayload) => Promise<{ registro: PresencaRegistro | null; status: CheckinStatus }>
+  registrarCheckinManual: (
+    alunoId: string,
+    dataHora?: string,
+    origem?: PresencaOrigem
+  ) => Promise<PresencaRegistro | null>
   registrarPresencaEmAula: (
     payload: Omit<PresencaRegistro, 'id' | 'createdAt' | 'updatedAt' | 'origem'> & { status?: PresencaStatus; origem?: PresencaOrigem }
   ) => Promise<PresencaRegistro>
@@ -92,6 +102,22 @@ export const usePresencasStore = create<PresencasState>((set, get) => ({
     set({ presencas: combinadas })
     syncAlunos(combinadas)
   },
+  listarDoAluno: async (alunoId) => {
+    const lista = await listarPresencasDoAluno(alunoId)
+    const outras = get().presencas.filter((item) => item.alunoId !== alunoId)
+    const combinadas = [...outras, ...lista]
+    set({ presencas: combinadas })
+    syncAlunos(combinadas)
+    return lista
+  },
+  listarUltimos30Dias: async () => {
+    const lista = await listarPresencasUltimos30Dias()
+    const ids = new Set(lista.map((item) => item.id))
+    const combinadas = [...get().presencas.filter((item) => !ids.has(item.id)), ...lista]
+    set({ presencas: combinadas })
+    syncAlunos(combinadas)
+    return lista
+  },
   registrarCheckin: async (payload) => {
     const sessionKey = `${payload.data || ''}::${payload.treinoId || 'principal'}`
     if (get().treinosFechados[sessionKey]) {
@@ -111,6 +137,18 @@ export const usePresencasStore = create<PresencasState>((set, get) => ({
     set({ presencas: atualizadas })
     syncAlunos(atualizadas)
     return { registro, status: 'checkin' }
+  },
+  registrarCheckinManual: async (alunoId, dataHora, origem) => {
+    try {
+      const registro = await serviceRegistrarCheckinManual(alunoId, dataHora, origem)
+      const atualizadas = [...get().presencas.filter((item) => item.id !== registro.id), registro]
+      set({ presencas: atualizadas })
+      syncAlunos(atualizadas)
+      return registro
+    } catch (error) {
+      console.error('Erro ao registrar check-in manual', error)
+      return null
+    }
   },
   registrarPresencaEmAula: async (payload) => {
     const registro = await registrarOuAtualizarPresenca({
