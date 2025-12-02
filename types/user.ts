@@ -28,7 +28,7 @@ export interface StaffProfile {
 
 export type LoginPayload = {
   email: string;
-  roles?: UserRole[];
+  senha: string;
 };
 
 export type Genero = 'Masculino' | 'Feminino' | 'Outro' | null;
