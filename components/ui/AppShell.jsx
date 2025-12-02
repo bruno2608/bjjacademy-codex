@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense, useEffect, useMemo } from 'react';
-import { usePathname } from 'next/navigation';
+import { useEffect, useMemo } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 import useUserStore from '../../store/userStore';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
@@ -12,9 +12,10 @@ import ShellFooter from '../layouts/ShellFooter';
 const BARE_PATHS = ['/login', '/unauthorized'];
 
 export default function AppShell({ children }) {
+  const router = useRouter();
   const pathname = usePathname();
-  const { hydrateFromStorage, hydrated, updateUser } = useUserStore();
-  const { user, aluno } = useCurrentAluno();
+  const { hydrateFromStorage, hydrated, updateUser, user: storeUser } = useUserStore();
+  const { aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
 
   useEffect(() => {
@@ -24,20 +25,38 @@ export default function AppShell({ children }) {
   }, [hydrateFromStorage, hydrated]);
 
   useEffect(() => {
-    const nextAvatar = aluno?.avatarUrl || staff?.avatarUrl || user?.avatarUrl;
+    const nextAvatar = aluno?.avatarUrl || staff?.avatarUrl || storeUser?.avatarUrl;
     const nextName = aluno?.nome || staff?.nome;
-    if (user && nextAvatar && nextAvatar !== user.avatarUrl && updateUser) {
-      updateUser({ avatarUrl: nextAvatar, name: nextName || user.name });
+    if (storeUser && nextAvatar && nextAvatar !== storeUser.avatarUrl && updateUser) {
+      updateUser({ avatarUrl: nextAvatar, name: nextName || storeUser.name });
     }
-  }, [aluno, staff, updateUser, user]);
+  }, [aluno, staff, storeUser, updateUser]);
 
   const isBareLayout = useMemo(
     () => BARE_PATHS.some((publicPath) => pathname?.startsWith(publicPath)),
     [pathname]
   );
 
+  useEffect(() => {
+    if (hydrated && !storeUser) {
+      router.replace('/login');
+    }
+  }, [hydrated, router, storeUser]);
+
   if (isBareLayout) {
     return children;
+  }
+
+  if (!hydrated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bjj-black text-bjj-white">
+        <div className="text-sm text-bjj-gray-200">Carregando ambiente...</div>
+      </div>
+    );
+  }
+
+  if (!storeUser) {
+    return null;
   }
 
   return (
