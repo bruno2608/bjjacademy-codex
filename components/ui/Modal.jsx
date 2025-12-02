@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { iconVariants, iconSizes } from '@/styles/iconTokens';
 
 export default function Modal({ isOpen, title, onClose, children }) {
   const [mounted, setMounted] = useState(false);
@@ -70,7 +71,7 @@ export default function Modal({ isOpen, title, onClose, children }) {
             className="btn btn-ghost btn-sm text-bjj-gray-200"
             aria-label="Fechar modal"
           >
-            <X size={16} />
+            <X className={`${iconSizes.sm} ${iconVariants.default}`} />
           </button>
         </header>
         <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1 lg:max-h-[75vh]">{children}</div>

@@ -13,6 +13,7 @@ import useRole from '../../hooks/useRole';
 import useUserStore from '../../store/userStore';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 export default function Header() {
   const router = useRouter();
@@ -85,7 +86,7 @@ export default function Header() {
         className="inline-flex items-center justify-center rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-2 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white"
         aria-label="Abrir menu"
       >
-        <Menu size={18} />
+        <Menu className={`${iconSizes.md} ${iconColors.default}`} />
       </button>
       <span className="text-sm font-semibold uppercase tracking-wide text-bjj-gray-200">BJJ Academy</span>
       <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-bjj-red/80 to-bjj-red text-xs font-semibold text-bjj-white shadow-[0_0_0_1px_rgba(225,6,0,0.4)]">
@@ -107,7 +108,7 @@ export default function Header() {
                 className="rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-2 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white"
                 aria-label="Fechar menu"
               >
-                <X size={16} />
+                <X className={`${iconSizes.sm} ${iconColors.default}`} />
               </button>
             </div>
             <nav className="flex max-h-[70vh] flex-col gap-2 overflow-y-auto">
@@ -128,7 +129,7 @@ export default function Header() {
                     aria-current={active ? 'page' : undefined}
                   >
                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-bjj-gray-900/70 text-bjj-gray-200">
-                      {Icon ? <Icon size={18} /> : null}
+                      {Icon ? <Icon className={`${iconSizes.md} ${iconColors.default}`} /> : null}
                     </span>
                     <div className="flex flex-col">
                       <span className="font-semibold leading-tight">{item.title}</span>
@@ -167,7 +168,7 @@ export default function Header() {
                     className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
                     onClick={() => setOpen(false)}
                   >
-                    <UserCircle2 size={16} /> Meu perfil
+                    <UserCircle2 className={`${iconSizes.sm} ${iconColors.default}`} /> Meu perfil
                   </Link>
                 )}
 
@@ -177,7 +178,7 @@ export default function Header() {
                     className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
                     onClick={() => setOpen(false)}
                   >
-                    <BarChart3 size={16} /> Relatórios
+                    <BarChart3 className={`${iconSizes.sm} ${iconColors.default}`} /> Relatórios
                   </Link>
                 )}
 
@@ -190,9 +191,13 @@ export default function Header() {
                       aria-expanded={configOpen}
                     >
                       <span className="inline-flex items-center gap-2">
-                        <Settings2 size={14} /> Configurações
+                        <Settings2 className={`${iconSizes.sm} ${iconColors.default}`} /> Configurações
                       </span>
-                      <ChevronDown size={14} className={`transition ${configOpen ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-500'}`} />
+                      <ChevronDown
+                        className={`transition ${iconSizes.xs} ${
+                          configOpen ? iconColors.default : iconColors.muted
+                        } ${configOpen ? 'rotate-180' : ''}`}
+                      />
                     </button>
                     {configOpen && (
                       <ul className="border-t border-bjj-gray-800/70 px-3 py-2 text-sm">
@@ -200,13 +205,16 @@ export default function Header() {
                           <li key={child.path}>
                             <Link
                               href={child.path}
-                              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-bjj-gray-200/80 transition hover:bg-bjj-gray-900/70 hover:text-bjj-white"
+                              className="group flex items-center gap-2 rounded-lg px-2 py-1.5 text-bjj-gray-200/80 transition hover:bg-bjj-gray-900/70 hover:text-bjj-white"
                               onClick={() => {
                                 setOpen(false);
                                 setConfigOpen(false);
                               }}
                             >
-                              <ChevronRight size={14} className="text-bjj-gray-500" /> {child.title}
+                              <ChevronRight
+                                className={`${iconSizes.xs} ${iconColors.muted} group-hover:text-bjj-white`}
+                              />{' '}
+                              {child.title}
                             </Link>
                           </li>
                         ))}
@@ -221,7 +229,7 @@ export default function Header() {
                 onClick={handleLogout}
                 className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-bjj-gray-800 px-3 py-2 text-sm font-semibold text-bjj-gray-200 transition hover:border-bjj-red/70 hover:bg-bjj-red/20 hover:text-bjj-white"
               >
-                <LogOut size={16} /> Sair
+                <LogOut className={`${iconSizes.sm} ${iconColors.danger}`} /> Sair
               </button>
             </div>
           </div>
