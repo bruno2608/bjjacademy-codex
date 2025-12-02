@@ -322,43 +322,22 @@ export default function PresencasPage() {
       </div>
 
       <section className="space-y-3 rounded-2xl bg-bjj-gray-900/60 p-4 ring-1 ring-bjj-gray-800">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-bjj-gray-200/70">Fluxos de presença</p>
-            <h2 className="text-lg font-semibold text-white">Alternar entre chamada e pendências</h2>
-            <p className="text-sm text-bjj-gray-200/90">
-              Use abas enxutas para navegar pelos dois modos sem perder o contexto da turma atual.
-            </p>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-bjj-gray-200/70">Fluxos de presença</p>
+            <h2 className="text-lg font-semibold text-white">Chamada e pendências</h2>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-bjj-gray-700 bg-bjj-gray-900 px-3 py-2 text-[11px] font-semibold text-bjj-gray-100">
+          <div className="inline-flex items-center gap-2 rounded-full border border-bjj-gray-800 bg-bjj-gray-900 px-3 py-1.5 text-[11px] font-semibold text-bjj-gray-100">
             <PieChart size={14} />
             {turmaAtual ? turmaAtual.nome : 'Turma não selecionada'}
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-2 text-sm font-semibold">
-          {abasDisponiveis.map((aba) => (
-            <button
-              key={aba.id}
-              type="button"
-              onClick={() => setAbaAtiva(aba.id)}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-bjj-red/60 focus:ring-offset-0 ${
-                abaAtiva === aba.id
-                  ? 'bg-bjj-red text-bjj-white shadow-[0_10px_25px_-15px_rgba(248,113,113,0.8)]'
-                  : 'bg-bjj-gray-900/70 text-bjj-gray-200 hover:text-bjj-white'
-              }`}
-            >
-              <span className="uppercase tracking-[0.14em]">{aba.titulo}</span>
-              <span
-                className={`rounded-full px-2 py-1 text-[11px] ${
-                  abaAtiva === aba.id ? 'bg-bjj-black/40 text-bjj-gray-100' : 'bg-bjj-gray-800/80 text-bjj-gray-100'
-                }`}
-              >
-                {aba.badge}
-              </span>
-            </button>
-          ))}
-        </div>
+        <MinimalTabs
+          items={abasDisponiveis.map((aba) => ({ id: aba.id, label: aba.titulo, badge: aba.badge }))}
+          activeId={abaAtiva}
+          onChange={setAbaAtiva}
+        />
       </section>
 
       {abaAtiva === 'chamada' ? (

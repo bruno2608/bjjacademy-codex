@@ -8,6 +8,7 @@ import GraduationList from '@/components/graduacoes/GraduationList';
 import GraduationTimeline from '@/components/graduacoes/GraduationTimeline';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
+import MinimalTabs from '@/components/ui/Tabs';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { useGraduacoesProfessorView } from '@/hooks/useGraduacoesProfessorView';
 import { normalizeFaixaSlug } from '@/lib/alunoStats';
@@ -288,25 +289,15 @@ export default function GraduacoesStaffPage() {
         <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">
           <ShieldCheck size={14} /> Visão de graduações
         </div>
-        <div className="flex flex-wrap gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 p-2 text-sm font-semibold">
-          {[
+
+        <MinimalTabs
+          items={[
             { id: 'proximas', label: 'Próximas graduações' },
             { id: 'historico', label: 'Histórico recente' }
-          ].map((aba) => (
-            <button
-              key={aba.id}
-              type="button"
-              onClick={() => setAbaAtiva(aba.id)}
-              className={`flex-1 rounded-lg px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-bjj-red/60 focus:ring-offset-0 sm:flex-none ${
-                abaAtiva === aba.id
-                  ? 'bg-bjj-red text-bjj-white shadow-[0_10px_25px_-15px_rgba(248,113,113,0.8)]'
-                  : 'bg-bjj-gray-900/70 text-bjj-gray-200 hover:text-bjj-white'
-              }`}
-            >
-              {aba.label}
-            </button>
-          ))}
-        </div>
+          ]}
+          activeId={abaAtiva}
+          onChange={setAbaAtiva}
+        />
 
         {abaAtiva === 'proximas' ? (
           <div className="space-y-4">
