@@ -5,6 +5,8 @@ export const siteMap = {
   [ROLE_KEYS.aluno]: [
     '/dashboard',
     '/checkin',
+    '/aluno/checkin',
+    '/aluno/checkin/manual',
     '/treinos',
     '/evolucao',
     '/historico-presencas',
@@ -14,6 +16,8 @@ export const siteMap = {
   [ROLE_KEYS.instrutor]: [
     '/dashboard',
     '/checkin',
+    '/aluno/checkin',
+    '/aluno/checkin/manual',
     '/treinos',
     '/evolucao',
     '/graduacoes',
@@ -26,6 +30,8 @@ export const siteMap = {
   [ROLE_KEYS.professor]: [
     '/dashboard',
     '/checkin',
+    '/aluno/checkin',
+    '/aluno/checkin/manual',
     '/treinos',
     '/evolucao',
     '/graduacoes',
@@ -34,6 +40,8 @@ export const siteMap = {
     '/belt-demo',
     '/configuracoes',
     '/presencas',
+    '/presencas/chamada',
+    '/presencas/revisao',
     '/alunos',
     '/relatorios',
     '/configuracoes/graduacao',
