@@ -6,11 +6,11 @@ export const iconSizes = {
 };
 
 export const iconColors = {
-  default: 'text-slate-50',
-  muted: 'text-slate-400',
+  default: 'text-bjj-white',
+  muted: 'text-bjj-gray-300',
   primary: 'text-bjj-red',
-  danger: 'text-red-500',
-  disabled: 'text-slate-500'
+  danger: 'text-red-400',
+  disabled: 'text-bjj-gray-500'
 };
 
 export const iconVariants = {
