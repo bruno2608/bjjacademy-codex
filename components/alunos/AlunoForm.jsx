@@ -13,6 +13,7 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 import FormSection from '../ui/FormSection';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 const formatTelefone = (raw) => {
   const digits = raw.replace(/\D/g, '').slice(0, 11);
@@ -351,7 +352,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
             onClick={prevStep}
             disabled={step === 0}
           >
-            <ChevronLeft size={14} /> Voltar
+            <ChevronLeft size={14} className={`${iconSizes.sm} ${iconColors.default}`} /> Voltar
           </Button>
           <Button
             type={isLastStep ? 'submit' : 'button'}
@@ -360,7 +361,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
             disabled={isSubmitting}
           >
             {isLastStep ? submitLabel : 'Avançar'}
-            {!isLastStep && <ChevronRight size={14} />}
+            {!isLastStep && <ChevronRight size={14} className={`${iconSizes.sm} ${iconColors.default}`} />}
           </Button>
         </div>
       </div>

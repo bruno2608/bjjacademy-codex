@@ -3,6 +3,7 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import { Clock } from 'lucide-react';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 // Visão específica da chamada do dia para professores/instrutores
 export default function PresencasChamadaView({
@@ -43,7 +44,7 @@ export default function PresencasChamadaView({
 
       {turmasDaAcademia.length === 0 ? (
         <div className="mt-4 flex items-center gap-3 rounded-xl border border-dashed border-bjj-gray-700 bg-bjj-gray-900/60 p-4 text-bjj-gray-100">
-          <Clock size={20} className="text-yellow-300" />
+          <Clock size={20} className={`${iconSizes.md} text-yellow-300`} />
           <div>
             <p className="font-semibold text-white">Nenhuma turma encontrada</p>
             <p className="text-sm text-bjj-gray-200">Cadastre turmas na academia para iniciar a chamada.</p>
@@ -53,7 +54,7 @@ export default function PresencasChamadaView({
         <>
           <div className="mt-4 flex items-center justify-between rounded-xl bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200 ring-1 ring-bjj-gray-700">
             <div className="flex items-center gap-2 text-white">
-              <Clock size={16} />
+              <Clock size={16} className={`${iconSizes.sm} ${iconColors.default}`} />
               <span>{turmaAtual ? turmaAtual.nome : 'Turma não selecionada'} • {formatDateBr(selectedDate)}</span>
             </div>
             <div className="flex items-center gap-2 text-xs">

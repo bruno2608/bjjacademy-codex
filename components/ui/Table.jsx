@@ -7,6 +7,7 @@
  */
 import { Loader2, Pencil, Trash2 } from 'lucide-react';
 import Badge from './Badge';
+import { iconColors, iconSizes, iconVariants } from '@/styles/iconTokens';
 
 export default function Table({ headers, data, onEdit, onDelete, isLoading = false }) {
   const tableHeaders = headers || ['Ações', 'Aluno', 'Graduação', 'Plano', 'Status', 'Contato'];
@@ -36,16 +37,16 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
               return (
                 <div key={row.id} className="bg-bjj-gray-900/50 transition-colors hover:bg-bjj-gray-900/75">
                   <div className="min-w-[1120px] grid grid-cols-[160px_minmax(200px,1.08fr)_minmax(280px,1.28fr)_minmax(180px,1fr)_minmax(140px,0.95fr)_minmax(190px,1fr)]">
-                    <div className="flex items-center justify-center gap-2 border-b border-bjj-gray-800/60 px-3.5 py-3">
-                      <button className={actionButtonClasses} onClick={() => onEdit?.(row)}>
-                        <Pencil size={14} />
-                        <span className="sr-only">Editar dados do aluno</span>
-                      </button>
-                      <button className={actionButtonClasses} onClick={() => onDelete?.(row)}>
-                        <Trash2 size={14} />
-                        <span className="sr-only">Remover aluno</span>
-                      </button>
-                    </div>
+                  <div className="flex items-center justify-center gap-2 border-b border-bjj-gray-800/60 px-3.5 py-3">
+                    <button className={actionButtonClasses} onClick={() => onEdit?.(row)}>
+                      <Pencil className={`${iconSizes.sm} ${iconVariants.default}`} />
+                      <span className="sr-only">Editar dados do aluno</span>
+                    </button>
+                    <button className={actionButtonClasses} onClick={() => onDelete?.(row)}>
+                      <Trash2 className={`${iconSizes.sm} ${iconColors.danger}`} />
+                      <span className="sr-only">Remover aluno</span>
+                    </button>
+                  </div>
                     <div className="border-b border-bjj-gray-800/60 px-3.5 py-3">
                       <p className="text-sm font-semibold text-bjj-white break-words leading-tight">{row.nome}</p>
                     </div>
@@ -112,11 +113,11 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
                 </div>
                 <div className="flex items-center gap-2">
                   <button className={actionButtonClasses} onClick={() => onEdit?.(row)}>
-                    <Pencil size={15} />
+                    <Pencil className={`${iconSizes.sm} ${iconVariants.default}`} />
                     <span className="sr-only">Editar dados do aluno</span>
                   </button>
                   <button className={actionButtonClasses} onClick={() => onDelete?.(row)}>
-                    <Trash2 size={15} />
+                    <Trash2 className={`${iconSizes.sm} ${iconColors.danger}`} />
                     <span className="sr-only">Remover aluno</span>
                   </button>
                 </div>
@@ -127,7 +128,7 @@ export default function Table({ headers, data, onEdit, onDelete, isLoading = fal
       </div>
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-bjj-black/40">
-          <Loader2 className="h-5 w-5 animate-spin text-bjj-red" />
+          <Loader2 className={`${iconSizes.md} animate-spin text-bjj-red`} />
         </div>
       )}
     </div>

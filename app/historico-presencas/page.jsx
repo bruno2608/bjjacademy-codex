@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { CalendarRange, Check, Clock3, History, Search, UserRound, X } from 'lucide-react';
+import { iconColors, iconSizes, iconVariants } from '@/styles/iconTokens';
 import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useAlunosStore } from '../../store/alunosStore';
@@ -177,7 +178,7 @@ export default function HistoricoPresencasPage() {
       <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-2xl border border-bjj-gray-800/70 bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-950 to-bjj-gray-900/90 p-4 text-sm text-bjj-gray-50">
           <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-bjj-gray-200/90">
-            <CalendarRange size={16} /> Meses
+            <CalendarRange className={`${iconSizes.sm} ${iconVariants.default}`} /> Meses
             <MultiSelectDropdown
               options={buildMonthOptions()}
               placeholder="Selecione meses"
@@ -187,9 +188,9 @@ export default function HistoricoPresencasPage() {
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-bjj-gray-200/90">
-              <span className="flex items-center gap-2"><UserRound size={16} /> Buscar aluno</span>
+              <span className="flex items-center gap-2"><UserRound className={`${iconSizes.sm} ${iconVariants.default}`} /> Buscar aluno</span>
               <div className="flex items-center gap-2 rounded-xl border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3 py-2 text-sm text-bjj-gray-100">
-                <Search size={14} className="text-bjj-gray-300" />
+                <Search className={`${iconSizes.sm} ${iconColors.muted}`} />
                 <input
                   className="w-full bg-transparent text-sm text-white placeholder:text-bjj-gray-200/60 focus:outline-none"
                   placeholder="Nome ou e-mail"
@@ -253,14 +254,14 @@ export default function HistoricoPresencasPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-950/80 shadow-[0_16px_50px_rgba(0,0,0,0.35)]">
-        <div className="flex items-center justify-between border-b border-bjj-gray-800/70 px-4 py-3 text-sm font-semibold text-white">
-          <div className="flex items-center gap-2">
-            <History size={16} className="text-bjj-red" />
-            Histórico recente
+        <div className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-950/80 shadow-[0_16px_50px_rgba(0,0,0,0.35)]">
+          <div className="flex items-center justify-between border-b border-bjj-gray-800/70 px-4 py-3 text-sm font-semibold text-white">
+            <div className="flex items-center gap-2">
+              <History className={`${iconSizes.sm} text-bjj-red`} />
+              Histórico recente
+            </div>
+            <span className="text-xs text-bjj-gray-100/80">Exibe os 80 registros mais recentes</span>
           </div>
-          <span className="text-xs text-bjj-gray-100/80">Exibe os 80 registros mais recentes</span>
-        </div>
 
         {registros.length === 0 ? (
           <div className="p-6 text-sm text-bjj-gray-100/90">Nenhum registro encontrado para os filtros atuais.</div>
@@ -280,7 +281,7 @@ export default function HistoricoPresencasPage() {
                     <div
                       className={`absolute left-9 top-1 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full text-white shadow-[0_12px_30px_rgba(0,0,0,0.45)] ${tone.marker}`}
                     >
-                      <Icon size={18} strokeWidth={3} />
+                      <Icon className={`${iconSizes.md} ${iconColors.default}`} strokeWidth={3} />
                     </div>
                     <div className="rounded-2xl border border-bjj-gray-800/70 bg-gradient-to-br from-bjj-gray-900 via-bjj-gray-950 to-bjj-gray-900/85 p-4 shadow-[0_14px_40px_rgba(0,0,0,0.35)]">
                       <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-bjj-gray-50/80">

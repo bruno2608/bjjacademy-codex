@@ -6,6 +6,7 @@
  * preparado para mobile-first.
  */
 import { CheckCircle2, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useTreinosStore } from '@/store/treinosStore';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
@@ -134,12 +135,12 @@ export default function AttendanceTable({
                         onClick={handleConfirm}
                         disabled={!canConfirm(record.status)}
                       >
-                        <CheckCircle2 size={16} />
+                        <CheckCircle2 size={16} className={`${iconSizes.md} ${iconColors.default}`} />
                         <span className="sr-only">Confirmar presença</span>
                       </button>
                       {!isPlaceholder && (
                         <button className={actionButtonClasses('add')} onClick={() => onAddSession?.(record)}>
-                          <Plus size={16} />
+                          <Plus size={16} className={`${iconSizes.md} ${iconColors.primary}`} />
                           <span className="sr-only">Adicionar outra sessão</span>
                         </button>
                       )}
@@ -148,7 +149,7 @@ export default function AttendanceTable({
                 </div>
                 {!isPlaceholder && (
                   <button className={actionButtonClasses('edit')} onClick={() => onEdit?.(record)}>
-                    <Pencil size={15} />
+                    <Pencil size={15} className={`${iconSizes.sm} ${iconColors.default}`} />
                     <span className="sr-only">Corrigir presença</span>
                   </button>
                 )}
@@ -161,23 +162,23 @@ export default function AttendanceTable({
                     onClick={handleConfirm}
                     disabled={!canConfirm(record.status)}
                   >
-                    <CheckCircle2 size={14} />
+                    <CheckCircle2 size={14} className={`${iconSizes.sm} ${iconColors.default}`} />
                     <span className="sr-only">Confirmar presença</span>
                   </button>
                   {!isPlaceholder && (
                     <button className={actionButtonClasses('add')} onClick={() => onAddSession?.(record)}>
-                      <Plus size={13} />
+                      <Plus size={13} className={`${iconSizes.sm} ${iconColors.primary}`} />
                       <span className="sr-only">Adicionar outra sessão</span>
                     </button>
                   )}
                   {!isPlaceholder && (
                     <button className={actionButtonClasses('edit')} onClick={() => onEdit?.(record)}>
-                      <Pencil size={13} />
+                      <Pencil size={13} className={`${iconSizes.sm} ${iconColors.default}`} />
                       <span className="sr-only">Corrigir presença</span>
                     </button>
                   )}
                   <button className={actionButtonClasses('delete')} onClick={() => onDelete?.(record)} disabled={isPlaceholder}>
-                    <Trash2 size={13} />
+                    <Trash2 size={13} className={`${iconSizes.sm} ${iconColors.danger}`} />
                     <span className="sr-only">Remover registro</span>
                   </button>
                 </div>
@@ -218,7 +219,7 @@ export default function AttendanceTable({
       </div>
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-bjj-black/40">
-          <Loader2 className="h-5 w-5 animate-spin text-bjj-red" />
+          <Loader2 className={`${iconSizes.md} animate-spin ${iconColors.primary}`} />
         </div>
       )}
     </div>

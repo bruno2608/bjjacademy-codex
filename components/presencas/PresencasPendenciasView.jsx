@@ -1,6 +1,7 @@
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { AlertCircle } from 'lucide-react';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 // Visão dedicada para revisão de pendências de presença
 export default function PresencasPendenciasView({
@@ -41,7 +42,7 @@ export default function PresencasPendenciasView({
 
       <div className="mt-4 flex flex-col gap-2 rounded-xl bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200 ring-1 ring-bjj-gray-700 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 text-white">
-          <AlertCircle size={16} className="text-yellow-300" />
+          <AlertCircle size={16} className={`${iconSizes.sm} text-yellow-300`} />
           <span>Presenças pendentes: {pendencias.length}</span>
         </div>
         <span className="inline-flex items-center justify-center rounded-full bg-bjj-gray-800 px-3 py-1 text-xs text-bjj-gray-100">

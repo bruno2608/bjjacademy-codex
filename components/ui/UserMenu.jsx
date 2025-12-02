@@ -15,6 +15,7 @@ import { getNavigationConfigForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { iconColors, iconSizes, iconVariants } from '@/styles/iconTokens';
 
 const buildInitials = (name = '', email = '') => {
   const source = name || email || 'Instrutor';
@@ -122,7 +123,7 @@ export default function UserMenu({ inline = false }) {
               className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
               onClick={() => setOpen(false)}
             >
-              <Icon size={16} /> {item.title}
+              <Icon className={`${iconSizes.sm} ${iconVariants.default}`} /> {item.title}
             </Link>
           );
         })}
@@ -133,7 +134,7 @@ export default function UserMenu({ inline = false }) {
         onClick={handleLogout}
         className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-bjj-gray-800 px-3 py-2 text-sm font-semibold text-bjj-gray-200 transition hover:border-bjj-red/70 hover:bg-bjj-red/20 hover:text-bjj-white"
       >
-        <LogOut size={16} /> Sair
+        <LogOut className={`${iconSizes.sm} ${iconColors.danger}`} /> Sair
       </button>
     </div>
   );
@@ -153,7 +154,11 @@ export default function UserMenu({ inline = false }) {
       >
         {AvatarBadge}
         <span className="hidden text-xs uppercase tracking-wide text-bjj-gray-300/80 md:inline">{displayName}</span>
-        <ChevronDown size={14} className={`transition ${open ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-400 group-hover:text-bjj-white'}`} />
+        <ChevronDown
+          className={`${iconSizes.sm} transition ${
+            open ? `${iconColors.default} rotate-180` : `${iconColors.muted} group-hover:text-bjj-white`
+          }`}
+        />
       </button>
 
       {open ? menuContent : null}

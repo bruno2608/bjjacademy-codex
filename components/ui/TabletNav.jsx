@@ -2,21 +2,31 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { ChevronDown, Menu, X } from 'lucide-react';
 
 import { getNavigationConfigForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import UserMenu from './UserMenu';
+import { iconColors, iconSizes, iconVariants } from '@/styles/iconTokens';
 
-const resolveActivePath = (pathname, item) => {
+const resolveActivePath = (pathname, searchParams, item) => {
   const target = typeof item?.href === 'string' ? item.href : item?.href?.pathname || item?.path;
+  const targetView = typeof item?.href === 'object' ? item?.href?.query?.view : undefined;
+
   if (!target) return false;
-  return pathname === target || pathname.startsWith(`${target}/`);
+
+  const matchesPath = pathname === target || pathname.startsWith(`${target}/`);
+
+  if (!targetView) return matchesPath;
+
+  const currentView = searchParams?.get('view');
+  return matchesPath && currentView === targetView;
 };
 
 export default function TabletNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { roles } = useRole();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -33,35 +43,50 @@ export default function TabletNav() {
     setOpenDrawerGroups((current) => ({ ...current, [key]: !current[key] }));
   };
 
-  const renderDropdown = (item) => {
+  const renderDropdown = (item, isActive) => {
     const isOpen = openDropdown === item.key;
     return (
       <div className="relative">
         <button
           type="button"
           onClick={() => toggleDropdown(item.key)}
-          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-bjj-gray-100 transition hover:bg-bjj-gray-900/70"
+          className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition hover:bg-bjj-gray-900/70 ${
+            isOpen || isActive
+              ? 'bg-bjj-red/15 text-bjj-white shadow-[0_10px_28px_rgba(225,6,0,0.12)]'
+              : 'text-bjj-gray-100'
+          }`}
           aria-expanded={isOpen}
         >
           <span>{item.title}</span>
-          <ChevronDown size={14} className={`transition ${isOpen ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-400'}`} />
+          <ChevronDown
+            className={`${iconSizes.sm} transition ${
+              isOpen || isActive ? iconColors.default : iconColors.muted
+            }`}
+          />
         </button>
         {isOpen ? (
           <div className="absolute left-0 z-50 mt-2 w-64 rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/95 p-2 shadow-[0_25px_65px_rgba(0,0,0,0.55)]">
             <ul className="space-y-1 text-sm text-bjj-gray-100">
-              {item.children?.map((child) => (
-                <li key={child.key}>
-                  <Link
-                    href={child.href || child.path}
-                    className="flex flex-col gap-0.5 rounded-xl px-3 py-2 transition hover:bg-bjj-gray-800/60"
-                  >
-                    <span className="font-medium">{child.title}</span>
-                    {child.description ? (
-                      <span className="text-[11px] text-bjj-gray-400">{child.description}</span>
-                    ) : null}
-                  </Link>
-                </li>
-              ))}
+              {item.children?.map((child) => {
+                const childActive = resolveActivePath(pathname, searchParams, child);
+                return (
+                  <li key={child.key}>
+                    <Link
+                      href={child.href || child.path}
+                      className={`flex flex-col gap-0.5 rounded-xl px-3 py-2 transition ${
+                        childActive
+                          ? 'bg-bjj-red/15 text-bjj-white shadow-[0_10px_28px_rgba(225,6,0,0.14)]'
+                          : 'hover:bg-bjj-gray-800/60'
+                      }`}
+                    >
+                      <span className="font-medium">{child.title}</span>
+                      {child.description ? (
+                        <span className="text-[11px] text-bjj-gray-400">{child.description}</span>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ) : null}
@@ -70,12 +95,15 @@ export default function TabletNav() {
   };
 
   const renderTopItem = (item) => {
-    const isActive = resolveActivePath(pathname, item);
+    const isActive = resolveActivePath(pathname, searchParams, item);
+    const hasActiveChild = item.children?.some((child) =>
+      resolveActivePath(pathname, searchParams, child)
+    );
 
     if (item.children?.length) {
       return (
         <li key={item.key} className="relative">
-          {renderDropdown(item)}
+          {renderDropdown(item, hasActiveChild)}
         </li>
       );
     }
@@ -101,7 +129,7 @@ export default function TabletNav() {
     let currentSection = null;
 
     return drawerNav.map((item, index) => {
-      const isActive = resolveActivePath(pathname, item);
+      const isActive = resolveActivePath(pathname, searchParams, item);
       const sectionChanged = item.section && item.section !== currentSection;
       if (sectionChanged) {
         currentSection = item.section;
@@ -123,14 +151,17 @@ export default function TabletNav() {
               >
                 <span>{item.title}</span>
                 <ChevronDown
-                  size={14}
-                  className={`transition ${openDrawerGroups[item.key || item.title] ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-400'}`}
+                  className={`${iconSizes.sm} transition ${
+                    openDrawerGroups[item.key || item.title]
+                      ? `${iconColors.default} rotate-180`
+                      : iconColors.muted
+                  }`}
                 />
               </button>
               {openDrawerGroups[item.key || item.title] ? (
                 <ul className="flex flex-col gap-1 border-t border-bjj-gray-800/80 px-2 py-2 text-sm">
                   {item.children.map((child) => {
-                    const childActive = resolveActivePath(pathname, child);
+                    const childActive = resolveActivePath(pathname, searchParams, child);
                     return (
                       <li key={child.key}>
                         <Link
@@ -176,12 +207,12 @@ export default function TabletNav() {
         <div className="flex flex-1 items-center gap-6">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white md:hidden"
-            aria-label={drawerOpen ? 'Fechar menu' : 'Abrir menu'}
-            onClick={() => setDrawerOpen(true)}
-          >
-            <Menu size={18} />
-          </button>
+        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white md:hidden"
+        aria-label={drawerOpen ? 'Fechar menu' : 'Abrir menu'}
+        onClick={() => setDrawerOpen(true)}
+      >
+        <Menu className={`${iconVariants.default} ${iconSizes.md}`} />
+      </button>
 
           <span className="text-sm font-semibold uppercase tracking-wide text-bjj-gray-200 md:hidden">BJJ Academy</span>
 
@@ -200,16 +231,16 @@ export default function TabletNav() {
         <div className="fixed inset-0 z-50 bg-bjj-black/80 backdrop-blur-sm md:hidden">
           <div className="absolute inset-x-0 top-0 mx-auto flex w-full max-w-md flex-col gap-4 rounded-b-3xl border-b border-bjj-gray-800 bg-bjj-gray-900/95 p-5 shadow-[0_45px_75px_rgba(0,0,0,0.45)]">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold uppercase tracking-wide text-bjj-gray-200">Menu principal</span>
-              <button
-                type="button"
-                onClick={() => setDrawerOpen(false)}
-                className="rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-2 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white"
-                aria-label="Fechar menu"
-              >
-                <X size={16} />
-              </button>
-            </div>
+            <span className="text-sm font-semibold uppercase tracking-wide text-bjj-gray-200">Menu principal</span>
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(false)}
+              className="rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-2 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white"
+              aria-label="Fechar menu"
+            >
+              <X className={`${iconVariants.default} ${iconSizes.sm}`} />
+            </button>
+          </div>
 
             <nav className="flex max-h-[70vh] flex-col gap-2 overflow-y-auto">{renderDrawerItems()}</nav>
           </div>
