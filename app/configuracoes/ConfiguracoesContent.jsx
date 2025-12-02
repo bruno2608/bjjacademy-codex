@@ -1,7 +1,8 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
-import { navigationItems } from '../../lib/navigation';
+import { getNavigationConfigForRoles } from '../../lib/navigation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 import { ROLE_KEYS } from '@/config/roles';
@@ -10,12 +11,16 @@ import { ROLE_KEYS } from '@/config/roles';
  * Página hub das configurações administrativas com links para as subseções.
  */
 
-const configNode = navigationItems.find((item) => item.path === '/configuracoes');
-const sections = configNode?.children ?? [];
-
 export default function ConfiguracoesContent() {
   const { user } = useCurrentUser();
   const { staff } = useCurrentStaff();
+  const roles = user?.roles || [];
+
+  const sections = useMemo(() => {
+    const { topNav } = getNavigationConfigForRoles(roles);
+    const configNode = topNav?.find((item) => item.path === '/configuracoes');
+    return configNode?.children ?? [];
+  }, [roles]);
 
   const canManageConfigs = Boolean(
     user?.roles?.some((role) =>
