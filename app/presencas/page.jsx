@@ -1,12 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, CalendarDays, CheckCircle2, Clock, PieChart } from 'lucide-react';
 
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import MinimalTabs from '@/components/ui/Tabs';
+import PresencasChamadaView from '@/components/presencas/PresencasChamadaView';
+import PresencasPendenciasView from '@/components/presencas/PresencasPendenciasView';
+import PresencasRevisaoView from '@/components/presencas/PresencasRevisaoView';
 import { useAcademiasStore } from '@/store/academiasStore';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useAulasStore } from '@/store/aulasStore';
@@ -14,7 +18,6 @@ import { useMatriculasStore } from '@/store/matriculasStore';
 import { usePresencasStore } from '@/store/presencasStore';
 import { useTurmasStore } from '@/store/turmasStore';
 import { useUserStore } from '@/store/userStore';
-import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 
 const STATUS_LABELS = {
   PENDENTE: { label: 'Pendente', tone: 'text-yellow-200' },
@@ -68,14 +71,17 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-export default function PresencasPage() {
+function PresencasPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(hoje());
   const [selectedTurmaId, setSelectedTurmaId] = useState('');
   const [currentAulaId, setCurrentAulaId] = useState('');
   const [pendenciasInicio, setPendenciasInicio] = useState(formatRangeDate(-7));
   const [pendenciasFim, setPendenciasFim] = useState(hoje());
-  const [abaAtiva, setAbaAtiva] = useState('chamada');
+  const [revisaoLimite, setRevisaoLimite] = useState(10);
 
   const user = useUserStore((state) => state.user);
   const turmas = useTurmasStore((state) => state.turmas);
@@ -215,6 +221,28 @@ export default function PresencasPage() {
   const aulaAtual = currentAulaId ? aulas.find((aula) => aula.id === currentAulaId) : null;
   const turmaAtual = turmasDaAcademia.find((turma) => turma.id === selectedTurmaId);
 
+  const activeView = useMemo(() => {
+    const allowed = ['chamada', 'pendencias', 'revisao'];
+    const fromQuery = searchParams.get('view');
+    return allowed.includes(fromQuery) ? fromQuery : 'chamada';
+  }, [searchParams]);
+
+  const revisoesRecentes = useMemo(() => {
+    return presencas
+      .filter((presenca) => {
+        const turma = presenca.turmaId ? turmas.find((item) => item.id === presenca.turmaId) : null;
+        return turma ? turma.academiaId === currentAcademiaId : true;
+      })
+      .map((presenca) => ({
+        presenca,
+        turma: presenca.turmaId ? turmas.find((item) => item.id === presenca.turmaId) : null,
+        aluno: alunos.find((item) => item.id === presenca.alunoId) || { id: presenca.alunoId, nome: 'Aluno' }
+      }))
+      .filter((item) => Boolean(item.presenca?.data))
+      .sort((a, b) => new Date(b.presenca.data).getTime() - new Date(a.presenca.data).getTime())
+      .slice(0, revisaoLimite);
+  }, [alunos, currentAcademiaId, presencas, revisaoLimite, turmas]);
+
   const abasDisponiveis = useMemo(
     () => [
       {
@@ -234,9 +262,15 @@ export default function PresencasPage() {
             ? 'Reveja e aprove rapidamente as presenças pendentes'
             : 'Sem pendências no período filtrado',
         badge: `${pendencias.length} itens`
+      },
+      {
+        id: 'revisao',
+        titulo: 'Revisão / últimos envios',
+        descricao: revisoesRecentes.length > 0 ? 'Histórico recente para auditoria' : 'Nenhum envio recente',
+        badge: `${revisoesRecentes.length} registros`
       }
     ],
-    [alunosDaChamada.length, pendencias.length, resumoAula.total, selectedDate, turmaAtual]
+    [alunosDaChamada.length, pendencias.length, resumoAula.total, revisoesRecentes.length, selectedDate, turmaAtual]
   );
 
   const handleStatusChange = async (alunoId, status) => {
@@ -259,6 +293,24 @@ export default function PresencasPage() {
   const handleFecharAula = async () => {
     if (!currentAulaId) return;
     await fecharAulaStore(currentAulaId, selectedTurmaId);
+  };
+
+  const handleViewChange = (nextView) => {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    params.set('view', nextView);
+    router.push(`/presencas?${params.toString()}`);
+  };
+
+  const handlePendenciasRange = (days) => {
+    if (days === 0) {
+      const hojeData = hoje();
+      setPendenciasInicio(hojeData);
+      setPendenciasFim(hojeData);
+      return;
+    }
+
+    setPendenciasInicio(formatRangeDate(days));
+    setPendenciasFim(hoje());
   };
 
   if (isLoading) {
@@ -341,221 +393,60 @@ export default function PresencasPage() {
 
         <MinimalTabs
           items={abasDisponiveis.map((aba) => ({ id: aba.id, label: aba.titulo, badge: aba.badge }))}
-          activeId={abaAtiva}
-          onChange={setAbaAtiva}
+          activeId={activeView}
+          onChange={handleViewChange}
         />
       </section>
 
-      {abaAtiva === 'chamada' ? (
-        <section className="rounded-2xl bg-bjj-gray-800/70 p-5 shadow-lg ring-1 ring-bjj-gray-700">
-          <div className="flex flex-col gap-3 border-b border-bjj-gray-700 pb-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-bjj-gray-200">Operação em tempo real</p>
-              <h2 className="text-xl font-semibold text-white">Chamada do dia</h2>
-              <p className="text-sm text-bjj-gray-200">
-                Defina a turma e a data para registrar presenças imediatamente.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full sm:w-auto"
-              />
-              <Select
-                value={selectedTurmaId}
-                onChange={(e) => setSelectedTurmaId(e.target.value)}
-                className="w-full sm:w-auto"
-              >
-                {turmasDaAcademia.map((turma) => (
-                  <option key={turma.id} value={turma.id}>
-                    {turma.nome}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          </div>
+      {activeView === 'chamada' && (
+        <PresencasChamadaView
+          selectedDate={selectedDate}
+          selectedTurmaId={selectedTurmaId}
+          onSelectDate={setSelectedDate}
+          onSelectTurma={setSelectedTurmaId}
+          turmasDaAcademia={turmasDaAcademia}
+          turmaAtual={turmaAtual}
+          resumoAula={resumoAula}
+          alunosDaChamada={alunosDaChamada}
+          handleStatusChange={handleStatusChange}
+          formatDateBr={formatDateBr}
+          StatusBadge={StatusBadge}
+          aulaAtual={aulaAtual}
+          handleFecharAula={handleFecharAula}
+          currentAulaId={currentAulaId}
+        />
+      )}
 
-          {turmasDaAcademia.length === 0 ? (
-            <div className="mt-4 flex items-center gap-3 rounded-xl border border-dashed border-bjj-gray-700 bg-bjj-gray-900/60 p-4 text-bjj-gray-100">
-              <AlertCircle size={20} className="text-yellow-300" />
-              <div>
-                <p className="font-semibold text-white">Nenhuma turma encontrada</p>
-                <p className="text-sm text-bjj-gray-200">Cadastre turmas na academia para iniciar a chamada.</p>
-              </div>
-            </div>
-            ) : (
-              <>
-                <div className="mt-4 flex items-center justify-between rounded-xl bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200 ring-1 ring-bjj-gray-700">
-                  <div className="flex items-center gap-2 text-white">
-                    <Clock size={16} />
-                    <span>
-                      {turmaAtual ? turmaAtual.nome : 'Turma não selecionada'} • {formatDateBr(selectedDate)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <StatusBadge status={aulaAtual?.status === 'encerrada' ? 'PRESENTE' : 'PENDENTE'} />
-                    <span className="rounded-full bg-bjj-gray-800 px-2 py-1 text-bjj-gray-100">
-                      {resumoAula.total || alunosDaChamada.length} alunos na chamada
-                    </span>
-                  </div>
-                </div>
+      {activeView === 'pendencias' && (
+        <PresencasPendenciasView
+          pendencias={pendencias}
+          pendenciasInicio={pendenciasInicio}
+          pendenciasFim={pendenciasFim}
+          onChangeInicio={setPendenciasInicio}
+          onChangeFim={setPendenciasFim}
+          onQuickRange={handlePendenciasRange}
+          formatDateBr={formatDateBr}
+          StatusBadge={StatusBadge}
+          handlePendenciaStatus={handlePendenciaStatus}
+        />
+      )}
 
-                <div className="mt-4 space-y-3">
-                  {alunosDaChamada.length === 0 && (
-                    <p className="text-bjj-gray-100">Nenhum aluno ativo vinculado a esta turma.</p>
-                  )}
-                  {alunosDaChamada.map(({ aluno, matricula, presenca }) => {
-                    const faixa = aluno?.faixaSlug ? getFaixaConfigBySlug(aluno.faixaSlug) : null;
-                    const status = presenca ? presenca.status : 'PENDENTE';
-                    return (
-                      <div
-                        key={matricula.id}
-                        className="flex flex-col gap-3 rounded-xl border border-bjj-gray-700 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between"
-                      >
-                        <div className="space-y-1">
-                          <p className="text-lg font-semibold text-white">{aluno?.nome}</p>
-                          <p className="text-sm text-bjj-gray-200">Matrícula #{matricula.numero}</p>
-                          {faixa && <p className={`inline-flex rounded-full bg-bjj-gray-800 px-2 py-1 text-xs ${faixa.textColor}`}>{faixa.nome}</p>}
-                        </div>
-                        <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
-                          <StatusBadge status={status} />
-                          <div className="flex flex-wrap gap-1">
-                            <Button size="sm" variant="success" onClick={() => handleStatusChange(aluno.id, 'PRESENTE')}>
-                              Presente
-                            </Button>
-                            <Button size="sm" variant="secondary" onClick={() => handleStatusChange(aluno.id, 'FALTA')}>
-                              Falta
-                            </Button>
-                            <Button size="sm" variant="outline" onClick={() => handleStatusChange(aluno.id, 'JUSTIFICADA')}>
-                              Justificar
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-4 flex flex-col gap-2 rounded-xl bg-bjj-gray-900/60 p-4 ring-1 ring-bjj-gray-700 md:flex-row md:items-center md:justify-between">
-                  <div className="text-sm text-bjj-gray-200">
-                    <p className="font-semibold text-white">Fechar treino</p>
-                    <p>Marca pendentes como presentes e encerra a aula instância.</p>
-                  </div>
-                  <Button variant="primary" onClick={handleFecharAula} disabled={!currentAulaId}>
-                    Fechar treino
-                  </Button>
-                </div>
-              </>
-            )}
-          </section>
-        ) : (
-        <section className="rounded-2xl bg-bjj-gray-800/70 p-5 shadow-lg ring-1 ring-bjj-gray-700">
-          <div className="flex flex-col gap-3 border-b border-bjj-gray-700 pb-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-bjj-gray-200">Operação pós-aula</p>
-              <h2 className="text-xl font-semibold text-white">Pendências de aprovação</h2>
-              <p className="text-sm text-bjj-gray-200">Revisão rápida de presenças pendentes no período.</p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Input
-                type="date"
-                value={pendenciasInicio}
-                onChange={(e) => setPendenciasInicio(e.target.value)}
-                className="w-full sm:w-auto"
-              />
-              <Input
-                type="date"
-                value={pendenciasFim}
-                onChange={(e) => setPendenciasFim(e.target.value)}
-                className="w-full sm:w-auto"
-              />
-              <div className="flex flex-wrap gap-1 text-xs">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setPendenciasInicio(formatRangeDate(-7));
-                    setPendenciasFim(hoje());
-                  }}
-                >
-                  Últimos 7 dias
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setPendenciasInicio(formatRangeDate(-30));
-                    setPendenciasFim(hoje());
-                  }}
-                >
-                  Últimos 30 dias
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    const hojeData = hoje();
-                    setPendenciasInicio(hojeData);
-                    setPendenciasFim(hojeData);
-                  }}
-                >
-                  Hoje
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-col gap-2 rounded-xl bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200 ring-1 ring-bjj-gray-700 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-white">
-              <AlertCircle size={16} className="text-yellow-300" />
-              <span>Presenças pendentes: {pendencias.length}</span>
-            </div>
-            <span className="inline-flex items-center justify-center rounded-full bg-bjj-gray-800 px-3 py-1 text-xs text-bjj-gray-100">
-              {formatDateBr(pendenciasInicio)} → {formatDateBr(pendenciasFim)}
-            </span>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {pendencias.length === 0 && (
-              <p className="rounded-xl border border-dashed border-bjj-gray-700 bg-bjj-gray-900/60 px-4 py-3 text-bjj-gray-100">
-                Nenhuma pendência no período selecionado.
-              </p>
-            )}
-            {pendencias.map((item) => {
-              const { presenca, turma, aula, aluno } = item;
-              return (
-                <div
-                  key={presenca.id}
-                  className="flex flex-col gap-3 rounded-xl border border-bjj-gray-700 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between"
-                >
-                  <div className="space-y-1">
-                    <p className="text-lg font-semibold text-white">{aluno.nome}</p>
-                    <p className="text-sm text-bjj-gray-200">
-                      {turma.nome} • {formatDateBr(presenca.data)} {aula ? `• ${aula.horaInicio}` : ''}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
-                    <StatusBadge status={presenca.status} />
-                    <div className="flex flex-wrap gap-1">
-                      <Button size="sm" variant="success" onClick={() => handlePendenciaStatus(presenca.id, 'PRESENTE')}>
-                        Presente
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={() => handlePendenciaStatus(presenca.id, 'FALTA')}>
-                        Falta
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handlePendenciaStatus(presenca.id, 'JUSTIFICADA')}>
-                        Justificar
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+      {activeView === 'revisao' && (
+        <PresencasRevisaoView
+          revisoes={revisoesRecentes}
+          formatDateBr={formatDateBr}
+          StatusBadge={StatusBadge}
+          onQuickFilter={(limite) => setRevisaoLimite(limite)}
+        />
       )}
     </div>
+  );
+}
+
+export default function PresencasPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-bjj-gray-200">Carregando presenças...</div>}>
+      <PresencasPageContent />
+    </Suspense>
   );
 }

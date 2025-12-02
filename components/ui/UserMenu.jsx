@@ -8,12 +8,11 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { ChevronDown, ChevronRight, LogOut, Settings2, UserCircle2, BarChart3 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ChevronDown, LogOut, UserCircle2 } from 'lucide-react';
 import useUserStore from '../../store/userStore';
-import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
+import { getNavigationConfigForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
-import { ROLE_KEYS } from '../../config/roles';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 
@@ -28,7 +27,6 @@ const buildInitials = (name = '', email = '') => {
 
 export default function UserMenu({ inline = false }) {
   const router = useRouter();
-  const pathname = usePathname();
   const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
   const aluno = useAlunosStore((state) =>
     user?.alunoId ? state.getAlunoById(user.alunoId) : null
@@ -36,57 +34,10 @@ export default function UserMenu({ inline = false }) {
   const { staff } = useCurrentStaff();
   const { roles } = useRole();
   const [open, setOpen] = useState(inline);
-  const [configOpen, setConfigOpen] = useState(false);
   const menuRef = useRef(null);
 
-  const navigationItems = useMemo(
-    () => getNavigationItemsForRoles(roles, { includeHidden: true }),
-    [roles]
-  );
-  const flattenedItems = useMemo(() => flattenNavigation(navigationItems), [navigationItems]);
-
-  const configItem = useMemo(
-    () => navigationItems.find((item) => item.path === '/configuracoes'),
-    [navigationItems]
-  );
-  const configChildren = configItem?.children ?? [];
-  const isConfigPath = useMemo(
-    () => Boolean(pathname && pathname.startsWith('/configuracoes')),
-    [pathname]
-  );
-
-  const profilePath = useMemo(
-    () => flattenedItems.find((item) => item.path === '/perfil')?.path,
-    [flattenedItems]
-  );
-
-  const canSeeHistory = useMemo(
-    () =>
-      roles.some((role) =>
-        [ROLE_KEYS.aluno, ROLE_KEYS.instrutor, ROLE_KEYS.professor, ROLE_KEYS.admin, ROLE_KEYS.ti].includes(role)
-      ),
-    [roles]
-  );
-
-  const historyPath = useMemo(() => {
-    const pathFromNav = flattenedItems.find((item) => item.path === '/historico-presencas')?.path;
-    if (pathFromNav) return pathFromNav;
-    return canSeeHistory ? '/historico-presencas' : undefined;
-  }, [canSeeHistory, flattenedItems]);
-
-  const canSeeReports = useMemo(
-    () =>
-      roles.some((role) =>
-        [ROLE_KEYS.aluno, ROLE_KEYS.instrutor, ROLE_KEYS.professor, ROLE_KEYS.admin, ROLE_KEYS.ti].includes(role)
-      ),
-    [roles]
-  );
-
-  const reportsPath = useMemo(() => {
-    const pathFromNav = flattenedItems.find((item) => item.path === '/relatorios')?.path;
-    if (pathFromNav) return pathFromNav;
-    return canSeeReports ? '/relatorios' : undefined;
-  }, [canSeeReports, flattenedItems]);
+  const navigationConfig = useMemo(() => getNavigationConfigForRoles(roles), [roles]);
+  const avatarItems = navigationConfig.avatarMenu;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -112,12 +63,6 @@ export default function UserMenu({ inline = false }) {
       hydrateFromStorage();
     }
   }, [hydrateFromStorage, hydrated]);
-
-  useEffect(() => {
-    if (isConfigPath) {
-      setConfigOpen(true);
-    }
-  }, [isConfigPath]);
 
   const handleLogout = () => {
     logout();
@@ -163,72 +108,24 @@ export default function UserMenu({ inline = false }) {
       </header>
 
       <nav className="mt-4 space-y-1 text-sm text-bjj-gray-200/80">
-        {profilePath && (
-          <Link
-            href={profilePath}
-            className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
-            onClick={() => setOpen(false)}
-          >
-            <UserCircle2 size={16} /> Meu perfil
-          </Link>
-        )}
+        {avatarItems.map((item) => {
+          if (item.action === 'logout') {
+            return null;
+          }
 
-        {historyPath && (
-          <Link
-            href={historyPath}
-            className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
-            onClick={() => setOpen(false)}
-          >
-            <ChevronRight size={14} className="text-bjj-gray-500" /> Histórico de presenças
-          </Link>
-        )}
+          const Icon = item.icon || UserCircle2;
 
-        {reportsPath && (
-          <Link
-            href={reportsPath}
-            className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
-            onClick={() => setOpen(false)}
-          >
-            <BarChart3 size={16} /> Relatórios
-          </Link>
-        )}
-
-        {configChildren.length > 0 && (
-          <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60">
-            <button
-              type="button"
-              onClick={() => setConfigOpen((state) => !state)}
-              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-300/70 transition hover:text-bjj-white"
-              aria-expanded={configOpen}
+          return (
+            <Link
+              key={item.key}
+              href={item.href || item.path}
+              className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:border-bjj-gray-700 hover:bg-bjj-gray-900/70 hover:text-bjj-white"
+              onClick={() => setOpen(false)}
             >
-              <span className="inline-flex items-center gap-2">
-                <Settings2 size={14} /> Configurações
-              </span>
-              <ChevronDown
-                size={14}
-                className={`transition ${configOpen ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-500'}`}
-              />
-            </button>
-            {configOpen && (
-              <ul className="border-t border-bjj-gray-800/70 px-3 py-2 text-sm">
-                {configChildren.map((child) => (
-                  <li key={child.path}>
-                    <Link
-                      href={child.path}
-                      className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-bjj-gray-200/80 transition hover:bg-bjj-gray-900/70 hover:text-bjj-white"
-                      onClick={() => {
-                        setOpen(false);
-                        setConfigOpen(false);
-                      }}
-                    >
-                      <ChevronRight size={14} className="text-bjj-gray-500" /> {child.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
+              <Icon size={16} /> {item.title}
+            </Link>
+          );
+        })}
       </nav>
 
       <button
