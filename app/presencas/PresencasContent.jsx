@@ -449,12 +449,5 @@ export default function PresencasPageContent({
       )}
     </div>
   );
-}
 
-export default function PresencasPage() {
-  return (
-    <Suspense fallback={<div className="p-6 text-bjj-gray-200">Carregando presenças...</div>}>
-      <PresencasPageContent />
-    </Suspense>
-  );
 }
