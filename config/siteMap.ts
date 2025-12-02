@@ -25,7 +25,10 @@ export const siteMap = {
     '/belt-demo',
     '/perfil',
     '/relatorios',
-    '/alunos'
+    '/alunos',
+    '/staff/qr/academia',
+    '/staff/qr/validar',
+    '/staff/qr/historico'
   ],
   [ROLE_KEYS.professor]: [
     '/dashboard',
@@ -42,6 +45,9 @@ export const siteMap = {
     '/presencas',
     '/presencas/chamada',
     '/presencas/revisao',
+    '/staff/qr/academia',
+    '/staff/qr/validar',
+    '/staff/qr/historico',
     '/alunos',
     '/relatorios',
     '/configuracoes/graduacao',

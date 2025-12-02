@@ -1,10 +1,12 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { Check, Clock, Search, UsersRound } from 'lucide-react'
+import { Check, Clock, QrCode, Search, UsersRound } from 'lucide-react'
 
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import { isQrCheckinEnabled } from '@/lib/featureFlags'
 import { useAlunosStore } from '@/store/alunosStore'
 import { usePresencasStore } from '@/store/presencasStore'
 
@@ -168,6 +170,36 @@ export default function PresencasChamadaPage() {
             </div>
           )}
         </div>
+
+        {isQrCheckinEnabled() && (
+          <div className="mt-6 rounded-2xl border border-dashed border-bjj-gray-800 bg-bjj-gray-950/70 p-5 text-bjj-gray-50">
+            <div className="mb-3 flex items-center gap-2 text-white">
+              <QrCode size={18} className="text-bjj-blue-100" />
+              <p className="text-lg font-semibold">QR Code Check-in (Beta)</p>
+            </div>
+            <p className="text-sm text-bjj-gray-200">Acesse as telas beta de QR Code para testar o fluxo de validação.</p>
+            <div className="mt-3 flex flex-wrap gap-2 text-sm">
+              <Link
+                href="/staff/qr/academia"
+                className="rounded-full bg-bjj-blue-700/20 px-3 py-1 font-semibold text-bjj-blue-100 ring-1 ring-bjj-blue-700/60 hover:bg-bjj-blue-700/30"
+              >
+                QR Code da Academia
+              </Link>
+              <Link
+                href="/staff/qr/validar"
+                className="rounded-full bg-bjj-gray-800 px-3 py-1 font-semibold text-bjj-gray-100 ring-1 ring-bjj-gray-700 hover:bg-bjj-gray-700"
+              >
+                Validar QR Code
+              </Link>
+              <Link
+                href="/staff/qr/historico"
+                className="rounded-full bg-bjj-gray-800 px-3 py-1 font-semibold text-bjj-gray-100 ring-1 ring-bjj-gray-700 hover:bg-bjj-gray-700"
+              >
+                Histórico de Validações
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
