@@ -183,8 +183,9 @@ export default function TabletNav() {
 
   return (
     // Sticky header stays visible while scrolling; shadow toggles when the page moves.
+    // Fixed positioning keeps the bar pinned on all viewports, while the AppShell adds top padding to clear it.
     <nav
-      className={`sticky top-0 z-40 border-b bg-bjj-black/95 backdrop-blur transition-shadow ${
+      className={`fixed inset-x-0 top-0 z-40 border-b bg-bjj-black/95 backdrop-blur transition-shadow ${
         isScrolled ? 'border-bjj-gray-700/80 shadow-[0_18px_30px_rgba(0,0,0,0.35)]' : 'border-bjj-gray-800/70'
       }`}
     >

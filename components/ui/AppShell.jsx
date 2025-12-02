@@ -63,8 +63,8 @@ export default function AppShell({ children }) {
     <div className="min-h-screen overflow-x-hidden bg-bjj-black text-bjj-white">
       <TabletNav />
 
-      {/* Top padding keeps content clear of the sticky header above. */}
-      <main className="mx-auto w-full max-w-6xl px-4 pb-12 pt-6 md:px-6 xl:px-8">{children}</main>
+      {/* Top padding keeps content clear of the fixed header above. */}
+      <main className="mx-auto w-full max-w-6xl px-4 pb-12 pt-24 md:px-6 xl:px-8">{children}</main>
 
       <ShellFooter />
     </div>
