@@ -26,6 +26,10 @@ export const siteMap = {
     '/perfil',
     '/relatorios',
     '/alunos',
+    '/presencas',
+    '/presencas/chamada',
+    '/presencas/pendencias',
+    '/presencas/revisao',
     '/staff/qr/academia',
     '/staff/qr/validar',
     '/staff/qr/historico'
@@ -44,6 +48,7 @@ export const siteMap = {
     '/configuracoes',
     '/presencas',
     '/presencas/chamada',
+    '/presencas/pendencias',
     '/presencas/revisao',
     '/staff/qr/academia',
     '/staff/qr/validar',

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { Check, Clock, QrCode, Search, UsersRound } from 'lucide-react'
+import { Check, Clock, ListChecks, QrCode, Search, UsersRound } from 'lucide-react'
 
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -73,9 +73,40 @@ export default function PresencasChamadaPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.28em] text-bjj-gray-300">Painel staff</p>
-        <h1 className="text-3xl font-bold text-white">Check-in de Alunos</h1>
-        <p className="text-bjj-gray-100">Registre a presença dos alunos nas aulas</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.28em] text-bjj-gray-300">Painel staff</p>
+            <h1 className="text-3xl font-bold text-white">Check-in de Alunos</h1>
+            <p className="text-bjj-gray-100">Registre a presença dos alunos nas aulas</p>
+          </div>
+
+          <div className="dropdown dropdown-end">
+            <label
+              tabIndex={0}
+              className="btn btn-sm gap-2 border border-bjj-gray-700 bg-bjj-gray-900 text-bjj-gray-100 hover:border-bjj-gray-500 hover:bg-bjj-gray-800"
+            >
+              <ListChecks size={16} />
+              Outros fluxos
+            </label>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu rounded-2xl border border-bjj-gray-800 bg-bjj-gray-950 p-2 text-sm text-bjj-gray-100 shadow-lg"
+            >
+              <li>
+                <Link href="/presencas/pendencias" className="hover:bg-bjj-gray-900">
+                  Pendências de aprovação
+                  <span className="text-[11px] text-bjj-gray-400">Revisar presenças pendentes</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/presencas/revisao" className="hover:bg-bjj-gray-900">
+                  Revisão / últimos envios
+                  <span className="text-[11px] text-bjj-gray-400">Histórico agrupado (30 dias)</span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
       </header>
 
       <div className="grid gap-3 md:grid-cols-3">
