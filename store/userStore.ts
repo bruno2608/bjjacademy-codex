@@ -1,14 +1,15 @@
 import { create } from 'zustand';
 
-import { ROLE_KEYS, normalizeRoles, type UserRole } from '../config/roles';
-import { ALL_ROLES } from '../config/userRoles';
+import { normalizeRoles, type UserRole } from '../config/roles';
 import type { AuthUser, LoginPayload } from '../types/user';
+import { authMockLogin } from '../services/authMockService';
 
 type UserState = {
   user: AuthUser | null;
   token: string | null;
   hydrated: boolean;
-  login: (payload: LoginPayload) => void;
+  isAuthenticated: boolean;
+  login: (payload: LoginPayload) => Promise<AuthUser | null>;
   updateUser?: (payload: Partial<AuthUser>) => void;
   logout: () => void;
   hydrate: (payload: Partial<{ user: AuthUser | null; token: string | null }>) => void;
@@ -17,32 +18,7 @@ type UserState = {
 
 const TOKEN_KEY = 'bjj_token';
 const ROLES_KEY = 'bjj_roles';
-const DEFAULT_ALUNO_ID = 'aluno_joao_silva';
-const DEFAULT_INSTRUTOR_ID = 'instrutor-vilmar';
-const DEFAULT_ACADEMIA_ID = 'academia_bjj_central';
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80';
-
-const fallbackUser: AuthUser = {
-  id: 'user_admin',
-  name: 'João Silva',
-  nomeCompleto: 'João Silva',
-  email: 'adminhml@bjjacademy.com.br',
-  avatarUrl: '/img/avatar-admin.png',
-  roles: [ROLE_KEYS.admin, ROLE_KEYS.professor],
-  alunoId: DEFAULT_ALUNO_ID,
-  instrutorId: DEFAULT_INSTRUTOR_ID,
-  professorId: 'professor-admin',
-  academiaId: DEFAULT_ACADEMIA_ID
-};
-
-const deriveRolesFromEmail = (email: string): UserRole[] => {
-  const normalized = email.toLowerCase();
-  const baseRoles = new Set<UserRole>([ROLE_KEYS.instrutor, ROLE_KEYS.professor]);
-  if (normalized.includes('admin')) baseRoles.add(ROLE_KEYS.admin);
-  if (normalized.includes('ti')) baseRoles.add(ROLE_KEYS.ti);
-  if (normalized.includes('aluno') || normalized.includes('student')) baseRoles.add(ROLE_KEYS.aluno);
-  return Array.from(baseRoles);
-};
 
 const persistRoles = (roles: UserRole[]) => {
   if (typeof window !== 'undefined') {
@@ -77,30 +53,26 @@ export const useUserStore = create<UserState>((set) => ({
   user: null,
   token: null,
   hydrated: false,
-  login: ({ email, roles }) => {
-    if (typeof window === 'undefined') return;
-    const fakeToken = `bjj-token-${Date.now()}`;
-    window.localStorage.setItem(TOKEN_KEY, fakeToken);
+  isAuthenticated: false,
+  login: async ({ email, senha }) => {
+    if (typeof window === 'undefined') return null;
 
-    const resolvedRoles = normalizeRoles(roles);
-    const finalRoles = resolvedRoles.length ? resolvedRoles : deriveRolesFromEmail(email);
-    const finalUser: AuthUser = {
-      id: fallbackUser.id,
-      name: email.split('@')[0] || 'Instrutor',
-      nomeCompleto: email.split('@')[0] || 'Instrutor',
-      email,
-      roles: finalRoles.length ? finalRoles : ALL_ROLES,
-      avatarUrl: DEFAULT_AVATAR,
-      telefone: null,
-      alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null,
-      instrutorId: finalRoles.includes(ROLE_KEYS.instrutor) ? DEFAULT_INSTRUTOR_ID : null,
-      professorId: finalRoles.includes(ROLE_KEYS.professor) ? 'professor-admin' : null,
-      academiaId: DEFAULT_ACADEMIA_ID
+    const authenticatedUser = await authMockLogin({ email, senha });
+    const fakeToken = `bjj-token-${Date.now()}`;
+    const normalizedRoles = normalizeRoles(authenticatedUser.roles);
+    const normalizedUser: AuthUser = {
+      ...authenticatedUser,
+      name: authenticatedUser.name || authenticatedUser.nomeCompleto,
+      avatarUrl: authenticatedUser.avatarUrl ?? DEFAULT_AVATAR,
+      roles: normalizedRoles
     };
 
-    persistRoles(finalUser.roles);
-    persistUser({ ...finalUser, alunoId: finalRoles.includes(ROLE_KEYS.aluno) ? DEFAULT_ALUNO_ID : null });
-    set({ user: finalUser, token: fakeToken, hydrated: true });
+    window.localStorage.setItem(TOKEN_KEY, fakeToken);
+    persistRoles(normalizedRoles);
+    persistUser(normalizedUser);
+
+    set({ user: normalizedUser, token: fakeToken, hydrated: true, isAuthenticated: true });
+    return normalizedUser;
   },
   updateUser: (payload) =>
     set((state) => {
@@ -114,20 +86,21 @@ export const useUserStore = create<UserState>((set) => ({
     }),
   logout: () => {
     clearPersistedRoles();
-    set({ user: null, token: null });
+    set({ user: null, token: null, isAuthenticated: false, hydrated: true });
   },
   hydrate: (payload) => {
     set((state) => ({
       user: payload.user ?? state.user,
-      token: payload.token ?? state.token
+      token: payload.token ?? state.token,
+      isAuthenticated: Boolean(payload.user ?? state.user ?? null)
     }));
   },
   hydrateFromStorage: () => {
     if (typeof window === 'undefined') return;
-    const hasToken = window.localStorage.getItem(TOKEN_KEY);
+
+    const storedToken = window.localStorage.getItem(TOKEN_KEY);
     const rawUser = window.localStorage.getItem('bjj_user');
     const rawRoles = window.localStorage.getItem(ROLES_KEY);
-
     const cookieRoles = typeof document !== 'undefined'
       ? document.cookie
           .split(';')
@@ -135,25 +108,6 @@ export const useUserStore = create<UserState>((set) => ({
           .find((entry) => entry.startsWith(`${ROLES_KEY}=`))
           ?.replace(`${ROLES_KEY}=`, '')
       : undefined;
-
-    let storedRoles: string[] = [];
-    if (rawRoles) {
-      try {
-        storedRoles = JSON.parse(rawRoles);
-      } catch (error) {
-        console.warn('Não foi possível ler os papéis salvos, usando cookie/local defaults.', error);
-        storedRoles = rawRoles.includes(',') ? rawRoles.split(',') : [];
-      }
-    } else if (cookieRoles) {
-      storedRoles = cookieRoles.split(',');
-    }
-
-    const parsedRoles = normalizeRoles(storedRoles);
-
-    if (!hasToken && !parsedRoles.length) {
-      set({ user: fallbackUser, token: null, hydrated: true });
-      return;
-    }
 
     let parsedUser: AuthUser | null = null;
     if (rawUser) {
@@ -164,13 +118,41 @@ export const useUserStore = create<UserState>((set) => ({
       }
     }
 
-    const finalRoles = parsedRoles.length ? parsedRoles : fallbackUser.roles;
-    const baseUser = parsedUser ? { ...fallbackUser, ...parsedUser, roles: finalRoles } : { ...fallbackUser, roles: finalRoles };
+    let storedRoles: UserRole[] = [];
+    if (rawRoles) {
+      try {
+        const parsedRoles = JSON.parse(rawRoles);
+        storedRoles = normalizeRoles(parsedRoles);
+      } catch (error) {
+        storedRoles = normalizeRoles(rawRoles.split(','));
+      }
+    } else if (cookieRoles) {
+      storedRoles = normalizeRoles(cookieRoles.split(','));
+    }
+
+    const finalRoles = storedRoles.length
+      ? storedRoles
+      : normalizeRoles(parsedUser?.roles ?? []);
+
+    if (!parsedUser && !storedToken) {
+      set({ user: null, token: null, hydrated: true, isAuthenticated: false });
+      return;
+    }
+
+    const hydratedUser = parsedUser
+      ? {
+          ...parsedUser,
+          name: parsedUser.name || parsedUser.nomeCompleto || parsedUser.email?.split('@')[0] || 'Usuário',
+          avatarUrl: parsedUser.avatarUrl ?? DEFAULT_AVATAR,
+          roles: finalRoles
+        }
+      : null;
 
     set({
-      user: baseUser,
-      token: hasToken ?? null,
-      hydrated: true
+      user: hydratedUser,
+      token: storedToken ?? null,
+      hydrated: true,
+      isAuthenticated: Boolean(hydratedUser)
     });
   }
 }));
