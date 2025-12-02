@@ -74,6 +74,7 @@ export default function PresencasPage() {
   const [currentAulaId, setCurrentAulaId] = useState('');
   const [pendenciasInicio, setPendenciasInicio] = useState(formatRangeDate(-7));
   const [pendenciasFim, setPendenciasFim] = useState(hoje());
+  const [abaAtiva, setAbaAtiva] = useState('chamada');
 
   const user = useUserStore((state) => state.user);
   const turmas = useTurmasStore((state) => state.turmas);
@@ -205,6 +206,33 @@ export default function PresencasPage() {
       .filter(Boolean);
   }, [aulas, alunos, currentAcademiaId, pendenciasFim, pendenciasInicio, presencas, turmas]);
 
+  const aulaAtual = currentAulaId ? aulas.find((aula) => aula.id === currentAulaId) : null;
+  const turmaAtual = turmasDaAcademia.find((turma) => turma.id === selectedTurmaId);
+
+  const abasDisponiveis = useMemo(
+    () => [
+      {
+        id: 'chamada',
+        titulo: 'Chamada do dia',
+        descricao:
+          turmaAtual && selectedDate
+            ? `${turmaAtual.nome} • ${formatDateBr(selectedDate)}`
+            : 'Selecione turma e data para registrar presença',
+        badge: `${resumoAula.total || alunosDaChamada.length} alunos`
+      },
+      {
+        id: 'pendencias',
+        titulo: 'Pendências',
+        descricao:
+          pendencias.length > 0
+            ? 'Reveja e aprove rapidamente as presenças pendentes'
+            : 'Sem pendências no período filtrado',
+        badge: `${pendencias.length} itens`
+      }
+    ],
+    [alunosDaChamada.length, pendencias.length, resumoAula.total, selectedDate, turmaAtual]
+  );
+
   const handleStatusChange = async (alunoId, status) => {
     if (!currentAulaId) return;
     await registrarPresencaEmAula({
@@ -234,9 +262,6 @@ export default function PresencasPage() {
       </div>
     );
   }
-
-  const aulaAtual = currentAulaId ? aulas.find((aula) => aula.id === currentAulaId) : null;
-  const turmaAtual = turmasDaAcademia.find((turma) => turma.id === selectedTurmaId);
 
   return (
     <div className="space-y-6">
@@ -296,7 +321,48 @@ export default function PresencasPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="space-y-4 rounded-2xl bg-bjj-gray-900/60 p-4 ring-1 ring-bjj-gray-800">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">Organização</p>
+            <h2 className="text-lg font-semibold text-white">Escolha a visão que quer trabalhar</h2>
+            <p className="text-sm text-bjj-gray-200">
+              Use abas para alternar entre a chamada em tempo real e a revisão de pendências sem perder o contexto da aula.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-bjj-gray-800 px-3 py-2 text-xs text-bjj-gray-100">
+            <PieChart size={14} />
+            {turmaAtual ? turmaAtual.nome : 'Turma não selecionada'}
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          {abasDisponiveis.map((aba) => (
+            <button
+              key={aba.id}
+              type="button"
+              onClick={() => setAbaAtiva(aba.id)}
+              className={`rounded-xl border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-bjj-red/60 focus:ring-offset-0 ${
+                abaAtiva === aba.id
+                  ? 'border-bjj-red bg-bjj-red/10 text-white shadow-[0_10px_30px_-15px_rgba(248,113,113,0.7)]'
+                  : 'border-bjj-gray-800/70 bg-bjj-gray-900/70 text-bjj-gray-200 hover:border-bjj-gray-700 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold uppercase tracking-[0.14em]">{aba.titulo}</p>
+                  <p className="text-xs text-bjj-gray-200/90">{aba.descricao}</p>
+                </div>
+                <span className="rounded-full bg-bjj-gray-900 px-3 py-1 text-[11px] font-semibold text-bjj-gray-100">
+                  {aba.badge}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {abaAtiva === 'chamada' ? (
         <section className="rounded-2xl bg-bjj-gray-800/70 p-5 shadow-lg ring-1 ring-bjj-gray-700">
           <div className="flex flex-col gap-3 border-b border-bjj-gray-700 pb-3 md:flex-row md:items-center md:justify-between">
             <div>
@@ -335,72 +401,72 @@ export default function PresencasPage() {
                 <p className="text-sm text-bjj-gray-200">Cadastre turmas na academia para iniciar a chamada.</p>
               </div>
             </div>
-          ) : (
-            <>
-              <div className="mt-4 flex items-center justify-between rounded-xl bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200 ring-1 ring-bjj-gray-700">
-                <div className="flex items-center gap-2 text-white">
-                  <Clock size={16} />
-                  <span>
-                    {turmaAtual ? turmaAtual.nome : 'Turma não selecionada'} • {formatDateBr(selectedDate)}
-                  </span>
+            ) : (
+              <>
+                <div className="mt-4 flex items-center justify-between rounded-xl bg-bjj-gray-900/70 px-4 py-3 text-sm text-bjj-gray-200 ring-1 ring-bjj-gray-700">
+                  <div className="flex items-center gap-2 text-white">
+                    <Clock size={16} />
+                    <span>
+                      {turmaAtual ? turmaAtual.nome : 'Turma não selecionada'} • {formatDateBr(selectedDate)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <StatusBadge status={aulaAtual?.status === 'encerrada' ? 'PRESENTE' : 'PENDENTE'} />
+                    <span className="rounded-full bg-bjj-gray-800 px-2 py-1 text-bjj-gray-100">
+                      {resumoAula.total || alunosDaChamada.length} alunos na chamada
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <StatusBadge status={aulaAtual?.status === 'encerrada' ? 'PRESENTE' : 'PENDENTE'} />
-                  <span className="rounded-full bg-bjj-gray-800 px-2 py-1 text-bjj-gray-100">
-                    {resumoAula.total || alunosDaChamada.length} alunos na chamada
-                  </span>
-                </div>
-              </div>
 
-              <div className="mt-4 space-y-3">
-                {alunosDaChamada.length === 0 && (
-                  <p className="text-bjj-gray-100">Nenhum aluno ativo vinculado a esta turma.</p>
-                )}
-                {alunosDaChamada.map(({ aluno, matricula, presenca }) => {
-                  const faixa = aluno?.faixaSlug ? getFaixaConfigBySlug(aluno.faixaSlug) : null;
-                  const status = presenca ? presenca.status : 'PENDENTE';
-                  return (
-                    <div
-                      key={matricula.id}
-                      className="flex flex-col gap-3 rounded-xl border border-bjj-gray-700 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between"
-                    >
-                      <div className="space-y-1">
-                        <p className="text-lg font-semibold text-white">{aluno?.nome}</p>
-                        <p className="text-sm text-bjj-gray-200">Matrícula #{matricula.numero}</p>
-                        {faixa && <p className={`inline-flex rounded-full bg-bjj-gray-800 px-2 py-1 text-xs ${faixa.textColor}`}>{faixa.nome}</p>}
-                      </div>
-                      <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
-                        <StatusBadge status={status} />
-                        <div className="flex flex-wrap gap-1">
-                          <Button size="sm" variant="success" onClick={() => handleStatusChange(aluno.id, 'PRESENTE')}>
-                            Presente
-                          </Button>
-                          <Button size="sm" variant="secondary" onClick={() => handleStatusChange(aluno.id, 'FALTA')}>
-                            Falta
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleStatusChange(aluno.id, 'JUSTIFICADA')}>
-                            Justificar
-                          </Button>
+                <div className="mt-4 space-y-3">
+                  {alunosDaChamada.length === 0 && (
+                    <p className="text-bjj-gray-100">Nenhum aluno ativo vinculado a esta turma.</p>
+                  )}
+                  {alunosDaChamada.map(({ aluno, matricula, presenca }) => {
+                    const faixa = aluno?.faixaSlug ? getFaixaConfigBySlug(aluno.faixaSlug) : null;
+                    const status = presenca ? presenca.status : 'PENDENTE';
+                    return (
+                      <div
+                        key={matricula.id}
+                        className="flex flex-col gap-3 rounded-xl border border-bjj-gray-700 bg-bjj-gray-900/60 p-4 md:flex-row md:items-center md:justify-between"
+                      >
+                        <div className="space-y-1">
+                          <p className="text-lg font-semibold text-white">{aluno?.nome}</p>
+                          <p className="text-sm text-bjj-gray-200">Matrícula #{matricula.numero}</p>
+                          {faixa && <p className={`inline-flex rounded-full bg-bjj-gray-800 px-2 py-1 text-xs ${faixa.textColor}`}>{faixa.nome}</p>}
+                        </div>
+                        <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
+                          <StatusBadge status={status} />
+                          <div className="flex flex-wrap gap-1">
+                            <Button size="sm" variant="success" onClick={() => handleStatusChange(aluno.id, 'PRESENTE')}>
+                              Presente
+                            </Button>
+                            <Button size="sm" variant="secondary" onClick={() => handleStatusChange(aluno.id, 'FALTA')}>
+                              Falta
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => handleStatusChange(aluno.id, 'JUSTIFICADA')}>
+                              Justificar
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-4 flex flex-col gap-2 rounded-xl bg-bjj-gray-900/60 p-4 ring-1 ring-bjj-gray-700 md:flex-row md:items-center md:justify-between">
-                <div className="text-sm text-bjj-gray-200">
-                  <p className="font-semibold text-white">Fechar treino</p>
-                  <p>Marca pendentes como presentes e encerra a aula instância.</p>
+                    );
+                  })}
                 </div>
-                <Button variant="primary" onClick={handleFecharAula} disabled={!currentAulaId}>
-                  Fechar treino
-                </Button>
-              </div>
-            </>
-          )}
-        </section>
 
+                <div className="mt-4 flex flex-col gap-2 rounded-xl bg-bjj-gray-900/60 p-4 ring-1 ring-bjj-gray-700 md:flex-row md:items-center md:justify-between">
+                  <div className="text-sm text-bjj-gray-200">
+                    <p className="font-semibold text-white">Fechar treino</p>
+                    <p>Marca pendentes como presentes e encerra a aula instância.</p>
+                  </div>
+                  <Button variant="primary" onClick={handleFecharAula} disabled={!currentAulaId}>
+                    Fechar treino
+                  </Button>
+                </div>
+              </>
+            )}
+          </section>
+        ) : (
         <section className="rounded-2xl bg-bjj-gray-800/70 p-5 shadow-lg ring-1 ring-bjj-gray-700">
           <div className="flex flex-col gap-3 border-b border-bjj-gray-700 pb-3 md:flex-row md:items-center md:justify-between">
             <div>
@@ -505,7 +571,7 @@ export default function PresencasPage() {
             })}
           </div>
         </section>
-      </div>
+      )}
     </div>
   );
 }
