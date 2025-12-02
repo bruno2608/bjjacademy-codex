@@ -1,5 +1,5 @@
 import { MOCK_PRESENCAS } from '@/data/mockPresencas'
-import type { PresencaRegistro, PresencaStatus } from '@/types/presenca'
+import type { PresencaOrigem, PresencaRegistro, PresencaStatus } from '@/types/presenca'
 
 type RegistrarPresencaPayload = {
   alunoId: string
@@ -15,6 +15,13 @@ let presencasDb: PresencaRegistro[] = [...MOCK_PRESENCAS]
 const clone = (lista: PresencaRegistro[]) => lista.map((item) => ({ ...item }))
 const agoraIso = () => new Date().toISOString()
 const hoje = () => new Date().toISOString().split('T')[0]
+const parseDataRegistro = (presenca: PresencaRegistro): Date => {
+  const baseData = presenca.data ? new Date(presenca.data) : null
+  if (baseData && !Number.isNaN(baseData.getTime())) return baseData
+  const created = presenca.createdAt ? new Date(presenca.createdAt) : null
+  if (created && !Number.isNaN(created.getTime())) return created
+  return new Date()
+}
 
 const localizarPorId = (id: string) => presencasDb.find((item) => item.id === id)
 
@@ -51,6 +58,13 @@ export async function listarPresencasPorAula(aulaId: string): Promise<PresencaRe
   return clone(presencasDb.filter((item) => item.aulaId === aulaId))
 }
 
+export async function listarPresencasDoAluno(alunoId: string): Promise<PresencaRegistro[]> {
+  const lista = presencasDb.filter((item) => item.alunoId === alunoId)
+  return clone(
+    lista.sort((a, b) => parseDataRegistro(b).getTime() - parseDataRegistro(a).getTime())
+  )
+}
+
 export async function registrarCheckin(
   alunoId: string,
   treinoId: string,
@@ -82,6 +96,45 @@ export async function registrarCheckin(
   }
   presencasDb = [...presencasDb, novo]
   return { ...novo }
+}
+
+export async function registrarCheckinManual(
+  alunoId: string,
+  dataHora?: string,
+  origem: PresencaOrigem = 'ALUNO'
+): Promise<PresencaRegistro> {
+  const referencia = dataHora ? new Date(dataHora) : new Date()
+  const data = referencia.toISOString().split('T')[0]
+  const existente = presencasDb.find((item) => item.alunoId === alunoId && item.data === data)
+  const agora = referencia.toISOString()
+
+  const base: PresencaRegistro = existente ?? {
+    id: existente?.id ?? `manual-${Date.now()}`,
+    alunoId,
+    treinoId: existente?.treinoId ?? 'treino_manual',
+    turmaId: existente?.turmaId ?? 'turma_manual',
+    aulaId: existente?.aulaId ?? null,
+    status: 'PRESENTE',
+    origem,
+    data,
+    observacao: null,
+    createdAt: agora,
+    updatedAt: agora,
+  }
+
+  const atualizado = normalizarRegistro({
+    ...base,
+    status: 'PRESENTE',
+    origem,
+    data,
+    updatedAt: agora,
+  })
+
+  presencasDb = presencasDb.some((item) => item.id === atualizado.id)
+    ? presencasDb.map((item) => (item.id === atualizado.id ? atualizado : item))
+    : [...presencasDb, atualizado]
+
+  return { ...atualizado }
 }
 
 export async function registrarOuAtualizarPresenca(payload: RegistrarPresencaPayload): Promise<PresencaRegistro> {
@@ -170,6 +223,15 @@ export async function atualizarStatusPresenca(
 
 export async function removerPresenca(id: string): Promise<void> {
   presencasDb = presencasDb.filter((item) => item.id !== id)
+}
+
+export async function listarPresencasUltimos30Dias(): Promise<PresencaRegistro[]> {
+  const limite = new Date()
+  limite.setDate(limite.getDate() - 30)
+  const filtradas = presencasDb.filter((item) => parseDataRegistro(item) >= limite)
+  return clone(
+    filtradas.sort((a, b) => parseDataRegistro(b).getTime() - parseDataRegistro(a).getTime())
+  )
 }
 
 export async function fecharTreino(treinoId: string, aulaId?: string): Promise<void> {
