@@ -11,6 +11,15 @@ import StaffAppShell from '../layouts/StaffAppShell';
 import AlunoAppShell from '../layouts/AlunoAppShell';
 
 const BARE_PATHS = ['/login', '/unauthorized'];
+const ALUNO_PATHS = [
+  '/dashboard',
+  '/checkin',
+  '/treinos',
+  '/evolucao',
+  '/perfil',
+  '/historico-presencas',
+  '/relatorios'
+];
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
@@ -38,11 +47,16 @@ export default function AppShell({ children }) {
     [pathname]
   );
 
+  const shouldUseAlunoLayout = useMemo(
+    () => ALUNO_PATHS.some((studentPath) => pathname?.startsWith(studentPath)),
+    [pathname]
+  );
+
   if (isBareLayout) {
     return children;
   }
 
-  if (isStaff) {
+  if (isStaff && !shouldUseAlunoLayout) {
     return <StaffAppShell>{children}</StaffAppShell>;
   }
 
