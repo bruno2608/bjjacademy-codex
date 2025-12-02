@@ -8,6 +8,7 @@ import { ArrowRight, CalendarClock, Award, Timer } from 'lucide-react';
 import Badge from '../ui/Badge';
 import ToggleTag from '../ui/ToggleTag';
 import { BjjBeltStrip } from '../bjj/BjjBeltStrip';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 const statusBadgeVariant = {
   Planejado: 'neutral',
@@ -97,10 +98,10 @@ export default function GraduationList({ graduacoes, onStatusChange, alunoLookup
               <h3 className="text-lg font-semibold text-bjj-white">{graduacao.alunoNome}</h3>
               <div className="flex flex-wrap items-center gap-3 text-sm text-bjj-gray-200/80">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-700/80 bg-bjj-gray-900/70 px-2.5 py-1 text-xs">
-                  <Award size={13} className="text-bjj-red" /> Próxima {graduacao.tipo.toLowerCase()}
+                  <Award className={`${iconSizes.xs} ${iconColors.default}`} /> Próxima {graduacao.tipo.toLowerCase()}
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-xs text-bjj-gray-200/70">
-                  <ArrowRight size={13} /> {alvoLabel}
+                  <ArrowRight className={`${iconSizes.xs} ${iconColors.default}`} /> {alvoLabel}
                 </span>
               </div>
             </header>
@@ -161,12 +162,12 @@ export default function GraduationList({ graduacoes, onStatusChange, alunoLookup
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs text-bjj-gray-200/70">
                 <span className="inline-flex items-center gap-1.5">
-                  <CalendarClock size={13} />
+                  <CalendarClock className={`${iconSizes.xs} ${iconColors.default}`} />
                   {formatDate(graduacao.dataPrevista || graduacao.previsao)}
                 </span>
                 {tempoRestanteLabel && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Timer size={13} />
+                    <Timer className={`${iconSizes.xs} ${iconColors.default}`} />
                     {tempoRestanteLabel}
                   </span>
                 )}

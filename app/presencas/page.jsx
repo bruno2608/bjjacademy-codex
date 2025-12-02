@@ -11,6 +11,7 @@ import MinimalTabs from '@/components/ui/Tabs';
 import PresencasChamadaView from '@/components/presencas/PresencasChamadaView';
 import PresencasPendenciasView from '@/components/presencas/PresencasPendenciasView';
 import PresencasRevisaoView from '@/components/presencas/PresencasRevisaoView';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 import { useAcademiasStore } from '@/store/academiasStore';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useAulasStore } from '@/store/aulasStore';
@@ -51,13 +52,13 @@ const StatusBadge = ({ status }) => {
   const icon = (() => {
     switch (status) {
       case 'PENDENTE':
-        return <Clock size={14} />;
+        return <Clock size={14} className={`${iconSizes.sm} ${iconColors.default}`} />;
       case 'PRESENTE':
-        return <CheckCircle2 size={14} />;
+        return <CheckCircle2 size={14} className={`${iconSizes.sm} ${iconColors.default}`} />;
       case 'FALTA':
-        return <AlertCircle size={14} />;
+        return <AlertCircle size={14} className={`${iconSizes.sm} ${iconColors.danger}`} />;
       case 'JUSTIFICADA':
-        return <CalendarDays size={14} />;
+        return <CalendarDays size={14} className={`${iconSizes.sm} ${iconColors.default}`} />;
       default:
         return null;
     }
@@ -331,7 +332,7 @@ function PresencasPageContent() {
         </div>
         <div className="flex flex-col items-start gap-2 rounded-2xl bg-bjj-gray-800/70 px-4 py-3 text-bjj-blue-200 ring-1 ring-bjj-gray-700 md:flex-row md:items-center">
           <div className="flex items-center gap-2 text-bjj-blue-100">
-            <PieChart size={20} />
+            <PieChart size={20} className={`${iconSizes.md} ${iconColors.default}`} />
             <span className="text-sm uppercase tracking-wide">Visão professor</span>
           </div>
           <span className="rounded-full bg-bjj-gray-900/80 px-3 py-1 text-xs font-semibold text-white">
@@ -386,7 +387,7 @@ function PresencasPageContent() {
             <h2 className="text-lg font-semibold text-white">Chamada e pendências</h2>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-bjj-gray-800 bg-bjj-gray-900 px-3 py-1.5 text-[11px] font-semibold text-bjj-gray-100">
-            <PieChart size={14} />
+            <PieChart size={14} className={`${iconSizes.sm} ${iconColors.default}`} />
             {turmaAtual ? turmaAtual.nome : 'Turma não selecionada'}
           </div>
         </div>

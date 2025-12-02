@@ -10,6 +10,7 @@ import { usePathname } from 'next/navigation';
 import { getNavigationItemsForRoles } from '../../lib/navigation';
 import useUserStore from '../../store/userStore';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { iconColors, iconSizes, iconVariants } from '@/styles/iconTokens';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -86,7 +87,7 @@ export default function Sidebar() {
                       : 'bg-bjj-gray-900/70 text-bjj-gray-200/80 group-hover:bg-bjj-gray-800 group-hover:text-bjj-white'
                   }`}
                 >
-                  {Icon ? <Icon size={18} /> : null}
+                  {Icon ? <Icon className={`${iconSizes.md} ${iconColors.default}`} /> : null}
                 </span>
                 <div className="flex flex-col leading-tight">
                   <span className="text-sm font-medium">{item.title}</span>
@@ -120,16 +121,17 @@ export default function Sidebar() {
                       : 'bg-bjj-gray-900/70 text-bjj-gray-200/80 group-hover:bg-bjj-gray-800 group-hover:text-bjj-white'
                   }`}
                 >
-                  {Icon ? <Icon size={18} /> : null}
+                  {Icon ? <Icon className={`${iconSizes.md} ${iconColors.default}`} /> : null}
                 </span>
                 <div className="flex flex-1 flex-col leading-tight">
                   <span className="text-sm font-medium">{item.title}</span>
                   <span className="text-[11px] text-bjj-gray-200/60">{item.children.length} seção(ões)</span>
                 </div>
                 <ChevronDown
-                  size={16}
-                  className={`transition-transform ${
-                    isOpen ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-400 group-hover:text-bjj-white'
+                  className={`${iconSizes.sm} transition-transform ${
+                    isOpen
+                      ? `${iconColors.default} rotate-180`
+                      : `${iconColors.muted} group-hover:${iconColors.default}`
                   }`}
                 />
                 <span
@@ -157,7 +159,11 @@ export default function Sidebar() {
                           }`}
                         >
                           <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-bjj-gray-900/70 text-bjj-gray-200/80">
-                            {ChildIcon ? <ChildIcon size={12} /> : <ChevronRight size={12} className="text-bjj-gray-400" />}
+                            {ChildIcon ? (
+                              <ChildIcon className={`${iconSizes.xs} ${iconVariants.default}`} />
+                            ) : (
+                              <ChevronRight className={`${iconSizes.xs} ${iconColors.muted}`} />
+                            )}
                           </span>
                           {child.title}
                         </Link>

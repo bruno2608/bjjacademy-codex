@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { CalendarCheck, Users } from 'lucide-react';
 import { useTreinosStore } from '../../store/treinosStore';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 const diasSemana = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
 
@@ -31,7 +32,7 @@ export default function AgendaPage() {
           <div key={dia.dia} className="rounded-2xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-4">
             <div className="mb-2 flex items-center justify-between text-sm font-semibold">
               <span className="uppercase tracking-[0.2em] text-bjj-gray-300">{dia.dia}</span>
-              <CalendarCheck size={16} className="text-bjj-red" />
+              <CalendarCheck className={`${iconSizes.sm} ${iconColors.default}`} />
             </div>
             {dia.treinos.length === 0 ? (
               <p className="text-sm text-bjj-gray-300/80">Nenhum treino cadastrado para este dia.</p>
@@ -49,7 +50,7 @@ export default function AgendaPage() {
                     <div className="text-right text-xs text-bjj-gray-300/80">
                       <p>{treino.hora}</p>
                       <p className="inline-flex items-center gap-1 rounded-full bg-bjj-gray-800 px-2 py-0.5 text-[11px]">
-                        <Users size={12} /> Prof. responsável
+                        <Users className={`${iconSizes.xs} ${iconColors.default}`} /> Prof. responsável
                       </p>
                     </div>
                   </li>

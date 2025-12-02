@@ -10,19 +10,18 @@ import { Filter, UserPlus2 } from 'lucide-react';
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { normalizeAlunoStatus, normalizeFaixaSlug } from '@/lib/alunoStats';
-import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 import { useStaffDashboard } from '@/services/dashboard/useStaffDashboard';
 import MultiSelectDropdown from '../../components/ui/MultiSelectDropdown';
 import Table from '../../components/ui/Table';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import AlunoForm from '../../components/alunos/AlunoForm';
-import PageHero from '../../components/ui/PageHero';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { usePresencasStore } from '../../store/presencasStore';
 import { useTreinosStore } from '../../store/treinosStore';
 import { useAlunosStore } from '../../store/alunosStore';
+import { iconColors, iconSizes, iconVariants } from '@/styles/iconTokens';
 
 const TODOS_TREINOS = 'all';
 const STATUS_OPTIONS = [
@@ -44,7 +43,6 @@ export default function AlunosPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const presencas = usePresencasStore((state) => state.presencas);
   const treinos = useTreinosStore((state) => state.treinos.filter((treino) => treino.ativo));
-  const { staff } = useCurrentStaff();
   const { alunosAtivos, totalAlunos, checkinsRegistradosSemana, graduacoesPendentes } = useStaffDashboard();
   const alunos = useAlunosStore((state) => state.alunos);
   const addAluno = useAlunosStore((state) => state.addAluno);
@@ -213,16 +211,20 @@ export default function AlunosPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <PageHero
-        badge="Gestão de alunos"
-        title={
-          staff?.nome
-            ? `Olá, ${staff.nome.split(' ')[0]}! Cadastre, filtre e mantenha os dados em dia`
-            : 'Cadastre, filtre e mantenha os dados dos praticantes em dia'
-        }
-        subtitle="Use os filtros inteligentes para localizar alunos, abrir o cadastro e acompanhar graduações em poucos cliques."
-      />
+    <div className="space-y-5">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.2em] text-bjj-gray-200/70">Alunos</p>
+          <h1 className="text-xl font-semibold text-bjj-white">Cadastros e presenças</h1>
+        </div>
+        <Button
+          type="button"
+          onClick={() => setIsCreateOpen(true)}
+          className="inline-flex items-center gap-2 self-start md:self-auto"
+        >
+          <UserPlus2 className={`${iconSizes.sm} ${iconVariants.default}`} /> Novo aluno
+        </Button>
+      </div>
 
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {[{
@@ -251,11 +253,10 @@ export default function AlunosPage() {
       <section className="space-y-3">
         <article className="card space-y-4 overflow-visible">
           <header className="flex flex-col gap-1">
-            <h2 className="text-base font-semibold text-bjj-white">Filtros inteligentes</h2>
-            <p className="text-sm text-bjj-gray-200/70">
-              Combine os filtros abaixo para localizar alunos por faixa, status ou treinos frequentes. A busca por nome é
-              habilitada a partir de três letras.
-            </p>
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="text-base font-semibold text-bjj-white">Filtros rápidos</h2>
+              <p className="text-xs text-bjj-gray-200/70">Busca a partir de 3 letras.</p>
+            </div>
           </header>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col gap-1">
@@ -315,7 +316,7 @@ export default function AlunosPage() {
               onClick={limparFiltros}
               className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-bjj-gray-200/70 transition hover:text-bjj-red"
             >
-              <Filter size={12} /> Limpar filtros
+              <Filter className={`${iconSizes.xs} ${iconColors.primary}`} /> Limpar filtros
             </button>
           </div>
         </article>
@@ -324,11 +325,8 @@ export default function AlunosPage() {
           <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <div className="space-y-1">
               <h2 className="text-base font-semibold text-bjj-white">Lista de alunos</h2>
-              <p className="text-sm text-bjj-gray-200/70">Monitore faixa atual, tempo dedicado e status de cada membro da academia.</p>
+              <p className="text-sm text-bjj-gray-200/70">Visão compacta da base de alunos.</p>
             </div>
-            <Button type="button" onClick={() => setIsCreateOpen(true)} className="self-start sm:self-auto">
-              <UserPlus2 size={16} /> Novo aluno
-            </Button>
           </header>
           <Table
             headers={['Ações', 'Aluno', 'Graduação', 'Plano', 'Status', 'Contato']}

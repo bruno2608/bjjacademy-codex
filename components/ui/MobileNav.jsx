@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getNavigationItemsForRoles } from '../../lib/navigation';
 import useUserStore from '../../store/userStore';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 export default function MobileNav() {
   const pathname = usePathname();
@@ -48,7 +49,7 @@ export default function MobileNav() {
                     : 'border-bjj-gray-800 bg-bjj-gray-900/60 text-bjj-gray-200/80 group-hover:border-bjj-gray-700 group-hover:bg-bjj-gray-800'
                 }`}
               >
-                {Icon ? <Icon size={18} /> : null}
+                {Icon ? <Icon className={`${iconSizes.md} ${iconColors.default}`} /> : null}
               </span>
               {item.title}
             </Link>

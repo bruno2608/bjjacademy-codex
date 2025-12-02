@@ -1,5 +1,6 @@
 import { ClipboardList } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 // Visão focada em revisão/histórico recente de presenças
 export default function PresencasRevisaoView({ revisoes, formatDateBr, StatusBadge, onQuickFilter }) {
@@ -22,7 +23,7 @@ export default function PresencasRevisaoView({ revisoes, formatDateBr, StatusBad
       </div>
 
       <div className="mt-4 flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-bjj-gray-200/70">
-        <ClipboardList size={14} /> Revisões recentes
+        <ClipboardList size={14} className={`${iconSizes.sm} ${iconColors.default}`} /> Revisões recentes
       </div>
 
       <div className="mt-3 space-y-3">

@@ -8,6 +8,7 @@ import { usePresencasStore } from '../../store/presencasStore';
 import { useTreinosStore } from '../../store/treinosStore';
 import Modal from '../../components/ui/Modal';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 const toLocalDate = (value) => {
   if (value instanceof Date) return value;
@@ -298,7 +299,7 @@ export default function CheckinPage() {
       >
         <div className="flex items-start gap-3 text-sm text-bjj-gray-100">
           <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-bjj-red/10 text-bjj-red">
-            <CheckCircle size={16} />
+            <CheckCircle className={`${iconSizes.sm} ${iconColors.default}`} />
           </span>
           <p className="leading-relaxed">{feedbackModal.message}</p>
         </div>

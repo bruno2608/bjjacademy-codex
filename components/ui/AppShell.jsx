@@ -61,7 +61,9 @@ export default function AppShell({ children }) {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-bjj-black text-bjj-white">
-      <TabletNav />
+      <Suspense fallback={null}>
+        <TabletNav />
+      </Suspense>
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-12 pt-6 md:px-6 xl:px-8">{children}</main>
 

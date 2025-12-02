@@ -20,6 +20,7 @@ import { useMatriculasStore } from '@/store/matriculasStore';
 import { usePresencasStore } from '@/store/presencasStore';
 import { useTurmasStore } from '@/store/turmasStore';
 import { useUserStore } from '@/store/userStore';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 const cardBase = 'rounded-3xl border border-bjj-gray-800 bg-bjj-gray-900/70 shadow-[0_25px_60px_rgba(0,0,0,0.35)]';
 const badge = 'text-xs uppercase tracking-[0.2em] text-bjj-gray-300/80';
@@ -188,7 +189,7 @@ function StudentDashboard() {
                 <p className={`text-xs ${item.badgeTone}`}>{item.helper}</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bjj-gray-800/80 text-white group-hover:bg-bjj-red group-hover:text-white">
-                <Icon size={16} />
+                <Icon className={`${iconSizes.sm} ${iconColors.default}`} />
               </div>
             </Link>
           );
@@ -204,7 +205,7 @@ function StudentDashboard() {
               {`Progresso atual: ${percentualProgresso}% (${aulasNoGrau}/${aulasMetaNoGrau} aulas)`}
             </p>
           </div>
-          <Activity size={18} className="text-green-400" />
+          <Activity className={`${iconSizes.sm} ${iconColors.default}`} />
         </header>
         <ul className="divide-y divide-bjj-gray-800/70 text-sm">
           {ultimasPresencas.map((item) => (
@@ -519,7 +520,7 @@ function ProfessorDashboard() {
             <h3 className="text-xl font-semibold text-white">Próximas graduações</h3>
             <p className="text-sm text-bjj-gray-300">3 alunos mais próximos da próxima faixa ou grau.</p>
           </div>
-          <Medal size={20} className="text-bjj-red" />
+          <Medal className={`${iconSizes.md} ${iconColors.default}`} />
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">

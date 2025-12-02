@@ -6,6 +6,7 @@
  * preparado para mobile-first.
  */
 import { CheckCircle2, Circle, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 export default function AttendanceTable({
   records,
@@ -71,7 +72,12 @@ export default function AttendanceTable({
                         : 'bg-bjj-gray-800/80 text-bjj-gray-200'
                     }`}
                   >
-                    {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
+                    {record.status === 'Presente' ? (
+                      <CheckCircle2 className={`${iconSizes.sm} ${iconColors.primary}`} />
+                    ) : (
+                      <Circle className={`${iconSizes.sm} ${iconColors.muted}`} />
+                    )}{' '}
+                    {record.status}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[11px] text-bjj-gray-200/70">
@@ -94,17 +100,17 @@ export default function AttendanceTable({
                         onClick={handleToggle}
                         disabled={isConfirmed && !isPlaceholder}
                       >
-                        <CheckCircle2 size={16} />
+                        <CheckCircle2 className={`${iconSizes.sm} ${iconColors.primary}`} />
                         <span className="sr-only">Marcar presença</span>
                       </button>
                       {!isPlaceholder && (
                         <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
-                          <Plus size={16} />
+                          <Plus className={`${iconSizes.sm} ${iconColors.default}`} />
                           <span className="sr-only">Adicionar outra sessão</span>
                         </button>
                       )}
                       <button className={actionButtonClasses} onClick={() => onDelete?.(record)} disabled={isPlaceholder}>
-                        <Trash2 size={15} />
+                        <Trash2 className={`${iconSizes.sm} ${iconColors.danger}`} />
                         <span className="sr-only">Remover registro</span>
                       </button>
                     </div>
@@ -112,7 +118,7 @@ export default function AttendanceTable({
                 </div>
                 {!isPlaceholder && (
                   <button className={actionButtonClasses} onClick={() => onEdit?.(record)}>
-                    <Pencil size={15} />
+                    <Pencil className={`${iconSizes.sm} ${iconColors.default}`} />
                     <span className="sr-only">Corrigir presença</span>
                   </button>
                 )}
@@ -124,18 +130,18 @@ export default function AttendanceTable({
                       onClick={handleToggle}
                       disabled={isConfirmed && !isPlaceholder}
                     >
-                      <CheckCircle2 size={15} />
+                      <CheckCircle2 className={`${iconSizes.sm} ${iconColors.primary}`} />
                       <span className="sr-only">Marcar presença</span>
                     </button>
                     {!isPlaceholder && (
                       <button className={actionButtonClasses} onClick={() => onAddSession?.(record)}>
-                        <Plus size={14} />
+                        <Plus className={`${iconSizes.xs} ${iconColors.default}`} />
                         <span className="sr-only">Adicionar outra sessão</span>
                       </button>
                     )}
                     {!isPlaceholder && (
                       <button className={actionButtonClasses} onClick={() => onEdit?.(record)}>
-                        <Pencil size={14} />
+                        <Pencil className={`${iconSizes.xs} ${iconColors.default}`} />
                         <span className="sr-only">Corrigir presença</span>
                       </button>
                     )}
@@ -144,7 +150,7 @@ export default function AttendanceTable({
                       onClick={() => onDelete?.(record)}
                       disabled={isPlaceholder}
                     >
-                      <Trash2 size={14} />
+                      <Trash2 className={`${iconSizes.xs} ${iconColors.danger}`} />
                       <span className="sr-only">Remover registro</span>
                     </button>
                   </div>
@@ -168,7 +174,12 @@ export default function AttendanceTable({
                           : 'bg-bjj-gray-800/80 text-bjj-gray-200'
                       }`}
                     >
-                      {record.status === 'Presente' ? <CheckCircle2 size={14} /> : <Circle size={14} />} {record.status}
+                      {record.status === 'Presente' ? (
+                        <CheckCircle2 className={`${iconSizes.sm} ${iconColors.primary}`} />
+                      ) : (
+                        <Circle className={`${iconSizes.sm} ${iconColors.muted}`} />
+                      )}{' '}
+                      {record.status}
                     </span>
                   </div>
                 </div>

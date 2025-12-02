@@ -15,6 +15,7 @@ import { updateAluno } from '../../../services/alunosService';
 import { getMaxStripes, getRuleForBelt } from '../../../lib/graduationRules';
 import { useAlunosStore } from '../../../store/alunosStore';
 import { normalizeFaixaSlug } from '../../../lib/alunoStats';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 export default function EditarAlunoPage() {
   const router = useRouter();
@@ -132,7 +133,7 @@ export default function EditarAlunoPage() {
           aria-label="Voltar para a lista de alunos"
           onClick={() => router.push('/alunos')}
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft className={`${iconSizes.sm} ${iconColors.default}`} />
         </button>
       </div>
 

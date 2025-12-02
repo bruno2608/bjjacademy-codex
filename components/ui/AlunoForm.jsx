@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { BELT_ORDER, getMaxStripes, orderBelts } from '../../lib/graduationRules';
 import { PLANOS_MOCK, STATUS_ALUNO } from '../../data/catalogs';
 import { useGraduationRulesStore } from '../../store/graduationRulesStore';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 const beltFallback = BELT_ORDER.filter((faixa) => faixa !== 'Vermelha');
 
@@ -265,7 +266,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
             className="inline-flex items-center gap-1 rounded-lg border border-bjj-gray-800 px-3.5 py-2 text-xs text-bjj-gray-200 transition hover:border-bjj-red hover:text-bjj-red disabled:cursor-not-allowed disabled:opacity-50"
             disabled={step === 0}
           >
-            <ChevronLeft size={14} /> Voltar
+            <ChevronLeft size={14} className={`${iconSizes.sm} ${iconColors.default}`} /> Voltar
           </button>
           <button
             type={isLastStep ? 'submit' : 'button'}
@@ -274,7 +275,7 @@ export default function AlunoForm({ initialData, onSubmit, isSubmitting = false,
             disabled={isSubmitting}
           >
             {isLastStep ? submitLabel : 'Avançar'}
-            {!isLastStep && <ChevronRight size={14} />}
+            {!isLastStep && <ChevronRight size={14} className={`${iconSizes.sm} ${iconColors.default}`} />}
           </button>
         </div>
       </div>

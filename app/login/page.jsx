@@ -91,7 +91,7 @@ export default function LoginPage() {
 
         <section className="relative max-w-xl space-y-5">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-bjj-gray-200/70">
-            <ShieldCheck size={13} className="text-bjj-red" /> Portal do instrutor
+            <ShieldCheck className={`${iconSizes.xs} ${iconColors.default}`} /> Portal do instrutor
           </span>
           <div className="space-y-3.5">
             <h1 className="text-3xl font-semibold">BJJ Academy</h1>

@@ -1,3 +1,5 @@
+import { iconColors, iconSizes } from '@/styles/iconTokens';
+
 /**
  * Card componente reutilizável para métricas rápidas.
  * Utiliza a classe utilitária `.card` para manter consistência visual.
@@ -15,7 +17,7 @@ export default function Card({ title, value, icon: Icon, description, className 
         </div>
         {Icon && (
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-bjj-red/10 text-bjj-red">
-            <Icon size={16} />
+            <Icon size={16} className={`${iconSizes.sm} ${iconColors.default}`} />
           </span>
         )}
       </header>

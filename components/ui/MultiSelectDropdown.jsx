@@ -8,6 +8,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, Search } from 'lucide-react';
+import { iconColors, iconSizes, iconVariants } from '@/styles/iconTokens';
 
 const EMPTY_ARRAY = [];
 
@@ -146,13 +147,13 @@ export default function MultiSelectDropdown({
         disabled={disabled}
       >
         <span className="truncate text-sm text-bjj-white/90">{summaryLabel}</span>
-        <ChevronDown size={14} className="text-bjj-gray-200/70" />
+        <ChevronDown className={`${iconSizes.sm} ${iconColors.muted}`} />
       </button>
 
       {isOpen && (
         <div className="absolute z-30 mt-1 w-full min-w-[220px] max-w-xs rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/95 p-3 shadow-focus">
           <div className="flex items-center gap-2 rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/60 px-2 py-1.5">
-            <Search size={14} className="text-bjj-gray-200/60" />
+            <Search className={`${iconSizes.sm} ${iconColors.muted}`} />
             <input
               type="search"
               value={query}
@@ -172,7 +173,7 @@ export default function MultiSelectDropdown({
               }`}
             >
               <span className="flex h-3.5 w-3.5 items-center justify-center rounded border border-bjj-gray-700 bg-bjj-gray-900/90">
-                {(hasAllSelected || isAllActive) && <Check size={12} className="text-bjj-red" />}
+                {(hasAllSelected || isAllActive) && <Check className={`${iconSizes.xs} ${iconColors.primary}`} />}
               </span>
               <span className="flex-1 text-[11px] uppercase tracking-wide">{allLabel}</span>
             </button>
@@ -192,7 +193,7 @@ export default function MultiSelectDropdown({
                   }`}
                 >
                   <span className="flex h-3.5 w-3.5 items-center justify-center rounded border border-bjj-gray-700 bg-bjj-gray-900/90">
-                    {checked && <Check size={12} className="text-bjj-red" />}
+                    {checked && <Check className={`${iconSizes.xs} ${iconColors.primary}`} />}
                   </span>
                   <span className="flex-1 truncate text-sm text-bjj-white/80">{option.label}</span>
                 </button>

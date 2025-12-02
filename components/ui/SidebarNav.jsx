@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getNavigationItemsForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 export default function SidebarNav() {
   const pathname = usePathname();
@@ -35,7 +36,7 @@ export default function SidebarNav() {
                     : 'border-bjj-gray-800 bg-bjj-gray-900 text-bjj-gray-200 group-hover:border-bjj-red/60'
                 }`}
               >
-                {Icon ? <Icon size={16} /> : null}
+                {Icon ? <Icon size={16} className={`${iconSizes.sm} ${iconColors.default}`} /> : null}
               </span>
               <div className="flex flex-1 items-center justify-between gap-2">
                 <span className="font-semibold leading-none">{item.title}</span>

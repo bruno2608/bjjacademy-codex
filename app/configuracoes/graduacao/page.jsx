@@ -14,6 +14,7 @@ import { BELT_ORDER } from '../../../config/graduationRules';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 import { ROLE_KEYS } from '@/config/roles';
+import { iconColors, iconSizes } from '@/styles/iconTokens';
 
 /**
  * Permite editar os requisitos mockados de cada faixa sem impactar o módulo principal.
@@ -221,7 +222,7 @@ export default function RegrasGraduacaoPage() {
 
       <div className="flex justify-end">
         <Button onClick={openCreateModal} className="flex items-center gap-2">
-          <Plus size={16} /> Nova faixa
+          <Plus className={`${iconSizes.sm} ${iconColors.default}`} /> Nova faixa
         </Button>
       </div>
 
@@ -249,7 +250,7 @@ export default function RegrasGraduacaoPage() {
                         aria-label={`Editar ${belt}`}
                         onClick={() => openEditModal(belt, rule)}
                       >
-                        <Edit3 size={14} />
+                        <Edit3 className={`${iconSizes.xs} ${iconColors.default}`} />
                       </button>
                       <button
                         type="button"
@@ -257,7 +258,7 @@ export default function RegrasGraduacaoPage() {
                         aria-label={`Excluir ${belt}`}
                         onClick={() => handleDelete(belt)}
                       >
-                        <Trash2 size={14} />
+                        <Trash2 className={`${iconSizes.xs} ${iconColors.danger}`} />
                       </button>
                     </div>
                   </td>
