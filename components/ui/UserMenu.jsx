@@ -15,15 +15,7 @@ import { getNavigationConfigForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
-
-const buildInitials = (name = '', email = '') => {
-  const source = name || email || 'Instrutor';
-  const parts = source.split(/[\s@._-]+/).filter(Boolean);
-  if (parts.length === 0) return 'IN';
-  const first = parts[0][0] || '';
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
-  return `${first}${last}`.toUpperCase();
-};
+import { getUserAvatarData } from '@/lib/userAvatar';
 
 export default function UserMenu({ inline = false }) {
   const router = useRouter();
@@ -69,11 +61,10 @@ export default function UserMenu({ inline = false }) {
     router.push('/login');
   };
 
-  const displayName = staff?.nome || aluno?.nome || user?.name || 'Instrutor';
+  const avatarEntity = staff || aluno || user;
   const displayEmail = staff?.email || aluno?.email || user?.email || 'instrutor@bjj.academy';
 
-  const initials = buildInitials(displayName, displayEmail);
-  const avatarUrl = staff?.avatarUrl || aluno?.avatarUrl || user?.avatarUrl;
+  const { nome: displayName, avatarUrl, initials } = getUserAvatarData({ ...avatarEntity, email: displayEmail });
 
   const AvatarBadge = (
     <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-bjj-red/80 to-bjj-red text-xs font-semibold text-bjj-white shadow-[0_0_0_1px_rgba(225,6,0,0.4)]">

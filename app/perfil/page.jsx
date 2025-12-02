@@ -11,9 +11,7 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { normalizeFaixaSlug } from '@/lib/alunoStats';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
-
-const ensureAvatar = (name, avatarUrl) =>
-  avatarUrl || `https://ui-avatars.com/api/?background=111111&color=fff&bold=true&name=${encodeURIComponent(name || 'BJJ')}`;
+import { getUserAvatarData } from '@/lib/userAvatar';
 
 export default function PerfilAlunoPage() {
   const { user, aluno } = useCurrentAluno();
@@ -109,15 +107,24 @@ export default function PerfilAlunoPage() {
   const disabledFieldClass =
     'input input-bordered input-primary w-full border border-bjj-gray-500/80 bg-bjj-gray-800/90 text-sm font-semibold text-bjj-gray-100/90 placeholder:text-bjj-gray-200 disabled:cursor-not-allowed disabled:border-bjj-gray-500 disabled:bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.06)_0,rgba(255,255,255,0.06)_12px,rgba(255,255,255,0.03)_12px,rgba(255,255,255,0.03)_24px)]';
 
+  const perfilBase = (isAluno ? aluno : staff) || user;
+  const heroAvatarData = getUserAvatarData({
+    ...perfilBase,
+    nome: form.nome || perfilBase?.nome || perfilBase?.nomeCompleto || perfilBase?.name,
+    avatarUrl: form.avatarUrl || perfilBase?.avatarUrl,
+    email: perfilBase?.email || user?.email
+  });
+
   return (
     <div className="space-y-4">
       <StudentHero
-        name={form.nome || user?.nomeCompleto || user?.name || staff?.nome || 'Aluno'}
+        name={heroAvatarData.nome}
+        initials={heroAvatarData.initials}
         faixa={isAluno ? aluno?.faixa || aluno?.faixaSlug : staff?.faixaSlug}
         faixaSlug={isAluno ? aluno?.faixaSlug ?? aluno?.faixa : staff?.faixaSlug}
         graus={grauAtual}
         statusLabel={statusLabel}
-        avatarUrl={ensureAvatar(form.nome || staff?.nome, form.avatarUrl)}
+        avatarUrl={heroAvatarData.avatarUrl || undefined}
         subtitle={isAluno ? 'Perfil do aluno' : 'Perfil do professor'}
       />
 
