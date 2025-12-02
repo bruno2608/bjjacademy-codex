@@ -1,14 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Award, Clock3, Filter, Medal, ShieldCheck } from 'lucide-react';
 
 import { BjjBeltStrip } from '@/components/bjj/BjjBeltStrip';
-import GraduationList from '@/components/graduacoes/GraduationList';
-import GraduationTimeline from '@/components/graduacoes/GraduationTimeline';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import MinimalTabs from '@/components/ui/Tabs';
+import GraduacoesHistoricoView from '@/components/graduacoes/GraduacoesHistoricoView';
+import GraduacoesProximasView from '@/components/graduacoes/GraduacoesProximasView';
 import { getFaixaConfigBySlug } from '@/data/mocks/bjjBeltUtils';
 import { useGraduacoesProfessorView } from '@/hooks/useGraduacoesProfessorView';
 import { normalizeFaixaSlug } from '@/lib/alunoStats';
@@ -22,6 +23,8 @@ const STATUS_OPTIONS = ['Planejado', 'Em progresso', 'Em avaliação', 'Pronto p
 const TIPO_OPTIONS = ['Faixa', 'Grau'];
 
 export default function GraduacoesStaffPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { staff } = useCurrentStaff();
   const graduacoesRaw = useGraduacoesStore((state) => state.graduacoes);
   const alunos = useAlunosStore((state) => state.alunos);
@@ -32,7 +35,11 @@ export default function GraduacoesStaffPage() {
   const [statusFiltro, setStatusFiltro] = useState('');
   const [tipoFiltro, setTipoFiltro] = useState('');
   const [periodoFiltro, setPeriodoFiltro] = useState(30);
-  const [abaAtiva, setAbaAtiva] = useState('proximas');
+  const activeView = useMemo(() => {
+    const allowed = ['proximas', 'historico'];
+    const fromQuery = searchParams.get('view');
+    return allowed.includes(fromQuery) ? fromQuery : 'proximas';
+  }, [searchParams]);
 
   // Se o aluno já atingiu a meta manualmente (ex.: faixa ou grau ajustado via edição),
   // sincronizamos o status da graduação e aplicamos os efeitos colaterais centrais
@@ -171,6 +178,12 @@ export default function GraduacoesStaffPage() {
     await updateGraduacao(graduacao.id, { status, dataConclusao });
   };
 
+  const handleViewChange = (nextView) => {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    params.set('view', nextView);
+    router.push(`/graduacoes?${params.toString()}`);
+  };
+
   return (
     <div className="space-y-8">
       <header className="card space-y-3">
@@ -295,30 +308,19 @@ export default function GraduacoesStaffPage() {
             { id: 'proximas', label: 'Próximas graduações' },
             { id: 'historico', label: 'Histórico recente' }
           ]}
-          activeId={abaAtiva}
-          onChange={setAbaAtiva}
+          activeId={activeView}
+          onChange={handleViewChange}
         />
 
-        {abaAtiva === 'proximas' ? (
-          <div className="space-y-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">Próximas promoções</p>
-            <GraduationList
-              graduacoes={graduacoesPendentes}
-              onStatusChange={handleStatusChange}
-              alunoLookup={alunoLookup}
-            />
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs uppercase tracking-[0.18em] text-bjj-gray-200/70">Histórico recente</p>
-              <p className="text-[11px] uppercase tracking-[0.12em] text-bjj-gray-200/60">
-                Janela: {periodoFiltro === 0 ? 'todos os registros' : `últimos ${periodoFiltro} dias`}
-              </p>
-            </div>
-            <GraduationTimeline itens={historico} />
-          </div>
+        {activeView === 'proximas' && (
+          <GraduacoesProximasView
+            graduacoesPendentes={graduacoesPendentes}
+            alunoLookup={alunoLookup}
+            onStatusChange={handleStatusChange}
+          />
         )}
+
+        {activeView === 'historico' && <GraduacoesHistoricoView historico={historico} periodoFiltro={periodoFiltro} />}
       </section>
     </div>
   );

@@ -20,12 +20,17 @@ export default function TabletNav() {
   const { roles } = useRole();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [openDrawerGroups, setOpenDrawerGroups] = useState({});
 
   const navigationConfig = useMemo(() => getNavigationConfigForRoles(roles), [roles]);
   const { topNav, drawerNav, variant } = navigationConfig;
 
   const toggleDropdown = (key) => {
     setOpenDropdown((current) => (current === key ? null : key));
+  };
+
+  const toggleDrawerGroup = (key) => {
+    setOpenDrawerGroups((current) => ({ ...current, [key]: !current[key] }));
   };
 
   const renderDropdown = (item) => {
@@ -94,6 +99,7 @@ export default function TabletNav() {
   const renderDrawerItems = () => {
     if (!drawerNav?.length) return null;
     let currentSection = null;
+
     return drawerNav.map((item, index) => {
       const isActive = resolveActivePath(pathname, item);
       const sectionChanged = item.section && item.section !== currentSection;
@@ -106,17 +112,57 @@ export default function TabletNav() {
           {sectionChanged ? (
             <span className="text-[11px] uppercase tracking-[0.22em] text-bjj-gray-400">{item.section}</span>
           ) : null}
-          <Link
-            href={item.href || item.path}
-            onClick={() => setDrawerOpen(false)}
-            className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
-              isActive
-                ? 'border-bjj-red/70 bg-bjj-red/10 text-bjj-white shadow-[0_18px_45px_rgba(225,6,0,0.18)]'
-                : 'border-bjj-gray-800/70 text-bjj-gray-200 hover:border-bjj-red/60 hover:bg-bjj-red/10 hover:text-bjj-white'
-            }`}
-          >
-            <span>{item.title}</span>
-          </Link>
+
+          {item.children?.length ? (
+            <div className="rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/60">
+              <button
+                type="button"
+                onClick={() => toggleDrawerGroup(item.key || item.title)}
+                className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-bjj-gray-100"
+                aria-expanded={openDrawerGroups[item.key || item.title] ? 'true' : 'false'}
+              >
+                <span>{item.title}</span>
+                <ChevronDown
+                  size={14}
+                  className={`transition ${openDrawerGroups[item.key || item.title] ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-400'}`}
+                />
+              </button>
+              {openDrawerGroups[item.key || item.title] ? (
+                <ul className="flex flex-col gap-1 border-t border-bjj-gray-800/80 px-2 py-2 text-sm">
+                  {item.children.map((child) => {
+                    const childActive = resolveActivePath(pathname, child);
+                    return (
+                      <li key={child.key}>
+                        <Link
+                          href={child.href || child.path}
+                          onClick={() => setDrawerOpen(false)}
+                          className={`flex items-center justify-between rounded-xl px-3 py-2 transition ${
+                            childActive
+                              ? 'bg-bjj-red/10 text-bjj-white shadow-[0_12px_30px_rgba(225,6,0,0.16)]'
+                              : 'text-bjj-gray-200 hover:bg-bjj-red/10 hover:text-bjj-white'
+                          }`}
+                        >
+                          <span>{child.title}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+            </div>
+          ) : (
+            <Link
+              href={item.href || item.path}
+              onClick={() => setDrawerOpen(false)}
+              className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
+                isActive
+                  ? 'border-bjj-red/70 bg-bjj-red/10 text-bjj-white shadow-[0_18px_45px_rgba(225,6,0,0.18)]'
+                  : 'border-bjj-gray-800/70 text-bjj-gray-200 hover:border-bjj-red/60 hover:bg-bjj-red/10 hover:text-bjj-white'
+              }`}
+            >
+              <span>{item.title}</span>
+            </Link>
+          )}
         </div>
       );
     });
