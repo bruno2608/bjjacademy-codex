@@ -11,17 +11,16 @@ import { LogOut, Menu, X, Settings2, ChevronRight, ChevronDown, BarChart3, UserC
 import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import useUserStore from '../../store/userStore';
-import { useAlunosStore } from '@/store/alunosStore';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { useCurrentAluno } from '@/hooks/useCurrentAluno';
+import { getUserAvatarData } from '@/lib/userAvatar';
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
-  const alunoSelecionado = useAlunosStore((state) =>
-    user?.alunoId ? state.getAlunoById(user.alunoId) : null
-  );
+  const { aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
   const { roles } = useRole();
 
@@ -58,19 +57,12 @@ export default function Header() {
     }
   }, [hydrateFromStorage, hydrated]);
 
-  const displayName = alunoSelecionado?.nome || staff?.nome || user?.name || 'Instrutor';
-  const displayEmail = alunoSelecionado?.email || staff?.email || user?.email || 'instrutor@bjj.academy';
-
-  const initials = useMemo(() => {
-    const source = displayName || displayEmail;
-    const parts = source.split(/[\s@._-]+/).filter(Boolean);
-    if (!parts.length) return 'IN';
-    const first = parts[0][0] || '';
-    const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
-    return `${first}${last}`.toUpperCase();
-  }, [displayEmail, displayName]);
-
-  const avatarUrl = alunoSelecionado?.avatarUrl || staff?.avatarUrl || user?.avatarUrl;
+  const avatarEntity = staff || aluno || user;
+  const displayEmail = avatarEntity?.email || user?.email || 'instrutor@bjj.academy';
+  const { nome: displayName, avatarUrl, initials } = useMemo(
+    () => getUserAvatarData({ ...avatarEntity, email: displayEmail }),
+    [avatarEntity, displayEmail]
+  );
 
   const handleLogout = () => {
     logout();
