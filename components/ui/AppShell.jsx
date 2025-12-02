@@ -18,6 +18,11 @@ export default function AppShell({ children }) {
   const { user, aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
 
+  const isBareLayout = useMemo(
+    () => BARE_PATHS.some((publicPath) => pathname?.startsWith(publicPath)),
+    [pathname]
+  );
+
   useEffect(() => {
     if (!hydrated) {
       hydrateFromStorage();
@@ -38,11 +43,6 @@ export default function AppShell({ children }) {
       updateUser({ avatarUrl: nextAvatar, name: nextName || user.name });
     }
   }, [aluno, staff, updateUser, user]);
-
-  const isBareLayout = useMemo(
-    () => BARE_PATHS.some((publicPath) => pathname?.startsWith(publicPath)),
-    [pathname]
-  );
 
   if (isBareLayout) {
     return children;
