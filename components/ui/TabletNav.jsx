@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, Menu, X } from 'lucide-react';
@@ -21,6 +21,17 @@ export default function TabletNav() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [openDrawerGroups, setOpenDrawerGroups] = useState({});
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navigationConfig = useMemo(() => getNavigationConfigForRoles(roles), [roles]);
   const { topNav, drawerNav, variant } = navigationConfig;
@@ -171,7 +182,13 @@ export default function TabletNav() {
   if (!topNav?.length) return null;
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-bjj-gray-800/70 bg-bjj-black/95 backdrop-blur">
+    // Sticky header stays visible while scrolling; shadow toggles when the page moves.
+    // Fixed positioning keeps the bar pinned on all viewports, while the AppShell adds top padding to clear it.
+    <nav
+      className={`fixed inset-x-0 top-0 z-40 border-b bg-bjj-black/95 backdrop-blur transition-shadow ${
+        isScrolled ? 'border-bjj-gray-700/80 shadow-[0_18px_30px_rgba(0,0,0,0.35)]' : 'border-bjj-gray-800/70'
+      }`}
+    >
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 md:px-6 xl:px-8">
         <div className="flex flex-1 items-center gap-6">
           <button
