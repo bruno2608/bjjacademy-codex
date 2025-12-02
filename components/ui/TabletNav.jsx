@@ -8,6 +8,7 @@ import { ChevronDown, Menu, X } from 'lucide-react';
 import { getNavigationConfigForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import UserMenu from './UserMenu';
+import { iconColors, iconSizes, iconVariants } from '@/styles/iconTokens';
 
 const resolveActivePath = (pathname, item) => {
   const target = typeof item?.href === 'string' ? item.href : item?.href?.pathname || item?.path;
@@ -44,7 +45,11 @@ export default function TabletNav() {
           aria-expanded={isOpen}
         >
           <span>{item.title}</span>
-          <ChevronDown size={14} className={`transition ${isOpen ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-400'}`} />
+          <ChevronDown
+            className={`${iconSizes.sm} transition ${
+              isOpen ? iconColors.default : iconColors.muted
+            }`}
+          />
         </button>
         {isOpen ? (
           <div className="absolute left-0 z-50 mt-2 w-64 rounded-2xl border border-bjj-gray-800/80 bg-bjj-gray-900/95 p-2 shadow-[0_25px_65px_rgba(0,0,0,0.55)]">
@@ -123,8 +128,11 @@ export default function TabletNav() {
               >
                 <span>{item.title}</span>
                 <ChevronDown
-                  size={14}
-                  className={`transition ${openDrawerGroups[item.key || item.title] ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-400'}`}
+                  className={`${iconSizes.sm} transition ${
+                    openDrawerGroups[item.key || item.title]
+                      ? `${iconColors.default} rotate-180`
+                      : iconColors.muted
+                  }`}
                 />
               </button>
               {openDrawerGroups[item.key || item.title] ? (
@@ -176,12 +184,12 @@ export default function TabletNav() {
         <div className="flex flex-1 items-center gap-6">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white md:hidden"
-            aria-label={drawerOpen ? 'Fechar menu' : 'Abrir menu'}
-            onClick={() => setDrawerOpen(true)}
-          >
-            <Menu size={18} />
-          </button>
+        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/80 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white md:hidden"
+        aria-label={drawerOpen ? 'Fechar menu' : 'Abrir menu'}
+        onClick={() => setDrawerOpen(true)}
+      >
+        <Menu className={`${iconVariants.default} ${iconSizes.md}`} />
+      </button>
 
           <span className="text-sm font-semibold uppercase tracking-wide text-bjj-gray-200 md:hidden">BJJ Academy</span>
 
@@ -200,16 +208,16 @@ export default function TabletNav() {
         <div className="fixed inset-0 z-50 bg-bjj-black/80 backdrop-blur-sm md:hidden">
           <div className="absolute inset-x-0 top-0 mx-auto flex w-full max-w-md flex-col gap-4 rounded-b-3xl border-b border-bjj-gray-800 bg-bjj-gray-900/95 p-5 shadow-[0_45px_75px_rgba(0,0,0,0.45)]">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold uppercase tracking-wide text-bjj-gray-200">Menu principal</span>
-              <button
-                type="button"
-                onClick={() => setDrawerOpen(false)}
-                className="rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-2 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white"
-                aria-label="Fechar menu"
-              >
-                <X size={16} />
-              </button>
-            </div>
+            <span className="text-sm font-semibold uppercase tracking-wide text-bjj-gray-200">Menu principal</span>
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(false)}
+              className="rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/70 p-2 text-bjj-gray-100 transition hover:border-bjj-red/70 hover:text-bjj-white"
+              aria-label="Fechar menu"
+            >
+              <X className={`${iconVariants.default} ${iconSizes.sm}`} />
+            </button>
+          </div>
 
             <nav className="flex max-h-[70vh] flex-col gap-2 overflow-y-auto">{renderDrawerItems()}</nav>
           </div>
