@@ -6,6 +6,7 @@ import { AlertCircle, CalendarDays, CheckCircle2, Clock, PieChart } from 'lucide
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
+import MinimalTabs from '@/components/ui/Tabs';
 import { useAcademiasStore } from '@/store/academiasStore';
 import { useAlunosStore } from '@/store/alunosStore';
 import { useAulasStore } from '@/store/aulasStore';
