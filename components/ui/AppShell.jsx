@@ -6,27 +6,16 @@ import { usePathname } from 'next/navigation';
 import useUserStore from '../../store/userStore';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
-import { useRole } from '@/hooks/useRole';
-import StaffAppShell from '../layouts/StaffAppShell';
-import AlunoAppShell from '../layouts/AlunoAppShell';
+import TabletNav from './TabletNav';
+import ShellFooter from '../layouts/ShellFooter';
 
 const BARE_PATHS = ['/login', '/unauthorized'];
-const ALUNO_PATHS = [
-  '/dashboard',
-  '/checkin',
-  '/treinos',
-  '/evolucao',
-  '/perfil',
-  '/historico-presencas',
-  '/relatorios'
-];
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
   const { hydrateFromStorage, hydrated, updateUser } = useUserStore();
   const { user, aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
-  const { isStaff } = useRole();
 
   useEffect(() => {
     if (!hydrated) {
@@ -47,18 +36,17 @@ export default function AppShell({ children }) {
     [pathname]
   );
 
-  const shouldUseAlunoLayout = useMemo(
-    () => ALUNO_PATHS.some((studentPath) => pathname?.startsWith(studentPath)),
-    [pathname]
-  );
-
   if (isBareLayout) {
     return children;
   }
 
-  if (isStaff && !shouldUseAlunoLayout) {
-    return <StaffAppShell>{children}</StaffAppShell>;
-  }
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-bjj-black text-bjj-white">
+      <TabletNav />
 
-  return <AlunoAppShell>{children}</AlunoAppShell>;
+      <main className="mx-auto w-full max-w-6xl px-4 pb-12 pt-6 md:px-6 xl:px-8">{children}</main>
+
+      <ShellFooter />
+    </div>
+  );
 }
