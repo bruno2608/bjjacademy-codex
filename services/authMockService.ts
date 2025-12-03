@@ -78,16 +78,17 @@ export const allowedPilotUsers: AuthUser[] = [
   },
   {
     id: 'admin-ti-001',
-    email: 'admin.ti@bjjacademy.com',
-    nomeCompleto: 'Admin TI Piloto',
-    name: 'Admin TI Piloto',
+    email: 'camila.duarte@bjjacademy.com',
+    nomeCompleto: 'Bruno Alves França',
+    name: 'Bruno Alves',
     roles: [ROLE_KEYS.adminTi],
     alunoId: null,
     instrutorId: null,
     professorId: null,
     academiaId: DEFAULT_ACADEMIA_ID,
-    avatarUrl: DEFAULT_AVATAR,
-    telefone: null
+    avatarUrl:
+      'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=320&q=80',
+    telefone: '(11) 98888-3344'
   }
 ];
 
