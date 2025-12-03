@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { useEffect, useMemo } from 'react'
 import { ArrowRight, Clock3, HandRaised, History, QrCode } from 'lucide-react'
 
+import { ROLE_KEYS } from '@/config/roles'
 import { useCurrentAluno } from '@/hooks/useCurrentAluno'
 import { usePresencasStore } from '@/store/presencasStore'
+import { useUserStore } from '@/store/userStore'
 
 const formatDate = (value?: string | null) => {
   if (!value) return '--'
@@ -40,11 +42,20 @@ const origemLabel: Record<string, string> = {
 }
 
 export default function MeuCheckinPage() {
+  const roles = useUserStore((state) => state.effectiveUser?.roles ?? [])
+  const impersonation = useUserStore((state) => state.impersonation)
   const { user, aluno } = useCurrentAluno()
   const alunoId = aluno?.id || user?.alunoId || ''
 
   const presencas = usePresencasStore((state) => state.presencas)
   const carregarPorAluno = usePresencasStore((state) => state.carregarPorAluno)
+
+  const isAlunoAtivo = useMemo(
+    () =>
+      roles.includes(ROLE_KEYS.aluno) &&
+      (impersonation?.isActive || roles.every((role) => role === ROLE_KEYS.aluno)),
+    [impersonation?.isActive, roles]
+  )
 
   useEffect(() => {
     if (alunoId) {
@@ -68,21 +79,23 @@ export default function MeuCheckinPage() {
       </header>
 
       <div className="mx-auto flex max-w-3xl flex-col gap-4">
-        <Link
-          href="/aluno/checkin/qrcode"
-          className="block rounded-2xl bg-gradient-to-r from-emerald-900/60 via-bjj-gray-900 to-bjj-gray-900 p-5 ring-1 ring-bjj-gray-800 transition hover:-translate-y-0.5 hover:ring-emerald-600"
-        >
-          <div className="flex items-center gap-4">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-700/25 text-emerald-100 ring-2 ring-emerald-600/70">
-              <QrCode size={28} />
-            </span>
-            <div className="flex-1">
-              <p className="text-lg font-semibold text-white">Check-in por QR Code</p>
-              <p className="text-sm text-bjj-gray-100">Simule a leitura do QR Code da academia</p>
+        {isAlunoAtivo && (
+          <Link
+            href="/aluno/checkin/qrcode"
+            className="block rounded-2xl bg-gradient-to-r from-emerald-900/60 via-bjj-gray-900 to-bjj-gray-900 p-5 ring-1 ring-bjj-gray-800 transition hover:-translate-y-0.5 hover:ring-emerald-600"
+          >
+            <div className="flex items-center gap-4">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-700/25 text-emerald-100 ring-2 ring-emerald-600/70">
+                <QrCode size={28} />
+              </span>
+              <div className="flex-1">
+                <p className="text-lg font-semibold text-white">Check-in por QR Code</p>
+                <p className="text-sm text-bjj-gray-100">Simule a leitura do QR Code da academia</p>
+              </div>
+              <ArrowRight className="text-bjj-gray-200" />
             </div>
-            <ArrowRight className="text-bjj-gray-200" />
-          </div>
-        </Link>
+          </Link>
+        )}
 
         <Link href="/aluno/checkin/manual" className="block rounded-2xl bg-gradient-to-r from-bjj-blue-900/60 via-bjj-gray-900 to-bjj-gray-900 p-5 ring-1 ring-bjj-gray-800 transition hover:-translate-y-0.5 hover:ring-bjj-blue-700">
           <div className="flex items-center gap-4">
@@ -118,7 +131,14 @@ export default function MeuCheckinPage() {
                   <div className="space-y-1">
                     <p className="text-base font-semibold text-white">{formatDate(presenca.data)}</p>
                     <p className="text-xs text-bjj-gray-200">Horário: {formatTime(presenca.createdAt)}</p>
-                    <p className="text-xs text-bjj-gray-300">Origem: {origemLabel[presenca.origem] || 'Sistema'}</p>
+                    <div className="flex flex-wrap gap-2 text-xs text-bjj-gray-300">
+                      <span className="rounded-full bg-bjj-gray-800 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-bjj-gray-100 ring-1 ring-bjj-gray-700">
+                        {origemLabel[presenca.origem] || 'Sistema'}
+                      </span>
+                      <span className="rounded-full bg-bjj-gray-800 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-bjj-gray-100 ring-1 ring-bjj-gray-700">
+                        {presenca.turmaId ? `Turma ${presenca.turmaId}` : 'Registro rápido'}
+                      </span>
+                    </div>
                   </div>
                   <span
                     className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${
