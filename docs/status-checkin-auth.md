@@ -1,5 +1,7 @@
 # Status de Autenticação e Check-in
 
+> **Documento consolidado:** use [`docs/auth-and-checkin-flow.md`](./auth-and-checkin-flow.md) como fonte única para regras de autenticação, perfis e check-in (manual + QR). Este arquivo registra o panorama histórico do MVP e limitações atuais.
+
 ## 1. Estado atual de autenticação
 
 - **Usuários piloto apenas**: o login aceita qualquer e-mail/senha e aplica papéis mockados (admin/ti/aluno) conforme o e-mail ou seleção manual. Não há fluxo real de cadastro.
