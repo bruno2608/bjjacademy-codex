@@ -31,6 +31,7 @@ npm run dev
 - Login em `/login` aceita qualquer e-mail/senha e gera token fake.
 - Papéis são inferidos pelo e-mail (campos contendo `admin`, `ti`, `aluno`/`student`) ou pela seleção manual.
 - Dados persistem em `localStorage`/cookies (`bjj_token`, `bjj_roles`, `bjj_user`), permitindo refresh sem perder sessão.
+- **Estado atual**: somente usuários piloto; não existe cadastro self-service nem fluxo de "Esqueci minha senha". O acesso é feito com as credenciais pré-configuradas ou pelo modo de impersonação de papéis.
 
 ## 🚀 **Stack principal**
 
@@ -39,6 +40,19 @@ npm run dev
 - **Zustand** para estado global mockado
 - **Lucide React** para ícones
 - **next-pwa** com `manifest.json`, service worker custom e cache offline
+
+## 📌 **Visão geral do módulo de presenças**
+
+- **Check-in manual (padrão do MVP)**: aluno registra presença em `/checkin`; staff ajusta status na área de presenças. Fluxo já parcialmente implementado com dados mockados e stores centralizadas.
+- **Check-in por QR Code (opcional no MVP)**: professor gera QR dinâmico por treino/horário em `/qrcode`, válido por 60s. Aluno lê em `/checkin/qrcode` e tem presença confirmada automaticamente com origem `qr-code`.
+- **Regra automática**: ao gerar o QR, o professor é marcado presente com origem `sistema` e a aula fica “em andamento”.
+- **Validações esperadas**: token não expirado, treino correto, academia correta e aluno pertencente à turma. Logs de validação alimentam o histórico `/qrcode/historico`.
+- **Origem/status**: status de presença (ex.: `nao-registrado`, `confirmado`, `ausente`, `cancelado`) combinados com origem (`manual`, `qr-code`, `sistema`) para rastreabilidade e futura auditoria.
+
+### Telas envolvidas (aluno + staff)
+
+- **Aluno**: Dashboard do aluno, Check-in manual (`/checkin`), Check-in por QR Code (`/checkin/qrcode`), Treinos do aluno, Evolução.
+- **Staff**: Presenças → Check-in de Alunos (`/presencas/check-in`), Pendências de aprovação (`/presencas/pendencias`), Revisão de Presenças (`/presencas/revisao`), QR Code da Academia (`/qrcode`), Histórico de Validações (`/qrcode/historico`).
 
 ## 🗺️ Mapa de telas e fontes de dados
 
@@ -167,6 +181,19 @@ Só depois dessas refatorações de tela, iniciar a implementação de:
 - **Dashboards**: `/dashboard` (aluno) consome apenas `useAlunoDashboard`; `/dashboard` (staff) consome apenas `useStaffDashboard`. Não foram encontrados imports diretos de mocks, mas qualquer nova métrica deve seguir o mesmo hook para evitar divergências.
 - **Presenças**: `/checkin`, `/historico-presencas`, `/presencas` e dashboards leem `usePresencasStore`; status seguem `PENDENTE | PRESENTE | FALTA | JUSTIFICADA`. Se alguma nova rota usar presenças, deve evitar `data/mockPresencas.ts` direto e reutilizar o store.
 - **Rotas utilitárias**: `/belt-demo` depende de `MOCK_FAIXAS` (propósito de demonstração). Não usar como base para telas produtivas ou para preparar a integração com Supabase.
+
+## 🗺️ Roadmap de presenças e check-in
+
+- **Sprint 1** – Navegação e menus: dropdowns de Presenças/QR para staff e Check-in manual/QR para aluno.
+- **Sprint 2** – Consolidação do check-in manual: chamadas, ajustes de status e fechamento de treino.
+- **Sprint 3** – Domínio de QR: tokens, validação (treino/academia/turma/expiração) e logs de validação.
+- **Sprint 4** – Telas de QR do staff: geração do QR dinâmico por treino e histórico de validações.
+- **Sprint 5** – Check-in por QR Code do aluno: leitura com câmera, modal de sucesso e atualização de presenças.
+- **Sprint 6** – Configurações de TI e documentação extra: TTL configurável e ajustes avançados.
+
+## 📚 Documentação adicional
+
+- [Status de autenticação e presenças](docs/status-checkin-auth.md)
 
 ## 👥 Gestão de Alunos (/alunos)
 
