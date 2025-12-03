@@ -131,7 +131,14 @@ export default function MeuCheckinPage() {
                   <div className="space-y-1">
                     <p className="text-base font-semibold text-white">{formatDate(presenca.data)}</p>
                     <p className="text-xs text-bjj-gray-200">Horário: {formatTime(presenca.createdAt)}</p>
-                    <p className="text-xs text-bjj-gray-300">Origem: {origemLabel[presenca.origem] || 'Sistema'}</p>
+                    <div className="flex flex-wrap gap-2 text-xs text-bjj-gray-300">
+                      <span className="rounded-full bg-bjj-gray-800 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-bjj-gray-100 ring-1 ring-bjj-gray-700">
+                        {origemLabel[presenca.origem] || 'Sistema'}
+                      </span>
+                      <span className="rounded-full bg-bjj-gray-800 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-bjj-gray-100 ring-1 ring-bjj-gray-700">
+                        {presenca.turmaId ? `Turma ${presenca.turmaId}` : 'Registro rápido'}
+                      </span>
+                    </div>
                   </div>
                   <span
                     className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${
