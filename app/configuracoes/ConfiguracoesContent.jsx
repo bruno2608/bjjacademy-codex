@@ -17,9 +17,8 @@ export default function ConfiguracoesContent() {
   const roles = user?.roles || [];
 
   const sections = useMemo(() => {
-    const { topNav } = getNavigationConfigForRoles(roles);
-    const configNode = topNav?.find((item) => item.path === '/configuracoes');
-    return configNode?.children ?? [];
+    const { configNav } = getNavigationConfigForRoles(roles);
+    return configNav?.children ?? [];
   }, [roles]);
 
   const canManageConfigs = Boolean(

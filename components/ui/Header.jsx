@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, Menu, X, Settings2, ChevronRight, ChevronDown, BarChart3, UserCircle2 } from 'lucide-react';
-import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
+import { flattenNavigation, getNavigationConfigForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import useUserStore from '../../store/userStore';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
@@ -27,12 +27,9 @@ export default function Header() {
   const { staff } = useCurrentStaff();
   const { roles } = useRole();
 
-  const navigationItems = useMemo(() => getNavigationItemsForRoles(roles), [roles]);
-  const fullNavigation = useMemo(
-    () => getNavigationItemsForRoles(roles, { includeHidden: true }),
-    [roles]
-  );
-  const flattenedItems = useMemo(() => flattenNavigation(fullNavigation), [fullNavigation]);
+  const navigationConfig = useMemo(() => getNavigationConfigForRoles(roles), [roles]);
+  const navigationItems = navigationConfig.drawerNav || navigationConfig.topNav || [];
+  const flattenedItems = useMemo(() => flattenNavigation(navigationItems), [navigationItems]);
   const profilePath = useMemo(
     () => flattenedItems.find((item) => item.path === '/perfil')?.path,
     [flattenedItems]
@@ -42,10 +39,10 @@ export default function Header() {
     [flattenedItems]
   );
   const configItem = useMemo(
-    () => fullNavigation.find((item) => item.path === '/configuracoes'),
-    [fullNavigation]
+    () => navigationItems.find((item) => item.path === '/configuracoes'),
+    [navigationItems]
   );
-  const configChildren = configItem?.children ?? [];
+  const configChildren = configItem?.children ?? navigationConfig.configNav?.children ?? [];
   const isConfigPath = useMemo(() => pathname.startsWith('/configuracoes'), [pathname]);
   const [configOpen, setConfigOpen] = useState(isConfigPath);
 
