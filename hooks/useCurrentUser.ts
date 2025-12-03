@@ -4,7 +4,7 @@ import useUserStore from '@/store/userStore';
 import type { CurrentUser } from '@/types/session';
 
 export function useCurrentUser() {
-  const rawUser = useUserStore((s) => s.user);
+  const rawUser = useUserStore((s) => s.effectiveUser ?? s.user);
   const updateUser = useUserStore((s) => s.updateUser);
 
   const user: CurrentUser | null = useMemo(

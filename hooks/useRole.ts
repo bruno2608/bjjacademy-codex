@@ -5,9 +5,9 @@ import { ROLE_PERMISSIONS, ROLE_KEYS, normalizeRoles, hasAnyRole, type UserRole 
 import useUserStore from '../store/userStore';
 
 export function useRole() {
-  const { user } = useUserStore();
+  const effectiveUser = useUserStore((state) => state.effectiveUser ?? state.user);
 
-  const roles = useMemo<UserRole[]>(() => normalizeRoles(user?.roles ?? []), [user?.roles]);
+  const roles = useMemo<UserRole[]>(() => normalizeRoles(effectiveUser?.roles ?? []), [effectiveUser?.roles]);
 
   const isStudent = roles.includes(ROLE_KEYS.aluno);
   const isInstructor = hasAnyRole(roles, [ROLE_KEYS.instrutor, ROLE_KEYS.professor]);

@@ -19,7 +19,10 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
+  const sessionUser = useUserStore((state) => state.effectiveUser ?? state.user);
+  const logout = useUserStore((state) => state.logout);
+  const hydrateFromStorage = useUserStore((state) => state.hydrateFromStorage);
+  const hydrated = useUserStore((state) => state.hydrated);
   const { aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
   const { roles } = useRole();
@@ -57,8 +60,8 @@ export default function Header() {
     }
   }, [hydrateFromStorage, hydrated]);
 
-  const avatarEntity = staff || aluno || user;
-  const displayEmail = avatarEntity?.email || user?.email || 'instrutor@bjj.academy';
+  const avatarEntity = staff || aluno || sessionUser;
+  const displayEmail = avatarEntity?.email || sessionUser?.email || 'instrutor@bjj.academy';
   const { nome: displayName, avatarUrl, initials } = useMemo(
     () => getUserAvatarData({ ...avatarEntity, email: displayEmail }),
     [avatarEntity, displayEmail]
