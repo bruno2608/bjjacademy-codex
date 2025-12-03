@@ -10,6 +10,7 @@ import {
   listarPresencasPorTreino,
   listarTodasPresencas,
   registrarCheckinManual as serviceRegistrarCheckinManual,
+  registrarCheckinQrCode as serviceRegistrarCheckinQrCode,
   registrarCheckin as serviceRegistrarCheckin,
   registrarOuAtualizarPresenca,
   removerPresenca,
@@ -44,6 +45,7 @@ type PresencasState = {
     origem?: PresencaOrigem,
     dataReferencia?: Date
   ) => Promise<PresencaRegistro>
+  registrarCheckinQrCode: (alunoId: string, dataReferencia?: Date) => Promise<PresencaRegistro>
   registrarPresencaEmAula: (
     payload: Omit<PresencaRegistro, 'id' | 'createdAt' | 'updatedAt' | 'origem'> & { status?: PresencaStatus; origem?: PresencaOrigem }
   ) => Promise<PresencaRegistro>
@@ -135,6 +137,13 @@ export const usePresencasStore = create<PresencasState>((set, get) => ({
   },
   registrarCheckinManual: async (alunoId, origem, dataReferencia) => {
     const registro = await serviceRegistrarCheckinManual(alunoId, origem, dataReferencia)
+    const atualizadas = [...get().presencas.filter((item) => item.id !== registro.id), registro]
+    set({ presencas: atualizadas })
+    syncAlunos(atualizadas)
+    return registro
+  },
+  registrarCheckinQrCode: async (alunoId, dataReferencia) => {
+    const registro = await serviceRegistrarCheckinQrCode(alunoId, dataReferencia)
     const atualizadas = [...get().presencas.filter((item) => item.id !== registro.id), registro]
     set({ presencas: atualizadas })
     syncAlunos(atualizadas)
