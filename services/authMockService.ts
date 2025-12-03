@@ -78,7 +78,7 @@ export const allowedPilotUsers: AuthUser[] = [
   },
   {
     id: 'admin-ti-001',
-    email: 'camila.duarte@bjjacademy.com',
+    email: 'bruno.alves@bjjacademy.com',
     nomeCompleto: 'Bruno Alves França',
     name: 'Bruno Alves',
     roles: [ROLE_KEYS.adminTi],
