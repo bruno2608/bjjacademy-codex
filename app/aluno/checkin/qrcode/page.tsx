@@ -2,10 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Camera, CheckCircle2, QrCode } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 import Button from '@/components/ui/Button'
+import { ROLE_KEYS } from '@/config/roles'
 import { useCurrentAluno } from '@/hooks/useCurrentAluno'
 import { usePresencasStore } from '@/store/presencasStore'
+import { useUserStore } from '@/store/userStore'
 
 const formatDateTime = (date: Date) =>
   date.toLocaleDateString('pt-BR', {
@@ -15,9 +18,12 @@ const formatDateTime = (date: Date) =>
   }) + ` às ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
 
 export default function CheckinQrCodeAlunoPage() {
+  const router = useRouter()
   const hoje = useMemo(() => new Date(), [])
   const dataHoje = useMemo(() => new Date().toISOString().split('T')[0], [])
 
+  const roles = useUserStore((state) => state.effectiveUser?.roles ?? [])
+  const impersonation = useUserStore((state) => state.impersonation)
   const { user, aluno } = useCurrentAluno()
   const alunoId = aluno?.id || user?.alunoId || ''
 
@@ -29,11 +35,24 @@ export default function CheckinQrCodeAlunoPage() {
   const [erro, setErro] = useState<string | null>(null)
   const [sucesso, setSucesso] = useState(false)
 
+  const isAlunoAtivo = useMemo(
+    () =>
+      roles.includes(ROLE_KEYS.aluno) &&
+      (impersonation?.isActive || roles.every((role) => role === ROLE_KEYS.aluno)),
+    [impersonation?.isActive, roles]
+  )
+
   useEffect(() => {
     if (alunoId) {
       carregarPorAluno(alunoId)
     }
   }, [alunoId, carregarPorAluno])
+
+  useEffect(() => {
+    if (!isAlunoAtivo) {
+      router.replace('/unauthorized')
+    }
+  }, [isAlunoAtivo, router])
 
   const registroHoje = useMemo(
     () => presencas.find((item) => item.alunoId === alunoId && (item.data || '').startsWith(dataHoje)),
@@ -58,6 +77,8 @@ export default function CheckinQrCodeAlunoPage() {
   }
 
   const saudacao = aluno?.nome || user?.nomeCompleto || 'Aluno'
+
+  if (!isAlunoAtivo) return null
 
   return (
     <div className="flex justify-center">
