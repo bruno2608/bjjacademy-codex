@@ -1,9 +1,9 @@
-import ConfiguracoesContent from './ConfiguracoesContent';
+import { redirect } from 'next/navigation';
 
 export const metadata = {
   title: 'Configurações da Academia · BJJ Academy'
 };
 
 export default function ConfiguracoesPage() {
-  return <ConfiguracoesContent />;
+  redirect('/configuracoes/graduacao');
 }
