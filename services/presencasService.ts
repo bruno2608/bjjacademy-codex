@@ -92,6 +92,13 @@ export async function registrarCheckinManual(
   return { ...registro }
 }
 
+export async function registrarCheckinQrCode(
+  alunoId: string,
+  dataReferencia?: Date
+): Promise<PresencaRegistro> {
+  return registrarCheckinManual(alunoId, 'QR_CODE', dataReferencia)
+}
+
 export async function registrarCheckin(
   alunoId: string,
   treinoId: string,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Eye, EyeOff, UserRound } from 'lucide-react';
 
 import { allowedPilotUsers } from '@/services/authMockService';
@@ -34,7 +34,13 @@ export default function AdminTiViewSwitcher() {
     []
   );
 
-  const [selectedPilotId, setSelectedPilotId] = useState(() => impersonation.targetUser?.id || pilotOptions[0]?.id);
+  const [selectedPilotId, setSelectedPilotId] = useState(() => impersonation.targetUser?.id || null);
+
+  useEffect(() => {
+    if (impersonation?.targetUser?.id) {
+      setSelectedPilotId(impersonation.targetUser.id);
+    }
+  }, [impersonation?.targetUser?.id]);
 
   if (!isAdminTi || !ownerUser) return null;
 
@@ -59,10 +65,10 @@ export default function AdminTiViewSwitcher() {
       <button
         type="button"
         onClick={() => setOpen((state) => !state)}
-        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] transition ${
+        className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${
           impersonation.isActive
-            ? 'border-amber-400/70 bg-amber-500/15 text-amber-100 shadow-[0_8px_18px_rgba(245,158,11,0.25)]'
-            : 'border-bjj-gray-800 bg-bjj-gray-900/70 text-bjj-gray-100 hover:border-bjj-red/60 hover:text-bjj-white'
+            ? 'bg-bjj-red/15 text-bjj-white shadow-[0_12px_32px_rgba(225,6,0,0.18)]'
+            : 'text-bjj-gray-100 hover:bg-bjj-gray-900/70'
         }`}
       >
         {impersonation.isActive ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -88,6 +94,7 @@ export default function AdminTiViewSwitcher() {
                 return (
                   <label
                     key={option.id}
+                    onClick={() => setSelectedPilotId(option.id)}
                     className={`flex cursor-pointer items-center justify-between rounded-xl border px-3 py-2 text-sm transition ${
                       isSelected
                         ? 'border-bjj-red/70 bg-bjj-red/10 text-bjj-white shadow-[0_12px_28px_rgba(225,6,0,0.18)]'
@@ -119,14 +126,23 @@ export default function AdminTiViewSwitcher() {
             <button
               type="button"
               onClick={handleActivate}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-bjj-red/70 bg-bjj-red/10 px-3 py-2 font-semibold text-bjj-white transition hover:bg-bjj-red/20"
+              disabled={!selectedPilotId}
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 font-semibold transition ${
+                selectedPilotId
+                  ? 'border-bjj-red/70 bg-bjj-red/10 text-bjj-white hover:bg-bjj-red/20'
+                  : 'cursor-not-allowed border-bjj-gray-800 bg-bjj-gray-900/60 text-bjj-gray-500'
+              }`}
             >
               <Eye size={16} /> Ativar modo teste
             </button>
             <button
               type="button"
               onClick={handleStop}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-bjj-gray-800 px-3 py-2 font-semibold text-bjj-gray-200 transition hover:border-bjj-red/60 hover:text-bjj-white"
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 font-semibold transition ${
+                impersonation.isActive
+                  ? 'border-bjj-gray-800 text-bjj-gray-200 hover:border-bjj-red/60 hover:text-bjj-white'
+                  : 'cursor-not-allowed border-bjj-gray-800/60 text-bjj-gray-500'
+              }`}
               disabled={!impersonation.isActive}
             >
               <EyeOff size={16} /> Voltar para meu usuário

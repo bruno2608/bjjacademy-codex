@@ -185,7 +185,7 @@ export default function Header() {
                       aria-expanded={configOpen}
                     >
                       <span className="inline-flex items-center gap-2">
-                        <Settings2 size={14} /> Configurações
+                        <Settings2 size={14} /> Perfil
                       </span>
                       <ChevronDown size={14} className={`transition ${configOpen ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-500'}`} />
                     </button>
