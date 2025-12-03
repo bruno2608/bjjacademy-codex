@@ -52,10 +52,10 @@ export default function TabletNav() {
         <button
           type="button"
           onClick={() => toggleDropdown(item.key)}
-          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-bjj-gray-100 transition hover:bg-bjj-gray-900/70"
+          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-bjj-gray-100 transition hover:bg-bjj-gray-900/70 whitespace-nowrap"
           aria-expanded={isOpen}
         >
-          <span>{item.title}</span>
+          <span className="whitespace-nowrap">{item.title}</span>
           <ChevronDown size={14} className={`transition ${isOpen ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-400'}`} />
         </button>
         {isOpen ? (
@@ -96,13 +96,13 @@ export default function TabletNav() {
       <li key={item.key}>
         <Link
           href={item.href || item.path}
-          className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+          className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition whitespace-nowrap ${
             isActive
               ? 'bg-bjj-red/15 text-bjj-white shadow-[0_12px_32px_rgba(225,6,0,0.18)]'
               : 'text-bjj-gray-100 hover:bg-bjj-gray-900/70'
           }`}
         >
-          <span>{item.title}</span>
+          <span className="whitespace-nowrap">{item.title}</span>
         </Link>
       </li>
     );
