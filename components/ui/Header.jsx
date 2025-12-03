@@ -7,8 +7,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LogOut, Menu, X, Settings2, ChevronRight, ChevronDown, BarChart3, UserCircle2 } from 'lucide-react';
-import { getNavigationItemsForRoles, flattenNavigation } from '../../lib/navigation';
+import { LogOut, Menu, X, BarChart3, UserCircle2 } from 'lucide-react';
+import { flattenNavigation, getNavigationConfigForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import useUserStore from '../../store/userStore';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
@@ -27,12 +27,9 @@ export default function Header() {
   const { staff } = useCurrentStaff();
   const { roles } = useRole();
 
-  const navigationItems = useMemo(() => getNavigationItemsForRoles(roles), [roles]);
-  const fullNavigation = useMemo(
-    () => getNavigationItemsForRoles(roles, { includeHidden: true }),
-    [roles]
-  );
-  const flattenedItems = useMemo(() => flattenNavigation(fullNavigation), [fullNavigation]);
+  const navigationConfig = useMemo(() => getNavigationConfigForRoles(roles), [roles]);
+  const navigationItems = navigationConfig.drawerNav || navigationConfig.topNav || [];
+  const flattenedItems = useMemo(() => flattenNavigation(navigationItems), [navigationItems]);
   const profilePath = useMemo(
     () => flattenedItems.find((item) => item.path === '/perfil')?.path,
     [flattenedItems]
@@ -41,18 +38,6 @@ export default function Header() {
     () => flattenedItems.find((item) => item.path === '/relatorios')?.path,
     [flattenedItems]
   );
-  const configItem = useMemo(
-    () => fullNavigation.find((item) => item.path === '/configuracoes'),
-    [fullNavigation]
-  );
-  const configChildren = configItem?.children ?? [];
-  const isConfigPath = useMemo(() => pathname.startsWith('/configuracoes'), [pathname]);
-  const [configOpen, setConfigOpen] = useState(isConfigPath);
-
-  useEffect(() => {
-    // Mantém o dropdown alinhado à rota atual para evitar que fique sempre aberto.
-    setConfigOpen(isConfigPath);
-  }, [isConfigPath]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -176,39 +161,6 @@ export default function Header() {
                   </Link>
                 )}
 
-                {configChildren.length > 0 && (
-                  <div className="rounded-xl border border-bjj-gray-800/70 bg-bjj-gray-900/50">
-                    <button
-                      type="button"
-                      onClick={() => setConfigOpen((state) => !state)}
-                      className="flex w-full items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-bjj-gray-300/70 transition hover:text-bjj-white"
-                      aria-expanded={configOpen}
-                    >
-                      <span className="inline-flex items-center gap-2">
-                        <Settings2 size={14} /> Configurações
-                      </span>
-                      <ChevronDown size={14} className={`transition ${configOpen ? 'rotate-180 text-bjj-white' : 'text-bjj-gray-500'}`} />
-                    </button>
-                    {configOpen && (
-                      <ul className="border-t border-bjj-gray-800/70 px-3 py-2 text-sm">
-                        {configChildren.map((child) => (
-                          <li key={child.path}>
-                            <Link
-                              href={child.path}
-                              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-bjj-gray-200/80 transition hover:bg-bjj-gray-900/70 hover:text-bjj-white"
-                              onClick={() => {
-                                setOpen(false);
-                                setConfigOpen(false);
-                              }}
-                            >
-                              <ChevronRight size={14} className="text-bjj-gray-500" /> {child.title}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
               </div>
 
               <button
