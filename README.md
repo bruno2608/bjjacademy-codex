@@ -26,12 +26,12 @@ npm run dev
 - `npm run start`: sobe o build gerado.
 - `npm run lint`: validações do Next.js + ESLint.
 
-## 🔐 **Autenticação mock e perfis**
+## 🔐 **Autenticação (estado atual)**
 
-- Login em `/login` aceita qualquer e-mail/senha e gera token fake.
-- Papéis são inferidos pelo e-mail (campos contendo `admin`, `ti`, `aluno`/`student`) ou pela seleção manual.
-- Dados persistem em `localStorage`/cookies (`bjj_token`, `bjj_roles`, `bjj_user`), permitindo refresh sem perder sessão.
-- **Estado atual**: somente usuários piloto; não existe cadastro self-service nem fluxo de "Esqueci minha senha". O acesso é feito com as credenciais pré-configuradas ou pelo modo de impersonação de papéis.
+- Login em `/login` usa o `authMockService` com whitelist fixa de usuários piloto e senha padrão `BJJ@pilot2025`.
+- A sessão é mockada via `userStore` (Zustand) com persistência em `localStorage`/cookies (`bjj_token`, `bjj_roles`, `bjj_user`, `bjj_impersonation`).
+- Não há fluxo de cadastro público nem telas de esqueci/redefinição de senha; o acesso depende da whitelist piloto ou do modo de impersonação `ADMIN_TI`.
+- Detalhamento completo em [`docs/auth-flow-login-signup-reset.md`](docs/auth-flow-login-signup-reset.md).
 
 ## 🚀 **Stack principal**
 
