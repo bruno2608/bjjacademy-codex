@@ -8,13 +8,14 @@ import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 import TabletNav from './TabletNav';
 import ShellFooter from '../layouts/ShellFooter';
+import ImpersonationBanner from './ImpersonationBanner';
 
 const BARE_PATHS = ['/login', '/unauthorized'];
 
 export default function AppShell({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { hydrateFromStorage, hydrated, updateUser, user: storeUser } = useUserStore();
+  const { hydrateFromStorage, hydrated, updateUser, user: storeUser, impersonation } = useUserStore();
   const { aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
 
@@ -27,10 +28,10 @@ export default function AppShell({ children }) {
   useEffect(() => {
     const nextAvatar = aluno?.avatarUrl || staff?.avatarUrl || storeUser?.avatarUrl;
     const nextName = aluno?.nome || staff?.nome;
-    if (storeUser && nextAvatar && nextAvatar !== storeUser.avatarUrl && updateUser) {
+    if (storeUser && nextAvatar && nextAvatar !== storeUser.avatarUrl && updateUser && !impersonation.isActive) {
       updateUser({ avatarUrl: nextAvatar, name: nextName || storeUser.name });
     }
-  }, [aluno, staff, storeUser, updateUser]);
+  }, [aluno, staff, storeUser, updateUser, impersonation?.isActive]);
 
   const isBareLayout = useMemo(
     () => BARE_PATHS.some((publicPath) => pathname?.startsWith(publicPath)),
@@ -62,6 +63,7 @@ export default function AppShell({ children }) {
   return (
     <div className="min-h-screen overflow-x-hidden bg-bjj-black text-bjj-white">
       <TabletNav />
+      <ImpersonationBanner />
 
       {/* Top padding keeps content clear of the fixed header above. */}
       <main className="mx-auto w-full max-w-6xl px-4 pb-12 pt-24 md:px-6 xl:px-8">{children}</main>

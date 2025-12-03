@@ -8,6 +8,7 @@ import { ChevronDown, Menu, X } from 'lucide-react';
 import { getNavigationConfigForRoles } from '../../lib/navigation';
 import useRole from '../../hooks/useRole';
 import UserMenu from './UserMenu';
+import AdminTiViewSwitcher from './AdminTiViewSwitcher';
 
 const resolveActivePath = (pathname, item) => {
   const target = typeof item?.href === 'string' ? item.href : item?.href?.pathname || item?.path;
@@ -206,6 +207,7 @@ export default function TabletNav() {
         </div>
 
         <div className="flex items-center gap-3">
+          <AdminTiViewSwitcher />
           <div className="hidden text-sm font-semibold text-bjj-gray-300 md:block">
             {variant === 'staff' ? 'Visão Staff' : 'Área do aluno'}
           </div>

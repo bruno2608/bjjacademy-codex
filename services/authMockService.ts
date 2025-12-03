@@ -10,7 +10,7 @@ const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1524504388940-b1c17226
 const DEFAULT_ACADEMIA_ID = 'academia_piloto_bjj';
 const PILOT_PASSWORD = 'BJJ@pilot2025';
 
-const allowedPilotUsers: AuthUser[] = [
+export const allowedPilotUsers: AuthUser[] = [
   {
     id: 'prof-001',
     email: 'professor@bjjacademy.com',
@@ -72,6 +72,19 @@ const allowedPilotUsers: AuthUser[] = [
     alunoId: null,
     instrutorId: null,
     professorId: 'admin-001',
+    academiaId: DEFAULT_ACADEMIA_ID,
+    avatarUrl: DEFAULT_AVATAR,
+    telefone: null
+  },
+  {
+    id: 'admin-ti-001',
+    email: 'admin.ti@bjjacademy.com',
+    nomeCompleto: 'Admin TI Piloto',
+    name: 'Admin TI Piloto',
+    roles: [ROLE_KEYS.adminTi],
+    alunoId: null,
+    instrutorId: null,
+    professorId: null,
     academiaId: DEFAULT_ACADEMIA_ID,
     avatarUrl: DEFAULT_AVATAR,
     telefone: null

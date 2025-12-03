@@ -19,7 +19,10 @@ import { getUserAvatarData } from '@/lib/userAvatar';
 
 export default function UserMenu({ inline = false }) {
   const router = useRouter();
-  const { user, logout, hydrateFromStorage, hydrated } = useUserStore();
+  const sessionUser = useUserStore((state) => state.effectiveUser ?? state.user);
+  const logout = useUserStore((state) => state.logout);
+  const hydrateFromStorage = useUserStore((state) => state.hydrateFromStorage);
+  const hydrated = useUserStore((state) => state.hydrated);
   const { aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
   const { roles } = useRole();
@@ -59,8 +62,8 @@ export default function UserMenu({ inline = false }) {
     router.push('/login');
   };
 
-  const avatarEntity = staff || aluno || user;
-  const displayEmail = staff?.email || aluno?.email || user?.email || 'instrutor@bjj.academy';
+  const avatarEntity = staff || aluno || sessionUser;
+  const displayEmail = staff?.email || aluno?.email || sessionUser?.email || 'instrutor@bjj.academy';
 
   const { nome: displayName, avatarUrl, initials } = getUserAvatarData({ ...avatarEntity, email: displayEmail });
 

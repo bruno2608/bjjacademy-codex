@@ -4,8 +4,15 @@ import { normalizeRoles, type UserRole } from '../config/roles';
 import type { AuthUser, LoginPayload } from '../types/user';
 import { authMockLogin } from '../services/authMockService';
 
+type ImpersonationState = {
+  isActive: boolean;
+  targetUser: AuthUser | null;
+};
+
 type UserState = {
   user: AuthUser | null;
+  effectiveUser: AuthUser | null;
+  impersonation: ImpersonationState;
   token: string | null;
   hydrated: boolean;
   isAuthenticated: boolean;
@@ -14,11 +21,16 @@ type UserState = {
   logout: () => void;
   hydrate: (payload: Partial<{ user: AuthUser | null; token: string | null }>) => void;
   hydrateFromStorage: () => void;
+  startImpersonation: (targetUser: AuthUser) => void;
+  stopImpersonation: () => void;
 };
 
 const TOKEN_KEY = 'bjj_token';
 const ROLES_KEY = 'bjj_roles';
+const IMPERSONATION_KEY = 'bjj_impersonation';
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80';
+
+const DEFAULT_IMPERSONATION_STATE: ImpersonationState = { isActive: false, targetUser: null };
 
 const persistRoles = (roles: UserRole[]) => {
   if (typeof window !== 'undefined') {
@@ -43,14 +55,34 @@ const clearPersistedRoles = () => {
     window.localStorage.removeItem(ROLES_KEY);
     window.localStorage.removeItem(TOKEN_KEY);
     window.localStorage.removeItem('bjj_user');
+    window.localStorage.removeItem(IMPERSONATION_KEY);
   }
   if (typeof document !== 'undefined') {
     document.cookie = `${ROLES_KEY}=; path=/; max-age=0`;
   }
 };
+const persistImpersonation = (impersonation: ImpersonationState) => {
+  if (typeof window === 'undefined') return;
 
-export const useUserStore = create<UserState>((set) => ({
+  if (!impersonation.isActive) {
+    window.localStorage.removeItem(IMPERSONATION_KEY);
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(IMPERSONATION_KEY, JSON.stringify(impersonation));
+  } catch (error) {
+    console.warn('Não foi possível salvar o modo teste', error);
+  }
+};
+
+const resolveEffectiveUser = (user: AuthUser | null, impersonation: ImpersonationState) =>
+  impersonation.isActive && impersonation.targetUser ? impersonation.targetUser : user;
+
+export const useUserStore = create<UserState>((set, get) => ({
   user: null,
+  effectiveUser: null,
+  impersonation: DEFAULT_IMPERSONATION_STATE,
   token: null,
   hydrated: false,
   isAuthenticated: false,
@@ -70,30 +102,54 @@ export const useUserStore = create<UserState>((set) => ({
     window.localStorage.setItem(TOKEN_KEY, fakeToken);
     persistRoles(normalizedRoles);
     persistUser(normalizedUser);
+    persistImpersonation(DEFAULT_IMPERSONATION_STATE);
 
-    set({ user: normalizedUser, token: fakeToken, hydrated: true, isAuthenticated: true });
+    set({
+      user: normalizedUser,
+      effectiveUser: normalizedUser,
+      impersonation: DEFAULT_IMPERSONATION_STATE,
+      token: fakeToken,
+      hydrated: true,
+      isAuthenticated: true
+    });
     return normalizedUser;
   },
   updateUser: (payload) =>
     set((state) => {
       const updatedUser = state.user ? { ...state.user, ...payload } : state.user;
+      const effectiveUser = resolveEffectiveUser(updatedUser, state.impersonation);
+
       if (updatedUser) {
         persistUser(updatedUser);
       }
+
       return {
-        user: updatedUser
+        user: updatedUser,
+        effectiveUser
       };
     }),
   logout: () => {
     clearPersistedRoles();
-    set({ user: null, token: null, isAuthenticated: false, hydrated: true });
+    set({
+      user: null,
+      effectiveUser: null,
+      impersonation: DEFAULT_IMPERSONATION_STATE,
+      token: null,
+      isAuthenticated: false,
+      hydrated: true
+    });
   },
   hydrate: (payload) => {
-    set((state) => ({
-      user: payload.user ?? state.user,
-      token: payload.token ?? state.token,
-      isAuthenticated: Boolean(payload.user ?? state.user ?? null)
-    }));
+    set((state) => {
+      const nextUser = payload.user ?? state.user;
+      const impersonation = state.impersonation ?? DEFAULT_IMPERSONATION_STATE;
+      return {
+        user: nextUser,
+        effectiveUser: resolveEffectiveUser(nextUser, impersonation),
+        token: payload.token ?? state.token,
+        isAuthenticated: Boolean(payload.user ?? state.user ?? null)
+      };
+    });
   },
   hydrateFromStorage: () => {
     if (typeof window === 'undefined') return;
@@ -101,6 +157,7 @@ export const useUserStore = create<UserState>((set) => ({
     const storedToken = window.localStorage.getItem(TOKEN_KEY);
     const rawUser = window.localStorage.getItem('bjj_user');
     const rawRoles = window.localStorage.getItem(ROLES_KEY);
+    const rawImpersonation = window.localStorage.getItem(IMPERSONATION_KEY);
     const cookieRoles = typeof document !== 'undefined'
       ? document.cookie
           .split(';')
@@ -134,8 +191,33 @@ export const useUserStore = create<UserState>((set) => ({
       ? storedRoles
       : normalizeRoles(parsedUser?.roles ?? []);
 
+    let impersonationState: ImpersonationState = DEFAULT_IMPERSONATION_STATE;
+    if (rawImpersonation) {
+      try {
+        const parsed = JSON.parse(rawImpersonation) as ImpersonationState;
+        if (parsed?.isActive && parsed.targetUser) {
+          impersonationState = {
+            isActive: true,
+            targetUser: {
+              ...parsed.targetUser,
+              roles: normalizeRoles(parsed.targetUser.roles)
+            }
+          };
+        }
+      } catch (error) {
+        impersonationState = DEFAULT_IMPERSONATION_STATE;
+      }
+    }
+
     if (!parsedUser && !storedToken) {
-      set({ user: null, token: null, hydrated: true, isAuthenticated: false });
+      set({
+        user: null,
+        effectiveUser: null,
+        impersonation: DEFAULT_IMPERSONATION_STATE,
+        token: null,
+        hydrated: true,
+        isAuthenticated: false
+      });
       return;
     }
 
@@ -148,12 +230,29 @@ export const useUserStore = create<UserState>((set) => ({
         }
       : null;
 
+    const effectiveUser = resolveEffectiveUser(hydratedUser, impersonationState);
+
     set({
       user: hydratedUser,
+      effectiveUser,
+      impersonation: impersonationState,
       token: storedToken ?? null,
       hydrated: true,
       isAuthenticated: Boolean(hydratedUser)
     });
+  },
+  startImpersonation: (targetUser) => {
+    const impersonation: ImpersonationState = {
+      isActive: true,
+      targetUser: { ...targetUser, roles: normalizeRoles(targetUser.roles) }
+    };
+    persistImpersonation(impersonation);
+    set({ impersonation, effectiveUser: impersonation.targetUser });
+  },
+  stopImpersonation: () => {
+    const user = get().user;
+    persistImpersonation(DEFAULT_IMPERSONATION_STATE);
+    set({ impersonation: DEFAULT_IMPERSONATION_STATE, effectiveUser: user });
   }
 }));
 

@@ -4,7 +4,7 @@ import { useAlunosStore } from '@/store/alunosStore';
 import { useUserStore } from '@/store/userStore';
 
 export function useCurrentAluno() {
-  const user = useUserStore((state) => state.user);
+  const user = useUserStore((state) => state.effectiveUser ?? state.user);
   const getAlunoById = useAlunosStore((s) => s.getAlunoById);
   const alunos = useAlunosStore((s) => s.alunos);
 
