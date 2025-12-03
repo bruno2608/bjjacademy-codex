@@ -25,6 +25,7 @@ module.exports = {
         'bjj-white': '#FFFFFF',
         'bjj-red': '#E10600',
         'bjj-gray-900': '#1A1A1A',
+        'bjj-gray-950': '#0D0D0D',
         'bjj-gray-800': '#2E2E2E',
         'bjj-gray-500': '#6B6B6B',
         'bjj-gray-700': '#3A3A3A',
