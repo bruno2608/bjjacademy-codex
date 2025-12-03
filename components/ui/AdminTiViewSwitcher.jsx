@@ -77,7 +77,7 @@ export default function AdminTiViewSwitcher() {
       </button>
 
       {open ? (
-        <div className="absolute right-0 z-40 mt-3 w-80 rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-950/95 p-4 shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
+        <div className="absolute right-0 z-40 mt-3 w-80 rounded-2xl border border-bjj-gray-800 bg-bjj-gray-950 p-4 shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
           <div className="mb-3 flex items-start gap-3 text-sm text-bjj-gray-200/90">
             <AlertTriangle size={16} className="mt-0.5 text-amber-300" />
             <p className="leading-relaxed">
