@@ -1,5 +1,7 @@
 # Fluxo de autenticação atual (mock)
 
+> **Documento consolidado:** as definições completas de autenticação, cadastro, reset e check-in estão em [`docs/auth-and-checkin-flow.md`](./auth-and-checkin-flow.md). Este arquivo permanece como fotografia do estado técnico atual (mocks/stores) e histórico de implementação.
+
 Este documento descreve o estado atual do fluxo de autenticação do BJJ Academy PWA. Ele consolida rotas existentes, stores, serviços mock e o comportamento do AppShell/middleware, sem propor mudanças de comportamento.
 
 ## 1. Estado atual da autenticação
