@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo } from 'react'
-import { ArrowRight, Clock3, HandRaised, History, QrCode } from 'lucide-react'
+import { ArrowRight, Clock3, Hand, History, QrCode } from 'lucide-react'
 
 import { useCurrentAluno } from '@/hooks/useCurrentAluno'
 import { usePresencasStore } from '@/store/presencasStore'
@@ -87,7 +87,7 @@ export default function MeuCheckinPage() {
         <Link href="/aluno/checkin/manual" className="block rounded-2xl bg-gradient-to-r from-bjj-blue-900/60 via-bjj-gray-900 to-bjj-gray-900 p-5 ring-1 ring-bjj-gray-800 transition hover:-translate-y-0.5 hover:ring-bjj-blue-700">
           <div className="flex items-center gap-4">
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-bjj-blue-700/30 text-bjj-blue-100 ring-2 ring-bjj-blue-700/70">
-              <HandRaised size={28} />
+              <Hand size={28} />
             </span>
             <div className="flex-1">
               <p className="text-lg font-semibold text-white">Check-in Manual</p>

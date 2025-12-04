@@ -3,14 +3,14 @@
 /**
  * Página de login alinhada ao novo visual gamificado do painel.
  */
-import { useState, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import ValidatedField from '../../components/ui/ValidatedField';
 import Button from '../../components/ui/Button';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, user, hydrateFromStorage, hydrated } = useUserStore();
@@ -177,5 +177,13 @@ export default function LoginPage() {
         </section>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-bjj-black" aria-busy="true" />}> 
+      <LoginContent />
+    </Suspense>
   );
 }

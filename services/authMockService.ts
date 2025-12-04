@@ -49,7 +49,7 @@ const mapUsuarioToAuthUser = (usuario: Usuario): AuthUser => {
   };
 };
 
-const allowedPilotUsers: AuthUser[] = MOCK_USUARIOS.map(mapUsuarioToAuthUser);
+export const allowedPilotUsers: AuthUser[] = MOCK_USUARIOS.map(mapUsuarioToAuthUser);
 
 export async function authMockLogin({ identifier, senha }: AuthMockLoginInput): Promise<AuthUser> {
   const normalizedIdentifier = identifier.trim().toLowerCase();
