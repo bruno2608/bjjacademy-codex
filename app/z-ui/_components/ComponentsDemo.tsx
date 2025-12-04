@@ -1,128 +1,207 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties } from "react";
+import { Check, ChevronLeft, ChevronRight, Menu, Mic, Phone, Settings, Volume2 } from "lucide-react";
 
-import { Check, Play, Volume2 } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
-import { cn } from '@/lib/utils';
-
-const chipStats = [
-  { label: 'Hoodies', value: 25 },
-  { label: 'Bags', value: 3 },
-  { label: 'Shoes', value: 0 },
-  { label: 'Accessories', value: 4 },
+const categories = [
+  { label: "Hoodies", count: 25, tone: "neutral" as const },
+  { label: "Bags", count: 3, tone: "neutral" as const },
+  { label: "Shoes", count: 0, tone: "warning" as const },
+  { label: "Accessories", count: 4, tone: "neutral" as const },
 ];
 
 const calendarDays = [
-  { day: '12', label: 'M' },
-  { day: '13', label: 'T' },
-  { day: '14', label: 'W' },
-  { day: '15', label: 'T' },
-  { day: '16', label: 'F' },
-  { day: '17', label: 'S' },
-  { day: '18', label: 'S' },
+  { day: "12", label: "M" },
+  { day: "13", label: "T" },
+  { day: "14", label: "W", active: true },
+  { day: "15", label: "T" },
+  { day: "16", label: "F" },
+  { day: "17", label: "S" },
+  { day: "18", label: "S" },
 ];
 
 const orders = [
-  { name: 'Charlie Chapman', status: 'Send', tone: 'info' },
-  { name: 'Howard Hudson', status: 'Failed', tone: 'error' },
-  { name: 'Fiona Fisher', status: 'In progress', tone: 'warning' },
-  { name: 'Nick Nelson', status: 'Completed', tone: 'success' },
-  { name: 'Amanda Anderson', status: 'Completed', tone: 'success' },
+  { name: "Charlie Chapman", status: "Send", tone: "info" as const },
+  { name: "Howard Hudson", status: "Failed", tone: "error" as const },
+  { name: "Fiona Fisher", status: "In progress", tone: "warning" as const },
+  { name: "Nick Nelson", status: "Completed", tone: "success" as const },
+  { name: "Amanda Anderson", status: "Completed", tone: "success" as const },
 ];
 
 const books = [
-  'Harry Potter and Sorcerer\'s Stack',
-  'Harry Potter and Chamber of Servers',
-  'Harry Potter and Prisoner of Azure',
-  'Harry Potter and Goblet of Firebase',
-  'Harry Potter and Elixir of Phoenix',
-  'Harry Potter and Half-Deployed App',
-  'Harry Potter and Deathly Frameworks',
+  "Harry Potter and Sorcerer's Stack",
+  "Harry Potter and Chamber of Servers",
+  "Harry Potter and Prisoner of Azure",
+  "Harry Potter and Goblet of Firebase",
+  "Harry Potter and Elixir of Phoenix",
+  "Harry Potter and Half-Deployed App",
+  "Harry Potter and Deathly Frameworks",
 ];
 
 export function ComponentsDemo() {
   return (
-    <section className='space-y-6'>
-      <div className='flex flex-wrap items-baseline justify-between gap-3'>
-        <div>
-          <h2 className='text-xl font-semibold'>Components Demo</h2>
-          <p className='text-sm text-base-content/70'>Vitrine estática inspirada no Theme Generator do DaisyUI.</p>
+    <section className="mt-8 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 items-start">
+        <div className="flex flex-col gap-6">
+          <PreviewCard />
+          <CalendarCard />
+          <SimpleTabsCard />
+          <PriceRangeCard />
+          <NikeShoesCard />
+          <SearchFindCard />
+          <CreateAccountCard />
         </div>
-        <span className='badge badge-outline border-base-300'>Static</span>
-      </div>
 
-      <div className='mt-2 grid auto-rows-[minmax(0,1fr)] grid-cols-1 gap-6 lg:grid-cols-3'>
-        <PreviewMoreCard />
-        <PriceRangeCard />
-        <NikeShoesCard />
-        <CreateAccountCard />
-        <SalesVolumeCard />
-        <PageScoreCard />
-        <RecentOrdersCard />
-        <DecemberRevenueCard />
-        <WritePostCard />
-        <ChatCard />
-        <AdminPanelCard />
-        <AudioCard />
-        <TerminalCard />
-        <NotificationsCard />
-        <HarryPotterCard />
-        <StarterPlanCard />
+        <div className="flex flex-col gap-6">
+          <SalesVolumeCard />
+          <PageScoreCard />
+          <RecentOrdersCard />
+          <DecemberRevenueCard />
+          <WritePostCard />
+          <ChatCard />
+          <AdminPanelCard />
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <AudioCard />
+          <TerminalCard />
+          <NotificationsBlock />
+          <HarryPotterTimeline />
+          <StarterPlanCard />
+        </div>
       </div>
     </section>
   );
 }
 
-function PreviewMoreCard() {
+function DemoCard({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn("card rounded-2xl border border-base-300/40 bg-base-200/80 shadow-sm", className)}>
+      <div className="card-body gap-4 p-4 sm:p-5">{children}</div>
+    </div>
+  );
+}
+
+function PreviewCard() {
   return (
     <DemoCard>
-      <div className='flex items-start justify-between gap-2'>
-        <h3 className='card-title text-base'>Preview more</h3>
-        <button className='btn btn-ghost btn-xs text-xs'>more</button>
-      </div>
-      <div className='flex flex-wrap gap-2 text-xs'>
-        <span className='badge badge-primary'>Shoes</span>
-        <span className='badge badge-outline border-base-300'>Bags</span>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-sm font-semibold">Preview more</h3>
+        <button className="btn btn-link btn-xs px-0">more</button>
       </div>
 
-      <div className='space-y-2 text-sm'>
-        {chipStats.map((chip) => (
-          <div key={chip.label} className='flex items-center justify-between rounded-lg bg-base-200/70 px-3 py-2'>
-            <span>{chip.label}</span>
-            <span className='badge badge-outline badge-sm border-base-300'>{chip.value}</span>
-          </div>
+      <div className="flex flex-wrap gap-2 text-xs">
+        <span className="badge badge-neutral">Shoes</span>
+        <span className="badge badge-neutral">Bags</span>
+      </div>
+
+      <div className="space-y-2 text-sm">
+        {categories.map((category) => (
+          <label
+            key={category.label}
+            className="flex items-center justify-between gap-3 rounded-lg bg-base-200/80 px-3 py-2"
+          >
+            <div className="flex items-center gap-2">
+              <input type="checkbox" className="checkbox checkbox-xs" defaultChecked={category.label === "Hoodies"} />
+              <span>{category.label}</span>
+            </div>
+            <span
+              className={cn(
+                "badge badge-sm",
+                category.tone === "warning" ? "badge-warning" : "badge-outline border-base-300"
+              )}
+            >
+              {category.count}
+            </span>
+          </label>
         ))}
       </div>
 
-      <div className='grid grid-cols-7 gap-2 text-xs'>
-        {calendarDays.map(({ day, label }) => (
+      <div className="grid grid-cols-7 gap-2 text-xs">
+        {calendarDays.map((item) => (
           <div
-            key={day}
+            key={`${item.day}-${item.label}`}
             className={cn(
-              'flex h-12 flex-col items-center justify-center rounded-lg border border-base-300/70 bg-base-200/60',
-              day === '14' && 'border-primary/70 bg-primary/20 text-primary-content'
+              "flex h-12 flex-col items-center justify-center rounded-lg border border-base-300/70 bg-base-200/70",
+              item.active && "border-primary/80 bg-primary/20 text-primary"
             )}
           >
-            <span className='text-[0.7rem] text-base-content/60'>{label}</span>
-            <span className='font-semibold'>{day}</span>
+            <span className="text-[0.7rem] text-base-content/60">{item.label}</span>
+            <span className="font-semibold">{item.day}</span>
           </div>
         ))}
       </div>
 
-      <div className='text-xs font-semibold text-base-content/70'>Show all day events</div>
-      <div className='space-y-1 rounded-xl border border-base-300/70 bg-base-200/70 p-3'>
-        <p className='font-semibold'>Team Sync Meeting</p>
-        <p className='text-xs text-base-content/60'>Weekly product review with design and development teams</p>
-        <div className='flex justify-end'>
-          <span className='badge badge-outline badge-sm'>1h</span>
+      <label className="label cursor-pointer justify-start gap-2 p-0 text-xs text-base-content/70">
+        <input type="checkbox" className="toggle toggle-sm toggle-primary" defaultChecked />
+        <span>Show all day events</span>
+      </label>
+
+      <div className="space-y-1 rounded-xl border border-base-300/70 bg-base-100/80 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="font-semibold">Team Sync Meeting</p>
+            <p className="text-xs text-base-content/60">Weekly product review with design and development teams</p>
+          </div>
+          <span className="badge badge-neutral badge-sm">1h</span>
         </div>
       </div>
+    </DemoCard>
+  );
+}
 
-      <div className='tabs tabs-bordered tabs-sm'>
-        <button className='tab'>Tab 1</button>
-        <button className='tab tab-active'>Tab 2</button>
-        <button className='tab'>Tab 3</button>
+function CalendarCard() {
+  return (
+    <DemoCard>
+      <div className="flex flex-wrap items-center gap-3 text-xs">
+        <button className="btn btn-xs btn-ghost">
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <div className="join">
+          {calendarDays.map((item) => (
+            <button
+              key={`${item.day}-${item.label}-mini`}
+              className={cn("btn btn-xs join-item", item.active && "btn-primary")}
+              type="button"
+            >
+              {item.day} {item.label}
+            </button>
+          ))}
+        </div>
+        <button className="btn btn-xs btn-ghost">
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
-      <div className='text-sm text-base-content/70'>Tab content 2</div>
+
+      <input type="text" className="input input-bordered w-full" placeholder="Search for events" />
+
+      <label className="label cursor-pointer justify-start gap-2 p-0 text-sm">
+        <input type="checkbox" className="toggle toggle-primary" defaultChecked />
+        <span className="label-text">Show all day events</span>
+      </label>
+
+      <div className="rounded-xl border border-base-300/70 bg-base-100/80 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="font-semibold">Team Sync Meeting</p>
+            <p className="text-xs text-base-content/60">Weekly product review with design and development teams</p>
+          </div>
+          <span className="badge badge-outline badge-sm">1h</span>
+        </div>
+      </div>
+    </DemoCard>
+  );
+}
+
+function SimpleTabsCard() {
+  return (
+    <DemoCard>
+      <div className="tabs tabs-bordered">
+        <a className="tab">Tab 1</a>
+        <a className="tab tab-active">Tab 2</a>
+        <a className="tab">Tab 3</a>
+      </div>
+      <p className="text-sm text-base-content/80">Tab content 2</p>
     </DemoCard>
   );
 }
@@ -130,12 +209,15 @@ function PreviewMoreCard() {
 function PriceRangeCard() {
   return (
     <DemoCard>
-      <h3 className='card-title text-base'>Price range</h3>
-      <div className='text-center text-4xl font-semibold'>50</div>
-      <input type='range' min={0} max={200} defaultValue={50} className='range range-primary' />
-      <div className='flex justify-between text-[0.7rem] text-base-content/60'>
-        <span>$0</span>
-        <span>$200</span>
+      <div className="flex items-center gap-2 text-sm font-semibold">
+        <span className="badge badge-ghost">$</span>
+        <span>Price range</span>
+      </div>
+      <div className="text-center text-4xl font-semibold">60</div>
+      <input type="range" min={0} max={100} defaultValue={60} className="range range-primary w-full" />
+      <div className="flex justify-between text-xs text-base-content/60">
+        <span>0</span>
+        <span>100</span>
       </div>
     </DemoCard>
   );
@@ -144,26 +226,44 @@ function PriceRangeCard() {
 function NikeShoesCard() {
   return (
     <DemoCard>
-      <figure className='rounded-lg bg-base-200 p-6'>
-        <div className='h-32 w-full rounded-lg bg-gradient-to-br from-base-300 to-base-100' />
-      </figure>
-      <div className='flex items-center justify-between'>
-        <h3 className='card-title text-base'>Nike Shoes SALE</h3>
-        <span className='badge badge-secondary'>SALE</span>
+      <div className="rounded-xl bg-gradient-to-tr from-primary/30 via-base-200 to-secondary/30 p-6">
+        <div className="aspect-[4/3] w-full rounded-lg bg-base-100/60" />
       </div>
-      <div className='flex items-center gap-2 text-xs text-base-content/70'>
-        <div className='rating rating-sm'>
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-semibold">Nike Shoes SALE</h3>
+        <span className="badge badge-accent">SALE</span>
+      </div>
+      <div className="flex items-center gap-2 text-xs text-base-content/70">
+        <div className="rating rating-sm">
           {Array.from({ length: 5 }).map((_, idx) => (
-            <input key={idx} type='radio' name='rating-1' className='mask mask-star-2 bg-primary' defaultChecked={idx < 4} />
+            <input
+              key={idx}
+              type="radio"
+              name="rating-shoes"
+              className="mask mask-star-2 bg-warning"
+              defaultChecked={idx < 4}
+              aria-label={`rating ${idx + 1}`}
+            />
           ))}
         </div>
         <span>420 reviews</span>
       </div>
-      <div className='flex items-center gap-3 text-lg font-semibold'>
-        <span>$120</span>
-        <span className='text-sm text-base-content/60 line-through'>$150</span>
+      <div className="flex items-baseline gap-3">
+        <span className="text-xl font-semibold">$120</span>
+        <span className="text-sm text-base-content/60 line-through">$150</span>
       </div>
-      <button className='btn btn-primary w-full'>Find</button>
+      <button className="btn btn-primary w-full">Find</button>
+    </DemoCard>
+  );
+}
+
+function SearchFindCard() {
+  return (
+    <DemoCard>
+      <div className="flex items-center gap-2">
+        <input type="text" className="input input-bordered w-full" placeholder="Search" />
+        <button className="btn btn-neutral">Find</button>
+      </div>
     </DemoCard>
   );
 }
@@ -171,53 +271,52 @@ function NikeShoesCard() {
 function CreateAccountCard() {
   return (
     <DemoCard>
-      <h3 className='card-title text-base'>Create new account</h3>
-      <p className='text-sm text-base-content/70'>Registration is free and only takes a minute.</p>
-      <label className='form-control w-full'>
-        <div className='label p-0'>
-          <span className='label-text'>Email</span>
+      <h3 className="text-base font-semibold">Create new account</h3>
+      <p className="text-sm text-base-content/70">Registration is free and only takes a minute.</p>
+      <label className="form-control w-full">
+        <div className="label p-0">
+          <span className="label-text">Username</span>
         </div>
-        <input className='input input-bordered' placeholder='you@example.com' />
+        <input className="input input-bordered" placeholder="your username" />
       </label>
-      <label className='form-control w-full'>
-        <div className='label p-0'>
-          <span className='label-text'>Password</span>
+      <label className="form-control w-full">
+        <div className="label p-0">
+          <span className="label-text">Password</span>
         </div>
-        <input type='password' className='input input-bordered' />
-        <span className='label-text-alt text-xs text-base-content/60'>Password must be 8+ characters.</span>
+        <input type="password" className="input input-bordered" />
+        <span className="label-text-alt text-xs text-error">Password must be 8+ characters.</span>
       </label>
-      <label className='label cursor-pointer gap-2'>
-        <input type='checkbox' className='checkbox' />
-        <span className='label-text'>Accept terms without reading</span>
+      <label className="label cursor-pointer justify-start gap-2 p-0 text-sm">
+        <input type="checkbox" className="toggle toggle-sm" defaultChecked />
+        <span className="label-text">Accept terms without reading</span>
       </label>
-      <label className='label cursor-pointer gap-2'>
-        <input type='checkbox' className='checkbox' />
-        <span className='label-text'>Subscribe to spam emails</span>
+      <label className="label cursor-pointer justify-start gap-2 p-0 text-sm">
+        <input type="checkbox" className="toggle toggle-sm" />
+        <span className="label-text">Subscribe to spam emails</span>
       </label>
-      <div className='flex flex-wrap items-center gap-3'>
-        <button className='btn btn-primary'>Register</button>
-        <button className='btn btn-link'>Or login</button>
-      </div>
+      <button className="btn btn-primary w-full">Register</button>
+      <button className="btn btn-link btn-sm px-0">Or login</button>
     </DemoCard>
   );
 }
 
 function SalesVolumeCard() {
+  const bars = [60, 32, 72, 96, 54, 68, 82, 70];
   return (
     <DemoCard>
-      <p className='text-sm text-base-content/80'>
-        Sales volume reached $12,450 this week, showing a 15% increase from the previous period.
-      </p>
-      <div className='rounded-xl border border-base-300/60 bg-base-200/60 p-3'>
-        <div className='flex h-24 items-end gap-1'>
-          {[60, 40, 70, 90, 55, 68, 80, 72].map((height, idx) => (
-            <div key={idx} className='w-full rounded-t-lg bg-primary/80' style={{ height }} />
+      <div className="space-y-4">
+        <div className="flex h-24 items-end gap-1">
+          {bars.map((height, idx) => (
+            <div key={idx} className="flex-1 rounded-t-lg bg-primary/80" style={{ height }} />
           ))}
         </div>
-      </div>
-      <div className='join'>
-        <button className='btn btn-sm join-item btn-primary'>Charts</button>
-        <button className='btn btn-sm join-item'>Details</button>
+        <p className="text-sm text-base-content/80">
+          Sales volume reached $12,450 this week, showing a 15% increase from the previous period.
+        </p>
+        <div className="flex gap-2">
+          <button className="btn btn-ghost btn-sm flex-1">Charts</button>
+          <button className="btn btn-neutral btn-sm flex-1">Details</button>
+        </div>
       </div>
     </DemoCard>
   );
@@ -225,13 +324,20 @@ function SalesVolumeCard() {
 
 function PageScoreCard() {
   return (
-    <DemoCard className='text-center'>
-      <p className='text-xs uppercase tracking-[0.2em] text-base-content/60'>Page Score</p>
-      <div className='radial-progress mx-auto text-primary' style={{ '--value': 91, '--size': '6rem' } as CSSProperties}>
-        91
+    <DemoCard>
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Page Score</p>
+          <div className="text-3xl font-semibold">91/100</div>
+          <span className="badge badge-success">All good</span>
+        </div>
+        <div
+          className="radial-progress text-primary"
+          style={{ "--value": 91, "--size": "5.5rem", "--thickness": "8px" } as CSSProperties}
+        >
+          91%
+        </div>
       </div>
-      <p className='text-sm'>91/100</p>
-      <span className='badge badge-success'>All good</span>
     </DemoCard>
   );
 }
@@ -239,18 +345,21 @@ function PageScoreCard() {
 function RecentOrdersCard() {
   return (
     <DemoCard>
-      <h3 className='card-title text-base'>Recent orders</h3>
-      <div className='space-y-2 text-sm'>
+      <div className="flex items-center gap-2 text-sm font-semibold">
+        <span className="badge badge-ghost">≡</span>
+        <span>Recent orders</span>
+      </div>
+      <div className="space-y-2 text-sm">
         {orders.map((order) => (
-          <div key={order.name} className='flex items-center justify-between rounded-lg bg-base-200/60 px-3 py-2'>
-            <span className='font-medium'>{order.name}</span>
+          <div key={order.name} className="flex items-center justify-between rounded-lg bg-base-200/70 px-3 py-2">
+            <span>{order.name}</span>
             <span
               className={cn(
-                'badge',
-                order.tone === 'info' && 'badge-info',
-                order.tone === 'error' && 'badge-error',
-                order.tone === 'warning' && 'badge-warning',
-                order.tone === 'success' && 'badge-success'
+                "badge",
+                order.tone === "info" && "badge-info",
+                order.tone === "error" && "badge-error",
+                order.tone === "warning" && "badge-warning",
+                order.tone === "success" && "badge-success"
               )}
             >
               {order.status}
@@ -265,10 +374,10 @@ function RecentOrdersCard() {
 function DecemberRevenueCard() {
   return (
     <DemoCard>
-      <p className='text-xs uppercase tracking-[0.2em] text-base-content/60'>Summary</p>
-      <h3 className='card-title text-base'>December Revenue</h3>
-      <div className='text-3xl font-bold'>$32,400</div>
-      <p className='text-sm text-base-content/70'>21% more than last month.</p>
+      <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Summary</p>
+      <h3 className="text-base font-semibold">December Revenue</h3>
+      <div className="text-3xl font-bold">$32,400</div>
+      <p className="text-sm text-base-content/70">21% more than last month.</p>
     </DemoCard>
   );
 }
@@ -276,16 +385,25 @@ function DecemberRevenueCard() {
 function WritePostCard() {
   return (
     <DemoCard>
-      <p className='text-xs uppercase tracking-[0.2em] text-base-content/60'>Content</p>
-      <h3 className='card-title text-base'>Write a new post</h3>
-      <textarea className='textarea textarea-bordered h-28 bg-base-200/70' placeholder='What’s happening?' />
-      <div className='flex flex-wrap items-center justify-between gap-2 text-xs text-base-content/60'>
-        <button className='btn btn-ghost btn-sm'>Add files</button>
-        <span>1200 characters remaining</span>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <span className="badge badge-ghost">✏️</span>
+          <span>Write a new post</span>
+        </div>
+        <div className="flex items-center gap-1 text-xs">
+          <button className="btn btn-ghost btn-xs">B</button>
+          <button className="btn btn-ghost btn-xs">I</button>
+          <button className="btn btn-ghost btn-xs">U</button>
+          <button className="btn btn-ghost btn-xs">Add files</button>
+        </div>
       </div>
-      <div className='flex flex-wrap items-center justify-end gap-2'>
-        <button className='btn btn-ghost btn-sm'>Draft</button>
-        <button className='btn btn-primary btn-sm'>Publish</button>
+      <textarea className="textarea textarea-bordered w-full min-h-[120px]" placeholder="What's happening?" />
+      <div className="flex items-center justify-between text-xs text-base-content/70">
+        <span>1200 characters remaining</span>
+        <div className="flex gap-2">
+          <button className="btn btn-ghost btn-sm">Draft</button>
+          <button className="btn btn-primary btn-sm">Publish</button>
+        </div>
       </div>
     </DemoCard>
   );
@@ -294,46 +412,60 @@ function WritePostCard() {
 function ChatCard() {
   return (
     <DemoCard>
-      <h3 className='card-title text-base'>Chat</h3>
-      <div className='space-y-3'>
-        <div className='chat chat-start'>
-          <div className='chat-header'>Obi-Wan Kenobi</div>
-          <div className='chat-bubble'>It\'s over Anakin</div>
-          <div className='chat-footer text-xs'>12:45</div>
+      <div className="space-y-3">
+        <div className="chat chat-start">
+          <div className="chat-header">Obi-Wan Kenobi</div>
+          <div className="chat-bubble">It's over Anakin</div>
+          <div className="chat-footer text-xs">12:45</div>
         </div>
-        <div className='chat chat-end'>
-          <div className='chat-header'>Anakin</div>
-          <div className='chat-bubble chat-bubble-primary'>I have the high ground</div>
-          <div className='chat-footer text-xs'>Delivered</div>
+        <div className="chat chat-end">
+          <div className="chat-header">Anakin</div>
+          <div className="chat-bubble chat-bubble-primary">I have the high ground</div>
+          <div className="chat-footer text-xs">Delivered</div>
         </div>
-        <div className='chat chat-start'>
-          <div className='chat-header'>Obi-Wan Kenobi</div>
-          <div className='chat-bubble'>You underestimate my power</div>
-          <div className='chat-footer text-xs'>Seen at 12:46</div>
+        <div className="chat chat-start">
+          <div className="chat-header">Obi-Wan Kenobi</div>
+          <div className="chat-bubble">You underestimate my power</div>
+          <div className="chat-footer text-xs">Seen at 12:46</div>
         </div>
+      </div>
+      <div className="flex items-center justify-around border-t border-base-300 pt-3 text-base-content/70">
+        <button className="btn btn-ghost btn-sm">
+          <Phone className="h-4 w-4" />
+        </button>
+        <button className="btn btn-ghost btn-sm">
+          <Mic className="h-4 w-4" />
+        </button>
+        <button className="btn btn-ghost btn-sm">
+          <Settings className="h-4 w-4" />
+        </button>
       </div>
     </DemoCard>
   );
 }
 
 function AdminPanelCard() {
-  const menuItems = [
-    { label: 'Databases', badge: '7' },
-    { label: 'Products' },
-    { label: 'Messages', badge: '29' },
-    { label: 'Access tokens' },
-    { label: 'Users' },
-    { label: 'Settings' },
+  const items = [
+    { label: "Databases", badge: "7" },
+    { label: "Products" },
+    { label: "Messages", badge: "29" },
+    { label: "Access tokens" },
+    { label: "Users", dot: true },
+    { label: "Settings" },
   ];
   return (
     <DemoCard>
-      <p className='text-xs uppercase tracking-[0.2em] text-base-content/60'>Admin panel</p>
-      <ul className='menu menu-compact rounded-box bg-base-200/70 p-2 text-sm'>
-        {menuItems.map((item) => (
+      <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Admin panel</p>
+      <ul className="menu menu-compact rounded-box bg-base-200/70 p-2 text-sm">
+        {items.map((item) => (
           <li key={item.label}>
             <a>
-              {item.label}
-              {item.badge && <span className='badge badge-sm'>{item.badge}</span>}
+              <span className="flex items-center gap-2">
+                <Menu className="h-3.5 w-3.5" />
+                {item.label}
+              </span>
+              {item.badge && <span className="badge badge-sm">{item.badge}</span>}
+              {item.dot && <span className="badge badge-info badge-xs" />}
             </a>
           </li>
         ))}
@@ -345,22 +477,33 @@ function AdminPanelCard() {
 function AudioCard() {
   return (
     <DemoCard>
-      <h3 className='card-title text-base'>PM Zoomcall ASMR</h3>
-      <p className='text-sm text-base-content/70'>Project Manager talking for 2 hours.</p>
-      <div className='flex items-center gap-3 text-xs'>
-        <span>13:39</span>
-        <div className='relative h-2 w-full rounded bg-base-300'>
-          <div className='absolute inset-y-0 left-0 w-1/3 rounded bg-primary' />
-        </div>
-        <span>120:00</span>
+      <div className="flex items-center justify-center gap-2 text-lg">
+        <button className="btn btn-square btn-neutral btn-sm">
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button className="btn btn-square btn-primary btn-sm">
+          <Play className="h-4 w-4" />
+        </button>
+        <button className="btn btn-square btn-neutral btn-sm">
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
-      <div className='flex items-center gap-2'>
-        <button className='btn btn-circle btn-primary btn-sm'>
-          <Play className='h-4 w-4' />
+      <div className="text-center">
+        <h3 className="text-base font-semibold">PM Zoomcall ASMR</h3>
+        <p className="text-sm text-base-content/70">Project Manager talking for 2 hours.</p>
+      </div>
+      <div className="flex items-center gap-3 text-xs">
+        <span className="badge badge-outline">13:39</span>
+        <input type="range" min={0} max={120} defaultValue={45} className="range range-primary w-full" />
+        <span className="text-base-content/70">120:00</span>
+      </div>
+      <div className="flex items-center justify-around text-base-content/70">
+        <button className="btn btn-square btn-ghost btn-sm">
+          <Volume2 className="h-4 w-4" />
         </button>
-        <button className='btn btn-circle btn-ghost btn-sm'>
-          <Volume2 className='h-4 w-4' />
-        </button>
+        <button className="btn btn-square btn-ghost btn-sm">🔀</button>
+        <button className="btn btn-square btn-ghost btn-sm">🔁</button>
+        <button className="btn btn-square btn-ghost btn-sm">🎧</button>
       </div>
     </DemoCard>
   );
@@ -369,14 +512,14 @@ function AudioCard() {
 function TerminalCard() {
   return (
     <DemoCard>
-      <div className='mockup-code text-sm'>
-        <pre data-prefix='$'>
+      <div className="mockup-code text-sm">
+        <pre data-prefix="$">
           <code>npm i daisyui</code>
         </pre>
-        <pre data-prefix='>'>
+        <pre data-prefix=">">
           <code>installing...</code>
         </pre>
-        <pre data-prefix='√'>
+        <pre data-prefix="✓">
           <code>Done!</code>
         </pre>
       </div>
@@ -384,77 +527,77 @@ function TerminalCard() {
   );
 }
 
-function NotificationsCard() {
+function NotificationsBlock() {
   return (
-    <DemoCard>
-      <div className='space-y-3 text-sm'>
-        <div className='alert alert-info'>There are 9 new messages</div>
-        <div className='alert alert-success'>Verification process completed</div>
-        <div className='alert alert-warning'>Click to verify your email</div>
-        <div className='alert alert-error justify-between'>
-          <span>Access denied</span>
-          <a className='link link-hover'>Support</a>
-        </div>
+    <div className="space-y-3">
+      <div className="alert alert-info">There are 9 new messages</div>
+      <div className="alert alert-success">Verification process completed</div>
+      <div className="alert alert-warning">Click to verify your email</div>
+      <div className="alert alert-error justify-between">
+        <span>Access denied</span>
+        <a className="link link-hover">Support</a>
       </div>
-    </DemoCard>
+    </div>
   );
 }
 
-function HarryPotterCard() {
+function HarryPotterTimeline() {
   return (
     <DemoCard>
-      <h3 className='card-title text-base'>Harry Potter and...</h3>
-      <div className='space-y-2 text-sm'>
-        {books.map((book, bookIdx) => (
-          <div key={book} className='flex items-center justify-between rounded-lg bg-base-200/60 px-3 py-2'>
-            <span>{book}</span>
-            <div className='rating rating-xs'>
-              {Array.from({ length: 5 }).map((_, idx) => (
-                <input
-                  key={idx}
-                  type='radio'
-                  name={`rating-${book}`}
-                  className='mask mask-star-2 bg-warning'
-                  defaultChecked={idx < Math.max(3, 2 + (bookIdx % 3))}
-                />
-              ))}
+      <h3 className="text-base font-semibold">Harry Potter and...</h3>
+      <ul className="steps steps-vertical">
+        {books.map((book, idx) => (
+          <li key={book} className={cn("step", idx < 4 && "step-primary")}> 
+            <div className="flex items-center justify-between gap-2 w-full text-left">
+              <span className="text-sm">{book}</span>
+              <div className="rating rating-xs">
+                {Array.from({ length: 5 }).map((_, starIdx) => (
+                  <input
+                    key={starIdx}
+                    type="radio"
+                    name={`rating-${idx}`}
+                    className="mask mask-star-2 bg-warning"
+                    defaultChecked={starIdx < Math.max(3, 2 + (idx % 3))}
+                    aria-label="rating"
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </DemoCard>
   );
 }
 
 function StarterPlanCard() {
   return (
-    <DemoCard className='text-center'>
-      <div className='badge badge-secondary'>SALE</div>
-      <h3 className='card-title text-base'>Starter Plan</h3>
-      <div className='text-3xl font-bold'>$200/month</div>
-      <ul className='space-y-1 text-sm'>
-        <li className='flex items-center justify-center gap-2'>
-          <Check className='h-4 w-4 text-success' /> 20 Tokens per day
+    <DemoCard>
+      <div className="flex items-center justify-between text-xs font-semibold">
+        <div className="join"> 
+          <button className="btn btn-xs join-item">Monthly</button>
+          <button className="btn btn-xs join-item btn-primary">Yearly</button>
+        </div>
+        <span className="badge badge-warning">SALE</span>
+      </div>
+      <h3 className="text-lg font-semibold">Starter Plan</h3>
+      <div className="text-4xl font-bold">$200</div>
+      <p className="text-sm text-base-content/70">/month</p>
+      <ul className="space-y-2 text-sm">
+        <li className="flex items-center gap-2 text-success">
+          <Check className="h-4 w-4" /> 20 Tokens per day
         </li>
-        <li className='flex items-center justify-center gap-2'>
-          <Check className='h-4 w-4 text-success' /> 10 Projects
+        <li className="flex items-center gap-2 text-success">
+          <Check className="h-4 w-4" /> 10 Projects
         </li>
-        <li className='flex items-center justify-center gap-2'>
-          <Check className='h-4 w-4 text-success' /> API Access
+        <li className="flex items-center gap-2 text-success">
+          <Check className="h-4 w-4" /> API Access
         </li>
-        <li className='flex items-center justify-center gap-2'>
-          <Check className='h-4 w-4 text-success' /> Priority Support
+        <li className="flex items-center gap-2 text-error">
+          <span className="font-semibold">×</span> Priority Support
         </li>
       </ul>
-      <button className='btn btn-primary w-full'>Buy Now</button>
+      <button className="btn btn-success w-full">Buy Now</button>
     </DemoCard>
-  );
-}
-
-function DemoCard({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={cn('card h-full rounded-2xl border border-base-300/40 bg-base-200/80 shadow-sm', className)}>
-      <div className='card-body space-y-3 p-4 sm:p-5'>{children}</div>
-    </div>
   );
 }
