@@ -1,5 +1,19 @@
 import type { CSSProperties } from "react";
-import { Check, ChevronLeft, ChevronRight, Menu, Mic, Phone, Play, Settings, Volume2 } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Headphones,
+  Menu,
+  Mic,
+  Pencil,
+  Phone,
+  Play,
+  Repeat,
+  Settings,
+  Shuffle,
+  Volume2,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -77,7 +91,7 @@ export function ComponentsDemo() {
 function DemoCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn("card rounded-2xl border border-base-300/40 bg-base-200/80 shadow-sm", className)}>
-      <div className="card-body gap-4 p-4 sm:p-5">{children}</div>
+      <div className="card-body gap-3 p-4 text-sm">{children}</div>
     </div>
   );
 }
@@ -91,8 +105,8 @@ function PreviewCard() {
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs">
-        <span className="badge badge-neutral">Shoes</span>
-        <span className="badge badge-neutral">Bags</span>
+        <span className="badge badge-neutral badge-sm">Shoes</span>
+        <span className="badge badge-neutral badge-sm">Bags</span>
       </div>
 
       <div className="space-y-2 text-sm">
@@ -116,43 +130,6 @@ function PreviewCard() {
           </label>
         ))}
       </div>
-
-      <div className="grid grid-cols-7 gap-2 text-xs">
-        {calendarDays.map((item) => (
-          <div
-            key={`${item.day}-${item.label}`}
-            className={cn(
-              "flex h-12 flex-col items-center justify-center rounded-lg border border-base-300/70 bg-base-200/70",
-              item.active && "border-primary/80 bg-primary/20 text-primary"
-            )}
-          >
-            <span className="text-[0.7rem] text-base-content/60">{item.label}</span>
-            <span className="font-semibold">{item.day}</span>
-          </div>
-        ))}
-      </div>
-
-      <label className="label cursor-pointer justify-start gap-2 p-0 text-xs text-base-content/70">
-        <input type="checkbox" className="toggle toggle-sm toggle-primary" defaultChecked />
-        <span>Show all day events</span>
-      </label>
-
-      <div className="space-y-1 rounded-xl border border-base-300/70 bg-base-100/80 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="font-semibold">Team Sync Meeting</p>
-            <p className="text-xs text-base-content/60">Weekly product review with design and development teams</p>
-          </div>
-          <span className="badge badge-neutral badge-sm">1h</span>
-        </div>
-      </div>
-
-      <div className="tabs tabs-bordered text-sm">
-        <a className="tab">Tab 1</a>
-        <a className="tab tab-active">Tab 2</a>
-        <a className="tab">Tab 3</a>
-      </div>
-      <p className="text-sm text-base-content/80">Tab content 2</p>
     </DemoCard>
   );
 }
@@ -200,18 +177,22 @@ function CalendarCard() {
   );
 }
 
-function SimpleTabsCard() {
-  return (
-    <DemoCard>
-      <div className="tabs tabs-bordered">
-        <a className="tab">Tab 1</a>
-        <a className="tab tab-active">Tab 2</a>
-        <a className="tab">Tab 3</a>
+  function SimpleTabsCard() {
+    return (
+      <div className="card rounded-2xl border border-base-300/40 bg-base-200/80 shadow-sm">
+        <div className="card-body gap-3 p-4 text-sm">
+          <div className="tabs tabs-lifted text-xs sm:text-sm">
+            <a className="tab tab-lifted">Tab 1</a>
+            <a className="tab tab-lifted tab-active">Tab 2</a>
+            <a className="tab tab-lifted">Tab 3</a>
+          </div>
+          <div className="mt-2">
+            <p className="text-sm text-base-content/80">Tab content 2</p>
+          </div>
+        </div>
       </div>
-      <p className="text-sm text-base-content/80">Tab content 2</p>
-    </DemoCard>
-  );
-}
+    );
+  }
 
 function PriceRangeCard() {
   return (
@@ -220,7 +201,7 @@ function PriceRangeCard() {
         <span className="badge badge-ghost">$</span>
         <span>Price range</span>
       </div>
-      <div className="text-center text-4xl font-semibold">50</div>
+      <div className="text-center text-3xl font-semibold">50</div>
       <input type="range" min={0} max={200} defaultValue={50} className="range range-primary w-full" />
       <div className="flex justify-between text-xs text-base-content/60">
         <span>0</span>
@@ -233,11 +214,11 @@ function PriceRangeCard() {
 function NikeShoesCard() {
   return (
     <DemoCard>
-      <div className="rounded-xl bg-gradient-to-tr from-primary/30 via-base-200 to-secondary/30 p-6">
+      <div className="rounded-xl bg-gradient-to-tr from-primary/30 via-base-200 to-secondary/30 p-4">
         <div className="aspect-[4/3] w-full rounded-lg bg-base-100/60" />
       </div>
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold">Nike Shoes SALE</h3>
+        <h3 className="text-sm font-semibold">Nike Shoes SALE</h3>
         <span className="badge badge-accent">SALE</span>
       </div>
       <div className="flex items-center gap-2 text-xs text-base-content/70">
@@ -259,7 +240,7 @@ function NikeShoesCard() {
         <span className="text-xl font-semibold">$120</span>
         <span className="text-sm text-base-content/60 line-through">$150</span>
       </div>
-      <button className="btn btn-primary w-full">Find</button>
+      <button className="btn btn-primary btn-sm w-full">Find</button>
     </DemoCard>
   );
 }
@@ -268,8 +249,8 @@ function SearchFindCard() {
   return (
     <DemoCard>
       <div className="flex items-center gap-2">
-        <input type="text" className="input input-bordered w-full" placeholder="Search" />
-        <button className="btn btn-neutral">Find</button>
+        <input type="text" className="input input-bordered input-sm w-full" placeholder="Search" />
+        <button className="btn btn-neutral btn-sm">Find</button>
       </div>
     </DemoCard>
   );
@@ -278,8 +259,8 @@ function SearchFindCard() {
 function CreateAccountCard() {
   return (
     <DemoCard>
-      <h3 className="text-base font-semibold">Create new account</h3>
-      <p className="text-sm text-base-content/70">Registration is free and only takes a minute.</p>
+      <h3 className="text-sm font-semibold">Create new account</h3>
+      <p className="text-xs text-base-content/70">Registration is free and only takes a minute.</p>
       <label className="form-control w-full">
         <div className="label p-0">
           <span className="label-text">Email</span>
@@ -301,8 +282,8 @@ function CreateAccountCard() {
         <input type="checkbox" className="toggle toggle-sm" />
         <span className="label-text">Subscribe to spam emails</span>
       </label>
-      <button className="btn btn-primary w-full">Register</button>
-      <button className="btn btn-link btn-sm px-0">Or login</button>
+      <button className="btn btn-primary btn-sm w-full">Register</button>
+      <button className="btn btn-link btn-xs px-0">Or login</button>
     </DemoCard>
   );
 }
@@ -311,7 +292,7 @@ function SalesVolumeCard() {
   const bars = [60, 32, 72, 96, 54, 68, 82, 70];
   return (
     <DemoCard>
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex h-24 items-end gap-1">
           {bars.map((height, idx) => (
             <div key={idx} className="flex-1 rounded-t-lg bg-primary/80" style={{ height }} />
@@ -335,7 +316,7 @@ function PageScoreCard() {
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Page Score</p>
-          <div className="text-3xl font-semibold">91/100</div>
+          <div className="text-2xl font-semibold">91/100</div>
           <span className="badge badge-success">All good</span>
         </div>
         <div
@@ -382,9 +363,9 @@ function DecemberRevenueCard() {
   return (
     <DemoCard>
       <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Summary</p>
-      <h3 className="text-base font-semibold">December Revenue</h3>
-      <div className="text-3xl font-bold">$32,400</div>
-      <p className="text-sm text-base-content/70">21% more than last month.</p>
+      <h3 className="text-sm font-semibold">December Revenue</h3>
+      <div className="text-2xl font-bold">$32,400</div>
+      <p className="text-xs text-base-content/70">21% more than last month.</p>
     </DemoCard>
   );
 }
@@ -394,7 +375,9 @@ function WritePostCard() {
     <DemoCard>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm font-semibold">
-          <span className="badge badge-ghost">✏️</span>
+          <span className="badge badge-ghost">
+            <Pencil className="h-4 w-4" />
+          </span>
           <span>Write a new post</span>
         </div>
         <div className="flex items-center gap-1 text-xs">
@@ -468,7 +451,7 @@ function AdminPanelCard() {
           <li key={item.label}>
             <a>
               <span className="flex items-center gap-2">
-                <Menu className="h-3.5 w-3.5" />
+                <Menu className="h-4 w-4" />
                 {item.label}
               </span>
               {item.badge && <span className="badge badge-sm">{item.badge}</span>}
@@ -484,7 +467,7 @@ function AdminPanelCard() {
 function AudioCard() {
   return (
     <DemoCard>
-      <div className="flex items-center justify-center gap-2 text-lg">
+      <div className="flex items-center justify-center gap-2 text-base">
         <button className="btn btn-square btn-neutral btn-sm">
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -496,8 +479,8 @@ function AudioCard() {
         </button>
       </div>
       <div className="text-center">
-        <h3 className="text-base font-semibold">PM Zoomcall ASMR</h3>
-        <p className="text-sm text-base-content/70">Project Manager talking for 2 hours.</p>
+        <h3 className="text-sm font-semibold">PM Zoomcall ASMR</h3>
+        <p className="text-xs text-base-content/70">Project Manager talking for 2 hours.</p>
       </div>
       <div className="flex items-center gap-2 text-xs text-base-content/70">
         <span className="badge badge-outline">13:39</span>
@@ -508,9 +491,15 @@ function AudioCard() {
         <button className="btn btn-square btn-ghost btn-sm">
           <Volume2 className="h-4 w-4" />
         </button>
-        <button className="btn btn-square btn-ghost btn-sm">🔀</button>
-        <button className="btn btn-square btn-ghost btn-sm">🔁</button>
-        <button className="btn btn-square btn-ghost btn-sm">🎧</button>
+        <button className="btn btn-square btn-ghost btn-sm">
+          <Shuffle className="h-4 w-4" />
+        </button>
+        <button className="btn btn-square btn-ghost btn-sm">
+          <Repeat className="h-4 w-4" />
+        </button>
+        <button className="btn btn-square btn-ghost btn-sm">
+          <Headphones className="h-4 w-4" />
+        </button>
       </div>
     </DemoCard>
   );
