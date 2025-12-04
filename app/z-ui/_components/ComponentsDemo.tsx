@@ -1,24 +1,5 @@
 import type { CSSProperties } from "react";
-import {
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Headphones,
-  Key,
-  Menu,
-  Mic,
-  Pencil,
-  Phone,
-  Play,
-  Repeat,
-  Search,
-  ShieldCheck,
-  Settings,
-  Shuffle,
-  TrendingUp,
-  User,
-  Volume2,
-} from "lucide-react";
+import { Icon } from "@iconify/react";
 
 import { cn } from "@/lib/utils";
 
@@ -144,7 +125,7 @@ function CalendarCard() {
     <DemoCard>
       <div className="flex flex-wrap items-center gap-3 text-xs">
         <button className="btn btn-xs btn-ghost">
-          <ChevronLeft className="h-4 w-4" />
+          <Icon icon="mdi:chevron-left" className="h-4 w-4" />
         </button>
         <div className="join">
           {calendarDays.map((item) => (
@@ -158,7 +139,7 @@ function CalendarCard() {
           ))}
         </div>
         <button className="btn btn-xs btn-ghost">
-          <ChevronRight className="h-4 w-4" />
+          <Icon icon="mdi:chevron-right" className="h-4 w-4" />
         </button>
       </div>
 
@@ -186,14 +167,18 @@ function SimpleTabsCard() {
   return (
     <div className="card rounded-2xl border border-base-300/40 bg-base-200/80 shadow-sm">
       <div className="card-body gap-3 p-4 text-sm">
-        <div className="tabs tabs-lifted text-sm">
-          <a className="tab tab-lifted">Tab 1</a>
-          <a className="tab tab-lifted tab-active">Tab 2</a>
-          <a className="tab tab-lifted">Tab 3</a>
+        <div role="tablist" className="tabs tabs-lifted tabs-sm">
+          <a role="tab" className="tab">
+            Tab 1
+          </a>
+          <a role="tab" className="tab tab-active">
+            Tab 2
+          </a>
+          <a role="tab" className="tab">
+            Tab 3
+          </a>
         </div>
-        <div className="mt-2">
-          <p className="text-sm text-base-content/80">Tab content 2</p>
-        </div>
+        <div className="mt-4 text-sm text-base-content/80">Tab content 2</div>
       </div>
     </div>
   );
@@ -256,8 +241,8 @@ function SearchFindCard() {
     <DemoCard>
       <div className="join w-full">
         <label className="input input-bordered input-sm join-item flex items-center gap-2 text-sm">
-          <Search className="h-4 w-4 opacity-70" />
-          <input type="text" placeholder="Search" className="grow" />
+          <Icon icon="mdi:magnify" className="h-4 w-4 text-base-content/60" />
+          <input type="text" placeholder="Search" className="grow bg-transparent outline-none" />
         </label>
         <button className="btn btn-primary btn-sm join-item">Find</button>
       </div>
@@ -268,21 +253,21 @@ function SearchFindCard() {
 function CreateAccountCard() {
   return (
     <DemoCard>
-      <h3 className="text-sm font-semibold">Create new account</h3>
-      <p className="text-xs text-base-content/70">Registration is free and only takes a minute.</p>
+      <h3 className="text-sm font-semibold text-base-content/80">Create new account</h3>
+      <p className="text-xs text-base-content/60">Registration is free and only takes a minute.</p>
 
       <label className="input input-bordered input-sm flex items-center gap-2">
-        <User className="h-4 w-4 opacity-70" />
+        <Icon icon="mdi:account-outline" className="h-4 w-4 text-base-content/60" />
         <input type="text" placeholder="Username" className="grow" />
       </label>
 
       <label className="input input-bordered input-sm flex items-center gap-2">
-        <Key className="h-4 w-4 opacity-70" />
+        <Icon icon="mdi:key-variant" className="h-4 w-4 text-base-content/60" />
         <input type="password" placeholder="password" className="grow" />
       </label>
 
       <p className="mt-1 flex items-center gap-1 text-xs text-error">
-        <span className="h-1.5 w-1.5 rounded-full bg-error" />
+        <span className="inline-block h-1 w-1 rounded-full bg-error" />
         Password must be 8+ characters.
       </p>
 
@@ -296,9 +281,11 @@ function CreateAccountCard() {
       </label>
 
       <button className="btn btn-primary w-full">Register</button>
-      <button className="btn btn-link btn-xs px-0" type="button">
-        Or login
-      </button>
+      <div className="text-center text-xs">
+        <button className="btn btn-link btn-xs px-0" type="button">
+          Or login
+        </button>
+      </div>
     </DemoCard>
   );
 }
@@ -330,10 +317,10 @@ function PageScoreCard() {
     <DemoCard>
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Page Score</p>
-          <div className="text-2xl font-semibold">91/100</div>
-          <div className="flex items-center gap-2 text-xs text-base-content/80">
-            <ShieldCheck className="h-4 w-4 text-success" />
+          <p className="text-xs font-semibold text-base-content/60">Page Score</p>
+          <div className="text-3xl font-bold">91/100</div>
+          <div className="inline-flex items-center gap-1 text-xs text-success">
+            <Icon icon="mdi:shield-check" className="h-4 w-4" />
             <span>All good</span>
           </div>
         </div>
@@ -351,8 +338,8 @@ function PageScoreCard() {
 function RecentOrdersCard() {
   return (
     <DemoCard>
-      <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-        <TrendingUp className="h-4 w-4 opacity-70" />
+      <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-base-content/70">
+        <Icon icon="mdi:trending-up" className="h-4 w-4 text-base-content/60" />
         <span>Recent orders</span>
       </div>
       <div className="space-y-2 text-sm">
@@ -383,7 +370,7 @@ function DecemberRevenueCard() {
       <p className="text-xs text-base-content/60">December Revenue</p>
       <p className="text-3xl font-semibold">$32,400</p>
       <div className="mt-1 flex items-center gap-2">
-        <TrendingUp className="h-4 w-4 text-success" />
+        <Icon icon="mdi:trending-up" className="h-4 w-4 text-success" />
         <span className="text-xs text-base-content/70">21% more than last month</span>
       </div>
     </DemoCard>
@@ -393,18 +380,16 @@ function DecemberRevenueCard() {
 function WritePostCard() {
   return (
     <DemoCard>
-      <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
-        <Pencil className="h-4 w-4 opacity-70" />
+      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-base-content/80">
+        <Icon icon="mdi:pencil-outline" className="h-4 w-4 text-base-content/60" />
         <span>Write a new post</span>
       </div>
 
-      <div className="mb-2 flex items-center justify-between">
-        <div className="join">
-          <button className="btn btn-xs join-item font-semibold">B</button>
-          <button className="btn btn-xs join-item italic">I</button>
-          <button className="btn btn-xs join-item underline">U</button>
-        </div>
-        <button className="btn btn-ghost btn-xs px-2">Add files</button>
+      <div className="mb-3 flex items-center gap-3 text-xs text-base-content/70">
+        <button className="btn btn-xs btn-ghost font-bold">B</button>
+        <button className="btn btn-xs btn-ghost italic">I</button>
+        <button className="btn btn-xs btn-ghost underline">U</button>
+        <button className="ml-auto btn btn-xs btn-ghost">Add files</button>
       </div>
 
       <textarea
@@ -412,11 +397,12 @@ function WritePostCard() {
         placeholder="What's happening?"
       />
 
-      <p className="mt-2 text-xs text-base-content/60">1200 characters remaining</p>
-
-      <div className="mt-3 flex gap-3">
-        <button className="btn btn-ghost flex-1">Draft</button>
-        <button className="btn btn-primary flex-1">Publish</button>
+      <div className="mt-2 flex items-center justify-between text-xs text-base-content/60">
+        <span>1200 characters remaining</span>
+        <div className="flex gap-2">
+          <button className="btn btn-ghost btn-sm">Draft</button>
+          <button className="btn btn-primary btn-sm">Publish</button>
+        </div>
       </div>
     </DemoCard>
   );
@@ -425,45 +411,52 @@ function WritePostCard() {
 function ChatCard() {
   return (
     <DemoCard>
-      <div className="space-y-3">
+      <div className="space-y-3 text-sm">
         <div className="chat chat-start">
           <div className="chat-image avatar">
-            <div className="w-8 rounded-full bg-base-300" />
+            <div className="w-8 rounded-full">
+              <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@94.webp" alt="Obi-Wan" />
+            </div>
           </div>
           <div className="chat-header text-xs">
             Obi-Wan Kenobi
             <time className="ml-1 opacity-70">12:45</time>
           </div>
-          <div className="chat-bubble bg-base-content text-base-100">It's over Anakin</div>
-        </div>
-        <div className="chat chat-end">
-          <div className="chat-image avatar">
-            <div className="w-8 rounded-full bg-base-300" />
-          </div>
-          <div className="chat-header text-xs">Anakin</div>
-          <div className="chat-bubble bg-base-content text-base-100">I have the high ground</div>
-          <div className="chat-footer text-xs text-base-content/60">Delivered</div>
+          <div className="chat-bubble bg-base-200 text-base-content">It's over Anakin</div>
         </div>
         <div className="chat chat-start">
           <div className="chat-image avatar">
-            <div className="w-8 rounded-full bg-base-300" />
+            <div className="w-8 rounded-full">
+              <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@94.webp" alt="Obi-Wan" />
+            </div>
           </div>
-          <div className="chat-header text-xs">Obi-Wan Kenobi</div>
-          <div className="chat-bubble bg-base-content text-base-100">You underestimate my power</div>
-          <div className="chat-footer text-xs text-base-content/60">Seen at 12:46</div>
+          <div className="chat-bubble bg-base-200 text-base-content">I have the high ground</div>
+          <div className="chat-footer text-[10px] text-base-content/60">Delivered</div>
+        </div>
+        <div className="chat chat-end">
+          <div className="chat-image avatar">
+            <div className="w-8 rounded-full">
+              <img src="https://img.daisyui.com/images/profile/demo/yellingcat@94.webp" alt="Anakin" />
+            </div>
+          </div>
+          <div className="chat-bubble bg-primary text-primary-content">You underestimate my power</div>
+          <div className="chat-footer text-[10px] text-base-content/60">Seen at 12:46</div>
         </div>
       </div>
-      <div className="mt-2 border-t border-base-300/50 pt-2 text-base-content/70">
+      <div className="mt-3 border-t border-base-300/50 pt-3 text-base-content/70">
         <div className="flex items-center justify-around">
           <button className="btn btn-ghost btn-sm" type="button">
-            <Phone className="h-4 w-4" />
+            <Icon icon="mdi:phone-outline" className="h-4 w-4" />
           </button>
           <button className="btn btn-ghost btn-sm" type="button">
-            <Mic className="h-4 w-4" />
+            <Icon icon="mdi:microphone-outline" className="h-4 w-4" />
           </button>
           <button className="btn btn-ghost btn-sm" type="button">
-            <Settings className="h-4 w-4" />
+            <Icon icon="mdi:cog-outline" className="h-4 w-4" />
           </button>
+        </div>
+        <div className="mt-2 flex justify-center">
+          <div className="h-0.5 w-12 rounded-full bg-base-300" />
         </div>
       </div>
     </DemoCard>
@@ -472,22 +465,22 @@ function ChatCard() {
 
 function AdminPanelCard() {
   const items = [
-    { label: "Databases", badge: "7" },
-    { label: "Products" },
-    { label: "Messages", badge: "29" },
-    { label: "Access tokens" },
-    { label: "Users", dot: true },
-    { label: "Settings" },
+    { label: "Databases", badge: "7", icon: "mdi:database-outline" },
+    { label: "Products", icon: "mdi:cube-outline" },
+    { label: "Messages", badge: "29", icon: "mdi:email-outline" },
+    { label: "Access tokens", icon: "mdi:key-variant" },
+    { label: "Users", dot: true, icon: "mdi:account-multiple-outline" },
+    { label: "Settings", icon: "mdi:cog-outline" },
   ];
   return (
     <DemoCard>
-      <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Admin panel</p>
+      <p className="text-xs font-semibold text-base-content/60">Admin panel</p>
       <ul className="menu menu-compact rounded-box bg-base-200/70 p-2 text-sm">
         {items.map((item) => (
           <li key={item.label}>
             <a>
               <span className="flex items-center gap-2">
-                <Menu className="h-4 w-4" />
+                <Icon icon={item.icon} className="h-4 w-4 text-base-content/70" />
                 {item.label}
               </span>
               {item.badge && <span className="badge badge-sm">{item.badge}</span>}
@@ -505,13 +498,13 @@ function AudioCard() {
     <DemoCard>
       <div className="flex items-center justify-center gap-2 text-base">
         <button className="btn btn-square btn-neutral btn-sm">
-          <ChevronLeft className="h-4 w-4" />
+          <Icon icon="mdi:chevron-left" className="h-4 w-4" />
         </button>
         <button className="btn btn-square btn-primary btn-sm">
-          <Play className="h-4 w-4" />
+          <Icon icon="mdi:play" className="h-4 w-4" />
         </button>
         <button className="btn btn-square btn-neutral btn-sm">
-          <ChevronRight className="h-4 w-4" />
+          <Icon icon="mdi:chevron-right" className="h-4 w-4" />
         </button>
       </div>
       <div className="text-center">
@@ -525,16 +518,16 @@ function AudioCard() {
       </div>
       <div className="flex items-center justify-around text-base-content/70">
         <button className="btn btn-square btn-ghost btn-sm">
-          <Volume2 className="h-4 w-4" />
+          <Icon icon="mdi:volume-high" className="h-4 w-4" />
         </button>
         <button className="btn btn-square btn-ghost btn-sm">
-          <Shuffle className="h-4 w-4" />
+          <Icon icon="mdi:shuffle-variant" className="h-4 w-4" />
         </button>
         <button className="btn btn-square btn-ghost btn-sm">
-          <Repeat className="h-4 w-4" />
+          <Icon icon="mdi:repeat" className="h-4 w-4" />
         </button>
         <button className="btn btn-square btn-ghost btn-sm">
-          <Headphones className="h-4 w-4" />
+          <Icon icon="mdi:headphones" className="h-4 w-4" />
         </button>
       </div>
     </DemoCard>
@@ -617,13 +610,13 @@ function StarterPlanCard() {
       <p className="text-sm text-base-content/70">/month</p>
       <ul className="space-y-2 text-sm">
         <li className="flex items-center gap-2 text-success">
-          <Check className="h-4 w-4" /> 20 Tokens per day
+          <Icon icon="mdi:check-bold" className="h-4 w-4" /> 20 Tokens per day
         </li>
         <li className="flex items-center gap-2 text-success">
-          <Check className="h-4 w-4" /> 10 Projects
+          <Icon icon="mdi:check-bold" className="h-4 w-4" /> 10 Projects
         </li>
         <li className="flex items-center gap-2 text-success">
-          <Check className="h-4 w-4" /> API Access
+          <Icon icon="mdi:check-bold" className="h-4 w-4" /> API Access
         </li>
         <li className="flex items-center gap-2 text-error">
           <span className="font-semibold">×</span> Priority Support
