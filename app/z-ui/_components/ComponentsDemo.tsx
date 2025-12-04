@@ -1,4 +1,7 @@
+"use client";
+
 import type { CSSProperties } from "react";
+import { useState } from "react";
 import { Icon } from "@iconify/react";
 
 import { cn } from "@/lib/utils";
@@ -164,21 +167,41 @@ function CalendarCard() {
 }
 
 function SimpleTabsCard() {
+  const [active, setActive] = useState<"1" | "2" | "3">("2");
+
   return (
     <div className="card rounded-2xl border border-base-300/40 bg-base-200/80 shadow-sm">
       <div className="card-body gap-3 p-4 text-sm">
         <div role="tablist" className="tabs tabs-lifted tabs-sm">
-          <a role="tab" className="tab">
+          <button
+            type="button"
+            role="tab"
+            className={cn("tab", active === "1" && "tab-active")}
+            onClick={() => setActive("1")}
+            aria-selected={active === "1"}
+          >
             Tab 1
-          </a>
-          <a role="tab" className="tab tab-active">
+          </button>
+          <button
+            type="button"
+            role="tab"
+            className={cn("tab", active === "2" && "tab-active")}
+            onClick={() => setActive("2")}
+            aria-selected={active === "2"}
+          >
             Tab 2
-          </a>
-          <a role="tab" className="tab">
+          </button>
+          <button
+            type="button"
+            role="tab"
+            className={cn("tab", active === "3" && "tab-active")}
+            onClick={() => setActive("3")}
+            aria-selected={active === "3"}
+          >
             Tab 3
-          </a>
+          </button>
         </div>
-        <div className="mt-4 text-sm text-base-content/80">Tab content 2</div>
+        <div className="mt-4 text-sm text-base-content/80">{`Tab content ${active}`}</div>
       </div>
     </div>
   );
