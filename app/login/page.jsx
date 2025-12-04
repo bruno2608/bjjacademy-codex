@@ -5,7 +5,7 @@
  */
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, ArrowRight, Apple, Loader2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import ValidatedField from '../../components/ui/ValidatedField';
 import Button from '../../components/ui/Button';
@@ -190,7 +190,7 @@ function LoginContent() {
             </div>
 
             <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-start sm:gap-3">
-              <div className="flex flex-1 flex-col items-stretch">
+              <div className="flex w-full flex-col items-stretch sm:max-w-[260px]">
                 <button
                   type="button"
                   className="w-full h-11 rounded-full border border-neutral-700 bg-white text-neutral-900 flex items-center justify-center gap-2 text-sm font-medium hover:bg-neutral-100 transition-colors opacity-70 cursor-not-allowed"
@@ -199,17 +199,6 @@ function LoginContent() {
                 >
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[15px] font-semibold text-[#4285F4]">G</span>
                   Google
-                </button>
-                <p className="mt-1 text-xs text-neutral-400 text-center">Em breve</p>
-              </div>
-
-              <div className="flex flex-1 flex-col items-stretch">
-                <button
-                  type="button"
-                  className="w-full h-11 rounded-full border border-neutral-700 bg-black text-white flex items-center justify-center gap-2 text-sm font-medium hover:bg-neutral-900 transition-colors opacity-70 cursor-not-allowed"
-                  aria-disabled="true"
-                >
-                  <Apple size={16} /> Apple
                 </button>
                 <p className="mt-1 text-xs text-neutral-400 text-center">Em breve</p>
               </div>
