@@ -34,8 +34,8 @@ module.exports = {
   },
   plugins: [daisyui],
   daisyui: {
-    themes: ['Z-Dark', 'Z-Light'],
-    darkTheme: 'Z-Dark',
+    themes: ['zekai-dark', 'zekai-light'],
+    darkTheme: 'zekai-dark',
     logs: false
   }
 };

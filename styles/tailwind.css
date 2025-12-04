@@ -1,5 +1,5 @@
 @plugin "daisyui/theme" {
-  name: "Z-Dark";
+  name: "zekai-dark";
   default: true;
   prefersdark: true;
   color-scheme: "dark";
@@ -34,7 +34,7 @@
 }
 
 @plugin "daisyui/theme" {
-  name: "Z-Light";
+  name: "zekai-light";
   default: false;
   prefersdark: false;
   color-scheme: "light";

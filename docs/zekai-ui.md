@@ -9,9 +9,9 @@ ZEKAI UI é o design system que consolida a identidade visual da família ZEKAI 
 - **Alinhamento visual:** preserva a estética dark e gamificada atual, mas com espaço para variantes futuras.
 
 ## Temas Z-Dark e Z-Light
-- **Z-Dark:** tema escuro padrão, focado no produto atual. Usa fundo profundo, alto contraste e vermelho como cor primária. Ele é aplicado via `data-theme="Z-Dark"` na raiz do documento.
+- **Z-Dark:** tema escuro padrão, focado no produto atual. Usa fundo profundo, alto contraste e vermelho como cor primária. Ele é aplicado via `data-theme="zekai-dark"` na raiz do documento.
 - **Z-Light:** tema claro planejado para evoluções futuras. Não está ativo, mas já existe na configuração DaisyUI para testes controlados.
-- **Implementação via DaisyUI:** os temas são declarados via `@plugin "daisyui/theme"` em `styles/tailwind.css` e registrados no `tailwind.config.js` com `themes: ['Z-Dark', 'Z-Light']`. Alterar o tema é tão simples quanto trocar o `data-theme` na raiz do HTML (ex.: `data-theme="Z-Light"`) sem refatorar as telas.
+- **Implementação via DaisyUI:** os temas são declarados via `@plugin "daisyui/theme"` em `styles/tailwind.css` e registrados no `tailwind.config.js` com `themes: ['zekai-dark', 'zekai-light']`. Alterar o tema é tão simples quanto trocar o `data-theme` na raiz do HTML (ex.: `data-theme="zekai-light"`) sem refatorar as telas.
 - **Tokens principais (visão conceitual):**
   - `base-100/200/300` e `base-content` definem planos de fundo e contraste de texto.
   - `primary`, `secondary`, `neutral`, `info`, `success`, `warning`, `error` orientam estados e feedbacks.
@@ -99,10 +99,14 @@ Outros componentes podem seguir a convenção `Zk*` (ex.: `ZkPageHeader`, `ZkCar
 ### Checklist rápido para novas telas
 - Use `ZkPage` + `ZkContainer` como esqueleto base e garanta `min-h-dvh` com fundo que herda as variáveis do tema.
 - Aplique somente tokens DaisyUI (base/primary/neutral/etc.) para cores, bordas e textos; nada de hex fixo.
-- Certifique-se de que o HTML raiz está com `data-theme="Z-Dark"` (ou `Z-Light` quando liberado) para herdar o tema certo.
+- Certifique-se de que o HTML raiz está com `data-theme="zekai-dark"` (ou `zekai-light` quando liberado) para herdar o tema certo.
 
 ## Estado atual do tema (Z-Dark / Z-Light)
-- DaisyUI configurado com os temas personalizados `Z-Dark` (default, dark) e `Z-Light` (light).
-- O atributo `data-theme="Z-Dark"` está aplicado no `<html>`, tornando o Z-Dark o tema ativo global.
+- DaisyUI configurado com os temas personalizados `zekai-dark` (default, dark) e `zekai-light` (light) como nomes técnicos.
+- O atributo `data-theme="zekai-dark"` está aplicado no `<html>`, tornando o Z-Dark o tema ativo global.
 - A tela `/login` foi ajustada para usar apenas tokens de tema (`bg-base-*`, `text-base-content`, `btn-*`), sem cores fixas, respondendo 100% ao ZEKAI UI.
 - Overrides antigos baseados em `bjj-*` foram removidos ou convertidos para tokens do tema.
+
+## Nomes técnicos dos temas
+- Os temas registrados no DaisyUI usam identificadores em minúsculas com hífen: `zekai-dark` (padrão) e `zekai-light` (futuro).
+- Para ativar um tema, ajuste o atributo `data-theme` no `<html>` para `zekai-dark` ou `zekai-light` (quando o modo claro for liberado).

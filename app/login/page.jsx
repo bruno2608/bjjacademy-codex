@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, Apple, ArrowRight, Loader2 } from 'lucide-react';
 import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
 import { ZkPage } from '@/components/zekai-ui/ZkPage';
+import { ZkThemeDebug } from '@/components/ZkThemeDebug';
 import useUserStore from '../../store/userStore';
 
 function LoginContent() {
@@ -277,6 +278,7 @@ function LoginContent() {
           </section>
         </div>
       </ZkContainer>
+      <ZkThemeDebug />
     </ZkPage>
   );
 }
