@@ -1,16 +1,28 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { LayoutGrid, Palette, SlidersHorizontal, Moon, SunMedium } from "lucide-react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { LayoutGrid, Palette, SlidersHorizontal, Moon, SunMedium, MessageSquare, ShoppingBag } from "lucide-react";
 
 import { ZkContainer } from "@/components/zekai-ui/ZkContainer";
 import { cn } from "@/lib/utils";
 
-const paletteTokens = {
+const THEME_KEY = "zekai-ui-theme";
+
+type TabKey = "demo" | "variants" | "palette";
+type ThemeKey = "Z-Dark" | "Z-Light";
+
+type PaletteToken = {
+  label: string;
+  className: string;
+  value: string;
+};
+
+const paletteTokens: Record<string, PaletteToken[]> = {
   base: [
     { label: "base-100", className: "bg-base-100 text-base-content", value: "oklch(25.33% 0.016 252.42)" },
     { label: "base-200", className: "bg-base-200 text-base-content", value: "oklch(23.26% 0.014 253.1)" },
-    { label: "base-300", className: "bg-base-300 text-base-content", value: "oklch(21.15% 0.012 254.09)" }
+    { label: "base-300", className: "bg-base-300 text-base-content", value: "oklch(21.15% 0.012 254.09)" },
+    { label: "base-content", className: "bg-base-content text-base-100", value: "oklch(97.807% 0.029 256.847)" }
   ],
   brand: [
     { label: "primary", className: "bg-primary text-primary-content", value: "oklch(98% 0.003 247.858)" },
@@ -31,6 +43,10 @@ const buttonVariants = [
   { label: "Primary", className: "btn btn-primary" },
   { label: "Secondary", className: "btn btn-secondary" },
   { label: "Accent", className: "btn btn-accent" },
+  { label: "Info", className: "btn btn-info" },
+  { label: "Success", className: "btn btn-success" },
+  { label: "Warning", className: "btn btn-warning" },
+  { label: "Error", className: "btn btn-error" },
   { label: "Ghost", className: "btn btn-ghost" },
   { label: "Outline", className: "btn btn-outline" },
   { label: "Link", className: "btn btn-link" },
@@ -41,29 +57,44 @@ const buttonVariants = [
 ];
 
 const badges = [
-  "badge", "badge-primary", "badge-secondary", "badge-accent", "badge-info", "badge-success", "badge-warning", "badge-error"
+  "badge",
+  "badge-primary",
+  "badge-secondary",
+  "badge-accent",
+  "badge-info",
+  "badge-success",
+  "badge-warning",
+  "badge-error"
 ];
 
 export default function ZUiPlaygroundPage() {
-  const [activeTab, setActiveTab] = useState<"demo" | "variants" | "palette">("demo");
-  const [theme, setTheme] = useState<"Z-Dark" | "Z-Light">("Z-Dark");
+  const [activeTab, setActiveTab] = useState<TabKey>("demo");
+  const [theme, setTheme] = useState<ThemeKey>("Z-Dark");
+
+  useEffect(() => {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === "Z-Dark" || stored === "Z-Light") {
+      setTheme(stored);
+    }
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
 
   const tabIconClasses = useMemo(() => "h-4 w-4", []);
 
   return (
-    <main className="min-h-screen bg-base-100 text-base-content" data-theme={theme}>
+    <main className="min-h-dvh bg-base-200 text-base-content" data-theme={theme}>
       <ZkContainer className="space-y-8 py-10">
         <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
-            <p className="badge badge-outline border-base-300 uppercase tracking-[0.18em]">Playground interno</p>
+            <p className="badge badge-outline border-base-300 uppercase tracking-[0.18em]">Playground</p>
             <h1 className="text-3xl font-semibold lg:text-4xl">ZEKAI UI · Theme Playground</h1>
             <p className="max-w-3xl text-sm text-base-content/70 lg:text-base">
-              Página interna para validar rapidamente o ZEKAI UI (Z-Dark / Z-Light) com os componentes DaisyUI. Use para checar
-              contrastes, espaçamentos e tokens antes de levar ajustes para telas reais.
+              Página neutra para validar o visual do ZEKAI UI com DaisyUI. Alterne temas, navegue pelas abas e compare
+              componentes antes de aplicar em produtos reais.
             </p>
           </div>
 
@@ -123,9 +154,9 @@ export default function ZUiPlaygroundPage() {
           </div>
         </div>
 
-        {activeTab === "demo" && <ComponentsDemo />}        
-        {activeTab === "variants" && <ComponentVariants />}        
-        {activeTab === "palette" && <ColorPalette />}      
+        {activeTab === "demo" && <ComponentsDemo />}
+        {activeTab === "variants" && <ComponentVariants />}
+        {activeTab === "palette" && <ColorPalette />}
       </ZkContainer>
     </main>
   );
@@ -133,196 +164,394 @@ export default function ZUiPlaygroundPage() {
 
 function ComponentsDemo() {
   return (
-    <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)_320px] xl:grid-cols-[320px_minmax(0,1fr)_360px]">
-      <aside className="card border border-base-300/70 bg-base-100/95 shadow-xl">
-        <div className="card-body space-y-4">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Filtros rápidos</p>
-            <h2 className="text-lg font-semibold">Visão geral</h2>
+    <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)_320px] xl:grid-cols-[340px_minmax(0,1fr)_360px]">
+      <div className="space-y-6">
+        <FilterPanel />
+        <CalendarCard />
+      </div>
+
+      <div className="space-y-6">
+        <OverviewCard />
+        <div className="grid gap-6 md:grid-cols-2">
+          <ComposerCard />
+          <ChatCard />
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <ScoreCard />
+        <OrdersCard />
+        <ProductCard />
+        <AlertsCard />
+      </div>
+    </div>
+  );
+}
+
+function FilterPanel() {
+  return (
+    <aside className="card border border-base-300/70 bg-base-100/95 shadow-xl">
+      <div className="card-body space-y-4">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Filters</p>
+          <h2 className="text-lg font-semibold">Collections</h2>
+        </div>
+        <div className="form-control">
+          <label className="label cursor-pointer justify-between gap-3">
+            <span className="label-text">In stock only</span>
+            <input type="checkbox" className="toggle toggle-primary" defaultChecked />
+          </label>
+        </div>
+        <div className="form-control">
+          <label className="label cursor-pointer justify-between gap-3">
+            <span className="label-text">Featured</span>
+            <input type="checkbox" className="toggle toggle-secondary" />
+          </label>
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/60">Categories</p>
+          {[
+            "Hoodies",
+            "Bags",
+            "Shoes",
+            "Accessories",
+            "Gadgets"
+          ].map((item, index) => (
+            <label key={item} className="label cursor-pointer gap-2">
+              <input
+                type="checkbox"
+                className={cn("checkbox", index === 0 && "checkbox-primary", index === 1 && "checkbox-secondary", index === 2 && "checkbox-accent")}
+                defaultChecked={index < 2}
+              />
+              <span className="label-text">{item}</span>
+            </label>
+          ))}
+        </div>
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/60">Quick actions</p>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn btn-primary btn-sm">Apply</button>
+            <button className="btn btn-outline btn-sm">Reset</button>
+            <button className="btn btn-ghost btn-sm">Export</button>
           </div>
-          <div className="form-control">
-            <label className="label cursor-pointer justify-between gap-3">
-              <span className="label-text">Somente alunos ativos</span>
-              <input type="checkbox" className="toggle toggle-primary" defaultChecked />
-            </label>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function CalendarCard() {
+  const days = ["12", "13", "14", "15", "16", "17", "18"];
+  return (
+    <div className="card border border-base-300/70 bg-base-100/95 shadow-xl">
+      <div className="card-body space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="card-title text-base">Schedule</h3>
+          <span className="badge badge-outline">Week</span>
+        </div>
+        <div className="grid grid-cols-7 gap-2 text-sm">
+          {days.map((day) => (
+            <div
+              key={day}
+              className={cn(
+                "flex h-12 flex-col items-center justify-center rounded-lg border border-base-300/70 bg-base-200/60",
+                day === "15" && "border-primary/60 bg-primary/20 text-primary-content"
+              )}
+            >
+              <span className="text-xs text-base-content/60">Dec</span>
+              <span className="font-semibold">{day}</span>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-2 rounded-xl border border-base-300/70 bg-base-200/60 p-3">
+          <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Upcoming</p>
+          <p className="text-sm font-semibold">Team sync meeting</p>
+          <p className="text-xs text-base-content/60">Thu, 15 Dec · 10:00 AM</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OverviewCard() {
+  return (
+    <section className="card border border-base-300/70 bg-base-100/95 shadow-2xl">
+      <div className="card-body space-y-5">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="badge badge-outline border-base-300">Dashboard</div>
+          <div className="tabs tabs-bordered tabs-sm">
+            <a className="tab tab-active">Overview</a>
+            <a className="tab">Conversions</a>
+            <a className="tab">Engagement</a>
           </div>
-          <div className="form-control">
-            <label className="label cursor-pointer justify-between gap-3">
-              <span className="label-text">Destacar presenças</span>
-              <input type="checkbox" className="toggle toggle-secondary" />
-            </label>
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Components Demo</h2>
+          <p className="text-sm text-base-content/70">
+            Layout inspirado no Theme Generator da DaisyUI para validar estados, hierarquia e contraste com os temas
+            Z-Dark/Z-Light.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="stat rounded-2xl border border-base-300/70 bg-base-200/70">
+            <div className="stat-title">Sessions</div>
+            <div className="stat-value">12.4k</div>
+            <div className="stat-desc">+8% vs. last week</div>
           </div>
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/60">Modalidades</p>
-            <label className="label cursor-pointer gap-2">
-              <input type="checkbox" className="checkbox checkbox-primary" defaultChecked />
-              <span className="label-text">Jiu-Jitsu</span>
-            </label>
-            <label className="label cursor-pointer gap-2">
-              <input type="checkbox" className="checkbox checkbox-secondary" defaultChecked />
-              <span className="label-text">No-Gi</span>
-            </label>
-            <label className="label cursor-pointer gap-2">
-              <input type="checkbox" className="checkbox checkbox-accent" />
-              <span className="label-text">MMA</span>
-            </label>
+          <div className="stat rounded-2xl border border-base-300/70 bg-base-200/70">
+            <div className="stat-title">Conversion</div>
+            <div className="stat-value">4.2%</div>
+            <div className="stat-desc">Steady • multi-device</div>
           </div>
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/60">Ações</p>
-            <div className="flex flex-wrap gap-2">
-              <button className="btn btn-primary btn-sm">Atualizar</button>
-              <button className="btn btn-outline btn-sm">Exportar</button>
-              <button className="btn btn-ghost btn-sm">Limpar</button>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="card border border-base-300/60 bg-base-200/60">
+            <div className="card-body space-y-3">
+              <h3 className="card-title text-base">Traffic sources</h3>
+              <div className="flex items-end gap-2">
+                {[60, 80, 40, 55, 72, 48, 66].map((height, idx) => (
+                  <div
+                    key={idx}
+                    className="flex-1 rounded-t-lg bg-primary/80"
+                    style={{ height: `${height}px` }}
+                    aria-hidden
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-base-content/60">Barras estáticas para simular gráfico de tráfego.</p>
+            </div>
+          </div>
+
+          <div className="card border border-base-300/60 bg-base-200/60">
+            <div className="card-body space-y-3">
+              <h3 className="card-title text-base">Page score</h3>
+              <div className="flex items-center gap-4">
+                <div className="radial-progress text-primary" style={{ "--value": 91 } as CSSProperties}>
+                  91
+                </div>
+                <div className="space-y-1">
+                  <p className="font-semibold">Excellent UX</p>
+                  <p className="text-sm text-base-content/70">Based on mock Lighthouse signals.</p>
+                </div>
+              </div>
+              <div className="divider my-2" />
+              <div className="space-y-1 text-sm">
+                <div className="flex items-center justify-between">
+                  <span>Performance</span>
+                  <span className="badge badge-success badge-sm">98</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Accessibility</span>
+                  <span className="badge badge-primary badge-sm">96</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Best practices</span>
+                  <span className="badge badge-info badge-sm">93</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </aside>
+      </div>
+    </section>
+  );
+}
 
-      <section className="card border border-base-300/70 bg-base-100/95 shadow-2xl">
-        <div className="card-body space-y-5">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="badge badge-outline border-base-300">Dashboard</div>
-            <div className="tabs tabs-bordered tabs-sm">
-              <a className="tab tab-active">Presenças</a>
-              <a className="tab">Turmas</a>
-              <a className="tab">Financeiro</a>
-            </div>
+function ComposerCard() {
+  return (
+    <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+      <div className="card-body space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Content</p>
+            <h3 className="card-title text-base">Write a new post</h3>
           </div>
+          <span className="badge badge-outline border-base-300">Draft</span>
+        </div>
+        <textarea className="textarea textarea-bordered h-28 w-full bg-base-200/70" placeholder="Share an update..." />
+        <div className="flex flex-wrap items-center gap-2 justify-end">
+          <button className="btn btn-ghost btn-sm">Save draft</button>
+          <button className="btn btn-primary btn-sm">Publish</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold">Resumo de presenças no mês</h2>
-            <p className="text-sm text-base-content/70">
-              Acompanhe check-ins, evolução das turmas e engajamento semanal com a paleta do ZEKAI UI aplicada.
-            </p>
+function ChatCard() {
+  return (
+    <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+      <div className="card-body space-y-4">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5" />
+          <h3 className="card-title text-base">Team chat</h3>
+        </div>
+        <div className="space-y-3">
+          <div className="chat chat-start">
+            <div className="chat-image avatar">
+              <div className="w-10 rounded-full bg-primary text-primary-content">OB</div>
+            </div>
+            <div className="chat-header">Obi-Wan</div>
+            <div className="chat-bubble">You were the chosen one!</div>
+            <div className="chat-footer text-xs">10:00</div>
           </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="stat rounded-2xl border border-base-300/70 bg-base-200/70">
-              <div className="stat-title">Check-ins no período</div>
-              <div className="stat-value">482</div>
-              <div className="stat-desc">+12% vs. mês anterior</div>
+          <div className="chat chat-end">
+            <div className="chat-image avatar">
+              <div className="w-10 rounded-full bg-secondary text-secondary-content">AN</div>
             </div>
-            <div className="stat rounded-2xl border border-base-300/70 bg-base-200/70">
-              <div className="stat-title">Alunos ativos</div>
-              <div className="stat-value">126</div>
-              <div className="stat-desc">80% com presença semanal</div>
-            </div>
+            <div className="chat-header">Anakin</div>
+            <div className="chat-bubble chat-bubble-secondary">I will bring balance to the Force.</div>
+            <div className="chat-footer text-xs">10:02</div>
           </div>
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            <div className="card border border-base-300/60 bg-base-200/60">
-              <div className="card-body space-y-3">
-                <h3 className="card-title text-base">Turmas de destaque</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between rounded-lg bg-base-100/80 px-3 py-2">
-                    <span className="font-medium">Fundamentos</span>
-                    <span className="badge badge-success">Lotada</span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-base-100/80 px-3 py-2">
-                    <span className="font-medium">No-Gi Intermediário</span>
-                    <span className="badge badge-warning">3 vagas</span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-base-100/80 px-3 py-2">
-                    <span className="font-medium">Avançado</span>
-                    <span className="badge badge-info">Aberta</span>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button className="btn btn-secondary btn-sm">Nova turma</button>
-                  <button className="btn btn-outline btn-sm">Ver calendário</button>
-                </div>
-              </div>
+          <div className="chat chat-start">
+            <div className="chat-image avatar">
+              <div className="w-10 rounded-full bg-neutral text-neutral-content">OB</div>
             </div>
-
-            <div className="card border border-base-300/60 bg-base-200/60">
-              <div className="card-body space-y-3">
-                <h3 className="card-title text-base">Equipe técnica</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-3 rounded-lg bg-base-100/80 px-3 py-2">
-                    <div className="avatar placeholder">
-                      <div className="w-10 rounded-full bg-secondary text-secondary-content">RJ</div>
-                    </div>
-                    <div>
-                      <p className="font-medium">Renato J.</p>
-                      <p className="text-xs text-base-content/60">Faixa preta · Head Coach</p>
-                    </div>
-                    <span className="badge badge-primary ml-auto">Em aula</span>
-                  </div>
-                  <div className="flex items-center gap-3 rounded-lg bg-base-100/80 px-3 py-2">
-                    <div className="avatar placeholder">
-                      <div className="w-10 rounded-full bg-primary text-primary-content">AM</div>
-                    </div>
-                    <div>
-                      <p className="font-medium">Ana M.</p>
-                      <p className="text-xs text-base-content/60">Faixa marrom · Instrutora</p>
-                    </div>
-                    <span className="badge badge-success ml-auto">Disponível</span>
-                  </div>
-                  <div className="flex items-center gap-3 rounded-lg bg-base-100/80 px-3 py-2">
-                    <div className="avatar placeholder">
-                      <div className="w-10 rounded-full bg-neutral text-neutral-content">LP</div>
-                    </div>
-                    <div>
-                      <p className="font-medium">Lucas P.</p>
-                      <p className="text-xs text-base-content/60">Faixa roxa · Assistente</p>
-                    </div>
-                    <span className="badge badge-warning ml-auto">Treino</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="alert alert-info text-sm">
-            <div>
-              <span className="font-semibold">Observação:</span> Toda a UI acima usa apenas tokens DaisyUI do tema ativo (Z-Dark ou Z-Light). Use este bloco para validar contraste e hierarquia.
-            </div>
+            <div className="chat-header">Obi-Wan</div>
+            <div className="chat-bubble">Then you are lost...</div>
+            <div className="chat-footer text-xs">10:04</div>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  );
+}
 
-      <section className="card border border-base-300/70 bg-base-100/95 shadow-xl">
-        <div className="card-body space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Resumo rápido</p>
-              <h2 className="text-lg font-semibold">KPIs gerais</h2>
-            </div>
-            <button className="btn btn-ghost btn-sm">Ver detalhes</button>
+function ScoreCard() {
+  return (
+    <div className="card border border-base-300/70 bg-base-100/95 shadow-xl">
+      <div className="card-body space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Summary</p>
+            <h3 className="card-title text-base">December revenue</h3>
           </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between rounded-lg border border-base-300/60 bg-base-200/60 px-3 py-2">
-              <div>
-                <p className="text-sm font-semibold">Check-ins hoje</p>
-                <p className="text-xs text-base-content/60">Inclui presença em aulas experimentais</p>
-              </div>
-              <span className="text-lg font-bold">42</span>
-            </div>
-            <div className="flex items-center justify-between rounded-lg border border-base-300/60 bg-base-200/60 px-3 py-2">
-              <div>
-                <p className="text-sm font-semibold">Novos cadastros</p>
-                <p className="text-xs text-base-content/60">Últimas 24h</p>
-              </div>
-              <span className="text-lg font-bold">7</span>
-            </div>
-            <div className="flex items-center justify-between rounded-lg border border-base-300/60 bg-base-200/60 px-3 py-2">
-              <div>
-                <p className="text-sm font-semibold">Planos a vencer</p>
-                <p className="text-xs text-base-content/60">Próximos 7 dias</p>
-              </div>
-              <span className="text-lg font-bold">14</span>
-            </div>
+          <span className="badge badge-success">+12.4%</span>
+        </div>
+        <div className="text-3xl font-bold">$32,400</div>
+        <p className="text-sm text-base-content/70">Mock data for visual testing.</p>
+        <div className="flex items-center gap-3">
+          <div className="radial-progress text-secondary" style={{ "--value": 72 } as CSSProperties}>
+            72%
           </div>
-          <div className="grid gap-2 md:grid-cols-2">
-            <div className="alert alert-success text-xs">
-              <span>✅ Taxa de presença acima do esperado esta semana.</span>
-            </div>
-            <div className="alert alert-warning text-xs">
-              <span>⚠️ Lembrete: renovar planos dos alunos com recorrência manual.</span>
-            </div>
+          <div className="space-y-1 text-sm">
+            <p>Recurring revenue momentum</p>
+            <p className="text-base-content/60">Projected next month: $34,600</p>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  );
+}
+
+function OrdersCard() {
+  const orders = [
+    { name: "Avery Fields", status: "Paid" },
+    { name: "Morgan Lee", status: "Pending" },
+    { name: "Taylor Brooks", status: "Refunded" },
+    { name: "Charlie Kim", status: "Processing" }
+  ];
+  return (
+    <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+      <div className="card-body space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="card-title text-base">Recent orders</h3>
+          <button className="btn btn-ghost btn-sm">View all</button>
+        </div>
+        <div className="space-y-2 text-sm">
+          {orders.map((order) => (
+            <div key={order.name} className="flex items-center justify-between rounded-lg bg-base-200/60 px-3 py-2">
+              <div className="flex items-center gap-2">
+                <div className="avatar placeholder">
+                  <div className="w-8 rounded-full bg-neutral text-neutral-content">{order.name[0]}</div>
+                </div>
+                <span className="font-medium">{order.name}</span>
+              </div>
+              <span
+                className={cn(
+                  "badge",
+                  order.status === "Paid" && "badge-success",
+                  order.status === "Pending" && "badge-warning",
+                  order.status === "Processing" && "badge-info",
+                  order.status === "Refunded" && "badge-error"
+                )}
+              >
+                {order.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProductCard() {
+  return (
+    <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+      <div className="card-body space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="h-5 w-5" />
+            <h3 className="card-title text-base">Featured product</h3>
+          </div>
+          <span className="badge badge-secondary">SALE</span>
+        </div>
+        <div className="rounded-xl bg-base-200/70 p-4">
+          <div className="mb-2 flex items-center justify-between text-sm text-base-content/80">
+            <span>Wireless Headphones</span>
+            <div className="rating rating-xs">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <input
+                  key={star}
+                  type="radio"
+                  name="rating-2"
+                  className="mask mask-star-2 bg-warning"
+                  defaultChecked={star === 4}
+                  aria-label={`Rating ${star}`}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1 text-sm">
+              <p className="text-base-content/60 line-through">$320</p>
+              <p className="text-xl font-semibold">$249</p>
+            </div>
+            <button className="btn btn-primary btn-sm">Add to cart</button>
+          </div>
+        </div>
+        <div className="space-y-1 text-sm text-base-content/70">
+          <p>Noise cancellation, 32h battery life, fast pairing.</p>
+          <div className="flex flex-wrap gap-2">
+            <span className="badge badge-outline">Audio</span>
+            <span className="badge badge-outline">Wireless</span>
+            <span className="badge badge-outline">New</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AlertsCard() {
+  return (
+    <div className="space-y-3">
+      <div className="alert alert-info text-sm">
+        <span>There are 9 new messages.</span>
+      </div>
+      <div className="alert alert-success text-sm">
+        <span>Verification process completed.</span>
+      </div>
+      <div className="alert alert-warning text-sm">
+        <span>Click to verify your email address.</span>
+      </div>
+      <div className="alert alert-error text-sm">
+        <span>Access denied. Contact support.</span>
+      </div>
     </div>
   );
 }
@@ -334,6 +563,7 @@ function ComponentVariants() {
         <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
           <div className="card-body space-y-3">
             <h3 className="card-title text-base">Buttons</h3>
+            <p className="text-sm text-base-content/70">Principais variações do DaisyUI com tamanhos e estados.</p>
             <div className="flex flex-wrap gap-2">
               {buttonVariants.map((button) => (
                 <button key={button.label} className={button.className} disabled={button.disabled}>
@@ -347,19 +577,25 @@ function ComponentVariants() {
         <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
           <div className="card-body space-y-3">
             <h3 className="card-title text-base">Inputs</h3>
+            <p className="text-sm text-base-content/70">Bordas, estados de cor e variações de tamanho.</p>
             <div className="space-y-3">
               <input type="text" placeholder="input" className="input input-bordered w-full" />
               <input type="text" placeholder="input-primary" className="input input-bordered input-primary w-full" />
               <input type="text" placeholder="input-secondary" className="input input-bordered input-secondary w-full" />
               <div className="space-y-1">
                 <input type="text" placeholder="input-error" className="input input-bordered input-error w-full" />
-                <p className="text-xs text-error">Texto de erro em input-error</p>
+                <p className="text-xs text-error">Helper text em estado de erro.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <input type="text" placeholder="input-sm" className="input input-bordered input-sm" />
                 <input type="text" placeholder="input-md" className="input input-bordered input-md" />
                 <input type="text" placeholder="input-lg" className="input input-bordered input-lg" />
               </div>
+              <select className="select select-bordered w-full">
+                <option>select</option>
+                <option>option A</option>
+                <option>option B</option>
+              </select>
             </div>
           </div>
         </div>
@@ -367,24 +603,23 @@ function ComponentVariants() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
-            <div className="card-body space-y-3">
-              <h3 className="card-title text-base">Badges</h3>
-              <div className="flex flex-wrap gap-2 text-sm">
-                {badges.map((badge) => (
-                  <span
-                    key={badge}
-                    className={cn(badge, "badge-outline capitalize border-base-300/60")}
-                  >
-                    {badge.replace("badge-", "")}
-                  </span>
-                ))}
-              </div>
+          <div className="card-body space-y-3">
+            <h3 className="card-title text-base">Badges</h3>
+            <p className="text-sm text-base-content/70">Todas as cores principais em modo outline.</p>
+            <div className="flex flex-wrap gap-2 text-sm">
+              {badges.map((badge) => (
+                <span key={badge} className={cn(badge, "badge-outline capitalize border-base-300/60")}> 
+                  {badge.replace("badge-", "")}
+                </span>
+              ))}
             </div>
           </div>
+        </div>
 
         <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
           <div className="card-body space-y-3">
             <h3 className="card-title text-base">Checkbox / Radio / Toggle</h3>
+            <p className="text-sm text-base-content/70">Estados de seleção e foco em diferentes cores.</p>
             <div className="space-y-2 text-sm">
               <div className="flex flex-wrap items-center gap-3">
                 <label className="flex items-center gap-2">
@@ -432,6 +667,19 @@ function ComponentVariants() {
           </div>
         </div>
       </div>
+
+      <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+        <div className="card-body space-y-3">
+          <h3 className="card-title text-base">Alerts</h3>
+          <p className="text-sm text-base-content/70">Feedback de status com cores do tema.</p>
+          <div className="space-y-2">
+            <div className="alert alert-info text-sm">Info alert — neutral guidance.</div>
+            <div className="alert alert-success text-sm">Success alert — operation completed.</div>
+            <div className="alert alert-warning text-sm">Warning alert — please double check.</div>
+            <div className="alert alert-error text-sm">Error alert — something went wrong.</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -446,14 +694,14 @@ function ColorPalette() {
       </div>
       <div className="alert alert-info text-sm">
         <span>
-          Esta paleta reflete os valores OKLCH oficiais do tema ativo (Z-Dark ou Z-Light). Alterne o tema no topo para validar contraste.
+          Paleta derivada dos temas oficiais Z-Dark/Z-Light. Alterne o tema no topo para validar contraste e legibilidade.
         </span>
       </div>
     </div>
   );
 }
 
-function PaletteCard({ title, tokens }: { title: string; tokens: { label: string; className: string; value: string }[] }) {
+function PaletteCard({ title, tokens }: { title: string; tokens: PaletteToken[] }) {
   return (
     <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
       <div className="card-body space-y-3">
