@@ -5,7 +5,7 @@
  */
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, ArrowRight, Apple, Loader2, Mail } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Apple, Loader2 } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import ValidatedField from '../../components/ui/ValidatedField';
 import Button from '../../components/ui/Button';
@@ -101,12 +101,12 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-bjj-black text-bjj-white">
-      <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-start overflow-hidden px-4 py-10 sm:px-8 lg:grid lg:min-h-screen lg:grid-cols-2 lg:items-center lg:gap-12">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black" aria-hidden />
-        <div className="absolute right-[-20%] top-[-10%] h-96 w-96 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
-        <div className="absolute left-[-10%] bottom-[-20%] h-72 w-72 rounded-full bg-bjj-gray-800/40 blur-3xl" aria-hidden />
+    <main className="relative min-h-screen bg-bjj-black text-bjj-white overflow-hidden">
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black" aria-hidden />
+      <div className="absolute right-[-18%] top-[-12%] h-[26rem] w-[26rem] rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
+      <div className="absolute left-[-12%] bottom-[-18%] h-72 w-72 rounded-full bg-bjj-gray-800/40 blur-3xl" aria-hidden />
 
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-start px-4 pt-8 pb-12 sm:px-8 lg:grid lg:min-h-screen lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14">
         <section className="relative mb-6 space-y-4 lg:mb-0 lg:max-w-2xl">
           <div className="flex flex-col gap-3 lg:gap-4">
             <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-bjj-gray-200/70">
@@ -182,28 +182,37 @@ function LoginContent() {
             <Button type="submit" className="w-full justify-center" disabled={isSubmitting}>
               {isSubmitting ? 'Entrando...' : 'Acessar painel'} {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight size={15} />}
             </Button>
-            <div className="flex items-center gap-2 text-xs text-bjj-gray-200/70">
+
+            <div className="flex items-center gap-3 text-xs text-bjj-gray-200/70">
               <span className="h-px flex-1 bg-bjj-gray-800" aria-hidden />
-              <span>ou continue com</span>
+              <span className="text-bjj-gray-300/70">ou continue com</span>
               <span className="h-px flex-1 bg-bjj-gray-800" aria-hidden />
             </div>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <button
-                type="button"
-                className="btn btn-outline btn-primary flex items-center justify-center gap-2 border-bjj-gray-700 bg-bjj-gray-900/60 text-bjj-gray-100"
-                aria-disabled
-              >
-                <Mail size={16} /> Google
-                <span className="text-[11px] text-bjj-gray-300/70">Em breve</span>
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline flex items-center justify-center gap-2 border-bjj-gray-700 bg-bjj-gray-900/60 text-bjj-gray-100"
-                aria-disabled
-              >
-                <Apple size={16} /> Apple
-                <span className="text-[11px] text-bjj-gray-300/70">Em breve</span>
-              </button>
+
+            <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-start sm:gap-3">
+              <div className="flex flex-1 flex-col items-stretch">
+                <button
+                  type="button"
+                  className="w-full h-11 rounded-full border border-neutral-700 bg-white text-neutral-900 flex items-center justify-center gap-2 text-sm font-medium hover:bg-neutral-100 transition-colors opacity-70 cursor-not-allowed"
+                  aria-disabled="true"
+                  // TODO: integrar OAuth Google
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[15px] font-semibold text-[#4285F4]">G</span>
+                  Google
+                </button>
+                <p className="mt-1 text-xs text-neutral-400 text-center">Em breve</p>
+              </div>
+
+              <div className="flex flex-1 flex-col items-stretch">
+                <button
+                  type="button"
+                  className="w-full h-11 rounded-full border border-neutral-700 bg-black text-white flex items-center justify-center gap-2 text-sm font-medium hover:bg-neutral-900 transition-colors opacity-70 cursor-not-allowed"
+                  aria-disabled="true"
+                >
+                  <Apple size={16} /> Apple
+                </button>
+                <p className="mt-1 text-xs text-neutral-400 text-center">Em breve</p>
+              </div>
             </div>
           </form>
           <div className="mt-5 space-y-3 text-center text-sm text-bjj-gray-200/80">
@@ -225,7 +234,7 @@ function LoginContent() {
           </div>
         </section>
       </div>
-    </div>
+    </main>
   );
 }
 
