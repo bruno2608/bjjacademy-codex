@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
         <meta name="theme-color" content="#000000" />
         <link rel="icon" href="/icons/icon-192x192.svg" />
       </head>
-      <body className="min-h-dvh font-sans bg-base-100 text-base-content">
+      <body className="min-h-dvh font-sans bg-base-200 text-base-content antialiased">
         {/* Todas as páginas do App são renderizadas aqui. */}
         <AppShell>{children}</AppShell>
       </body>

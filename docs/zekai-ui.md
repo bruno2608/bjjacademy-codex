@@ -36,3 +36,8 @@ O ZEKAI UI é o design system oficial do bjjacademy-codex, construído sobre Tai
 - Use `ZkContainer` para centralizar e limitar a largura; em auth, combine com grids responsivos (2 colunas no desktop, colunas empilhadas no mobile).
 - Aplique apenas tokens do tema para cores/bordas/textos; evite hex/hsl fixo.
 - Confirme que `data-theme="Z-Dark"` está setado na raiz (ou `Z-Light` quando o modo claro for liberado).
+
+## Playground de Componentes (/z-ui)
+- Rota interna para validar visualmente o tema Z-Dark/Z-Light aplicado ao DaisyUI, sem necessidade de navegar pelas telas reais.
+- Exibe paleta de cores, botões, inputs, checkbox/radio/toggle, alerts e exemplos de tipografia sobre diferentes superfícies.
+- Use esta página para conferir contrastes, bordas e estados antes de aplicar ajustes de tema em produção.

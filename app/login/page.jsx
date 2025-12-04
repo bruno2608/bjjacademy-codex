@@ -104,7 +104,7 @@ function LoginContent() {
   };
 
   return (
-    <main className="min-h-dvh bg-base-300 text-base-content">
+    <main className="min-h-dvh bg-base-200 text-base-content">
       <ZkContainer className="grid min-h-dvh items-center gap-12 py-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
         <section className="flex flex-col gap-4 lg:pr-6">
           <span className="badge badge-outline w-fit border-base-300 text-[0.65rem] font-semibold uppercase tracking-[0.25em]">

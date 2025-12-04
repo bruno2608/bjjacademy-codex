@@ -10,7 +10,7 @@ import TabletNav from './TabletNav';
 import ShellFooter from '../layouts/ShellFooter';
 import ImpersonationBanner from './ImpersonationBanner';
 
-const BARE_PATHS = ['/login', '/unauthorized'];
+const BARE_PATHS = ['/login', '/unauthorized', '/z-ui'];
 
 export default function AppShell({ children }) {
   const router = useRouter();
