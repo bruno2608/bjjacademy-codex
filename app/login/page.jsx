@@ -131,7 +131,7 @@ function LoginContent() {
           </div>
         </section>
 
-        <section className="relative w-full max-w-md rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/80 p-6 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)] sm:p-7 lg:ml-auto">
+        <section className="relative w-full max-w-lg mx-auto rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/80 p-6 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)] sm:p-7 lg:ml-auto lg:mr-0">
           <header className="mb-5 space-y-1 text-center">
             <h2 className="text-xl font-semibold">Entrar</h2>
             <p className="text-sm text-bjj-gray-200/70">Use suas credenciais para acessar o painel.</p>
@@ -189,7 +189,7 @@ function LoginContent() {
               <span className="h-px flex-1 bg-bjj-gray-800" aria-hidden />
             </div>
 
-            <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-start sm:gap-3">
+            <div className="flex flex-col items-center gap-3 text-sm sm:flex-row sm:items-center sm:justify-center sm:gap-3">
               <div className="flex w-full flex-col items-stretch sm:max-w-[260px]">
                 <button
                   type="button"
