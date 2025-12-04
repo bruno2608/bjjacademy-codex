@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { LayoutGrid, Palette, SlidersHorizontal, Moon, SunMedium, MessageSquare, ShoppingBag } from "lucide-react";
+import { LayoutGrid, Palette, SlidersHorizontal, Moon, SunMedium, MessageSquare, ShoppingBag, PanelRightDashed } from "lucide-react";
 
 import { ZkContainer } from "@/components/zekai-ui/ZkContainer";
 import { cn } from "@/lib/utils";
 
 const THEME_KEY = "zekai-ui-theme";
 
-type TabKey = "demo" | "variants" | "palette";
+type TabKey = "demo" | "variants" | "palette" | "editor";
 type ThemeKey = "Z-Dark" | "Z-Light";
 
 type PaletteToken = {
@@ -151,12 +151,21 @@ export default function ZUiPlaygroundPage() {
               <Palette className={tabIconClasses} />
               <span className="hidden md:inline">Color Palette</span>
             </button>
+            <button
+              className={cn("tab gap-2", activeTab === "editor" && "tab-active")}
+              onClick={() => setActiveTab("editor")}
+              title="Theme Editor"
+            >
+              <PanelRightDashed className={tabIconClasses} />
+              <span className="hidden md:inline">Theme Editor</span>
+            </button>
           </div>
         </div>
 
         {activeTab === "demo" && <ComponentsDemo />}
         {activeTab === "variants" && <ComponentVariants />}
         {activeTab === "palette" && <ColorPalette />}
+        {activeTab === "editor" && <ThemeEditor />}
       </ZkContainer>
     </main>
   );
@@ -164,25 +173,35 @@ export default function ZUiPlaygroundPage() {
 
 function ComponentsDemo() {
   return (
-    <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)_320px] xl:grid-cols-[340px_minmax(0,1fr)_360px]">
-      <div className="space-y-6">
-        <FilterPanel />
-        <CalendarCard />
-      </div>
-
-      <div className="space-y-6">
-        <OverviewCard />
-        <div className="grid gap-6 md:grid-cols-2">
-          <ComposerCard />
-          <ChatCard />
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold">Components Demo</h2>
+          <p className="text-sm text-base-content/70">Layout de referência inspirado no Theme Generator da DaisyUI.</p>
         </div>
+        <span className="badge badge-outline border-base-300">Static showcase</span>
       </div>
 
-      <div className="space-y-6">
-        <ScoreCard />
-        <OrdersCard />
-        <ProductCard />
-        <AlertsCard />
+      <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)_320px] xl:grid-cols-[340px_minmax(0,1fr)_360px]">
+        <div className="space-y-6">
+          <FilterPanel />
+          <CalendarCard />
+        </div>
+
+        <div className="space-y-6">
+          <OverviewCard />
+          <div className="grid gap-6 md:grid-cols-2">
+            <ComposerCard />
+            <ChatCard />
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <ScoreCard />
+          <OrdersCard />
+          <ProductCard />
+          <AlertsCard />
+        </div>
       </div>
     </div>
   );
@@ -558,7 +577,14 @@ function AlertsCard() {
 
 function ComponentVariants() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold">Component Variants</h2>
+          <p className="text-sm text-base-content/70">Estados essenciais para validar consistência do tema.</p>
+        </div>
+        <span className="badge badge-outline border-base-300">Tokens only</span>
+      </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
           <div className="card-body space-y-3">
@@ -686,7 +712,14 @@ function ComponentVariants() {
 
 function ColorPalette() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold">Color Palette</h2>
+          <p className="text-sm text-base-content/70">Cores principais do ZEKAI UI derivadas de Z-Dark/Z-Light.</p>
+        </div>
+        <span className="badge badge-outline border-base-300">Tokens</span>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <PaletteCard title="Base" tokens={paletteTokens.base} />
         <PaletteCard title="Brand" tokens={paletteTokens.brand} />
@@ -696,6 +729,138 @@ function ColorPalette() {
         <span>
           Paleta derivada dos temas oficiais Z-Dark/Z-Light. Alterne o tema no topo para validar contraste e legibilidade.
         </span>
+      </div>
+    </div>
+  );
+}
+
+function ThemeEditor() {
+  return (
+    <div className="space-y-6">
+      <div className="card border border-base-300/70 bg-base-100/95 shadow-2xl">
+        <div className="card-body space-y-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="card-title text-base">Theme Editor</h2>
+              <p className="text-sm text-base-content/70">
+                Visual prévio inspirado no DaisyUI Theme Generator. Controles são estáticos para validar spacing, estados e foco
+                do ZEKAI UI.
+              </p>
+            </div>
+            <span className="badge badge-outline border-base-300">Preview only</span>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="space-y-4 rounded-2xl border border-base-300/70 bg-base-200/60 p-4">
+              <h3 className="text-sm font-semibold">Tokens visuais</h3>
+              <label className="form-control gap-2">
+                <div className="label p-0">
+                  <span className="label-text">Radius</span>
+                  <span className="label-text-alt text-xs text-base-content/60">0.25rem</span>
+                </div>
+                <input type="range" min={0} max={100} defaultValue={40} className="range range-primary range-xs" />
+              </label>
+              <label className="form-control gap-2">
+                <div className="label p-0">
+                  <span className="label-text">Shadow depth</span>
+                  <span className="label-text-alt text-xs text-base-content/60">medium</span>
+                </div>
+                <input type="range" min={0} max={100} defaultValue={55} className="range range-secondary range-xs" />
+              </label>
+              <label className="form-control gap-2">
+                <div className="label p-0">
+                  <span className="label-text">Border width</span>
+                  <span className="label-text-alt text-xs text-base-content/60">0.5px</span>
+                </div>
+                <input type="range" min={0} max={100} defaultValue={20} className="range range-accent range-xs" />
+              </label>
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-base-300/70 bg-base-200/60 p-4">
+              <h3 className="text-sm font-semibold">Estado do tema</h3>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="label cursor-pointer gap-3 rounded-lg border border-base-300/60 bg-base-100/80 px-3 py-2">
+                  <span className="label-text">Ativar modo dark (Z-Dark)</span>
+                  <input type="checkbox" className="toggle toggle-primary" defaultChecked />
+                </label>
+                <label className="label cursor-pointer gap-3 rounded-lg border border-base-300/60 bg-base-100/80 px-3 py-2">
+                  <span className="label-text">Ativar modo light (Z-Light)</span>
+                  <input type="checkbox" className="toggle toggle-secondary" />
+                </label>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                {["Primary", "Accent", "Neutral", "Info"].map((token) => (
+                  <label key={token} className="form-control gap-2">
+                    <div className="label p-0">
+                      <span className="label-text">{token} color</span>
+                      <span className="label-text-alt text-xs text-base-content/60">preview only</span>
+                    </div>
+                    <input type="color" className="input input-bordered h-10" defaultValue="#ffffff" aria-label={`${token} color`} />
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+              <div className="card-body space-y-3">
+                <h4 className="card-title text-sm">Preview · Buttons</h4>
+                <div className="flex flex-wrap gap-2">
+                  <button className="btn btn-primary btn-sm">Primary</button>
+                  <button className="btn btn-secondary btn-sm">Secondary</button>
+                  <button className="btn btn-accent btn-sm">Accent</button>
+                  <button className="btn btn-outline btn-sm">Outline</button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button className="btn btn-success btn-xs">Success</button>
+                  <button className="btn btn-warning btn-xs">Warn</button>
+                  <button className="btn btn-error btn-xs">Error</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+              <div className="card-body space-y-3">
+                <h4 className="card-title text-sm">Preview · Form controls</h4>
+                <label className="form-control gap-2">
+                  <span className="label-text text-sm">Label</span>
+                  <input type="text" className="input input-bordered input-sm" placeholder="Text input" />
+                </label>
+                <label className="form-control gap-2">
+                  <span className="label-text text-sm">Select</span>
+                  <select className="select select-bordered select-sm">
+                    <option>Option A</option>
+                    <option>Option B</option>
+                    <option>Option C</option>
+                  </select>
+                </label>
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="checkbox checkbox-primary checkbox-sm" defaultChecked />
+                    primary
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="checkbox checkbox-accent checkbox-sm" />
+                    accent
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+              <div className="card-body space-y-3">
+                <h4 className="card-title text-sm">Preview · Alerts</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="alert alert-info">Info tone sample</div>
+                  <div className="alert alert-success">Success tone sample</div>
+                  <div className="alert alert-warning">Warning tone sample</div>
+                  <div className="alert alert-error">Error tone sample</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
