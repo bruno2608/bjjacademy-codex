@@ -11,7 +11,7 @@ ZEKAI UI é o design system que consolida a identidade visual da família ZEKAI 
 ## Temas Z-Dark e Z-Light
 - **Z-Dark:** tema escuro padrão, focado no produto atual. Usa fundo profundo, alto contraste e vermelho como cor primária. Ele é aplicado via `data-theme="Z-Dark"` na raiz do documento.
 - **Z-Light:** tema claro planejado para evoluções futuras. Não está ativo, mas já existe na configuração DaisyUI para testes controlados.
-- **Implementação via DaisyUI:** os temas são declarados via `@plugin "daisyui/theme"` em `styles/zekai-themes.css` e registrados no `tailwind.config.js` com `themes: ['Z-Dark', 'Z-Light']`. Alterar o tema é tão simples quanto trocar o `data-theme` na raiz do HTML (ex.: `data-theme="Z-Light"`) sem refatorar as telas.
+- **Implementação via DaisyUI:** os temas são declarados diretamente no `tailwind.config.js` em `daisyui.themes` com os identificadores `Z-Dark` (default) e `Z-Light` (futuro). Trocar de tema exige apenas ajustar `data-theme` na raiz do HTML (ex.: `data-theme="Z-Light"`) sem refatorar as telas. O arquivo `styles/zekai-themes.css` permanece apenas como referência legada comentada.
 - **Tokens principais (visão conceitual):**
   - `base-100/200/300` e `base-content` definem planos de fundo e contraste de texto.
   - `primary`, `secondary`, `neutral`, `info`, `success`, `warning`, `error` orientam estados e feedbacks.
