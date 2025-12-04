@@ -59,7 +59,7 @@ export const ROLE_PERMISSIONS = {
     canEditGraduation: true,
     canSeeAdmin: true
   },
-  [ROLE_KEYS.ti]: {
+  [ROLE_KEYS.adminTi]: {
     canEditSelf: true,
     canEditGraduation: true,
     canSeeAdmin: true

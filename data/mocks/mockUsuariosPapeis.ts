@@ -30,6 +30,20 @@ export const MOCK_USUARIOS_PAPEIS: UsuarioPapel[] = [
     concedidoPor: 'user_prof_vilmar'
   },
   {
+    id: 'user_admin_academia_role_admin',
+    usuarioId: 'user_admin_academia',
+    papelId: 4,
+    dataConcessao: '2021-04-01T09:00:00Z',
+    concedidoPor: 'user_admin_ti'
+  },
+  {
+    id: 'user_admin_ti_role_admin_ti',
+    usuarioId: 'user_admin_ti',
+    papelId: 5,
+    dataConcessao: '2020-01-10T09:00:00Z',
+    concedidoPor: null
+  },
+  {
     id: 'user_maria_souza_role_aluno',
     usuarioId: 'user_maria_souza',
     papelId: 1,
@@ -42,5 +56,12 @@ export const MOCK_USUARIOS_PAPEIS: UsuarioPapel[] = [
     papelId: 1,
     dataConcessao: '2023-02-10T09:00:00Z',
     concedidoPor: 'user_instrutora_ana'
+  },
+  {
+    id: 'user_carla_pires_role_aluno',
+    usuarioId: 'user_carla_pires',
+    papelId: 1,
+    dataConcessao: '2023-05-10T09:00:00Z',
+    concedidoPor: 'user_admin_academia'
   }
 ];

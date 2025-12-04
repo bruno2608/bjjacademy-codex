@@ -4,7 +4,7 @@
  * Página de login alinhada ao novo visual gamificado do painel.
  */
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import ValidatedField from '../../components/ui/ValidatedField';
@@ -12,10 +12,11 @@ import Button from '../../components/ui/Button';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, user, hydrateFromStorage, hydrated } = useUserStore();
-  const [form, setForm] = useState({ email: '', senha: '' });
+  const [form, setForm] = useState({ identifier: '', senha: '', rememberMe: false });
   const [error, setError] = useState('');
-  const [touched, setTouched] = useState({ email: false, senha: false });
+  const [touched, setTouched] = useState({ identifier: false, senha: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -29,36 +30,49 @@ export default function LoginPage() {
     const isStaff = user.roles.some((role) => role !== 'ALUNO');
     const isAlunoOnly = user.roles.length === 1 && user.roles[0] === 'ALUNO';
 
+    const redirectParam = searchParams.get('redirect');
+    const isInternalRedirect = redirectParam?.startsWith('/') && !redirectParam.startsWith('//');
+
+    if (isInternalRedirect) {
+      router.replace(redirectParam);
+      return;
+    }
+
     if (isStaff) {
       router.replace('/dashboard');
     } else if (isAlunoOnly) {
       router.replace('/dashboard-aluno');
     }
-  }, [hydrated, router, user]);
+  }, [hydrated, router, searchParams, user]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const nextValue = name === 'rememberMe' ? event.target.checked : value;
+    setForm((prev) => ({ ...prev, [name]: nextValue }));
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!form.email || !form.senha) {
-      setError('Informe e-mail e senha.');
+    if (!form.identifier || !form.senha) {
+      setError('Informe e-mail/usuário e senha.');
       return;
     }
     setError('');
     setIsSubmitting(true);
 
     try {
-      const authUser = await login({ email: form.email, senha: form.senha });
+      const authUser = await login({ identifier: form.identifier, senha: form.senha, rememberMe: form.rememberMe });
       if (!authUser) throw new Error('CREDENCIAIS_INVALIDAS');
 
       const isStaff = authUser.roles.some((role) => role !== 'ALUNO');
       const isAlunoOnly = authUser.roles.length === 1 && authUser.roles[0] === 'ALUNO';
+      const redirectParam = searchParams.get('redirect');
+      const isInternalRedirect = redirectParam?.startsWith('/') && !redirectParam.startsWith('//');
 
-      if (isStaff) {
+      if (isInternalRedirect) {
+        router.push(redirectParam);
+      } else if (isStaff) {
         router.push('/dashboard');
       } else if (isAlunoOnly) {
         router.push('/dashboard-aluno');
@@ -68,9 +82,13 @@ export default function LoginPage() {
     } catch (err) {
       if (err instanceof Error) {
         if (err.message === 'USUARIO_NAO_HABILITADO_PILOTO') {
-          setError('Este usuário ainda não está habilitado para o piloto. Fale com o professor/administrador.');
+          setError('E-mail/usuário ou senha inválidos.');
         } else if (err.message === 'CREDENCIAIS_INVALIDAS') {
-          setError('E-mail ou senha inválidos.');
+          setError('E-mail/usuário ou senha inválidos.');
+        } else if (err.message === 'USUARIO_CONVITE_PENDENTE') {
+          setError('Seu convite ainda não foi ativado. Conclua o primeiro acesso.');
+        } else if (err.message === 'USUARIO_INATIVO') {
+          setError('Usuário inativo. Procure o administrador da academia.');
         } else {
           setError('Não foi possível realizar o login. Tente novamente.');
         }
@@ -113,16 +131,16 @@ export default function LoginPage() {
           </header>
           <form className="space-y-3.5" onSubmit={handleSubmit}>
             <ValidatedField
-              name="email"
-              type="email"
-              label="E-mail"
-              placeholder="voce@bjj.academy"
-              value={form.email}
+              name="identifier"
+              type="text"
+              label="E-mail ou usuário"
+              placeholder="voce@bjj.academy ou seu usuário"
+              value={form.identifier}
               onChange={handleChange}
-              onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
-              helper="Use seu e-mail institucional"
-              error={!form.email && touched.email ? 'E-mail é obrigatório' : ''}
-              success={form.email && !error ? 'Formato válido' : ''}
+              onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
+              helper="Login aceita e-mail ou username (lowercase)"
+              error={!form.identifier && touched.identifier ? 'Informe e-mail ou usuário' : ''}
+              success={form.identifier && !error ? 'Formato válido' : ''}
               required
             />
             <ValidatedField
@@ -133,11 +151,21 @@ export default function LoginPage() {
               value={form.senha}
               onChange={handleChange}
               onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
-              helper="Use a senha compartilhada com a equipe"
+              helper="Mínimo 10 caracteres; senha piloto: BJJ@pilot2025"
               error={!form.senha && touched.senha ? 'Informe a senha' : ''}
               success={form.senha && !error ? 'Ok' : ''}
               required
             />
+            <label className="flex items-center gap-2 text-sm text-bjj-gray-200/80">
+              <input
+                type="checkbox"
+                name="rememberMe"
+                checked={form.rememberMe}
+                onChange={handleChange}
+                className="checkbox checkbox-sm checkbox-primary"
+              />
+              Lembrar de mim nesta sessão
+            </label>
             {error && <p className="text-sm text-bjj-red">{error}</p>}
             <Button type="submit" className="w-full justify-center" disabled={isSubmitting}>
               {isSubmitting ? 'Entrando...' : 'Acessar painel'} <ArrowRight size={15} />
