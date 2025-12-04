@@ -5,12 +5,15 @@
 const daisyui = require('daisyui');
 
 module.exports = {
-  content: ['./app/**/*.{js,jsx,ts,tsx}',
+  content: [
+    './app/**/*.{js,jsx,ts,tsx}',
     './components/**/*.{js,jsx,ts,tsx}',
     './data/**/*.{js,jsx,ts,tsx}',
     './mocks/**/*.{js,jsx,ts,tsx}',
     './utils/**/*.{js,jsx,ts,tsx}',
-    './src/**/*.{js,jsx,ts,tsx}'],
+    './src/**/*.{js,jsx,ts,tsx}',
+    './styles/**/*.css'
+  ],
   theme: {
     extend: {
       colors: {
@@ -34,8 +37,8 @@ module.exports = {
   },
   plugins: [daisyui],
   daisyui: {
-    themes: ['zekai-dark', 'zekai-light'],
-    darkTheme: 'zekai-dark',
+    themes: ['Z-Dark', 'Z-Light'],
+    darkTheme: 'Z-Dark',
     logs: false
   }
 };
