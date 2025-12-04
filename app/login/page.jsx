@@ -5,7 +5,7 @@
  */
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, ArrowRight } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Apple, Loader2, Mail } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import ValidatedField from '../../components/ui/ValidatedField';
 import Button from '../../components/ui/Button';
@@ -102,14 +102,14 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen bg-bjj-black text-bjj-white">
-      <div className="relative flex min-h-screen flex-col justify-center overflow-hidden px-6 py-12 sm:px-12 lg:flex-row lg:items-center lg:gap-16">
+      <div className="relative flex min-h-screen flex-col justify-start overflow-hidden px-6 py-12 sm:px-12 lg:flex-row lg:items-center lg:gap-16">
         <div className="absolute inset-0 -z-10 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black" aria-hidden />
         <div className="absolute right-[-20%] top-[-10%] h-96 w-96 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
         <div className="absolute left-[-10%] bottom-[-20%] h-72 w-72 rounded-full bg-bjj-gray-800/40 blur-3xl" aria-hidden />
 
-        <section className="relative max-w-xl space-y-5">
+        <section className="relative max-w-xl space-y-4">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-bjj-gray-200/70">
-            <ShieldCheck size={13} className="text-bjj-red" /> Portal do instrutor
+            <ShieldCheck size={13} className="text-bjj-red" /> Portal autenticado
           </span>
           <div className="space-y-3.5">
             <h1 className="text-3xl font-semibold">BJJ Academy</h1>
@@ -118,13 +118,13 @@ function LoginContent() {
             </p>
           </div>
           <ul className="space-y-2 text-sm text-bjj-gray-200/70">
-            <li>• Experiência PWA pronta para instalação</li>
-            <li>• Dashboard gamificado com métricas em tempo real</li>
-            <li>• Gestão completa de alunos, presenças e graduações</li>
+            <li>• Login por e-mail ou usuário (case-insensitive)</li>
+            <li>• Perfis aluno e staff já configurados para o piloto</li>
+            <li>• Fluxos de convite, cadastro público e reset documentados</li>
           </ul>
         </section>
 
-        <section className="relative mt-10 w-full max-w-md rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/80 p-6 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)] lg:mt-0">
+        <section className="relative mt-8 w-full max-w-md rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/80 p-6 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)] lg:mt-0">
           <header className="mb-5 space-y-1 text-center">
             <h2 className="text-xl font-semibold">Entrar</h2>
             <p className="text-sm text-bjj-gray-200/70">Use suas credenciais para acessar o painel.</p>
@@ -138,7 +138,7 @@ function LoginContent() {
               value={form.identifier}
               onChange={handleChange}
               onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
-              helper="Login aceita e-mail ou username (lowercase)"
+              helper="Login aceita e-mail ou username (case-insensitive)"
               error={!form.identifier && touched.identifier ? 'Informe e-mail ou usuário' : ''}
               success={form.identifier && !error ? 'Formato válido' : ''}
               required
@@ -156,24 +156,66 @@ function LoginContent() {
               success={form.senha && !error ? 'Ok' : ''}
               required
             />
-            <label className="flex items-center gap-2 text-sm text-bjj-gray-200/80">
-              <input
-                type="checkbox"
-                name="rememberMe"
-                checked={form.rememberMe}
-                onChange={handleChange}
-                className="checkbox checkbox-sm checkbox-primary"
-              />
-              Lembrar de mim nesta sessão
-            </label>
+            <div className="flex items-center justify-between text-sm text-bjj-gray-200/80">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="rememberMe"
+                  checked={form.rememberMe}
+                  onChange={handleChange}
+                  className="checkbox checkbox-sm checkbox-primary"
+                />
+                Lembrar de mim nesta sessão
+              </label>
+              <a href="/esqueci-senha" className="text-bjj-red hover:text-bjj-red/80">
+                Esqueci minha senha
+              </a>
+            </div>
             {error && <p className="text-sm text-bjj-red">{error}</p>}
             <Button type="submit" className="w-full justify-center" disabled={isSubmitting}>
-              {isSubmitting ? 'Entrando...' : 'Acessar painel'} <ArrowRight size={15} />
+              {isSubmitting ? 'Entrando...' : 'Acessar painel'} {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight size={15} />}
             </Button>
+            <div className="flex items-center gap-2 text-xs text-bjj-gray-200/70">
+              <span className="h-px flex-1 bg-bjj-gray-800" aria-hidden />
+              <span>ou continue com</span>
+              <span className="h-px flex-1 bg-bjj-gray-800" aria-hidden />
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <button
+                type="button"
+                className="btn btn-outline btn-primary flex items-center justify-center gap-2 border-bjj-gray-700 bg-bjj-gray-900/60 text-bjj-gray-100"
+                aria-disabled
+              >
+                <Mail size={16} /> Google
+                <span className="text-[11px] text-bjj-gray-300/70">Em breve</span>
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline flex items-center justify-center gap-2 border-bjj-gray-700 bg-bjj-gray-900/60 text-bjj-gray-100"
+                aria-disabled
+              >
+                <Apple size={16} /> Apple
+                <span className="text-[11px] text-bjj-gray-300/70">Em breve</span>
+              </button>
+            </div>
           </form>
-          <p className="mt-5 text-center text-xs text-bjj-gray-200/60">
-            Use um e-mail habilitado no piloto e a senha padrão para acessar.
-          </p>
+          <div className="mt-5 space-y-3 text-center text-sm text-bjj-gray-200/80">
+            <p className="text-xs text-bjj-gray-200/60">Use um e-mail ou usuário habilitado no piloto e a senha padrão para acessar.</p>
+            <div className="flex flex-col gap-1 text-xs">
+              <p>
+                Não tem conta?{' '}
+                <a href="/cadastro" className="text-bjj-red hover:text-bjj-red/80">
+                  Cadastre-se
+                </a>
+              </p>
+              <p>
+                Recebeu um convite?{' '}
+                <a href="/acesso-convite" className="text-bjj-red hover:text-bjj-red/80">
+                  Primeiro acesso
+                </a>
+              </p>
+            </div>
+          </div>
         </section>
       </div>
     </div>
