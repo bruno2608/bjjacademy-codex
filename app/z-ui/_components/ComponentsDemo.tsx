@@ -4,14 +4,19 @@ import {
   ChevronLeft,
   ChevronRight,
   Headphones,
+  Key,
   Menu,
   Mic,
   Pencil,
   Phone,
   Play,
   Repeat,
+  Search,
+  ShieldCheck,
   Settings,
   Shuffle,
+  TrendingUp,
+  User,
   Volume2,
 } from "lucide-react";
 
@@ -157,7 +162,7 @@ function CalendarCard() {
         </button>
       </div>
 
-      <input type="text" className="input input-bordered w-full" placeholder="Search for events" />
+      <input type="text" className="input input-bordered input-sm w-full" placeholder="Search for events" />
 
       <label className="label cursor-pointer justify-start gap-2 p-0 text-sm">
         <input type="checkbox" className="toggle toggle-primary" defaultChecked />
@@ -177,22 +182,22 @@ function CalendarCard() {
   );
 }
 
-  function SimpleTabsCard() {
-    return (
-      <div className="card rounded-2xl border border-base-300/40 bg-base-200/80 shadow-sm">
-        <div className="card-body gap-3 p-4 text-sm">
-          <div className="tabs tabs-lifted text-xs sm:text-sm">
-            <a className="tab tab-lifted">Tab 1</a>
-            <a className="tab tab-lifted tab-active">Tab 2</a>
-            <a className="tab tab-lifted">Tab 3</a>
-          </div>
-          <div className="mt-2">
-            <p className="text-sm text-base-content/80">Tab content 2</p>
-          </div>
+function SimpleTabsCard() {
+  return (
+    <div className="card rounded-2xl border border-base-300/40 bg-base-200/80 shadow-sm">
+      <div className="card-body gap-3 p-4 text-sm">
+        <div className="tabs tabs-lifted text-sm">
+          <a className="tab tab-lifted">Tab 1</a>
+          <a className="tab tab-lifted tab-active">Tab 2</a>
+          <a className="tab tab-lifted">Tab 3</a>
+        </div>
+        <div className="mt-2">
+          <p className="text-sm text-base-content/80">Tab content 2</p>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
 function PriceRangeCard() {
   return (
@@ -214,12 +219,14 @@ function PriceRangeCard() {
 function NikeShoesCard() {
   return (
     <DemoCard>
-      <div className="rounded-xl bg-gradient-to-tr from-primary/30 via-base-200 to-secondary/30 p-4">
-        <div className="aspect-[4/3] w-full rounded-lg bg-base-100/60" />
-      </div>
+      <img
+        src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+        alt="Nike Shoes"
+        className="h-64 w-full rounded-2xl object-cover"
+      />
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Nike Shoes SALE</h3>
-        <span className="badge badge-accent">SALE</span>
+        <h3 className="text-sm font-semibold">Nike Shoes</h3>
+        <span className="badge badge-success">SALE</span>
       </div>
       <div className="flex items-center gap-2 text-xs text-base-content/70">
         <div className="rating rating-sm">
@@ -240,7 +247,6 @@ function NikeShoesCard() {
         <span className="text-xl font-semibold">$120</span>
         <span className="text-sm text-base-content/60 line-through">$150</span>
       </div>
-      <button className="btn btn-primary btn-sm w-full">Find</button>
     </DemoCard>
   );
 }
@@ -248,9 +254,12 @@ function NikeShoesCard() {
 function SearchFindCard() {
   return (
     <DemoCard>
-      <div className="flex items-center gap-2">
-        <input type="text" className="input input-bordered input-sm w-full" placeholder="Search" />
-        <button className="btn btn-neutral btn-sm">Find</button>
+      <div className="join w-full">
+        <label className="input input-bordered input-sm join-item flex items-center gap-2 text-sm">
+          <Search className="h-4 w-4 opacity-70" />
+          <input type="text" placeholder="Search" className="grow" />
+        </label>
+        <button className="btn btn-primary btn-sm join-item">Find</button>
       </div>
     </DemoCard>
   );
@@ -261,19 +270,22 @@ function CreateAccountCard() {
     <DemoCard>
       <h3 className="text-sm font-semibold">Create new account</h3>
       <p className="text-xs text-base-content/70">Registration is free and only takes a minute.</p>
-      <label className="form-control w-full">
-        <div className="label p-0">
-          <span className="label-text">Email</span>
-        </div>
-        <input className="input input-bordered" placeholder="name@email.com" />
+
+      <label className="input input-bordered input-sm flex items-center gap-2">
+        <User className="h-4 w-4 opacity-70" />
+        <input type="text" placeholder="Username" className="grow" />
       </label>
-      <label className="form-control w-full">
-        <div className="label p-0">
-          <span className="label-text">Password</span>
-        </div>
-        <input type="password" className="input input-bordered" />
-        <span className="label-text-alt text-xs text-error">Password must be 8+ characters.</span>
+
+      <label className="input input-bordered input-sm flex items-center gap-2">
+        <Key className="h-4 w-4 opacity-70" />
+        <input type="password" placeholder="password" className="grow" />
       </label>
+
+      <p className="mt-1 flex items-center gap-1 text-xs text-error">
+        <span className="h-1.5 w-1.5 rounded-full bg-error" />
+        Password must be 8+ characters.
+      </p>
+
       <label className="label cursor-pointer justify-start gap-2 p-0 text-sm">
         <input type="checkbox" className="toggle toggle-sm" defaultChecked />
         <span className="label-text">Accept terms without reading</span>
@@ -282,20 +294,23 @@ function CreateAccountCard() {
         <input type="checkbox" className="toggle toggle-sm" />
         <span className="label-text">Subscribe to spam emails</span>
       </label>
-      <button className="btn btn-primary btn-sm w-full">Register</button>
-      <button className="btn btn-link btn-xs px-0">Or login</button>
+
+      <button className="btn btn-primary w-full">Register</button>
+      <button className="btn btn-link btn-xs px-0" type="button">
+        Or login
+      </button>
     </DemoCard>
   );
 }
 
 function SalesVolumeCard() {
-  const bars = [60, 32, 72, 96, 54, 68, 82, 70];
+  const heights = ["h-4", "h-6", "h-3", "h-8", "h-10", "h-7", "h-9", "h-12", "h-14", "h-16"];
   return (
     <DemoCard>
       <div className="space-y-3">
         <div className="flex h-24 items-end gap-1">
-          {bars.map((height, idx) => (
-            <div key={idx} className="flex-1 rounded-t-lg bg-primary/80" style={{ height }} />
+          {heights.map((h, idx) => (
+            <div key={idx} className={cn("w-2 rounded-full bg-base-content/90", h)} />
           ))}
         </div>
         <p className="text-sm text-base-content/80">
@@ -303,7 +318,7 @@ function SalesVolumeCard() {
         </p>
         <div className="flex gap-2">
           <button className="btn btn-ghost btn-sm flex-1">Charts</button>
-          <button className="btn btn-neutral btn-sm flex-1">Details</button>
+          <button className="btn btn-primary btn-sm flex-1">Details</button>
         </div>
       </div>
     </DemoCard>
@@ -317,7 +332,10 @@ function PageScoreCard() {
         <div className="space-y-1">
           <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Page Score</p>
           <div className="text-2xl font-semibold">91/100</div>
-          <span className="badge badge-success">All good</span>
+          <div className="flex items-center gap-2 text-xs text-base-content/80">
+            <ShieldCheck className="h-4 w-4 text-success" />
+            <span>All good</span>
+          </div>
         </div>
         <div
           className="radial-progress text-primary"
@@ -333,8 +351,8 @@ function PageScoreCard() {
 function RecentOrdersCard() {
   return (
     <DemoCard>
-      <div className="flex items-center gap-2 text-sm font-semibold">
-        <span className="badge badge-ghost">≡</span>
+      <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+        <TrendingUp className="h-4 w-4 opacity-70" />
         <span>Recent orders</span>
       </div>
       <div className="space-y-2 text-sm">
@@ -343,7 +361,7 @@ function RecentOrdersCard() {
             <span>{order.name}</span>
             <span
               className={cn(
-                "badge",
+                "badge badge-outline badge-sm",
                 order.tone === "info" && "badge-info",
                 order.tone === "error" && "badge-error",
                 order.tone === "warning" && "badge-warning",
@@ -362,10 +380,12 @@ function RecentOrdersCard() {
 function DecemberRevenueCard() {
   return (
     <DemoCard>
-      <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Summary</p>
-      <h3 className="text-sm font-semibold">December Revenue</h3>
-      <div className="text-2xl font-bold">$32,400</div>
-      <p className="text-xs text-base-content/70">21% more than last month.</p>
+      <p className="text-xs text-base-content/60">December Revenue</p>
+      <p className="text-3xl font-semibold">$32,400</p>
+      <div className="mt-1 flex items-center gap-2">
+        <TrendingUp className="h-4 w-4 text-success" />
+        <span className="text-xs text-base-content/70">21% more than last month</span>
+      </div>
     </DemoCard>
   );
 }
@@ -373,27 +393,30 @@ function DecemberRevenueCard() {
 function WritePostCard() {
   return (
     <DemoCard>
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-sm font-semibold">
-          <span className="badge badge-ghost">
-            <Pencil className="h-4 w-4" />
-          </span>
-          <span>Write a new post</span>
-        </div>
-        <div className="flex items-center gap-1 text-xs">
-          <button className="btn btn-ghost btn-xs">B</button>
-          <button className="btn btn-ghost btn-xs">I</button>
-          <button className="btn btn-ghost btn-xs">U</button>
-          <button className="btn btn-ghost btn-xs">Add files</button>
-        </div>
+      <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+        <Pencil className="h-4 w-4 opacity-70" />
+        <span>Write a new post</span>
       </div>
-      <textarea className="textarea textarea-bordered w-full min-h-[120px]" placeholder="What's happening?" />
-      <div className="flex items-center justify-between text-xs text-base-content/70">
-        <span>1200 characters remaining</span>
-        <div className="flex gap-2">
-          <button className="btn btn-ghost btn-sm">Draft</button>
-          <button className="btn btn-primary btn-sm">Publish</button>
+
+      <div className="mb-2 flex items-center justify-between">
+        <div className="join">
+          <button className="btn btn-xs join-item font-semibold">B</button>
+          <button className="btn btn-xs join-item italic">I</button>
+          <button className="btn btn-xs join-item underline">U</button>
         </div>
+        <button className="btn btn-ghost btn-xs px-2">Add files</button>
+      </div>
+
+      <textarea
+        className="textarea textarea-bordered w-full min-h-[140px]"
+        placeholder="What's happening?"
+      />
+
+      <p className="mt-2 text-xs text-base-content/60">1200 characters remaining</p>
+
+      <div className="mt-3 flex gap-3">
+        <button className="btn btn-ghost flex-1">Draft</button>
+        <button className="btn btn-primary flex-1">Publish</button>
       </div>
     </DemoCard>
   );
@@ -404,31 +427,44 @@ function ChatCard() {
     <DemoCard>
       <div className="space-y-3">
         <div className="chat chat-start">
-          <div className="chat-header">Obi-Wan Kenobi</div>
-          <div className="chat-bubble">It's over Anakin</div>
-          <div className="chat-footer text-xs">12:45</div>
+          <div className="chat-image avatar">
+            <div className="w-8 rounded-full bg-base-300" />
+          </div>
+          <div className="chat-header text-xs">
+            Obi-Wan Kenobi
+            <time className="ml-1 opacity-70">12:45</time>
+          </div>
+          <div className="chat-bubble bg-base-content text-base-100">It's over Anakin</div>
         </div>
         <div className="chat chat-end">
-          <div className="chat-header">Anakin</div>
-          <div className="chat-bubble chat-bubble-primary">I have the high ground</div>
-          <div className="chat-footer text-xs">Delivered</div>
+          <div className="chat-image avatar">
+            <div className="w-8 rounded-full bg-base-300" />
+          </div>
+          <div className="chat-header text-xs">Anakin</div>
+          <div className="chat-bubble bg-base-content text-base-100">I have the high ground</div>
+          <div className="chat-footer text-xs text-base-content/60">Delivered</div>
         </div>
         <div className="chat chat-start">
-          <div className="chat-header">Obi-Wan Kenobi</div>
-          <div className="chat-bubble">You underestimate my power</div>
-          <div className="chat-footer text-xs">Seen at 12:46</div>
+          <div className="chat-image avatar">
+            <div className="w-8 rounded-full bg-base-300" />
+          </div>
+          <div className="chat-header text-xs">Obi-Wan Kenobi</div>
+          <div className="chat-bubble bg-base-content text-base-100">You underestimate my power</div>
+          <div className="chat-footer text-xs text-base-content/60">Seen at 12:46</div>
         </div>
       </div>
-      <div className="flex items-center justify-around border-t border-base-300 pt-3 text-base-content/70">
-        <button className="btn btn-ghost btn-sm">
-          <Phone className="h-4 w-4" />
-        </button>
-        <button className="btn btn-ghost btn-sm">
-          <Mic className="h-4 w-4" />
-        </button>
-        <button className="btn btn-ghost btn-sm">
-          <Settings className="h-4 w-4" />
-        </button>
+      <div className="mt-2 border-t border-base-300/50 pt-2 text-base-content/70">
+        <div className="flex items-center justify-around">
+          <button className="btn btn-ghost btn-sm" type="button">
+            <Phone className="h-4 w-4" />
+          </button>
+          <button className="btn btn-ghost btn-sm" type="button">
+            <Mic className="h-4 w-4" />
+          </button>
+          <button className="btn btn-ghost btn-sm" type="button">
+            <Settings className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </DemoCard>
   );
