@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { ROLE_KEYS, normalizeRoles, type UserRole } from './config/roles';
 import { allowedRoutesForRoles, canAccessPath } from './config/siteMap';
 
-const PUBLIC_ROUTES = ['/login', '/unauthorized', '/manifest.json'];
+const PUBLIC_ROUTES = ['/login', '/unauthorized', '/manifest.json', '/z-ui'];
 const STATIC_PREFIXES = ['/_next', '/icons', '/service-worker.js', '/sw.js'];
 
 const parseRoles = (raw: string | undefined): UserRole[] => {

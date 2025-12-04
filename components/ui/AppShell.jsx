@@ -39,10 +39,11 @@ export default function AppShell({ children }) {
   );
 
   useEffect(() => {
-    if (hydrated && !storeUser) {
+    // Skip auth redirect for bare/public layouts like login, unauthorized, and z-ui.
+    if (!isBareLayout && hydrated && !storeUser) {
       router.replace('/login');
     }
-  }, [hydrated, router, storeUser]);
+  }, [hydrated, router, storeUser, isBareLayout]);
 
   if (isBareLayout) {
     return children;
