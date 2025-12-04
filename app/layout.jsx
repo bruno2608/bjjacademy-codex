@@ -17,7 +17,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="pt-BR" data-theme="Z-Dark" className="min-h-dvh">
+    <html lang="pt-BR" data-theme="zdark" className="min-h-dvh">
       <head>
         {/* PWA meta tags garantem comportamento instalável e cores nativas. */}
         <link rel="manifest" href="/manifest.json" />

@@ -286,7 +286,7 @@ function CreateAccountCard() {
 
       <label className="input input-bordered input-sm flex items-center gap-2">
         <Icon icon="mdi:key-variant" className="h-4 w-4 text-base-content/60" />
-        <input type="password" placeholder="password" className="grow" />
+        <input type="password" placeholder="Password" className="grow" />
       </label>
 
       <p className="mt-1 flex items-center gap-1 text-xs text-error">
@@ -314,21 +314,26 @@ function CreateAccountCard() {
 }
 
 function SalesVolumeCard() {
-  const heights = ["h-4", "h-6", "h-3", "h-8", "h-10", "h-7", "h-9", "h-12", "h-14", "h-16"];
+  const heights = [8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30];
   return (
     <DemoCard>
       <div className="space-y-3">
-        <div className="flex h-24 items-end gap-1">
+        <div className="flex h-28 items-end gap-1.5">
           {heights.map((h, idx) => (
-            <div key={idx} className={cn("w-2 rounded-full bg-base-content/90", h)} />
+            <div
+              key={idx}
+              className="w-2.5 rounded-full bg-base-content/90"
+              style={{ height: `${h}px` }}
+              aria-hidden
+            />
           ))}
         </div>
         <p className="text-sm text-base-content/80">
           Sales volume reached $12,450 this week, showing a 15% increase from the previous period.
         </p>
         <div className="flex gap-2">
-          <button className="btn btn-ghost btn-sm flex-1">Charts</button>
-          <button className="btn btn-primary btn-sm flex-1">Details</button>
+          <button className="btn btn-sm flex-1 btn-neutral">Charts</button>
+          <button className="btn btn-sm flex-1 btn-primary btn-active">Details</button>
         </div>
       </div>
     </DemoCard>
@@ -367,11 +372,11 @@ function RecentOrdersCard() {
       </div>
       <div className="space-y-2 text-sm">
         {orders.map((order) => (
-          <div key={order.name} className="flex items-center justify-between rounded-lg bg-base-200/70 px-3 py-2">
+          <div key={order.name} className="flex items-center justify-between rounded-lg border border-base-300/60 px-3 py-2">
             <span>{order.name}</span>
             <span
               className={cn(
-                "badge badge-outline badge-sm",
+                "badge badge-sm",
                 order.tone === "info" && "badge-info",
                 order.tone === "error" && "badge-error",
                 order.tone === "warning" && "badge-warning",
@@ -409,9 +414,11 @@ function WritePostCard() {
       </div>
 
       <div className="mb-3 flex items-center gap-3 text-xs text-base-content/70">
-        <button className="btn btn-xs btn-ghost font-bold">B</button>
-        <button className="btn btn-xs btn-ghost italic">I</button>
-        <button className="btn btn-xs btn-ghost underline">U</button>
+        <div className="join">
+          <button className="btn btn-xs btn-ghost font-bold join-item">B</button>
+          <button className="btn btn-xs btn-ghost italic join-item">I</button>
+          <button className="btn btn-xs btn-ghost underline join-item">U</button>
+        </div>
         <button className="ml-auto btn btn-xs btn-ghost">Add files</button>
       </div>
 
@@ -437,28 +444,28 @@ function ChatCard() {
       <div className="space-y-3 text-sm">
         <div className="chat chat-start">
           <div className="chat-image avatar">
-            <div className="w-8 rounded-full">
+            <div className="w-9 rounded-full">
               <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@94.webp" alt="Obi-Wan" />
             </div>
           </div>
-          <div className="chat-header text-xs">
+          <div className="chat-header text-xs text-base-content/80">
             Obi-Wan Kenobi
             <time className="ml-1 opacity-70">12:45</time>
           </div>
-          <div className="chat-bubble bg-base-200 text-base-content">It's over Anakin</div>
+          <div className="chat-bubble bg-base-content text-base-100">It's over Anakin</div>
         </div>
         <div className="chat chat-start">
           <div className="chat-image avatar">
-            <div className="w-8 rounded-full">
+            <div className="w-9 rounded-full">
               <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@94.webp" alt="Obi-Wan" />
             </div>
           </div>
-          <div className="chat-bubble bg-base-200 text-base-content">I have the high ground</div>
+          <div className="chat-bubble bg-base-content text-base-100">I have the high ground</div>
           <div className="chat-footer text-[10px] text-base-content/60">Delivered</div>
         </div>
         <div className="chat chat-end">
           <div className="chat-image avatar">
-            <div className="w-8 rounded-full">
+            <div className="w-9 rounded-full">
               <img src="https://img.daisyui.com/images/profile/demo/yellingcat@94.webp" alt="Anakin" />
             </div>
           </div>
@@ -466,7 +473,7 @@ function ChatCard() {
           <div className="chat-footer text-[10px] text-base-content/60">Seen at 12:46</div>
         </div>
       </div>
-      <div className="mt-3 border-t border-base-300/50 pt-3 text-base-content/70">
+      <div className="mt-3 rounded-xl border border-base-300/50 bg-base-200/70 px-3 py-2 text-base-content/70">
         <div className="flex items-center justify-around">
           <button className="btn btn-ghost btn-sm" type="button">
             <Icon icon="mdi:phone-outline" className="h-4 w-4" />
@@ -479,7 +486,7 @@ function ChatCard() {
           </button>
         </div>
         <div className="mt-2 flex justify-center">
-          <div className="h-0.5 w-12 rounded-full bg-base-300" />
+          <div className="h-0.5 w-12 rounded-full bg-base-100/70" />
         </div>
       </div>
     </DemoCard>
@@ -498,20 +505,20 @@ function AdminPanelCard() {
   return (
     <DemoCard>
       <p className="text-xs font-semibold text-base-content/60">Admin panel</p>
-      <ul className="menu menu-compact rounded-box bg-base-200/70 p-2 text-sm">
+      <div className="divide-y divide-base-300/60 overflow-hidden rounded-xl border border-base-300/60 bg-base-200/70 text-sm">
         {items.map((item) => (
-          <li key={item.label}>
-            <a>
-              <span className="flex items-center gap-2">
-                <Icon icon={item.icon} className="h-4 w-4 text-base-content/70" />
-                {item.label}
-              </span>
+          <div key={item.label} className="flex items-center justify-between px-3 py-2">
+            <div className="flex items-center gap-2">
+              <Icon icon={item.icon} className="h-4 w-4 text-base-content/70" />
+              <span>{item.label}</span>
+            </div>
+            <div className="flex items-center gap-2">
               {item.badge && <span className="badge badge-sm">{item.badge}</span>}
               {item.dot && <span className="badge badge-info badge-xs" />}
-            </a>
-          </li>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </DemoCard>
   );
 }
@@ -520,13 +527,13 @@ function AudioCard() {
   return (
     <DemoCard>
       <div className="flex items-center justify-center gap-2 text-base">
-        <button className="btn btn-square btn-neutral btn-sm">
+        <button className="btn btn-square btn-ghost btn-sm border border-base-300 bg-base-100/80">
           <Icon icon="mdi:chevron-left" className="h-4 w-4" />
         </button>
-        <button className="btn btn-square btn-primary btn-sm">
+        <button className="btn btn-square btn-primary btn-sm shadow-sm">
           <Icon icon="mdi:play" className="h-4 w-4" />
         </button>
-        <button className="btn btn-square btn-neutral btn-sm">
+        <button className="btn btn-square btn-ghost btn-sm border border-base-300 bg-base-100/80">
           <Icon icon="mdi:chevron-right" className="h-4 w-4" />
         </button>
       </div>
@@ -534,10 +541,12 @@ function AudioCard() {
         <h3 className="text-sm font-semibold">PM Zoomcall ASMR</h3>
         <p className="text-xs text-base-content/70">Project Manager talking for 2 hours.</p>
       </div>
-      <div className="flex items-center gap-2 text-xs text-base-content/70">
-        <span className="badge badge-outline">13:39</span>
-        <input type="range" min={0} max={120} defaultValue={45} className="range range-primary w-full" />
-        <span>120:00</span>
+      <div className="flex items-center gap-3 text-xs text-base-content/70">
+        <span className="rounded-full bg-base-100/90 px-3 py-1 shadow">13:39</span>
+        <div className="flex-1 rounded-full bg-base-300/60 px-3 py-2">
+          <input type="range" min={0} max={120} defaultValue={45} className="range range-primary range-sm w-full" />
+        </div>
+        <span className="text-xs">120:00</span>
       </div>
       <div className="flex items-center justify-around text-base-content/70">
         <button className="btn btn-square btn-ghost btn-sm">
@@ -578,12 +587,26 @@ function TerminalCard() {
 function NotificationsBlock() {
   return (
     <div className="space-y-3">
-      <div className="alert alert-info">There are 9 new messages</div>
-      <div className="alert alert-success">Verification process completed</div>
-      <div className="alert alert-warning">Click to verify your email</div>
-      <div className="alert alert-error justify-between">
-        <span>Access denied</span>
-        <a className="link link-hover">Support</a>
+      <div className="alert alert-info items-center gap-3 border border-info/60 bg-info/10 text-info-content">
+        <Icon icon="mdi:email-outline" className="h-4 w-4" />
+        <span className="text-sm">There are 9 new messages</span>
+      </div>
+      <div className="alert alert-success items-center gap-3 border border-success/60 bg-success/10 text-success-content">
+        <Icon icon="mdi:shield-check" className="h-4 w-4" />
+        <span className="text-sm">Verification process completed</span>
+      </div>
+      <div className="alert alert-warning items-center gap-3 border border-warning/60 bg-warning/10 text-warning-content">
+        <Icon icon="mdi:shield-check" className="h-4 w-4" />
+        <span className="text-sm">
+          Click to verify your email
+        </span>
+      </div>
+      <div className="alert alert-error items-center justify-between gap-3 border border-error/60 bg-error/10 text-error-content">
+        <div className="flex items-center gap-2">
+          <Icon icon="mdi:alert-circle-outline" className="h-4 w-4" />
+          <span className="text-sm">Access denied</span>
+        </div>
+        <a className="link text-sm text-error-content underline">Support</a>
       </div>
     </div>
   );

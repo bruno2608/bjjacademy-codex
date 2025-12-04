@@ -4,86 +4,86 @@
  */
 const daisyui = require('daisyui');
 
-const zDark = {
-  'color-scheme': 'dark',
-  'base-100': 'oklch(25.33% 0.016 252.42)',
-  'base-200': 'oklch(23.26% 0.014 253.1)',
-  'base-300': 'oklch(21.15% 0.012 254.09)',
-  'base-content': 'oklch(97.807% 0.029 256.847)',
+const zdark = {
+  "color-scheme": "dark",
+  "base-100": "oklch(25.33% 0.016 252.42)",
+  "base-200": "oklch(23.26% 0.014 253.1)",
+  "base-300": "oklch(55% 0.027 264.364)",
+  "base-content": "oklch(100.0% 0.000 360.000)",
 
-  primary: 'oklch(98% 0.003 247.858)',
-  'primary-content': 'oklch(14% 0.004 49.25)',
+  primary: "oklch(98% 0.003 247.858)",
+  "primary-content": "oklch(14% 0.004 49.25)",
 
-  secondary: 'oklch(64% 0.246 16.439)',
-  'secondary-content': 'oklch(97.807% 0.029 256.847)',
+  secondary: "oklch(44% 0.017 285.786)",
+  "secondary-content": "oklch(100% 0 0)",
 
-  accent: 'oklch(0% 0 0)',
-  'accent-content': 'oklch(100% 0 0)',
+  accent: "oklch(58% 0.253 17.585)",
+  "accent-content": "oklch(100% 0 0)",
 
-  neutral: 'oklch(37% 0.034 259.733)',
-  'neutral-content': 'oklch(97.807% 0.029 256.847)',
+  neutral: "oklch(37% 0.034 259.733)",
+  "neutral-content": "oklch(100% 0 0)",
 
-  info: 'oklch(74% 0.16 232.661)',
-  'info-content': 'oklch(29% 0.066 243.157)',
+  info: "oklch(74% 0.16 232.661)",
+  "info-content": "oklch(29% 0.066 243.157)",
 
-  success: 'oklch(76% 0.177 163.223)',
-  'success-content': 'oklch(26% 0.065 152.934)',
+  success: "oklch(79% 0.209 151.711)",
+  "success-content": "oklch(26% 0.065 152.934)",
 
-  warning: 'oklch(85% 0.199 91.936)',
-  'warning-content': 'oklch(42% 0.095 57.708)',
+  warning: "oklch(85% 0.199 91.936)",
+  "warning-content": "oklch(41% 0.112 45.904)",
 
-  error: 'oklch(70% 0.191 22.216)',
-  'error-content': 'oklch(26% 0.079 36.259)',
+  error: "oklch(64% 0.246 16.439)",
+  "error-content": "oklch(89% 0.058 10.001)",
 
-  '--radius-selector': '0.25rem',
-  '--radius-field': '0.25rem',
-  '--radius-box': '0.5rem',
-  '--size-selector': '0.21875rem',
-  '--size-field': '0.21875rem',
-  '--border': '0.5px',
-  '--depth': '1',
-  '--noise': '0'
+  "--radius-selector": "0.5rem",
+  "--radius-field": "0.25rem",
+  "--radius-box": "0.5rem",
+  "--size-selector": "0.25rem",
+  "--size-field": "0.25rem",
+  "--border": "1px",
+  "--depth": "1",
+  "--noise": "0",
 };
 
-const zLight = {
-  'color-scheme': 'light',
-  'base-100': 'oklch(100% 0 0)',
-  'base-200': 'oklch(98% 0 0)',
-  'base-300': 'oklch(95% 0 0)',
-  'base-content': 'oklch(21% 0.006 285.885)',
+const zlight = {
+  "color-scheme": "light",
+  "base-100": "oklch(92% 0.003 48.717)",
+  "base-200": "oklch(95% 0 0)",
+  "base-300": "oklch(95% 0 0)",
+  "base-content": "oklch(21% 0.006 285.885)",
 
-  primary: 'oklch(12% 0.042 264.695)',
-  'primary-content': 'oklch(98% 0 0)',
+  primary: "oklch(37% 0.034 259.733)",
+  "primary-content": "oklch(100% 0 0)",
 
-  secondary: 'oklch(63% 0.237 25.331)',
-  'secondary-content': 'oklch(97% 0.013 17.38)',
+  secondary: "oklch(27% 0.006 286.033)",
+  "secondary-content": "oklch(100% 0 0)",
 
-  accent: 'oklch(12% 0.042 264.695)',
-  'accent-content': 'oklch(98% 0 0)',
+  accent: "oklch(58% 0.253 17.585)",
+  "accent-content": "oklch(100% 0 0)",
 
-  neutral: 'oklch(27% 0.041 260.031)',
-  'neutral-content': 'oklch(95% 0 0)',
+  neutral: "oklch(44% 0.03 256.802)",
+  "neutral-content": "oklch(92% 0.004 286.32)",
 
-  info: 'oklch(12% 0.042 264.695)',
-  'info-content': 'oklch(98% 0 0)',
+  info: "oklch(58% 0.158 241.966)",
+  "info-content": "oklch(97% 0.013 236.62)",
 
-  success: 'oklch(76% 0.177 163.223)',
-  'success-content': 'oklch(37% 0.077 168.94)',
+  success: "oklch(62% 0.194 149.214)",
+  "success-content": "oklch(98% 0.018 155.826)",
 
-  warning: 'oklch(82% 0.189 84.429)',
-  'warning-content': 'oklch(47% 0.114 61.907)',
+  warning: "oklch(82% 0.189 84.429)",
+  "warning-content": "oklch(27% 0.077 45.635)",
 
-  error: 'oklch(57% 0.245 27.325)',
-  'error-content': 'oklch(93% 0.032 17.717)',
+  error: "oklch(64% 0.246 16.439)",
+  "error-content": "oklch(100% 0 0)",
 
-  '--radius-selector': '0.25rem',
-  '--radius-field': '0.25rem',
-  '--radius-box': '0.5rem',
-  '--size-selector': '0.21875rem',
-  '--size-field': '0.21875rem',
-  '--border': '0.5px',
-  '--depth': '1',
-  '--noise': '0'
+  "--radius-selector": "0.5rem",
+  "--radius-field": "0.25rem",
+  "--radius-box": "0.5rem",
+  "--size-selector": "0.21875rem",
+  "--size-field": "0.21875rem",
+  "--border": "1px",
+  "--depth": "1",
+  "--noise": "0",
 };
 
 module.exports = {
@@ -121,13 +121,13 @@ module.exports = {
   daisyui: {
     themes: [
       {
-        'Z-Dark': zDark
+        zdark,
       },
       {
-        'Z-Light': zLight
-      }
+        zlight,
+      },
     ],
-    darkTheme: 'Z-Dark',
+    darkTheme: 'zdark',
     logs: false
   }
 };

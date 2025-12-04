@@ -12,20 +12,22 @@ import { ComponentsDemo } from "./_components/ComponentsDemo";
 import { ThemeEditor } from "./_components/ThemeEditor";
 
 type TabKey = "editor" | "demo" | "variants" | "palette";
-type ThemeKey = "Z-Dark" | "Z-Light";
+type ThemeKey = "zdark" | "zlight";
 
 const STORAGE_KEY = "zekai-ui-theme";
 
 export default function ZUiPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("editor");
-  const [theme, setTheme] = useState<ThemeKey>("Z-Dark");
+  const [theme, setTheme] = useState<ThemeKey>("zdark");
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "Z-Dark" || stored === "Z-Light") {
+    if (stored === "zdark" || stored === "zlight") {
       setTheme(stored);
-    } else if (document?.documentElement?.getAttribute("data-theme") === "Z-Light") {
-      setTheme("Z-Light");
+    } else if (stored === "Z-Dark") {
+      setTheme("zdark");
+    } else if (stored === "Z-Light" || document?.documentElement?.getAttribute("data-theme") === "zlight") {
+      setTheme("zlight");
     }
   }, []);
 
@@ -56,19 +58,19 @@ export default function ZUiPage() {
             <div className="join rounded-full border border-base-300/60 bg-base-100/80 shadow-sm">
               <button
                 type="button"
-                className={cn("btn btn-xs join-item", theme === "Z-Dark" && "btn-active btn-primary")}
-                onClick={() => setTheme("Z-Dark")}
-                aria-pressed={theme === "Z-Dark"}
+                className={cn("btn btn-xs join-item", theme === "zdark" && "btn-active btn-primary")}
+                onClick={() => setTheme("zdark")}
+                aria-pressed={theme === "zdark"}
               >
-                Z-Dark
+                zdark
               </button>
               <button
                 type="button"
-                className={cn("btn btn-xs join-item", theme === "Z-Light" && "btn-active btn-secondary")}
-                onClick={() => setTheme("Z-Light")}
-                aria-pressed={theme === "Z-Light"}
+                className={cn("btn btn-xs join-item", theme === "zlight" && "btn-active btn-secondary")}
+                onClick={() => setTheme("zlight")}
+                aria-pressed={theme === "zlight"}
               >
-                Z-Light
+                zlight
               </button>
             </div>
           </div>

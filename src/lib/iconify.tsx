@@ -1,6 +1,7 @@
 import type { ComponentType, SVGAttributes } from "react";
 import {
   Box,
+  CircleAlert,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -45,6 +46,7 @@ const iconMap: Record<string, ComponentType<SVGAttributes<SVGElement>>> = {
   "mdi:cube-outline": Box,
   "mdi:email-outline": Mail,
   "mdi:account-multiple-outline": Users,
+  "mdi:alert-circle-outline": CircleAlert,
   "mdi:play": Play,
   "mdi:shuffle-variant": Shuffle,
   "mdi:repeat": Repeat,

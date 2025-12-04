@@ -32,8 +32,8 @@ export function ColorPalette() {
     <section className="space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold">Color Palette</h2>
-          <p className="text-sm text-base-content/70">Paleta dos temas Z-Dark/Z-Light usando tokens DaisyUI.</p>
+        <h2 className="text-xl font-semibold">Color Palette</h2>
+        <p className="text-sm text-base-content/70">Paleta dos temas zdark/zlight usando tokens DaisyUI.</p>
         </div>
         <span className="badge badge-outline border-base-300">Read-only</span>
       </div>
@@ -45,7 +45,7 @@ export function ColorPalette() {
       </div>
 
       <div className="alert alert-info text-sm">
-        Alternar o tema no topo da página para validar contraste e legibilidade em Z-Dark e Z-Light.
+        Alternar o tema no topo da página para validar contraste e legibilidade em zdark e zlight.
       </div>
     </section>
   );

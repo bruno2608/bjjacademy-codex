@@ -1,3 +1,69 @@
-/* LEGADO: definições de tema via @plugin foram removidas.
-   Os temas Z-Dark/Z-Light agora vivem no tailwind.config.js (daisyui.themes).
-   Mantemos este arquivo apenas como extensão futura para utilitários globais. */
+@plugin "daisyui/theme" {
+  name: "zdark";
+  default: true;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(25.33% 0.016 252.42);
+  --color-base-200: oklch(23.26% 0.014 253.1);
+  --color-base-300: oklch(55% 0.027 264.364);
+  --color-base-content: oklch(100.0% 0.000 360.000);
+  --color-primary: oklch(98% 0.003 247.858);
+  --color-primary-content: oklch(14% 0.004 49.25);
+  --color-secondary: oklch(44% 0.017 285.786);
+  --color-secondary-content: oklch(100% 0 0);
+  --color-accent: oklch(58% 0.253 17.585);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(37% 0.034 259.733);
+  --color-neutral-content: oklch(100% 0 0);
+  --color-info: oklch(74% 0.16 232.661);
+  --color-info-content: oklch(29% 0.066 243.157);
+  --color-success: oklch(79% 0.209 151.711);
+  --color-success-content: oklch(26% 0.065 152.934);
+  --color-warning: oklch(85% 0.199 91.936);
+  --color-warning-content: oklch(41% 0.112 45.904);
+  --color-error: oklch(64% 0.246 16.439);
+  --color-error-content: oklch(89% 0.058 10.001);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: "zlight";
+  default: false;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(92% 0.003 48.717);
+  --color-base-200: oklch(95% 0 0);
+  --color-base-300: oklch(95% 0 0);
+  --color-base-content: oklch(21% 0.006 285.885);
+  --color-primary: oklch(37% 0.034 259.733);
+  --color-primary-content: oklch(100% 0 0);
+  --color-secondary: oklch(27% 0.006 286.033);
+  --color-secondary-content: oklch(100% 0 0);
+  --color-accent: oklch(58% 0.253 17.585);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(44% 0.03 256.802);
+  --color-neutral-content: oklch(92% 0.004 286.32);
+  --color-info: oklch(58% 0.158 241.966);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(62% 0.194 149.214);
+  --color-success-content: oklch(98% 0.018 155.826);
+  --color-warning: oklch(82% 0.189 84.429);
+  --color-warning-content: oklch(27% 0.077 45.635);
+  --color-error: oklch(64% 0.246 16.439);
+  --color-error-content: oklch(100% 0 0);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}

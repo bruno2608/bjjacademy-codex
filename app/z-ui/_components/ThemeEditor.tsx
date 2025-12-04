@@ -168,8 +168,8 @@ export function ThemeEditor() {
                     <span className="label-text">Default theme</span>
                   </div>
                   <select className="select select-bordered select-sm">
-                    <option>Z-Dark</option>
-                    <option>Z-Light</option>
+                    <option>zdark</option>
+                    <option>zlight</option>
                     <option>dark</option>
                   </select>
                 </label>
@@ -178,7 +178,7 @@ export function ThemeEditor() {
                     <span className="label-text">Default dark theme</span>
                   </div>
                   <select className="select select-bordered select-sm">
-                    <option>Z-Dark</option>
+                    <option>zdark</option>
                     <option>dark</option>
                   </select>
                 </label>
@@ -203,11 +203,11 @@ export function ThemeEditor() {
                 </div>
                 <p className="text-xs text-base-content/60">Add it after @plugin "daisyui";</p>
                 <pre className="mockup-code text-left text-sm">
-                  <code>{`"Z-Dark": {
+                  <code>{`"zdark": {
   "base-100": "oklch(25.33% 0.016 252.42)",
   "primary": "oklch(98% 0.003 247.858)",
-  "secondary": "oklch(64% 0.246 16.439)",
-  "accent": "oklch(0% 0 0)"
+  "secondary": "oklch(44% 0.017 285.786)",
+  "accent": "oklch(58% 0.253 17.585)"
 }`}</code>
                 </pre>
               </div>
