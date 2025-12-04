@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import './zekai-themes.css';
 @import './tailwind.css';
 
 html,
