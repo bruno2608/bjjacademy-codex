@@ -76,7 +76,10 @@
 /* Custom layer para estilos reutilizáveis. */
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-bjj-gray-800 px-4 py-2 text-sm font-semibold text-bjj-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/40 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60;
+    background-color: hsl(var(--b2));
+    color: hsl(var(--bc));
+    border-color: hsl(var(--b3));
   }
 
   .btn-sm {
@@ -88,39 +91,59 @@
   }
 
   .btn-ghost {
-    @apply bg-transparent text-bjj-gray-200 hover:bg-bjj-gray-800;
+    @apply bg-transparent text-base-content hover:bg-base-200/70;
+    border-color: transparent;
   }
 
   .btn-outline {
-    @apply bg-transparent border border-bjj-gray-700 text-bjj-gray-200;
+    @apply bg-transparent text-base-content hover:bg-base-200/70;
+    border-color: hsl(var(--b3));
   }
 
   .card {
-    @apply relative overflow-hidden rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/80 p-5 text-bjj-white shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)];
+    @apply relative overflow-hidden rounded-2xl border p-5 shadow-xl;
+    background-color: hsl(var(--b1));
+    color: hsl(var(--bc));
+    border-color: hsl(var(--b3));
   }
 
   .btn-primary {
-    @apply bg-bjj-red text-bjj-white border-transparent hover:bg-bjj-red/90;
+    background-color: hsl(var(--p));
+    color: hsl(var(--pc));
+    border-color: hsl(var(--p));
+    @apply hover:brightness-105;
   }
 
   .btn-secondary {
-    @apply btn bg-transparent border border-bjj-gray-700 text-bjj-gray-200 hover:border-bjj-red hover:text-bjj-red;
+    background-color: hsl(var(--s));
+    color: hsl(var(--sc));
+    border-color: hsl(var(--s));
+    @apply hover:brightness-105;
   }
 
   .input-field {
-    @apply w-full rounded-lg border border-bjj-gray-700 bg-bjj-gray-900/70 px-3.5 py-2.5 text-sm text-bjj-white placeholder:text-bjj-gray-200/70 focus:border-bjj-red focus:outline-none focus:ring-1 focus:ring-bjj-red/40 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply w-full rounded-lg border px-3.5 py-2.5 text-sm transition placeholder:text-base-content/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60;
+    background-color: hsl(var(--b1));
+    color: hsl(var(--bc));
+    border-color: hsl(var(--b3));
   }
 
   .select {
-    @apply w-full rounded-lg border border-bjj-gray-700 bg-bjj-gray-900/70 px-3.5 py-2.5 text-sm text-bjj-white focus:border-bjj-red focus:outline-none focus:ring-1 focus:ring-bjj-red/40;
+    @apply w-full rounded-lg border px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/40;
+    background-color: hsl(var(--b1));
+    color: hsl(var(--bc));
+    border-color: hsl(var(--b3));
   }
 
   .select-bordered {
-    @apply border-bjj-gray-700;
+    border-color: hsl(var(--b3));
   }
 
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide;
+    background-color: hsl(var(--b2));
+    color: hsl(var(--bc));
+    border: 1px solid hsl(var(--b3));
   }
 
   .badge-sm {
@@ -128,31 +151,41 @@
   }
 
   .badge-success {
-    @apply bg-emerald-500/20 text-emerald-200;
+    background-color: hsl(var(--su) / 0.15);
+    color: hsl(var(--suc));
   }
 
   .badge-primary {
-    @apply bg-bjj-red/20 text-bjj-red;
+    background-color: hsl(var(--p) / 0.15);
+    color: hsl(var(--pc));
   }
 
   .badge-warning {
-    @apply bg-amber-500/20 text-amber-200;
+    background-color: hsl(var(--wa) / 0.18);
+    color: hsl(var(--wac));
   }
 
   .badge-error {
-    @apply bg-bjj-red/20 text-bjj-white;
+    background-color: hsl(var(--er) / 0.18);
+    color: hsl(var(--erc));
   }
 
   .badge-outline {
-    @apply border border-bjj-gray-700 bg-transparent text-bjj-gray-200;
+    background-color: transparent;
+    color: hsl(var(--bc));
+    border: 1px solid hsl(var(--b3));
   }
 
   .modal {
-    @apply fixed inset-0 z-50 flex items-center justify-center bg-bjj-black/80 px-4 py-6 backdrop-blur;
+    @apply fixed inset-0 z-50 flex items-center justify-center px-4 py-6 backdrop-blur;
+    background-color: hsl(var(--b2) / 0.85);
   }
 
   .modal-box {
-    @apply w-full max-w-2xl rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900 p-6 text-bjj-white shadow-[0_18px_35px_-18px_rgba(0,0,0,0.6)];
+    @apply w-full max-w-2xl rounded-2xl border p-6 shadow-xl;
+    background-color: hsl(var(--b1));
+    color: hsl(var(--bc));
+    border-color: hsl(var(--b3));
   }
 
   /*
@@ -179,7 +212,7 @@
 
   .scrollbar-dark {
     scrollbar-width: thin;
-    scrollbar-color: rgba(96, 96, 96, 0.8) rgba(18, 18, 18, 0.85);
+    scrollbar-color: hsl(var(--bc) / 0.7) hsl(var(--b2) / 0.85);
   }
 
   .scrollbar-dark::-webkit-scrollbar {
@@ -187,17 +220,16 @@
   }
 
   .scrollbar-dark::-webkit-scrollbar-track {
-    background: rgba(14, 14, 14, 0.9);
+    background: hsl(var(--b2) / 0.9);
     border-radius: 9999px;
   }
 
   .scrollbar-dark::-webkit-scrollbar-thumb {
-    background: rgba(120, 120, 120, 0.8);
+    background: hsl(var(--bc) / 0.8);
     border-radius: 9999px;
   }
 
   .scrollbar-dark::-webkit-scrollbar-thumb:hover {
-    background: rgba(225, 6, 0, 0.75);
+    background: hsl(var(--p) / 0.75);
   }
-
 }

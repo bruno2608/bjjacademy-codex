@@ -100,3 +100,9 @@ Outros componentes podem seguir a convenção `Zk*` (ex.: `ZkPageHeader`, `ZkCar
 - Use `ZkPage` + `ZkContainer` como esqueleto base e garanta `min-h-dvh` com fundo que herda as variáveis do tema.
 - Aplique somente tokens DaisyUI (base/primary/neutral/etc.) para cores, bordas e textos; nada de hex fixo.
 - Certifique-se de que o HTML raiz está com `data-theme="Z-Dark"` (ou `Z-Light` quando liberado) para herdar o tema certo.
+
+## Estado atual do tema (Z-Dark / Z-Light)
+- DaisyUI configurado com os temas personalizados `Z-Dark` (default, dark) e `Z-Light` (light).
+- O atributo `data-theme="Z-Dark"` está aplicado no `<html>`, tornando o Z-Dark o tema ativo global.
+- A tela `/login` foi ajustada para usar apenas tokens de tema (`bg-base-*`, `text-base-content`, `btn-*`), sem cores fixas, respondendo 100% ao ZEKAI UI.
+- Overrides antigos baseados em `bjj-*` foram removidos ou convertidos para tokens do tema.
