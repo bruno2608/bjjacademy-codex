@@ -7,7 +7,6 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, Apple, ArrowRight, Loader2 } from 'lucide-react';
 import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
-import { ZkPage } from '@/components/zekai-ui/ZkPage';
 import { ZkThemeDebug } from '@/components/ZkThemeDebug';
 import useUserStore from '../../store/userStore';
 
@@ -105,181 +104,169 @@ function LoginContent() {
   };
 
   return (
-    <ZkPage className="bg-gradient-to-br from-base-300/60 via-base-200 to-base-100 text-base-content">
-      <ZkContainer className="flex min-h-dvh items-center py-10 lg:py-16">
-        <div className="grid w-full grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-center lg:gap-12">
-          <section className="order-1 w-full max-w-md justify-self-center lg:order-2 lg:justify-self-end">
-            <div className="card w-full border border-base-300/60 bg-base-100 shadow-xl">
-              <div className="card-body space-y-5">
-                <header className="space-y-1 text-center">
-                  <h2 className="text-xl font-semibold">Entrar</h2>
-                  <p className="text-sm text-base-content/70">Use suas credenciais para acessar o painel.</p>
-                </header>
-                <form className="space-y-5" onSubmit={handleSubmit}>
-                  <div className="form-control space-y-2">
-                    <label className="label pb-0">
-                      <span className="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/80">
-                        E-mail ou usuário
-                      </span>
-                    </label>
-                    <input
-                      name="identifier"
-                      type="text"
-                      placeholder="voce@bjj.academy ou seu usuário"
-                      value={form.identifier}
-                      onChange={handleChange}
-                      onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
-                      className="input input-bordered w-full bg-base-100 text-sm focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
-                      required
-                    />
-                    {identifierError ? (
-                      <p className="text-xs text-error">{identifierError}</p>
-                    ) : (
-                      <p className="text-[0.68rem] text-base-content/60">Login aceita e-mail ou username (case-insensitive).</p>
-                    )}
-                  </div>
+    <main className="min-h-dvh bg-base-300 text-base-content">
+      <ZkContainer className="grid min-h-dvh items-center gap-12 py-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
+        <section className="flex flex-col gap-4 lg:pr-6">
+          <span className="badge badge-outline w-fit border-base-300 text-[0.65rem] font-semibold uppercase tracking-[0.25em]">
+            <span className="flex items-center gap-1.5 text-xs">
+              <ShieldCheck size={14} className="text-primary" /> Portal autenticado
+            </span>
+          </span>
+          <div className="space-y-4">
+            <h1 className="text-4xl font-bold lg:text-5xl">BJJ Academy</h1>
+            <p className="max-w-prose text-base text-base-content/80 lg:text-lg">
+              Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
+            </p>
+          </div>
+          <ul className="space-y-2 text-sm text-base-content/80 lg:max-w-xl">
+            <li className="flex gap-2">
+              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+              <span>Login por e-mail ou usuário (case-insensitive).</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+              <span>Perfis aluno e staff já configurados para o piloto.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+              <span>Fluxos de convite, cadastro público e reset documentados.</span>
+            </li>
+          </ul>
+        </section>
 
-                  <div className="form-control space-y-2">
-                    <label className="label pb-0">
-                      <span className="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/80">
-                        Senha
-                      </span>
-                    </label>
-                    <input
-                      name="senha"
-                      type="password"
-                      placeholder="••••••••"
-                      value={form.senha}
-                      onChange={handleChange}
-                      onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
-                      className="input input-bordered w-full bg-base-100 text-sm focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
-                      required
-                    />
-                    {senhaError ? (
-                      <p className="text-xs text-error">{senhaError}</p>
-                    ) : (
-                      <p className="text-[0.68rem] text-base-content/60">Mínimo 10 caracteres; senha piloto: BJJ@pilot2025</p>
-                    )}
-                  </div>
+        <section className="w-full max-w-md justify-self-center lg:justify-self-end">
+          <div className="card w-full border border-base-300/60 bg-base-100/95 shadow-2xl">
+            <div className="card-body space-y-6">
+              <header className="space-y-1 text-center">
+                <h2 className="text-xl font-semibold">Entrar</h2>
+                <p className="text-sm text-base-content/70">Use suas credenciais para acessar o painel.</p>
+              </header>
+              <form className="space-y-5" onSubmit={handleSubmit}>
+                <div className="form-control space-y-2">
+                  <label className="label pb-0">
+                    <span className="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/80">
+                      E-mail ou usuário
+                    </span>
+                  </label>
+                  <input
+                    name="identifier"
+                    type="text"
+                    placeholder="voce@bjj.academy ou seu usuário"
+                    value={form.identifier}
+                    onChange={handleChange}
+                    onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
+                    className="input input-bordered w-full bg-base-200/80 text-sm focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
+                    required
+                  />
+                  {identifierError ? (
+                    <p className="text-xs text-error">{identifierError}</p>
+                  ) : (
+                    <p className="text-[0.68rem] text-base-content/60">Login aceita e-mail ou username (case-insensitive).</p>
+                  )}
+                </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-base-content/80">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        name="rememberMe"
-                        checked={form.rememberMe}
-                        onChange={handleChange}
-                        className="checkbox checkbox-sm checkbox-primary"
-                      />
-                      Lembrar de mim nesta sessão
-                    </label>
-                    <a href="/esqueci-senha" className="link link-primary text-xs font-semibold">
-                      Esqueci minha senha
+                <div className="form-control space-y-2">
+                  <label className="label pb-0">
+                    <span className="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/80">
+                      Senha
+                    </span>
+                  </label>
+                  <input
+                    name="senha"
+                    type="password"
+                    placeholder="••••••••"
+                    value={form.senha}
+                    onChange={handleChange}
+                    onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
+                    className="input input-bordered w-full bg-base-200/80 text-sm focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
+                    required
+                  />
+                  {senhaError ? (
+                    <p className="text-xs text-error">{senhaError}</p>
+                  ) : (
+                    <p className="text-[0.68rem] text-base-content/60">Mínimo 10 caracteres; senha piloto: BJJ@pilot2025</p>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-base-content/80">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      name="rememberMe"
+                      checked={form.rememberMe}
+                      onChange={handleChange}
+                      className="checkbox checkbox-sm checkbox-primary"
+                    />
+                    Lembrar de mim nesta sessão
+                  </label>
+                  <a href="/esqueci-senha" className="link link-primary text-xs font-semibold">
+                    Esqueci minha senha
+                  </a>
+                </div>
+
+                {error && <p className="text-sm text-error">{error}</p>}
+
+                <button type="submit" className="btn btn-secondary w-full justify-center gap-2" disabled={isSubmitting}>
+                  {isSubmitting ? 'Entrando...' : 'Acessar painel'}
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight size={15} />}
+                </button>
+
+                <div className="divider text-[0.7rem] uppercase text-base-content/60">ou continue com</div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <button
+                      type="button"
+                      className="btn btn-outline w-full justify-center gap-2"
+                      aria-disabled="true"
+                      disabled
+                    >
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-base-200 text-[13px] font-semibold">
+                        G
+                      </span>
+                      Google
+                    </button>
+                    <p className="text-center text-[0.68rem] text-base-content/60">Em breve</p>
+                  </div>
+                  <div className="space-y-1">
+                    <button
+                      type="button"
+                      className="btn btn-outline w-full justify-center gap-2"
+                      aria-disabled="true"
+                      disabled
+                    >
+                      <Apple className="h-4 w-4" />
+                      Apple
+                    </button>
+                    <p className="text-center text-[0.68rem] text-base-content/60">Em breve</p>
+                  </div>
+                </div>
+              </form>
+              <div className="space-y-3 text-center text-sm text-base-content/80">
+                <p className="text-[0.68rem] text-base-content/60">
+                  Use um e-mail ou usuário habilitado no piloto e a senha padrão para acessar.
+                </p>
+                <div className="flex flex-col gap-1 text-xs">
+                  <p>
+                    Não tem conta?{' '}
+                    <a href="/cadastro" className="link link-primary font-semibold">
+                      Cadastre-se
                     </a>
-                  </div>
-
-                  {error && <p className="text-sm text-error">{error}</p>}
-
-                  <button
-                    type="submit"
-                    className="btn btn-primary w-full justify-center gap-2"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Entrando...' : 'Acessar painel'}
-                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight size={15} />}
-                  </button>
-
-                  <div className="flex items-center gap-3 text-xs text-base-content/70">
-                    <div className="h-px flex-1 bg-base-300/60" aria-hidden />
-                    <span>ou continue com</span>
-                    <div className="h-px flex-1 bg-base-300/60" aria-hidden />
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <button
-                        type="button"
-                        className="btn btn-outline w-full justify-center gap-2 border-base-300 bg-base-100 text-base-content hover:border-base-200 hover:bg-base-200"
-                        aria-disabled="true"
-                        disabled
-                      >
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-base-200 text-[13px] font-semibold">
-                          G
-                        </span>
-                        Google
-                      </button>
-                      <p className="text-center text-[0.68rem] text-base-content/60">Em breve</p>
-                    </div>
-                    <div className="space-y-1">
-                      <button
-                        type="button"
-                        className="btn btn-outline w-full justify-center gap-2 border-base-300 bg-base-100 text-base-content hover:border-base-200 hover:bg-base-200"
-                        aria-disabled="true"
-                        disabled
-                      >
-                        <Apple className="h-4 w-4" />
-                        Apple
-                      </button>
-                      <p className="text-center text-[0.68rem] text-base-content/60">Em breve</p>
-                    </div>
-                  </div>
-                </form>
-                <div className="space-y-3 text-center text-sm text-base-content/80">
-                  <p className="text-[0.68rem] text-base-content/60">
-                    Use um e-mail ou usuário habilitado no piloto e a senha padrão para acessar.
                   </p>
-                  <div className="flex flex-col gap-1 text-xs">
-                    <p>
-                      Não tem conta?{' '}
-                      <a href="/cadastro" className="link link-primary font-semibold">
-                        Cadastre-se
-                      </a>
-                    </p>
-                    <p>
-                      Recebeu um convite?{' '}
-                      <a href="/acesso-convite" className="link link-primary font-semibold">
-                        Primeiro acesso
-                      </a>
-                    </p>
-                  </div>
+                  <p>
+                    Recebeu um convite?{' '}
+                    <a href="/acesso-convite" className="link link-primary font-semibold">
+                      Primeiro acesso
+                    </a>
+                  </p>
                 </div>
               </div>
             </div>
-          </section>
-
-          <section className="order-2 flex flex-col gap-4 text-base-content lg:order-1 lg:pr-6">
-            <div className="flex flex-col gap-3 lg:gap-4">
-              <span className="badge badge-outline w-fit border-base-300 text-[0.65rem] font-semibold uppercase tracking-[0.25em]">
-                <span className="flex items-center gap-1.5 text-xs">
-                  <ShieldCheck size={14} className="text-primary" /> Portal autenticado
-                </span>
-              </span>
-              <div className="space-y-3">
-                <h1 className="text-3xl font-semibold lg:text-5xl">BJJ Academy</h1>
-                <p className="max-w-prose text-sm text-base-content/70 md:text-base">
-                  Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
-                </p>
-              </div>
-              <ul className="space-y-2 text-sm text-base-content/70 lg:max-w-xl">
-                <li className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
-                  <span>Login por e-mail ou usuário (case-insensitive).</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
-                  <span>Perfis aluno e staff já configurados para o piloto.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
-                  <span>Fluxos de convite, cadastro público e reset documentados.</span>
-                </li>
-              </ul>
-            </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </ZkContainer>
       <ZkThemeDebug />
-    </ZkPage>
+    </main>
   );
 }
 

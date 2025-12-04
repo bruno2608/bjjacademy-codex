@@ -1,112 +1,38 @@
 # ZEKAI UI
 
-## Introdução
-ZEKAI UI é o design system que consolida a identidade visual da família ZEKAI (incluindo BJJ Academy Codex e futuros produtos como Zenco). Ele nasce sobre TailwindCSS + DaisyUI e adiciona uma camada própria de componentes (`Zk*`), padrões de layout e diretrizes de responsividade para manter consistência entre telas e times.
+## 1. Visão geral
+O ZEKAI UI é o design system oficial do bjjacademy-codex, construído sobre Tailwind CSS + DaisyUI. Ele padroniza o visual em torno de dois temas (Z-Dark e Z-Light), componentes base (`Zk*`) e um modelo de responsividade pensado para dashboards e telas de autenticação. O objetivo é entregar um visual moderno e escuro por padrão, próximo ao preview gerado no DaisyUI Theme Generator, mantendo consistência entre páginas e times.
 
-## O que é o ZEKAI UI
-- **Base tecnológica:** TailwindCSS provê a fundação utilitária; DaisyUI adiciona temas e componentes com tokens configuráveis; a camada `Zk*` combina ambos com regras de layout e espaçamento próprias do produto.
-- **Objetivo:** acelerar entregas de interface, reduzir divergências visuais e documentar decisões (gradientes, profundidade, radii, grids) em um só lugar.
-- **Alinhamento visual:** preserva a estética dark e gamificada atual, mas com espaço para variantes futuras.
+## 2. Temas (Z-Dark / Z-Light)
+- **Z-Dark (padrão, dark):** plano de fundo escuro com `base-100/200/300`, texto claro em `base-content`, CTA neutro em `primary` (claro) e destaque em `secondary` (vermelho brand). `accent` permanece preto, `neutral` é um azul escuro e os estados usam `info/success/warning/error` derivados do generator.
+- **Z-Light (futuro, light):** mesma lógica em paleta clara. Mantém contraste elevado para dashboards, mas não é o tema ativo ainda.
+- **Tokens principais e uso recomendado:**
+  - **Fundo e texto:** `bg-base-100/200/300`, `text-base-content`.
+  - **CTAs:** `btn-primary` para ações neutras/claras, `btn-secondary` para o destaque vermelho brand; `btn-ghost`/`btn-outline` para ações secundárias.
+  - **Mensagens e status:** `alert-info/success/warning/error`, `badge-*` seguindo o mesmo esquema.
+  - **Inputs:** `input input-bordered bg-base-200` como padrão; foco com `focus-visible:ring-primary`.
+- **Ativação do tema:** configurado em `tailwind.config.js` via DaisyUI (`themes: ["Z-Dark", "Z-Light"]`, `darkTheme: "Z-Dark"`). O tema ativo é definido por `data-theme="Z-Dark"` no `<html>`. Alternar para Z-Light requer apenas mudar esse atributo quando o toggle for liberado.
 
-## Temas Z-Dark e Z-Light
-- **Z-Dark:** tema escuro padrão, focado no produto atual. Usa fundo profundo, alto contraste e vermelho como cor primária. Ele é aplicado via `data-theme="Z-Dark"` na raiz do documento.
-- **Z-Light:** tema claro planejado para evoluções futuras. Não está ativo, mas já existe na configuração DaisyUI para testes controlados.
-- **Implementação via DaisyUI:** os temas são declarados diretamente no `tailwind.config.js` em `daisyui.themes` com os identificadores `Z-Dark` (default) e `Z-Light` (futuro). Trocar de tema exige apenas ajustar `data-theme` na raiz do HTML (ex.: `data-theme="Z-Light"`) sem refatorar as telas. O arquivo `styles/zekai-themes.css` permanece apenas como referência legada comentada.
-- **Tokens principais (visão conceitual):**
-  - `base-100/200/300` e `base-content` definem planos de fundo e contraste de texto.
-  - `primary`, `secondary`, `neutral`, `info`, `success`, `warning`, `error` orientam estados e feedbacks.
-  - Bordas e raios usam variáveis como `--radius-*`/`--border` para manter cantos arredondados consistentes.
-  - Profundidade/ruído (`--depth`, `--noise`) sugerem camadas leves de sombra e textura para dar volume sem poluir.
+## 3. Layout e responsividade
+- **Wrapper global:** `ZkContainer` centraliza e limita largura (`w-full max-w-6xl mx-auto px-4 md:px-6 lg:px-8`).
+- **Páginas públicas/Auth:** fundo `bg-base-300` ou `bg-base-200`, grid 2 colunas em desktop (`lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]`), empilhado em mobile (`grid-cols-1`). Texto/hero na esquerda, card/formulário na direita; em mobile o texto aparece acima e o card ocupa a largura inteira.
+- **Dashboard:** topbar sticky (`sticky top-0 z-40 bg-base-100/80 backdrop-blur`), header compacto e grids autoajustáveis (`grid-cols-[repeat(auto-fit,minmax(260px,1fr))]`).
+- **Formulários:** colunas únicas no mobile; `md:grid-cols-2` quando fizer sentido. Erros inline (`text-xs text-error`) logo abaixo do campo.
 
-## Padrões de Layout e Responsividade
-### ZkContainer
-Largura controlada para não perder legibilidade em monitores grandes:
-```
-w-full max-w-6xl mx-auto px-4 md:px-6 lg:px-8
-```
-Use em praticamente todas as páginas (exceto casos full-bleed).
-
-### ZkPage
-Wrapper raiz de página, pensado para o tema Z-Dark:
-```
-min-h-dvh
-flex flex-col
-bg-gradient-to-br from-base-300/40 via-base-200 to-base-100
-```
-Aplica o gradiente de fundo padrão e garante altura mínima de viewport.
-
-### Layout de Auth (login/cadastro/reset)
-- **Mobile:** `flex flex-col gap-8` → hero em cima, card de login embaixo.
-- **Desktop:** `lg:flex-row lg:items-center lg:gap-12` → hero à esquerda (`flex-1`), form/card à direita (`w-full max-w-md`).
-- Evite alturas fixas; combine `min-h-dvh`, `py-10`–`py-16` e grid flexível para que o formulário fique visível sem rolagem excessiva.
-
-### Layout de Dashboard
-- Topbar sticky: `sticky top-0 z-40 bg-base-100/80 backdrop-blur`.
-- Conteúdo principal: header compacto (`ZkPageHeader`) + grid autoajustável `grid-cols-[repeat(auto-fit,minmax(260px,1fr))]` para cards.
-
-### Layout de formulários
-- `grid-cols-1` no mobile; `md:grid-cols-2` quando fizer sentido em telas médias+.
-- Erros sempre inline abaixo dos campos: `text-xs text-error` para feedback imediato.
-
-## Componentes Base ZEKAI UI
-### ZkContainer
-- **Quando usar:** sempre que precisar centralizar conteúdo e limitar largura. Evita linhas muito extensas em desktop.
-- **Exemplo:**
-```tsx
-import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
-
-function Example() {
-  return (
-    <ZkContainer>
-      <p>Conteúdo centralizado em até 6xl.</p>
-    </ZkContainer>
-  );
-}
-```
-
-### ZkPage
-- **Quando usar:** páginas completas (auth, dashboards, landing internas) que devem herdar o gradiente base e o comportamento de altura mínima.
-- **Exemplo:**
-```tsx
-import { ZkPage } from '@/components/zekai-ui/ZkPage';
-import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
-
-function Page() {
-  return (
-    <ZkPage>
-      <ZkContainer className="py-10">
-        <h1>Minha página</h1>
-      </ZkContainer>
-    </ZkPage>
-  );
-}
-```
-
-### (Referência breve)
-Outros componentes podem seguir a convenção `Zk*` (ex.: `ZkPageHeader`, `ZkCard`, `ZkButton`) para padronizar headings, cartões e ações. Documente-os aqui quando existirem no código.
-
-## Boas práticas gerais
-- Evite heróis gigantes em telas operacionais; prefira blocos compactos e informação densa.
-- Priorize contraste forte em Z-Dark (texto claro sobre fundo escuro) e use grids autoajustáveis para cards.
-- Para formulários, prefira mensagens de erro inline a toasts genéricos; melhora rastreabilidade e acessibilidade.
-- Use espaçamentos consistentes (`gap-8`, `py-10`/`py-16`) e limites de largura para preservar leitura em qualquer viewport.
-
-## Como replicar o padrão nas próximas telas
-- Envolva cada página com `ZkPage` para herdar o gradiente e o comportamento de altura mínima.
-- Centralize o conteúdo com `ZkContainer` e respeite os limites de largura e paddings indicados.
-- Sempre prefira tokens do tema (`bg-base-*`, `text-base-content`, `btn-primary`, `border-base-300`) em vez de cores fixas. Trocar o tema para `Z-Light` é tão simples quanto alterar `data-theme` na raiz, preservando a consistência sem refatorações adicionais.
-
-### Checklist rápido para novas telas
-- Use `ZkPage` + `ZkContainer` como esqueleto base e garanta `min-h-dvh` com fundo que herda as variáveis do tema.
-- Aplique somente tokens DaisyUI (base/primary/neutral/etc.) para cores, bordas e textos; nada de hex fixo.
-- Certifique-se de que o HTML raiz está com `data-theme="Z-Dark"` (ou `Z-Light` quando liberado) para herdar o tema certo.
+## 4. Componentes base
+- **ZkContainer:** wrapper responsivo. Use em praticamente todas as páginas para centralizar o conteúdo.
+- **ZkPage:** opcional para cenários que pedem fundo gradiente/altura mínima; combine com `ZkContainer` quando quiser herdar o padrão de página inteira.
+- **Botões:** `btn-primary` (ação neutra clara), `btn-secondary` (vermelho brand), `btn-outline`/`btn-ghost` para ações secundárias.
+- **Inputs:** `input input-bordered bg-base-200/80` com foco em `primary`. Checkbox/radio/toggle usam as variantes padrão do DaisyUI para respeitar o tema.
+- **Feedbacks:** `alert-*` e `badge-*` seguem a paleta do tema; prefira badges outline para marcadores discretos.
 
 ## Estado atual do tema (Z-Dark / Z-Light)
-- DaisyUI configurado com os temas personalizados `Z-Dark` (default, dark) e `Z-Light` (light) como nomes técnicos.
-- O atributo `data-theme="Z-Dark"` está aplicado no `<html>`, tornando o Z-Dark o tema ativo global.
-- A tela `/login` foi ajustada para usar apenas tokens de tema (`bg-base-*`, `text-base-content`, `btn-*`), sem cores fixas, respondendo 100% ao ZEKAI UI.
-- Overrides antigos baseados em `bjj-*` foram removidos ou convertidos para tokens do tema.
+- DaisyUI configurado com os temas personalizados `Z-Dark` (default) e `Z-Light` em `tailwind.config.js`.
+- O `<html>` aplica `data-theme="Z-Dark"`, tornando o dark o tema ativo global.
+- A tela `/login` usa somente tokens do tema (`bg-base-*`, `text-base-content`, `btn-*`), sem cores fixas.
+- Overrides antigos baseados em `bjj-*` ou cores hardcoded foram removidos ou convertidos para tokens do tema.
 
-## Nomes técnicos dos temas
-- Os temas registrados no DaisyUI usam identificadores `Z-Dark` (padrão) e `Z-Light` (futuro), respeitando a capitalização mostrada aqui.
-- Para ativar um tema, ajuste o atributo `data-theme` no `<html>` para `Z-Dark` ou `Z-Light` (quando o modo claro for liberado).
+## Checklist rápido para novas telas
+- Use `ZkContainer` para centralizar e limitar a largura; em auth, combine com grids responsivos (2 colunas no desktop, colunas empilhadas no mobile).
+- Aplique apenas tokens do tema para cores/bordas/textos; evite hex/hsl fixo.
+- Confirme que `data-theme="Z-Dark"` está setado na raiz (ou `Z-Light` quando o modo claro for liberado).
