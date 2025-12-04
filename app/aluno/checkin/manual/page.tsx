@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, CheckCircle2, HandRaised } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Hand } from 'lucide-react'
 
 import Button from '@/components/ui/Button'
 import { useCurrentAluno } from '@/hooks/useCurrentAluno'
@@ -79,7 +79,7 @@ export default function CheckinManualAlunoPage() {
 
           <div className="mt-4 flex flex-col items-center gap-3 text-center">
             <span className="flex h-20 w-20 items-center justify-center rounded-full bg-bjj-blue-700/30 text-bjj-blue-100 ring-4 ring-bjj-blue-800/60">
-              <HandRaised size={36} />
+              <Hand size={36} />
             </span>
             <p className="text-lg font-semibold text-white">Olá, {saudacao}!</p>
             <p className="text-sm text-bjj-gray-200">Clique no botão abaixo para confirmar sua presença.</p>

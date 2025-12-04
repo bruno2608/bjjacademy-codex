@@ -1,4 +1,4 @@
-export type PapelCodigo = 'ALUNO' | 'INSTRUTOR' | 'PROFESSOR' | 'ADMIN_TI';
+export type PapelCodigo = 'ALUNO' | 'INSTRUTOR' | 'PROFESSOR' | 'ADMIN' | 'ADMIN_TI';
 
 export interface Papel {
   id: number;

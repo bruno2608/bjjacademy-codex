@@ -24,9 +24,16 @@ export const MOCK_PAPEIS: Papel[] = [
   },
   {
     id: 4,
+    codigo: 'ADMIN',
+    nome: 'Admin',
+    descricao: 'Administração da academia',
+    nivelAcesso: 4
+  },
+  {
+    id: 5,
     codigo: 'ADMIN_TI',
     nome: 'Admin / TI',
     descricao: 'Administração e suporte técnico',
-    nivelAcesso: 4
+    nivelAcesso: 5
   }
 ];

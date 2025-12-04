@@ -86,10 +86,10 @@ export const useUserStore = create<UserState>((set, get) => ({
   token: null,
   hydrated: false,
   isAuthenticated: false,
-  login: async ({ email, senha }) => {
+  login: async ({ identifier, senha }) => {
     if (typeof window === 'undefined') return null;
 
-    const authenticatedUser = await authMockLogin({ email, senha });
+    const authenticatedUser = await authMockLogin({ identifier, senha });
     const fakeToken = `bjj-token-${Date.now()}`;
     const normalizedRoles = normalizeRoles(authenticatedUser.roles);
     const normalizedUser: AuthUser = {
