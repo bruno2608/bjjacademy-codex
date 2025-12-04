@@ -102,29 +102,36 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen bg-bjj-black text-bjj-white">
-      <div className="relative flex min-h-screen flex-col justify-start overflow-hidden px-6 py-12 sm:px-12 lg:flex-row lg:items-center lg:gap-16">
+      <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-start overflow-hidden px-4 py-10 sm:px-8 lg:grid lg:min-h-screen lg:grid-cols-2 lg:items-center lg:gap-12">
         <div className="absolute inset-0 -z-10 bg-gradient-to-br from-bjj-gray-900 via-bjj-black to-bjj-black" aria-hidden />
         <div className="absolute right-[-20%] top-[-10%] h-96 w-96 rounded-full bg-bjj-red/10 blur-3xl" aria-hidden />
         <div className="absolute left-[-10%] bottom-[-20%] h-72 w-72 rounded-full bg-bjj-gray-800/40 blur-3xl" aria-hidden />
 
-        <section className="relative max-w-xl space-y-4">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-bjj-gray-200/70">
-            <ShieldCheck size={13} className="text-bjj-red" /> Portal autenticado
-          </span>
-          <div className="space-y-3.5">
-            <h1 className="text-3xl font-semibold">BJJ Academy</h1>
-            <p className="text-sm text-bjj-gray-200/80">
-              Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
-            </p>
+        <section className="relative mb-6 space-y-4 lg:mb-0 lg:max-w-2xl">
+          <div className="flex flex-col gap-3 lg:gap-4">
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-bjj-gray-800/80 bg-bjj-gray-900/70 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-bjj-gray-200/70">
+              <ShieldCheck size={13} className="text-bjj-red" /> Portal autenticado
+            </span>
+            <div className="space-y-2 lg:space-y-3.5">
+              <h1 className="text-3xl font-semibold lg:text-4xl">BJJ Academy</h1>
+              <p className="text-sm text-bjj-gray-200/80 lg:text-base">
+                <span className="hidden lg:inline">
+                  Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
+                </span>
+                <span className="inline lg:hidden">
+                  Acesse o painel da academia, acompanhe graduações e presenças em tempo real.
+                </span>
+              </p>
+            </div>
+            <ul className="hidden space-y-2 text-sm text-bjj-gray-200/70 lg:block">
+              <li>• Login por e-mail ou usuário (case-insensitive)</li>
+              <li>• Perfis aluno e staff já configurados para o piloto</li>
+              <li>• Fluxos de convite, cadastro público e reset documentados</li>
+            </ul>
           </div>
-          <ul className="space-y-2 text-sm text-bjj-gray-200/70">
-            <li>• Login por e-mail ou usuário (case-insensitive)</li>
-            <li>• Perfis aluno e staff já configurados para o piloto</li>
-            <li>• Fluxos de convite, cadastro público e reset documentados</li>
-          </ul>
         </section>
 
-        <section className="relative mt-8 w-full max-w-md rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/80 p-6 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)] lg:mt-0">
+        <section className="relative w-full max-w-md rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900/80 p-6 shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)] sm:p-7 lg:ml-auto">
           <header className="mb-5 space-y-1 text-center">
             <h2 className="text-xl font-semibold">Entrar</h2>
             <p className="text-sm text-bjj-gray-200/70">Use suas credenciais para acessar o painel.</p>
