@@ -17,14 +17,14 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" data-theme="Z-Dark" className="min-h-dvh">
       <head>
         {/* PWA meta tags garantem comportamento instalável e cores nativas. */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
         <link rel="icon" href="/icons/icon-192x192.svg" />
       </head>
-      <body className="font-sans bg-bjj-black text-bjj-white">
+      <body className="min-h-dvh font-sans bg-base-100 text-base-content">
         {/* Todas as páginas do App são renderizadas aqui. */}
         <AppShell>{children}</AppShell>
       </body>
