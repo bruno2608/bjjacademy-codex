@@ -5,7 +5,7 @@
  */
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
+import { ShieldCheck, Apple, ArrowRight, Loader2 } from 'lucide-react';
 import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
 import { ZkPage } from '@/components/zekai-ui/ZkPage';
 import useUserStore from '../../store/userStore';
@@ -104,35 +104,16 @@ function LoginContent() {
 
   return (
     <ZkPage>
-      <ZkContainer className="flex min-h-dvh flex-col items-center justify-center py-10 lg:py-16">
-        <div className="flex w-full flex-col gap-8 lg:flex-row lg:items-center lg:gap-12">
-          <section className="flex-1 space-y-4 text-base-content">
-            <div className="flex flex-col gap-3 lg:gap-4">
-              <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-base-300/60 bg-base-200/60 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-base-content/70">
-                <ShieldCheck size={13} className="text-primary" /> Portal autenticado
-              </span>
-              <div className="space-y-3">
-                <h1 className="text-[clamp(1.6rem,2.3vw,2.4rem)] font-semibold text-base-content">BJJ Academy</h1>
-                <p className="max-w-prose text-sm text-base-content/70 md:text-base">
-                  Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
-                </p>
-              </div>
-              <ul className="hidden space-y-2 text-sm text-base-content/70 lg:block">
-                <li>• Login por e-mail ou usuário (case-insensitive)</li>
-                <li>• Perfis aluno e staff já configurados para o piloto</li>
-                <li>• Fluxos de convite, cadastro público e reset documentados</li>
-              </ul>
-            </div>
-          </section>
-
-          <section className="w-full max-w-md">
-            <div className="card w-full border border-base-300/60 bg-base-200/60 shadow-xl backdrop-blur">
+      <ZkContainer className="flex min-h-dvh flex-col justify-center py-10 lg:py-16">
+        <div className="grid w-full grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center lg:gap-12">
+          <section className="order-1 w-full max-w-md justify-self-center lg:order-2 lg:justify-self-end">
+            <div className="card w-full border border-base-300/70 bg-base-200/80 shadow-xl backdrop-blur">
               <div className="card-body space-y-4">
                 <header className="space-y-1 text-center">
                   <h2 className="text-lg font-semibold text-base-content">Entrar</h2>
                   <p className="text-sm text-base-content/70">Use suas credenciais para acessar o painel.</p>
                 </header>
-                <form className="space-y-3.5" onSubmit={handleSubmit}>
+                <form className="space-y-4" onSubmit={handleSubmit}>
                   <ValidatedField
                     name="identifier"
                     type="text"
@@ -170,13 +151,14 @@ function LoginContent() {
                       />
                       Lembrar de mim nesta sessão
                     </label>
-                    <a href="/esqueci-senha" className="text-primary hover:text-primary/80">
+                    <a href="/esqueci-senha" className="text-primary hover:text-primary/80 hover:underline">
                       Esqueci minha senha
                     </a>
                   </div>
                   {error && <p className="text-sm text-error">{error}</p>}
                   <Button type="submit" className="w-full justify-center" disabled={isSubmitting}>
-                    {isSubmitting ? 'Entrando...' : 'Acessar painel'} {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight size={15} />}
+                    {isSubmitting ? 'Entrando...' : 'Acessar painel'}{' '}
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight size={15} />}
                   </Button>
 
                   <div className="flex items-center gap-3 text-xs text-base-content/70">
@@ -185,18 +167,32 @@ function LoginContent() {
                     <span className="h-px flex-1 bg-base-300" aria-hidden />
                   </div>
 
-                  <div className="flex flex-col items-center gap-3 text-sm sm:flex-row sm:items-center sm:justify-center sm:gap-3">
-                    <div className="flex w-full flex-col items-stretch sm:max-w-[260px]">
+                  <div className="grid gap-3 text-sm sm:grid-cols-2">
+                    <div className="space-y-1">
                       <button
                         type="button"
-                        className="btn btn-outline w-full flex items-center justify-center gap-2"
+                        className="btn w-full justify-center gap-2 border border-base-300 bg-base-200/80 text-base-content hover:border-base-200 hover:bg-base-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                         aria-disabled="true"
                         disabled
                       >
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[15px] font-semibold text-[#4285F4]">G</span>
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-base-100 text-[13px] font-semibold text-base-content">
+                          G
+                        </span>
                         Google
                       </button>
-                      <p className="mt-1 text-center text-xs text-base-content/60">Em breve</p>
+                      <p className="text-center text-xs text-base-content/60">Em breve</p>
+                    </div>
+                    <div className="space-y-1">
+                      <button
+                        type="button"
+                        className="btn w-full justify-center gap-2 border border-base-300 bg-base-200/80 text-base-content hover:border-base-200 hover:bg-base-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                        aria-disabled="true"
+                        disabled
+                      >
+                        <Apple className="h-4 w-4" />
+                        Apple
+                      </button>
+                      <p className="text-center text-xs text-base-content/60">Em breve</p>
                     </div>
                   </div>
                 </form>
@@ -205,19 +201,38 @@ function LoginContent() {
                   <div className="flex flex-col gap-1 text-xs">
                     <p>
                       Não tem conta?{' '}
-                      <a href="/cadastro" className="text-primary hover:text-primary/80">
+                      <a href="/cadastro" className="text-primary hover:text-primary/80 hover:underline">
                         Cadastre-se
                       </a>
                     </p>
                     <p>
                       Recebeu um convite?{' '}
-                      <a href="/acesso-convite" className="text-primary hover:text-primary/80">
+                      <a href="/acesso-convite" className="text-primary hover:text-primary/80 hover:underline">
                         Primeiro acesso
                       </a>
                     </p>
                   </div>
                 </div>
               </div>
+            </div>
+          </section>
+
+          <section className="order-2 flex flex-col gap-4 text-base-content lg:order-1 lg:pr-6">
+            <div className="flex flex-col gap-3 lg:gap-4">
+              <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-base-300/60 bg-base-200/60 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-base-content/70">
+                <ShieldCheck size={13} className="text-primary" /> Portal autenticado
+              </span>
+              <div className="space-y-3">
+                <h1 className="text-[clamp(1.6rem,2.3vw,2.4rem)] font-semibold text-base-content">BJJ Academy</h1>
+                <p className="max-w-prose text-sm text-base-content/70 md:text-base">
+                  Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
+                </p>
+              </div>
+              <ul className="space-y-2 text-sm text-base-content/70 lg:max-w-xl">
+                <li>• Login por e-mail ou usuário (case-insensitive)</li>
+                <li>• Perfis aluno e staff já configurados para o piloto</li>
+                <li>• Fluxos de convite, cadastro público e reset documentados</li>
+              </ul>
             </div>
           </section>
         </div>
@@ -228,7 +243,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-gradient-to-br from-black via-black to-[#1a0000]" aria-busy="true" />}>
+    <Suspense fallback={<div className="min-h-dvh bg-base-100" aria-busy="true" />}>
       <LoginContent />
     </Suspense>
   );

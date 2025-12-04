@@ -13,7 +13,7 @@ try {
 }
 
 const daisyThemes = {
-  'Z-Dark': {
+  'z-dark': {
     primary: '#E10600',
     'primary-content': '#fef2f2',
     secondary: '#3A3A3A',
@@ -35,7 +35,7 @@ const daisyThemes = {
     '--depth': '18',
     '--noise': '0.02'
   },
-  'Z-Light': {
+  'z-light': {
     primary: '#D32F2F',
     'primary-content': '#fff1f2',
     secondary: '#4b5563',
@@ -101,9 +101,10 @@ module.exports = {
   plugins: [daisyUIPlugin],
   daisyui: {
     themes: [
-      { 'Z-Dark': daisyThemes['Z-Dark'] },
-      { 'Z-Light': daisyThemes['Z-Light'] },
+      { 'z-dark': daisyThemes['z-dark'] },
+      { 'z-light': daisyThemes['z-light'] },
       { bjjacademy: daisyThemes.bjjacademy }
-    ]
+    ],
+    darkTheme: 'z-dark'
   }
 };

@@ -9,9 +9,9 @@ ZEKAI UI é o design system que consolida a identidade visual da família ZEKAI 
 - **Alinhamento visual:** preserva a estética dark e gamificada atual, mas com espaço para variantes futuras.
 
 ## Temas Z-Dark e Z-Light
-- **Z-Dark:** tema escuro padrão, focado no produto atual. Usa fundo profundo, alto contraste e vermelho como cor primária. Ele é aplicado via `data-theme="Z-Dark"` na raiz do documento.
+- **Z-Dark:** tema escuro padrão, focado no produto atual. Usa fundo profundo, alto contraste e vermelho como cor primária. Ele é aplicado via `data-theme="z-dark"` na raiz do documento.
 - **Z-Light:** tema claro planejado para evoluções futuras. Não está ativo, mas já existe na configuração DaisyUI para testes controlados.
-- **Implementação via DaisyUI:** os temas são declarados em `daisyui.themes` no `tailwind.config.js`. Hoje eles podem aparecer como `Bjj-dark`/`Bjj-light` ou nomes legados; no vocabulário do design system chamamos conceitualmente de **Z-Dark** e **Z-Light**, independentemente do nome interno.
+- **Implementação via DaisyUI:** os temas são declarados em `daisyui.themes` no `tailwind.config.js` usando os nomes `z-dark` e `z-light` e podem ser alterados na raiz do HTML (ex.: `data-theme="z-light"`) sem trocar o código das telas. No vocabulário do design system chamamos conceitualmente de **Z-Dark** e **Z-Light**, independentemente do nome interno.
 - **Tokens principais (visão conceitual):**
   - `base-100/200/300` e `base-content` definem planos de fundo e contraste de texto.
   - `primary`, `secondary`, `neutral`, `info`, `success`, `warning`, `error` orientam estados e feedbacks.
@@ -31,7 +31,7 @@ Wrapper raiz de página, pensado para o tema Z-Dark:
 ```
 min-h-dvh
 flex flex-col
-bg-gradient-to-br from-black via-black to-[#1a0000]
+bg-gradient-to-br from-base-300/40 via-base-200 to-base-100
 ```
 Aplica o gradiente de fundo padrão e garante altura mínima de viewport.
 
@@ -90,3 +90,8 @@ Outros componentes podem seguir a convenção `Zk*` (ex.: `ZkPageHeader`, `ZkCar
 - Priorize contraste forte em Z-Dark (texto claro sobre fundo escuro) e use grids autoajustáveis para cards.
 - Para formulários, prefira mensagens de erro inline a toasts genéricos; melhora rastreabilidade e acessibilidade.
 - Use espaçamentos consistentes (`gap-8`, `py-10`/`py-16`) e limites de largura para preservar leitura em qualquer viewport.
+
+## Como replicar o padrão nas próximas telas
+- Envolva cada página com `ZkPage` para herdar o gradiente e o comportamento de altura mínima.
+- Centralize o conteúdo com `ZkContainer` e respeite os limites de largura e paddings indicados.
+- Sempre prefira tokens do tema (`bg-base-*`, `text-base-content`, `btn-primary`, `border-base-300`) em vez de cores fixas. Trocar o tema para `z-light` é tão simples quanto alterar `data-theme` na raiz, preservando a consistência sem refatorações adicionais.
