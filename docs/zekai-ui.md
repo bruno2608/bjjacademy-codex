@@ -11,7 +11,7 @@ O ZEKAI UI é o design system oficial do bjjacademy-codex, construído sobre Tai
   - **CTAs:** `btn-primary` para ações neutras, `btn-secondary` para destaque vermelho brand; `btn-ghost`/`btn-outline` para ações secundárias.
   - **Mensagens e status:** `alert-info/success/warning/error`, `badge-*` seguindo a paleta.
   - **Inputs:** `input input-bordered bg-base-200` como padrão; foco com `focus-visible:ring-primary`.
-- **Fonte da verdade:** os temas são definidos em `styles/tailwind.css` via `@plugin "daisyui/theme"` e registrados em `tailwind.config.js` (`themes: ["Z-Dark", "Z-Light"], darkTheme: "Z-Dark"`). O tema ativo vem de `data-theme="Z-Dark"` no `<html>`; trocar para Z-Light basta alterar esse atributo quando o toggle for liberado.
+- **Fonte da verdade:** os temas vivem no `tailwind.config.js` em `daisyui.themes` (apenas `Z-Dark` e `Z-Light`, com `darkTheme: "Z-Dark"`). O tema ativo vem de `data-theme="Z-Dark"` no `<html>`; trocar para Z-Light basta alterar esse atributo quando o toggle for liberado.
 
 ## 3. Layout e responsividade
 - **Wrapper global:** `ZkContainer` centraliza e limita largura (`w-full max-w-6xl mx-auto px-4 md:px-6 lg:px-8`).
@@ -27,7 +27,7 @@ O ZEKAI UI é o design system oficial do bjjacademy-codex, construído sobre Tai
 - **Feedbacks:** `alert-*` e `badge-*` seguem a paleta do tema; prefira badges outline para marcadores discretos.
 
 ## Estado atual do tema (Z-Dark / Z-Light)
-- DaisyUI está configurado com os temas personalizados `Z-Dark` (default) e `Z-Light` via `tailwind.config.js` e `styles/tailwind.css`.
+- DaisyUI está configurado com os temas personalizados `Z-Dark` (default) e `Z-Light` exclusivamente no `tailwind.config.js` (`daisyui.themes`).
 - O `<html>` aplica `data-theme="Z-Dark"`, tornando o dark o tema ativo global.
 - A tela `/login` usa somente tokens do tema (`bg-base-*`, `text-base-content`, `btn-*`), sem cores fixas.
 - Overrides antigos baseados em `bjj-*` ou cores hardcoded foram removidos ou convertidos para tokens do tema.
@@ -39,5 +39,5 @@ O ZEKAI UI é o design system oficial do bjjacademy-codex, construído sobre Tai
 
 ## Playground de Componentes (/z-ui)
 - Rota interna para validar visualmente o tema Z-Dark/Z-Light aplicado ao DaisyUI, sem necessidade de navegar pelas telas reais.
-- Exibe paleta de cores, botões, inputs, checkbox/radio/toggle, alerts e exemplos de tipografia sobre diferentes superfícies.
+- Exibe paleta com tokens (base/primary/secondary/accent/neutral/info/success/warning/error) e valores OKLCH, mais componentes como botões, badges, inputs, checkbox/radio/toggle, alerts e exemplos de tipografia sobre diferentes superfícies.
 - Use esta página para conferir contrastes, bordas e estados antes de aplicar ajustes de tema em produção.

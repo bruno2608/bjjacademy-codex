@@ -1,7 +1,36 @@
+import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
+
+const paletteTokens = [
+  { label: 'Base 100', classes: 'bg-base-100 text-base-content', value: 'oklch(25.33% 0.016 252.42)' },
+  { label: 'Base 200', classes: 'bg-base-200 text-base-content', value: 'oklch(23.26% 0.014 253.1)' },
+  { label: 'Base 300', classes: 'bg-base-300 text-base-content', value: 'oklch(21.15% 0.012 254.09)' },
+  { label: 'Primary', classes: 'bg-primary text-primary-content', value: 'oklch(98% 0.003 247.858)' },
+  { label: 'Secondary', classes: 'bg-secondary text-secondary-content', value: 'oklch(64% 0.246 16.439)' },
+  { label: 'Accent', classes: 'bg-accent text-accent-content', value: 'oklch(0% 0 0)' },
+  { label: 'Neutral', classes: 'bg-neutral text-neutral-content', value: 'oklch(37% 0.034 259.733)' },
+  { label: 'Info', classes: 'bg-info text-info-content', value: 'oklch(74% 0.16 232.661)' },
+  { label: 'Success', classes: 'bg-success text-success-content', value: 'oklch(76% 0.177 163.223)' },
+  { label: 'Warning', classes: 'bg-warning text-warning-content', value: 'oklch(85% 0.199 91.936)' },
+  { label: 'Error', classes: 'bg-error text-error-content', value: 'oklch(70% 0.191 22.216)' }
+];
+
+const buttonVariants = [
+  { label: 'Default', className: 'btn' },
+  { label: 'Primary', className: 'btn btn-primary' },
+  { label: 'Secondary', className: 'btn btn-secondary' },
+  { label: 'Accent', className: 'btn btn-accent' },
+  { label: 'Info', className: 'btn btn-info' },
+  { label: 'Success', className: 'btn btn-success' },
+  { label: 'Warning', className: 'btn btn-warning' },
+  { label: 'Error', className: 'btn btn-error' },
+  { label: 'Outline', className: 'btn btn-outline' },
+  { label: 'Ghost', className: 'btn btn-ghost' }
+];
+
 export default function ZUiPlaygroundPage() {
   return (
     <main className="min-h-dvh bg-base-200 text-base-content py-10">
-      <div className="mx-auto max-w-6xl space-y-8 px-4 lg:px-8">
+      <ZkContainer className="space-y-8">
         <header className="space-y-2">
           <p className="badge badge-outline border-base-300 uppercase tracking-[0.18em]">Playground interno</p>
           <h1 className="text-3xl font-semibold lg:text-4xl">ZEKAI UI – Components Playground</h1>
@@ -16,25 +45,16 @@ export default function ZUiPlaygroundPage() {
             <div className="card-body space-y-4">
               <h2 className="text-lg font-semibold">Paleta do tema</h2>
               <div className="grid gap-3 md:grid-cols-2">
-                {[
-                  { label: 'Base 100', classes: 'bg-base-100 text-base-content' },
-                  { label: 'Base 200', classes: 'bg-base-200 text-base-content' },
-                  { label: 'Base 300', classes: 'bg-base-300 text-base-content' },
-                  { label: 'Primary', classes: 'bg-primary text-primary-content' },
-                  { label: 'Secondary', classes: 'bg-secondary text-secondary-content' },
-                  { label: 'Accent', classes: 'bg-accent text-accent-content' },
-                  { label: 'Neutral', classes: 'bg-neutral text-neutral-content' },
-                  { label: 'Info', classes: 'bg-info text-info-content' },
-                  { label: 'Success', classes: 'bg-success text-success-content' },
-                  { label: 'Warning', classes: 'bg-warning text-warning-content' },
-                  { label: 'Error', classes: 'bg-error text-error-content' }
-                ].map((token) => (
+                {paletteTokens.map((token) => (
                   <div
                     key={token.label}
-                    className={`flex items-center justify-between rounded-lg border border-base-300/60 px-3 py-3 ${token.classes}`}
+                    className={`flex items-start justify-between rounded-lg border border-base-300/60 px-3 py-3 ${token.classes}`}
                   >
-                    <span className="font-medium">{token.label}</span>
-                    <span className="text-xs uppercase tracking-wide">{token.classes.split(' ')[0].replace('bg-', '')}</span>
+                    <div className="space-y-1">
+                      <span className="text-sm font-semibold">{token.label}</span>
+                      <p className="text-xs opacity-80">{token.value}</p>
+                    </div>
+                    <span className="text-[0.65rem] uppercase tracking-wide">{token.classes.split(' ')[0].replace('bg-', '')}</span>
                   </div>
                 ))}
               </div>
@@ -45,12 +65,11 @@ export default function ZUiPlaygroundPage() {
             <div className="card-body space-y-4">
               <h2 className="text-lg font-semibold">Buttons</h2>
               <div className="flex flex-wrap gap-3">
-                <button className="btn">Default</button>
-                <button className="btn btn-primary">Primary</button>
-                <button className="btn btn-secondary">Secondary</button>
-                <button className="btn btn-accent">Accent</button>
-                <button className="btn btn-ghost">Ghost</button>
-                <button className="btn btn-outline">Outline</button>
+                {buttonVariants.map((variant) => (
+                  <button key={variant.label} className={variant.className}>
+                    {variant.label}
+                  </button>
+                ))}
                 <button className="btn btn-primary" disabled>
                   Disabled
                 </button>
@@ -164,6 +183,11 @@ export default function ZUiPlaygroundPage() {
                   <h3 className="text-2xl font-bold">Título sobre primary</h3>
                   <p className="text-sm opacity-90">Texto ajustado ao primary-content.</p>
                 </div>
+                <div className="space-y-2 rounded-lg border border-base-300/60 bg-secondary p-4 text-secondary-content">
+                  <p className="text-xs uppercase opacity-80">Secondary</p>
+                  <h3 className="text-2xl font-bold">CTA destaque</h3>
+                  <p className="text-sm opacity-90">Secundário vermelho brand para contrastes fortes.</p>
+                </div>
                 <div className="space-y-2 rounded-lg border border-base-300/60 bg-success p-4 text-success-content">
                   <p className="text-xs uppercase opacity-80">Success</p>
                   <h3 className="text-2xl font-bold">Feedback positivo</h3>
@@ -174,11 +198,16 @@ export default function ZUiPlaygroundPage() {
                   <h3 className="text-2xl font-bold">Atenção do usuário</h3>
                   <p className="text-sm opacity-90">Indicado para alertas de risco moderado.</p>
                 </div>
+                <div className="space-y-2 rounded-lg border border-base-300/60 bg-error p-4 text-error-content">
+                  <p className="text-xs uppercase opacity-80">Error</p>
+                  <h3 className="text-2xl font-bold">Estados críticos</h3>
+                  <p className="text-sm opacity-90">Para erros que exigem correção imediata.</p>
+                </div>
               </div>
             </div>
           </section>
         </div>
-      </div>
+      </ZkContainer>
     </main>
   );
 }
