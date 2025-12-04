@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { LayoutGrid, Palette, SlidersHorizontal, Moon, SunMedium, MessageSquare, ShoppingBag, PanelRightDashed } from "lucide-react";
+import { BadgeCheck, CheckCircle2, Flame, LayoutGrid, Layers, MessageSquare, Palette, Wand2 } from "lucide-react";
 
 import { ZkContainer } from "@/components/zekai-ui/ZkContainer";
 import { cn } from "@/lib/utils";
@@ -22,20 +22,20 @@ const paletteTokens: Record<string, PaletteToken[]> = {
     { label: "base-100", className: "bg-base-100 text-base-content", value: "oklch(25.33% 0.016 252.42)" },
     { label: "base-200", className: "bg-base-200 text-base-content", value: "oklch(23.26% 0.014 253.1)" },
     { label: "base-300", className: "bg-base-300 text-base-content", value: "oklch(21.15% 0.012 254.09)" },
-    { label: "base-content", className: "bg-base-content text-base-100", value: "oklch(97.807% 0.029 256.847)" }
+    { label: "base-content", className: "bg-base-content text-base-100", value: "oklch(97.807% 0.029 256.847)" },
   ],
   brand: [
     { label: "primary", className: "bg-primary text-primary-content", value: "oklch(98% 0.003 247.858)" },
     { label: "secondary", className: "bg-secondary text-secondary-content", value: "oklch(64% 0.246 16.439)" },
     { label: "accent", className: "bg-accent text-accent-content", value: "oklch(0% 0 0)" },
-    { label: "neutral", className: "bg-neutral text-neutral-content", value: "oklch(37% 0.034 259.733)" }
+    { label: "neutral", className: "bg-neutral text-neutral-content", value: "oklch(37% 0.034 259.733)" },
   ],
   states: [
     { label: "info", className: "bg-info text-info-content", value: "oklch(74% 0.16 232.661)" },
     { label: "success", className: "bg-success text-success-content", value: "oklch(76% 0.177 163.223)" },
     { label: "warning", className: "bg-warning text-warning-content", value: "oklch(85% 0.199 91.936)" },
-    { label: "error", className: "bg-error text-error-content", value: "oklch(70% 0.191 22.216)" }
-  ]
+    { label: "error", className: "bg-error text-error-content", value: "oklch(70% 0.191 22.216)" },
+  ],
 };
 
 const buttonVariants = [
@@ -43,28 +43,23 @@ const buttonVariants = [
   { label: "Primary", className: "btn btn-primary" },
   { label: "Secondary", className: "btn btn-secondary" },
   { label: "Accent", className: "btn btn-accent" },
-  { label: "Info", className: "btn btn-info" },
-  { label: "Success", className: "btn btn-success" },
-  { label: "Warning", className: "btn btn-warning" },
-  { label: "Error", className: "btn btn-error" },
   { label: "Ghost", className: "btn btn-ghost" },
   { label: "Outline", className: "btn btn-outline" },
   { label: "Link", className: "btn btn-link" },
   { label: "Disabled", className: "btn", disabled: true },
-  { label: "Primary sm", className: "btn btn-primary btn-sm" },
-  { label: "Secondary lg", className: "btn btn-secondary btn-lg" },
-  { label: "Block", className: "btn btn-primary btn-block" }
+  { label: "Small", className: "btn btn-primary btn-sm" },
+  { label: "Large", className: "btn btn-secondary btn-lg" },
+  { label: "Block", className: "btn btn-primary btn-block" },
 ];
 
-const badges = [
-  "badge",
+const badgeVariants = [
   "badge-primary",
   "badge-secondary",
   "badge-accent",
   "badge-info",
   "badge-success",
   "badge-warning",
-  "badge-error"
+  "badge-error",
 ];
 
 export default function ZUiPlaygroundPage() {
@@ -89,44 +84,42 @@ export default function ZUiPlaygroundPage() {
     <main className="min-h-dvh bg-base-200 text-base-content" data-theme={theme}>
       <ZkContainer className="space-y-8 py-10">
         <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
-            <p className="badge badge-outline border-base-300 uppercase tracking-[0.18em]">Playground</p>
-            <h1 className="text-3xl font-semibold lg:text-4xl">ZEKAI UI · Theme Playground</h1>
-            <p className="max-w-3xl text-sm text-base-content/70 lg:text-base">
-              Página neutra para validar o visual do ZEKAI UI com DaisyUI. Alterne temas, navegue pelas abas e compare
-              componentes antes de aplicar em produtos reais.
-            </p>
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-base-content/60">Playground</p>
+            <div className="space-y-1">
+              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">ZEKAI UI · Theme Playground</h1>
+              <p className="max-w-3xl text-sm text-base-content/70 lg:text-base">
+                Página neutra para validar o visual da ZEKAI UI com DaisyUI. Alterne temas, navegue pelas abas e compare
+                componentes antes de aplicar em produtos reais.
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-base-content/70">
-              <span>Tema</span>
-              <div className="join">
-                <button
-                  type="button"
-                  className={cn("btn btn-xs join-item", theme === "Z-Dark" && "btn-active btn-primary")}
-                  onClick={() => setTheme("Z-Dark")}
-                  aria-pressed={theme === "Z-Dark"}
-                >
-                  <Moon className="h-4 w-4" />
-                  <span className="hidden md:inline">Z-Dark</span>
-                </button>
-                <button
-                  type="button"
-                  className={cn("btn btn-xs join-item", theme === "Z-Light" && "btn-active btn-secondary")}
-                  onClick={() => setTheme("Z-Light")}
-                  aria-pressed={theme === "Z-Light"}
-                >
-                  <SunMedium className="h-4 w-4" />
-                  <span className="hidden md:inline">Z-Light</span>
-                </button>
-              </div>
+          <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.15em] text-base-content/70">
+            <span>Tema</span>
+            <div className="join rounded-full border border-base-300/60 bg-base-100/80 shadow-sm">
+              <button
+                type="button"
+                className={cn("btn btn-xs join-item", theme === "Z-Dark" && "btn-active btn-primary")}
+                onClick={() => setTheme("Z-Dark")}
+                aria-pressed={theme === "Z-Dark"}
+              >
+                Z-Dark
+              </button>
+              <button
+                type="button"
+                className={cn("btn btn-xs join-item", theme === "Z-Light" && "btn-active btn-secondary")}
+                onClick={() => setTheme("Z-Light")}
+                aria-pressed={theme === "Z-Light"}
+              >
+                Z-Light
+              </button>
             </div>
           </div>
         </header>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="tabs tabs-boxed tabs-sm bg-base-200">
+        <div className="flex flex-wrap items-center gap-3 justify-between">
+          <div className="tabs tabs-boxed tabs-sm bg-base-200/80">
             <button
               className={cn("tab gap-2", activeTab === "demo" && "tab-active")}
               onClick={() => setActiveTab("demo")}
@@ -140,7 +133,7 @@ export default function ZUiPlaygroundPage() {
               onClick={() => setActiveTab("variants")}
               title="Component Variants"
             >
-              <SlidersHorizontal className={tabIconClasses} />
+              <Layers className={tabIconClasses} />
               <span className="hidden md:inline">Component Variants</span>
             </button>
             <button
@@ -156,10 +149,11 @@ export default function ZUiPlaygroundPage() {
               onClick={() => setActiveTab("editor")}
               title="Theme Editor"
             >
-              <PanelRightDashed className={tabIconClasses} />
+              <Wand2 className={tabIconClasses} />
               <span className="hidden md:inline">Theme Editor</span>
             </button>
           </div>
+          <span className="text-xs text-base-content/60">Static showcase</span>
         </div>
 
         {activeTab === "demo" && <ComponentsDemo />}
@@ -173,16 +167,16 @@ export default function ZUiPlaygroundPage() {
 
 function ComponentsDemo() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">Components Demo</h2>
-          <p className="text-sm text-base-content/70">Layout de referência inspirado no Theme Generator da DaisyUI.</p>
+          <p className="text-sm text-base-content/70">Mini dashboard inspirado no Theme Generator da DaisyUI.</p>
         </div>
-        <span className="badge badge-outline border-base-300">Static showcase</span>
+        <span className="badge badge-outline border-base-300">Static</span>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)_320px] xl:grid-cols-[340px_minmax(0,1fr)_360px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.6fr)_minmax(0,1.2fr)]">
         <div className="space-y-6">
           <FilterPanel />
           <CalendarCard />
@@ -229,17 +223,16 @@ function FilterPanel() {
         </div>
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/60">Categories</p>
-          {[
-            "Hoodies",
-            "Bags",
-            "Shoes",
-            "Accessories",
-            "Gadgets"
-          ].map((item, index) => (
+          {["Hoodies", "Bags", "Shoes", "Accessories"].map((item, index) => (
             <label key={item} className="label cursor-pointer gap-2">
               <input
                 type="checkbox"
-                className={cn("checkbox", index === 0 && "checkbox-primary", index === 1 && "checkbox-secondary", index === 2 && "checkbox-accent")}
+                className={cn(
+                  "checkbox",
+                  index === 0 && "checkbox-primary",
+                  index === 1 && "checkbox-secondary",
+                  index === 2 && "checkbox-accent"
+                )}
                 defaultChecked={index < 2}
               />
               <span className="label-text">{item}</span>
@@ -308,8 +301,7 @@ function OverviewCard() {
         <div className="space-y-2">
           <h2 className="text-xl font-semibold">Components Demo</h2>
           <p className="text-sm text-base-content/70">
-            Layout inspirado no Theme Generator da DaisyUI para validar estados, hierarquia e contraste com os temas
-            Z-Dark/Z-Light.
+            Layout inspirado no Theme Generator da DaisyUI para validar estados, hierarquia e contraste com os temas Z-Dark/Z-Light.
           </p>
         </div>
 
@@ -322,7 +314,7 @@ function OverviewCard() {
           <div className="stat rounded-2xl border border-base-300/70 bg-base-200/70">
             <div className="stat-title">Conversion</div>
             <div className="stat-value">4.2%</div>
-            <div className="stat-desc">Steady • multi-device</div>
+            <div className="stat-desc">Steady · multi-device</div>
           </div>
         </div>
 
@@ -332,12 +324,7 @@ function OverviewCard() {
               <h3 className="card-title text-base">Traffic sources</h3>
               <div className="flex items-end gap-2">
                 {[60, 80, 40, 55, 72, 48, 66].map((height, idx) => (
-                  <div
-                    key={idx}
-                    className="flex-1 rounded-t-lg bg-primary/80"
-                    style={{ height: `${height}px` }}
-                    aria-hidden
-                  />
+                  <div key={idx} className="flex-1 rounded-t-lg bg-primary/80" style={{ height: `${height}px` }} aria-hidden />
                 ))}
               </div>
               <p className="text-xs text-base-content/60">Barras estáticas para simular gráfico de tráfego.</p>
@@ -391,7 +378,7 @@ function ComposerCard() {
           <span className="badge badge-outline border-base-300">Draft</span>
         </div>
         <textarea className="textarea textarea-bordered h-28 w-full bg-base-200/70" placeholder="Share an update..." />
-        <div className="flex flex-wrap items-center gap-2 justify-end">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <button className="btn btn-ghost btn-sm">Save draft</button>
           <button className="btn btn-primary btn-sm">Publish</button>
         </div>
@@ -471,7 +458,7 @@ function OrdersCard() {
     { name: "Avery Fields", status: "Paid" },
     { name: "Morgan Lee", status: "Pending" },
     { name: "Taylor Brooks", status: "Refunded" },
-    { name: "Charlie Kim", status: "Processing" }
+    { name: "Charlie Kim", status: "Processing" },
   ];
   return (
     <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
@@ -514,42 +501,36 @@ function ProductCard() {
       <div className="card-body space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5" />
-            <h3 className="card-title text-base">Featured product</h3>
+            <Flame className="h-5 w-5" />
+            <h3 className="card-title text-base">Product spotlight</h3>
           </div>
           <span className="badge badge-secondary">SALE</span>
         </div>
         <div className="rounded-xl bg-base-200/70 p-4">
-          <div className="mb-2 flex items-center justify-between text-sm text-base-content/80">
-            <span>Wireless Headphones</span>
-            <div className="rating rating-xs">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <input
-                  key={star}
-                  type="radio"
-                  name="rating-2"
-                  className="mask mask-star-2 bg-warning"
-                  defaultChecked={star === 4}
-                  aria-label={`Rating ${star}`}
-                />
-              ))}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-base-content/60">Nike Shoes</p>
+              <p className="text-lg font-semibold">Air Runner X</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs line-through text-base-content/50">$220</p>
+              <p className="text-xl font-bold text-primary">$180</p>
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="space-y-1 text-sm">
-              <p className="text-base-content/60 line-through">$320</p>
-              <p className="text-xl font-semibold">$249</p>
+          <div className="mt-4 flex items-center justify-between text-xs text-base-content/70">
+            <div className="flex items-center gap-1">
+              <BadgeCheck className="h-4 w-4" />
+              <span>Free returns</span>
             </div>
-            <button className="btn btn-primary btn-sm">Add to cart</button>
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>4.8 (1.2k)</span>
+            </div>
           </div>
         </div>
-        <div className="space-y-1 text-sm text-base-content/70">
-          <p>Noise cancellation, 32h battery life, fast pairing.</p>
-          <div className="flex flex-wrap gap-2">
-            <span className="badge badge-outline">Audio</span>
-            <span className="badge badge-outline">Wireless</span>
-            <span className="badge badge-outline">New</span>
-          </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <button className="btn btn-primary btn-sm">Add to cart</button>
+          <button className="btn btn-outline btn-sm">Wishlist</button>
         </div>
       </div>
     </div>
@@ -558,18 +539,16 @@ function ProductCard() {
 
 function AlertsCard() {
   return (
-    <div className="space-y-3">
-      <div className="alert alert-info text-sm">
-        <span>There are 9 new messages.</span>
-      </div>
-      <div className="alert alert-success text-sm">
-        <span>Verification process completed.</span>
-      </div>
-      <div className="alert alert-warning text-sm">
-        <span>Click to verify your email address.</span>
-      </div>
-      <div className="alert alert-error text-sm">
-        <span>Access denied. Contact support.</span>
+    <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+      <div className="card-body space-y-3">
+        <h3 className="card-title text-base">Alerts</h3>
+        <p className="text-sm text-base-content/70">Feedback de status com cores do tema.</p>
+        <div className="space-y-2">
+          <div className="alert alert-info text-sm">There are 9 new messages</div>
+          <div className="alert alert-success text-sm">Verification process completed</div>
+          <div className="alert alert-warning text-sm">Click to verify your email</div>
+          <div className="alert alert-error text-sm">Access denied — contact support</div>
+        </div>
       </div>
     </div>
   );
@@ -577,134 +556,111 @@ function AlertsCard() {
 
 function ComponentVariants() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">Component Variants</h2>
-          <p className="text-sm text-base-content/70">Estados essenciais para validar consistência do tema.</p>
+          <p className="text-sm text-base-content/70">Variações rápidas para comparar estados e tamanhos.</p>
         </div>
-        <span className="badge badge-outline border-base-300">Tokens only</span>
+        <span className="badge badge-outline border-base-300">Variants</span>
       </div>
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
-          <div className="card-body space-y-3">
-            <h3 className="card-title text-base">Buttons</h3>
-            <p className="text-sm text-base-content/70">Principais variações do DaisyUI com tamanhos e estados.</p>
-            <div className="flex flex-wrap gap-2">
-              {buttonVariants.map((button) => (
-                <button key={button.label} className={button.className} disabled={button.disabled}>
-                  {button.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
 
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
-          <div className="card-body space-y-3">
-            <h3 className="card-title text-base">Inputs</h3>
-            <p className="text-sm text-base-content/70">Bordas, estados de cor e variações de tamanho.</p>
-            <div className="space-y-3">
-              <input type="text" placeholder="input" className="input input-bordered w-full" />
-              <input type="text" placeholder="input-primary" className="input input-bordered input-primary w-full" />
-              <input type="text" placeholder="input-secondary" className="input input-bordered input-secondary w-full" />
-              <div className="space-y-1">
-                <input type="text" placeholder="input-error" className="input input-bordered input-error w-full" />
-                <p className="text-xs text-error">Helper text em estado de erro.</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <input type="text" placeholder="input-sm" className="input input-bordered input-sm" />
-                <input type="text" placeholder="input-md" className="input input-bordered input-md" />
-                <input type="text" placeholder="input-lg" className="input input-bordered input-lg" />
-              </div>
-              <select className="select select-bordered w-full">
-                <option>select</option>
-                <option>option A</option>
-                <option>option B</option>
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <CardShell title="Buttons" description="Tamanhos e estilos padrão DaisyUI">
+          <div className="flex flex-wrap gap-2">
+            {buttonVariants.map((variant) => (
+              <button key={variant.label} className={variant.className} disabled={variant.disabled}>
+                {variant.label}
+              </button>
+            ))}
+          </div>
+        </CardShell>
+
+        <CardShell title="Inputs & Forms" description="Combinação de campos e controles">
+          <div className="space-y-3">
+            <label className="form-control gap-2">
+              <span className="label-text text-sm">Email</span>
+              <input type="email" className="input input-bordered" placeholder="name@email.com" />
+              <span className="text-xs text-base-content/60">Helper text for guidance.</span>
+            </label>
+            <label className="form-control gap-2">
+              <span className="label-text text-sm">Select</span>
+              <select className="select select-bordered">
+                <option>Option A</option>
+                <option>Option B</option>
+                <option>Option C</option>
               </select>
+            </label>
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              <label className="flex items-center gap-2">
+                <input type="checkbox" className="checkbox checkbox-primary" defaultChecked />
+                checkbox
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" className="toggle toggle-secondary" />
+                toggle
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="radio" name="demo" className="radio radio-accent" defaultChecked />
+                radio
+              </label>
             </div>
           </div>
-        </div>
+        </CardShell>
+
+        <CardShell title="Badges & Chips" description="Indicadores de status">
+          <div className="flex flex-wrap gap-2">
+            {badgeVariants.map((variant) => (
+              <span key={variant} className={cn("badge", variant)}>
+                {variant.replace("badge-", "")}
+              </span>
+            ))}
+          </div>
+        </CardShell>
+
+        <CardShell title="Alerts & Feedback" description="Alertas com ícones e cores do tema">
+          <div className="space-y-2 text-sm">
+            <div className="alert alert-info">Informational message</div>
+            <div className="alert alert-success">Process completed</div>
+            <div className="alert alert-warning">Please double check</div>
+            <div className="alert alert-error">Something went wrong</div>
+          </div>
+        </CardShell>
+
+        <CardShell title="Tabs & Pills" description="Estados de navegação">
+          <div className="space-y-3">
+            <div className="tabs tabs-boxed">
+              <a className="tab tab-active">Active</a>
+              <a className="tab">Tab</a>
+              <a className="tab">Tab</a>
+            </div>
+            <div className="join">
+              <button className="btn btn-sm join-item">Previous</button>
+              <button className="btn btn-sm join-item">Next</button>
+            </div>
+            <div className="breadcrumbs text-sm">
+              <ul>
+                <li><a>Home</a></li>
+                <li><a>Library</a></li>
+                <li>Data</li>
+              </ul>
+            </div>
+          </div>
+        </CardShell>
       </div>
+    </div>
+  );
+}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
-          <div className="card-body space-y-3">
-            <h3 className="card-title text-base">Badges</h3>
-            <p className="text-sm text-base-content/70">Todas as cores principais em modo outline.</p>
-            <div className="flex flex-wrap gap-2 text-sm">
-              {badges.map((badge) => (
-                <span key={badge} className={cn(badge, "badge-outline capitalize border-base-300/60")}> 
-                  {badge.replace("badge-", "")}
-                </span>
-              ))}
-            </div>
-          </div>
+function CardShell({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+  return (
+    <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+      <div className="card-body space-y-3">
+        <div className="space-y-1">
+          <h3 className="card-title text-base">{title}</h3>
+          {description ? <p className="text-sm text-base-content/70">{description}</p> : null}
         </div>
-
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
-          <div className="card-body space-y-3">
-            <h3 className="card-title text-base">Checkbox / Radio / Toggle</h3>
-            <p className="text-sm text-base-content/70">Estados de seleção e foco em diferentes cores.</p>
-            <div className="space-y-2 text-sm">
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="checkbox checkbox-primary" defaultChecked />
-                  primary
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="checkbox checkbox-secondary" />
-                  secondary
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="checkbox checkbox-accent" />
-                  accent
-                </label>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="flex items-center gap-2">
-                  <input type="radio" name="variant-radio" className="radio radio-primary" defaultChecked />
-                  primary
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="radio" name="variant-radio" className="radio radio-secondary" />
-                  secondary
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="radio" name="variant-radio" className="radio radio-accent" />
-                  accent
-                </label>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="toggle toggle-primary" defaultChecked />
-                  primary
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="toggle toggle-secondary" />
-                  secondary
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="toggle toggle-accent" />
-                  accent
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
-        <div className="card-body space-y-3">
-          <h3 className="card-title text-base">Alerts</h3>
-          <p className="text-sm text-base-content/70">Feedback de status com cores do tema.</p>
-          <div className="space-y-2">
-            <div className="alert alert-info text-sm">Info alert — neutral guidance.</div>
-            <div className="alert alert-success text-sm">Success alert — operation completed.</div>
-            <div className="alert alert-warning text-sm">Warning alert — please double check.</div>
-            <div className="alert alert-error text-sm">Error alert — something went wrong.</div>
-          </div>
-        </div>
+        {children}
       </div>
     </div>
   );
@@ -712,13 +668,13 @@ function ComponentVariants() {
 
 function ColorPalette() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">Color Palette</h2>
-          <p className="text-sm text-base-content/70">Cores principais do ZEKAI UI derivadas de Z-Dark/Z-Light.</p>
+          <p className="text-sm text-base-content/70">Tokens principais do tema ZEKAI UI.</p>
         </div>
-        <span className="badge badge-outline border-base-300">Tokens</span>
+        <span className="badge badge-outline border-base-300">Palette</span>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <PaletteCard title="Base" tokens={paletteTokens.base} />
@@ -726,141 +682,7 @@ function ColorPalette() {
         <PaletteCard title="States" tokens={paletteTokens.states} />
       </div>
       <div className="alert alert-info text-sm">
-        <span>
-          Paleta derivada dos temas oficiais Z-Dark/Z-Light. Alterne o tema no topo para validar contraste e legibilidade.
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function ThemeEditor() {
-  return (
-    <div className="space-y-6">
-      <div className="card border border-base-300/70 bg-base-100/95 shadow-2xl">
-        <div className="card-body space-y-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="card-title text-base">Theme Editor</h2>
-              <p className="text-sm text-base-content/70">
-                Visual prévio inspirado no DaisyUI Theme Generator. Controles são estáticos para validar spacing, estados e foco
-                do ZEKAI UI.
-              </p>
-            </div>
-            <span className="badge badge-outline border-base-300">Preview only</span>
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            <div className="space-y-4 rounded-2xl border border-base-300/70 bg-base-200/60 p-4">
-              <h3 className="text-sm font-semibold">Tokens visuais</h3>
-              <label className="form-control gap-2">
-                <div className="label p-0">
-                  <span className="label-text">Radius</span>
-                  <span className="label-text-alt text-xs text-base-content/60">0.25rem</span>
-                </div>
-                <input type="range" min={0} max={100} defaultValue={40} className="range range-primary range-xs" />
-              </label>
-              <label className="form-control gap-2">
-                <div className="label p-0">
-                  <span className="label-text">Shadow depth</span>
-                  <span className="label-text-alt text-xs text-base-content/60">medium</span>
-                </div>
-                <input type="range" min={0} max={100} defaultValue={55} className="range range-secondary range-xs" />
-              </label>
-              <label className="form-control gap-2">
-                <div className="label p-0">
-                  <span className="label-text">Border width</span>
-                  <span className="label-text-alt text-xs text-base-content/60">0.5px</span>
-                </div>
-                <input type="range" min={0} max={100} defaultValue={20} className="range range-accent range-xs" />
-              </label>
-            </div>
-
-            <div className="space-y-4 rounded-2xl border border-base-300/70 bg-base-200/60 p-4">
-              <h3 className="text-sm font-semibold">Estado do tema</h3>
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="label cursor-pointer gap-3 rounded-lg border border-base-300/60 bg-base-100/80 px-3 py-2">
-                  <span className="label-text">Ativar modo dark (Z-Dark)</span>
-                  <input type="checkbox" className="toggle toggle-primary" defaultChecked />
-                </label>
-                <label className="label cursor-pointer gap-3 rounded-lg border border-base-300/60 bg-base-100/80 px-3 py-2">
-                  <span className="label-text">Ativar modo light (Z-Light)</span>
-                  <input type="checkbox" className="toggle toggle-secondary" />
-                </label>
-              </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                {["Primary", "Accent", "Neutral", "Info"].map((token) => (
-                  <label key={token} className="form-control gap-2">
-                    <div className="label p-0">
-                      <span className="label-text">{token} color</span>
-                      <span className="label-text-alt text-xs text-base-content/60">preview only</span>
-                    </div>
-                    <input type="color" className="input input-bordered h-10" defaultValue="#ffffff" aria-label={`${token} color`} />
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-3">
-            <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
-              <div className="card-body space-y-3">
-                <h4 className="card-title text-sm">Preview · Buttons</h4>
-                <div className="flex flex-wrap gap-2">
-                  <button className="btn btn-primary btn-sm">Primary</button>
-                  <button className="btn btn-secondary btn-sm">Secondary</button>
-                  <button className="btn btn-accent btn-sm">Accent</button>
-                  <button className="btn btn-outline btn-sm">Outline</button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button className="btn btn-success btn-xs">Success</button>
-                  <button className="btn btn-warning btn-xs">Warn</button>
-                  <button className="btn btn-error btn-xs">Error</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
-              <div className="card-body space-y-3">
-                <h4 className="card-title text-sm">Preview · Form controls</h4>
-                <label className="form-control gap-2">
-                  <span className="label-text text-sm">Label</span>
-                  <input type="text" className="input input-bordered input-sm" placeholder="Text input" />
-                </label>
-                <label className="form-control gap-2">
-                  <span className="label-text text-sm">Select</span>
-                  <select className="select select-bordered select-sm">
-                    <option>Option A</option>
-                    <option>Option B</option>
-                    <option>Option C</option>
-                  </select>
-                </label>
-                <div className="flex flex-wrap items-center gap-3 text-sm">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="checkbox checkbox-primary checkbox-sm" defaultChecked />
-                    primary
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="checkbox checkbox-accent checkbox-sm" />
-                    accent
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
-              <div className="card-body space-y-3">
-                <h4 className="card-title text-sm">Preview · Alerts</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="alert alert-info">Info tone sample</div>
-                  <div className="alert alert-success">Success tone sample</div>
-                  <div className="alert alert-warning">Warning tone sample</div>
-                  <div className="alert alert-error">Error tone sample</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        Paleta derivada dos temas oficiais Z-Dark/Z-Light. Alterne o tema no topo para validar contraste e legibilidade.
       </div>
     </div>
   );
@@ -887,6 +709,112 @@ function PaletteCard({ title, tokens }: { title: string; tokens: PaletteToken[] 
               <span className="text-[0.7rem] uppercase opacity-80">{token.label}</span>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ThemeEditor() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold">Theme Editor</h2>
+          <p className="text-sm text-base-content/70">
+            Ajuste visual estático inspirado no Theme Generator da DaisyUI. Controles não aplicam mudanças reais.
+          </p>
+        </div>
+        <span className="badge badge-outline border-base-300">Preview</span>
+      </div>
+
+      <div className="card border border-base-300/70 bg-base-100/95 shadow-2xl">
+        <div className="card-body space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-4 rounded-2xl border border-base-300/70 bg-base-200/60 p-4">
+              <h3 className="text-sm font-semibold">Brand colors</h3>
+              {["Primary", "Secondary", "Accent", "Neutral"].map((token) => (
+                <div key={token} className="flex items-center gap-3">
+                  <input type="color" className="input input-bordered h-10 w-16" defaultValue="#ffffff" aria-label={token} />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">{token}</p>
+                    <p className="text-xs text-base-content/60">Preview only</p>
+                  </div>
+                  <input type="text" className="input input-bordered input-sm max-w-[140px]" defaultValue="#FFFFFF" />
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-base-300/70 bg-base-200/60 p-4">
+              <h3 className="text-sm font-semibold">States</h3>
+              {["Info", "Success", "Warning", "Error"].map((token) => (
+                <div key={token} className="flex items-center gap-3">
+                  <input type="color" className="input input-bordered h-10 w-16" defaultValue="#ffffff" aria-label={token} />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">{token}</p>
+                    <p className="text-xs text-base-content/60">Static view</p>
+                  </div>
+                  <input type="text" className="input input-bordered input-sm max-w-[140px]" defaultValue="#FFFFFF" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="rounded-2xl border border-base-300/70 bg-base-200/60 p-4 space-y-3">
+              <h3 className="text-sm font-semibold">Radius & Corners</h3>
+              <label className="form-control gap-2">
+                <div className="label p-0">
+                  <span className="label-text">Border radius</span>
+                  <span className="label-text-alt text-xs text-base-content/60">Md</span>
+                </div>
+                <input type="range" min={0} max={100} defaultValue={45} className="range range-primary range-xs" />
+                <div className="flex justify-between text-[0.7rem] text-base-content/60">
+                  <span>Sm</span>
+                  <span>Md</span>
+                  <span>Lg</span>
+                  <span>Full</span>
+                </div>
+              </label>
+            </div>
+
+            <div className="rounded-2xl border border-base-300/70 bg-base-200/60 p-4 space-y-3">
+              <h3 className="text-sm font-semibold">Density</h3>
+              <label className="form-control gap-2">
+                <div className="label p-0">
+                  <span className="label-text">Spacing</span>
+                  <span className="label-text-alt text-xs text-base-content/60">Comfort</span>
+                </div>
+                <input type="range" min={0} max={100} defaultValue={55} className="range range-secondary range-xs" />
+                <div className="flex justify-between text-[0.7rem] text-base-content/60">
+                  <span>Compact</span>
+                  <span>Balanced</span>
+                  <span>Relaxed</span>
+                </div>
+              </label>
+            </div>
+
+            <div className="rounded-2xl border border-base-300/70 bg-base-200/60 p-4 space-y-3">
+              <h3 className="text-sm font-semibold">Misc</h3>
+              <label className="label cursor-pointer justify-between gap-3 rounded-lg border border-base-300/60 bg-base-100/80 px-3 py-2">
+                <span className="label-text">Enable subtle shadows</span>
+                <input type="checkbox" className="toggle toggle-primary" defaultChecked />
+              </label>
+              <label className="label cursor-pointer justify-between gap-3 rounded-lg border border-base-300/60 bg-base-100/80 px-3 py-2">
+                <span className="label-text">Use softer borders</span>
+                <input type="checkbox" className="toggle toggle-secondary" />
+              </label>
+              <label className="label cursor-pointer justify-between gap-3 rounded-lg border border-base-300/60 bg-base-100/80 px-3 py-2">
+                <span className="label-text">High contrast mode</span>
+                <input type="checkbox" className="toggle toggle-accent" />
+              </label>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button className="btn btn-primary">Apply (visual only)</button>
+            <button className="btn btn-ghost">Reset</button>
+          </div>
         </div>
       </div>
     </div>
