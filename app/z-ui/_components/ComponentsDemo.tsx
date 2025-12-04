@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Check, ChevronLeft, ChevronRight, Menu, Mic, Phone, Settings, Volume2 } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Menu, Mic, Phone, Play, Settings, Volume2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -146,6 +146,13 @@ function PreviewCard() {
           <span className="badge badge-neutral badge-sm">1h</span>
         </div>
       </div>
+
+      <div className="tabs tabs-bordered text-sm">
+        <a className="tab">Tab 1</a>
+        <a className="tab tab-active">Tab 2</a>
+        <a className="tab">Tab 3</a>
+      </div>
+      <p className="text-sm text-base-content/80">Tab content 2</p>
     </DemoCard>
   );
 }
@@ -213,11 +220,11 @@ function PriceRangeCard() {
         <span className="badge badge-ghost">$</span>
         <span>Price range</span>
       </div>
-      <div className="text-center text-4xl font-semibold">60</div>
-      <input type="range" min={0} max={100} defaultValue={60} className="range range-primary w-full" />
+      <div className="text-center text-4xl font-semibold">50</div>
+      <input type="range" min={0} max={200} defaultValue={50} className="range range-primary w-full" />
       <div className="flex justify-between text-xs text-base-content/60">
         <span>0</span>
-        <span>100</span>
+        <span>200</span>
       </div>
     </DemoCard>
   );
@@ -275,9 +282,9 @@ function CreateAccountCard() {
       <p className="text-sm text-base-content/70">Registration is free and only takes a minute.</p>
       <label className="form-control w-full">
         <div className="label p-0">
-          <span className="label-text">Username</span>
+          <span className="label-text">Email</span>
         </div>
-        <input className="input input-bordered" placeholder="your username" />
+        <input className="input input-bordered" placeholder="name@email.com" />
       </label>
       <label className="form-control w-full">
         <div className="label p-0">
@@ -492,10 +499,10 @@ function AudioCard() {
         <h3 className="text-base font-semibold">PM Zoomcall ASMR</h3>
         <p className="text-sm text-base-content/70">Project Manager talking for 2 hours.</p>
       </div>
-      <div className="flex items-center gap-3 text-xs">
+      <div className="flex items-center gap-2 text-xs text-base-content/70">
         <span className="badge badge-outline">13:39</span>
         <input type="range" min={0} max={120} defaultValue={45} className="range range-primary w-full" />
-        <span className="text-base-content/70">120:00</span>
+        <span>120:00</span>
       </div>
       <div className="flex items-center justify-around text-base-content/70">
         <button className="btn btn-square btn-ghost btn-sm">
