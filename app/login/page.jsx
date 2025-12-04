@@ -9,8 +9,6 @@ import { ShieldCheck, Apple, ArrowRight, Loader2 } from 'lucide-react';
 import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
 import { ZkPage } from '@/components/zekai-ui/ZkPage';
 import useUserStore from '../../store/userStore';
-import ValidatedField from '../../components/ui/ValidatedField';
-import Button from '../../components/ui/Button';
 
 function LoginContent() {
   const router = useRouter();
@@ -20,6 +18,9 @@ function LoginContent() {
   const [error, setError] = useState('');
   const [touched, setTouched] = useState({ identifier: false, senha: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const identifierError = !form.identifier && touched.identifier ? 'Informe e-mail ou usuário.' : '';
+  const senhaError = !form.senha && touched.senha ? 'Informe a senha.' : '';
 
   useEffect(() => {
     if (!hydrated) {
@@ -103,44 +104,64 @@ function LoginContent() {
   };
 
   return (
-    <ZkPage>
-      <ZkContainer className="flex min-h-dvh flex-col justify-center py-10 lg:py-16">
-        <div className="grid w-full grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center lg:gap-12">
+    <ZkPage className="bg-gradient-to-br from-base-300/60 via-base-200 to-base-100 text-base-content">
+      <ZkContainer className="flex min-h-dvh items-center py-10 lg:py-16">
+        <div className="grid w-full grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-center lg:gap-12">
           <section className="order-1 w-full max-w-md justify-self-center lg:order-2 lg:justify-self-end">
-            <div className="card w-full border border-base-300/70 bg-base-200/80 shadow-xl backdrop-blur">
-              <div className="card-body space-y-4">
+            <div className="card w-full border border-base-300/60 bg-base-100 shadow-xl">
+              <div className="card-body space-y-5">
                 <header className="space-y-1 text-center">
-                  <h2 className="text-lg font-semibold text-base-content">Entrar</h2>
+                  <h2 className="text-xl font-semibold">Entrar</h2>
                   <p className="text-sm text-base-content/70">Use suas credenciais para acessar o painel.</p>
                 </header>
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                  <ValidatedField
-                    name="identifier"
-                    type="text"
-                    label="E-mail ou usuário"
-                    placeholder="voce@bjj.academy ou seu usuário"
-                    value={form.identifier}
-                    onChange={handleChange}
-                    onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
-                    helper="Login aceita e-mail ou username (case-insensitive)"
-                    error={!form.identifier && touched.identifier ? 'Informe e-mail ou usuário' : ''}
-                    success={form.identifier && !error ? 'Formato válido' : ''}
-                    required
-                  />
-                  <ValidatedField
-                    name="senha"
-                    type="password"
-                    label="Senha"
-                    placeholder="••••••••"
-                    value={form.senha}
-                    onChange={handleChange}
-                    onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
-                    helper="Mínimo 10 caracteres; senha piloto: BJJ@pilot2025"
-                    error={!form.senha && touched.senha ? 'Informe a senha' : ''}
-                    success={form.senha && !error ? 'Ok' : ''}
-                    required
-                  />
-                  <div className="flex items-center justify-between text-sm text-base-content/80">
+                <form className="space-y-5" onSubmit={handleSubmit}>
+                  <div className="form-control space-y-2">
+                    <label className="label pb-0">
+                      <span className="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/80">
+                        E-mail ou usuário
+                      </span>
+                    </label>
+                    <input
+                      name="identifier"
+                      type="text"
+                      placeholder="voce@bjj.academy ou seu usuário"
+                      value={form.identifier}
+                      onChange={handleChange}
+                      onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
+                      className="input input-bordered w-full bg-base-100 text-sm focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
+                      required
+                    />
+                    {identifierError ? (
+                      <p className="text-xs text-error">{identifierError}</p>
+                    ) : (
+                      <p className="text-[0.68rem] text-base-content/60">Login aceita e-mail ou username (case-insensitive).</p>
+                    )}
+                  </div>
+
+                  <div className="form-control space-y-2">
+                    <label className="label pb-0">
+                      <span className="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/80">
+                        Senha
+                      </span>
+                    </label>
+                    <input
+                      name="senha"
+                      type="password"
+                      placeholder="••••••••"
+                      value={form.senha}
+                      onChange={handleChange}
+                      onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
+                      className="input input-bordered w-full bg-base-100 text-sm focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
+                      required
+                    />
+                    {senhaError ? (
+                      <p className="text-xs text-error">{senhaError}</p>
+                    ) : (
+                      <p className="text-[0.68rem] text-base-content/60">Mínimo 10 caracteres; senha piloto: BJJ@pilot2025</p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-base-content/80">
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -151,63 +172,71 @@ function LoginContent() {
                       />
                       Lembrar de mim nesta sessão
                     </label>
-                    <a href="/esqueci-senha" className="text-primary hover:text-primary/80 hover:underline">
+                    <a href="/esqueci-senha" className="link link-primary text-xs font-semibold">
                       Esqueci minha senha
                     </a>
                   </div>
+
                   {error && <p className="text-sm text-error">{error}</p>}
-                  <Button type="submit" className="w-full justify-center" disabled={isSubmitting}>
-                    {isSubmitting ? 'Entrando...' : 'Acessar painel'}{' '}
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary w-full justify-center gap-2"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Entrando...' : 'Acessar painel'}
                     {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight size={15} />}
-                  </Button>
+                  </button>
 
                   <div className="flex items-center gap-3 text-xs text-base-content/70">
-                    <span className="h-px flex-1 bg-base-300" aria-hidden />
-                    <span className="text-base-content/70">ou continue com</span>
-                    <span className="h-px flex-1 bg-base-300" aria-hidden />
+                    <div className="h-px flex-1 bg-base-300/60" aria-hidden />
+                    <span>ou continue com</span>
+                    <div className="h-px flex-1 bg-base-300/60" aria-hidden />
                   </div>
 
-                  <div className="grid gap-3 text-sm sm:grid-cols-2">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1">
                       <button
                         type="button"
-                        className="btn w-full justify-center gap-2 border border-base-300 bg-base-200/80 text-base-content hover:border-base-200 hover:bg-base-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                        className="btn btn-outline w-full justify-center gap-2 border-base-300 bg-base-100 text-base-content hover:border-base-200 hover:bg-base-200"
                         aria-disabled="true"
                         disabled
                       >
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-base-100 text-[13px] font-semibold text-base-content">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-base-200 text-[13px] font-semibold">
                           G
                         </span>
                         Google
                       </button>
-                      <p className="text-center text-xs text-base-content/60">Em breve</p>
+                      <p className="text-center text-[0.68rem] text-base-content/60">Em breve</p>
                     </div>
                     <div className="space-y-1">
                       <button
                         type="button"
-                        className="btn w-full justify-center gap-2 border border-base-300 bg-base-200/80 text-base-content hover:border-base-200 hover:bg-base-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                        className="btn btn-outline w-full justify-center gap-2 border-base-300 bg-base-100 text-base-content hover:border-base-200 hover:bg-base-200"
                         aria-disabled="true"
                         disabled
                       >
                         <Apple className="h-4 w-4" />
                         Apple
                       </button>
-                      <p className="text-center text-xs text-base-content/60">Em breve</p>
+                      <p className="text-center text-[0.68rem] text-base-content/60">Em breve</p>
                     </div>
                   </div>
                 </form>
                 <div className="space-y-3 text-center text-sm text-base-content/80">
-                  <p className="text-xs text-base-content/60">Use um e-mail ou usuário habilitado no piloto e a senha padrão para acessar.</p>
+                  <p className="text-[0.68rem] text-base-content/60">
+                    Use um e-mail ou usuário habilitado no piloto e a senha padrão para acessar.
+                  </p>
                   <div className="flex flex-col gap-1 text-xs">
                     <p>
                       Não tem conta?{' '}
-                      <a href="/cadastro" className="text-primary hover:text-primary/80 hover:underline">
+                      <a href="/cadastro" className="link link-primary font-semibold">
                         Cadastre-se
                       </a>
                     </p>
                     <p>
                       Recebeu um convite?{' '}
-                      <a href="/acesso-convite" className="text-primary hover:text-primary/80 hover:underline">
+                      <a href="/acesso-convite" className="link link-primary font-semibold">
                         Primeiro acesso
                       </a>
                     </p>
@@ -219,19 +248,30 @@ function LoginContent() {
 
           <section className="order-2 flex flex-col gap-4 text-base-content lg:order-1 lg:pr-6">
             <div className="flex flex-col gap-3 lg:gap-4">
-              <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-base-300/60 bg-base-200/60 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-base-content/70">
-                <ShieldCheck size={13} className="text-primary" /> Portal autenticado
+              <span className="badge badge-outline w-fit border-base-300 text-[0.65rem] font-semibold uppercase tracking-[0.25em]">
+                <span className="flex items-center gap-1.5 text-xs">
+                  <ShieldCheck size={14} className="text-primary" /> Portal autenticado
+                </span>
               </span>
               <div className="space-y-3">
-                <h1 className="text-[clamp(1.6rem,2.3vw,2.4rem)] font-semibold text-base-content">BJJ Academy</h1>
+                <h1 className="text-3xl font-semibold lg:text-5xl">BJJ Academy</h1>
                 <p className="max-w-prose text-sm text-base-content/70 md:text-base">
                   Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
                 </p>
               </div>
               <ul className="space-y-2 text-sm text-base-content/70 lg:max-w-xl">
-                <li>• Login por e-mail ou usuário (case-insensitive)</li>
-                <li>• Perfis aluno e staff já configurados para o piloto</li>
-                <li>• Fluxos de convite, cadastro público e reset documentados</li>
+                <li className="flex gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+                  <span>Login por e-mail ou usuário (case-insensitive).</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+                  <span>Perfis aluno e staff já configurados para o piloto.</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+                  <span>Fluxos de convite, cadastro público e reset documentados.</span>
+                </li>
               </ul>
             </div>
           </section>

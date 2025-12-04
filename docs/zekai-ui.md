@@ -9,9 +9,9 @@ ZEKAI UI é o design system que consolida a identidade visual da família ZEKAI 
 - **Alinhamento visual:** preserva a estética dark e gamificada atual, mas com espaço para variantes futuras.
 
 ## Temas Z-Dark e Z-Light
-- **Z-Dark:** tema escuro padrão, focado no produto atual. Usa fundo profundo, alto contraste e vermelho como cor primária. Ele é aplicado via `data-theme="z-dark"` na raiz do documento.
+- **Z-Dark:** tema escuro padrão, focado no produto atual. Usa fundo profundo, alto contraste e vermelho como cor primária. Ele é aplicado via `data-theme="Z-Dark"` na raiz do documento.
 - **Z-Light:** tema claro planejado para evoluções futuras. Não está ativo, mas já existe na configuração DaisyUI para testes controlados.
-- **Implementação via DaisyUI:** os temas são declarados em `daisyui.themes` no `tailwind.config.js` usando os nomes `z-dark` e `z-light` e podem ser alterados na raiz do HTML (ex.: `data-theme="z-light"`) sem trocar o código das telas. No vocabulário do design system chamamos conceitualmente de **Z-Dark** e **Z-Light**, independentemente do nome interno.
+- **Implementação via DaisyUI:** os temas são declarados via `@plugin "daisyui/theme"` em `styles/tailwind.css` e registrados no `tailwind.config.js` com `themes: ['Z-Dark', 'Z-Light']`. Alterar o tema é tão simples quanto trocar o `data-theme` na raiz do HTML (ex.: `data-theme="Z-Light"`) sem refatorar as telas.
 - **Tokens principais (visão conceitual):**
   - `base-100/200/300` e `base-content` definem planos de fundo e contraste de texto.
   - `primary`, `secondary`, `neutral`, `info`, `success`, `warning`, `error` orientam estados e feedbacks.
@@ -94,4 +94,9 @@ Outros componentes podem seguir a convenção `Zk*` (ex.: `ZkPageHeader`, `ZkCar
 ## Como replicar o padrão nas próximas telas
 - Envolva cada página com `ZkPage` para herdar o gradiente e o comportamento de altura mínima.
 - Centralize o conteúdo com `ZkContainer` e respeite os limites de largura e paddings indicados.
-- Sempre prefira tokens do tema (`bg-base-*`, `text-base-content`, `btn-primary`, `border-base-300`) em vez de cores fixas. Trocar o tema para `z-light` é tão simples quanto alterar `data-theme` na raiz, preservando a consistência sem refatorações adicionais.
+- Sempre prefira tokens do tema (`bg-base-*`, `text-base-content`, `btn-primary`, `border-base-300`) em vez de cores fixas. Trocar o tema para `Z-Light` é tão simples quanto alterar `data-theme` na raiz, preservando a consistência sem refatorações adicionais.
+
+### Checklist rápido para novas telas
+- Use `ZkPage` + `ZkContainer` como esqueleto base e garanta `min-h-dvh` com fundo que herda as variáveis do tema.
+- Aplique somente tokens DaisyUI (base/primary/neutral/etc.) para cores, bordas e textos; nada de hex fixo.
+- Certifique-se de que o HTML raiz está com `data-theme="Z-Dark"` (ou `Z-Light` quando liberado) para herdar o tema certo.

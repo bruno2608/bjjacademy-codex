@@ -12,64 +12,6 @@ try {
   daisyUIPlugin = () => {};
 }
 
-const daisyThemes = {
-  'z-dark': {
-    primary: '#E10600',
-    'primary-content': '#fef2f2',
-    secondary: '#3A3A3A',
-    accent: '#9ca3af',
-    neutral: '#1f1f1f',
-    'base-100': '#0b0b0f',
-    'base-200': '#111217',
-    'base-300': '#1b1c22',
-    'base-content': '#f4f4f5',
-    info: '#38bdf8',
-    success: '#4ade80',
-    warning: '#facc15',
-    error: '#f87171',
-    '--rounded-box': '0.75rem',
-    '--rounded-btn': '0.5rem',
-    '--rounded-badge': '0.35rem',
-    '--border': '1px',
-    '--radius-card': '14px',
-    '--depth': '18',
-    '--noise': '0.02'
-  },
-  'z-light': {
-    primary: '#D32F2F',
-    'primary-content': '#fff1f2',
-    secondary: '#4b5563',
-    accent: '#1f2937',
-    neutral: '#1f2937',
-    'base-100': '#f7f7f7',
-    'base-200': '#ececec',
-    'base-300': '#dcdcdc',
-    'base-content': '#111827',
-    info: '#0ea5e9',
-    success: '#22c55e',
-    warning: '#f59e0b',
-    error: '#ef4444',
-    '--rounded-box': '0.75rem',
-    '--rounded-btn': '0.5rem',
-    '--rounded-badge': '0.35rem',
-    '--border': '1px',
-    '--radius-card': '14px',
-    '--depth': '10',
-    '--noise': '0.01'
-  },
-  bjjacademy: {
-    primary: '#D32F2F',
-    secondary: '#424242',
-    accent: '#ffffff',
-    neutral: '#1f2937',
-    'base-100': '#f5f5f5',
-    info: '#2196f3',
-    success: '#4caf50',
-    warning: '#ff9800',
-    error: '#f44336'
-  }
-};
-
 module.exports = {
   content: ['./app/**/*.{js,jsx,ts,tsx}',
     './components/**/*.{js,jsx,ts,tsx}',
@@ -100,11 +42,7 @@ module.exports = {
   },
   plugins: [daisyUIPlugin],
   daisyui: {
-    themes: [
-      { 'z-dark': daisyThemes['z-dark'] },
-      { 'z-light': daisyThemes['z-light'] },
-      { bjjacademy: daisyThemes.bjjacademy }
-    ],
-    darkTheme: 'z-dark'
+    themes: ['Z-Dark', 'Z-Light'],
+    darkTheme: 'Z-Dark'
   }
 };
