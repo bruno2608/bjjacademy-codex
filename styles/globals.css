@@ -1,3 +1,5 @@
+@reference "./tailwind.css";
+
 html,
 body {
   height: 100%;
@@ -5,7 +7,39 @@ body {
 
 body {
   min-height: 100vh;
-  background-color: hsl(var(--b2));
-  color: hsl(var(--bc));
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+@layer components {
+  /* Card base do ZEKAI UI */
+  .zk-card {
+    @apply flex flex-col gap-4 bg-base-100 border border-base-300 rounded-[var(--radius-box)] p-6 text-sm shadow-sm;
+    border-width: var(--border, 1px);
+  }
+
+  /* Badge soft (usada como pill numérica 25 / 3 / 4) */
+  .zk-badge-soft {
+    @apply inline-flex min-w-[2.25rem] items-center justify-center px-3 py-0.5 text-xs font-medium rounded-full border border-base-300 bg-base-300 text-base-content;
+    border-width: var(--border, 1px);
+  }
+
+  /* Badge soft de aviso (ex.: número 0 em amarelo) */
+  .zk-badge-soft-warning {
+    @apply inline-flex min-w-[2.25rem] items-center justify-center px-3 py-0.5 text-xs font-medium rounded-full bg-warning text-warning-content;
+  }
+
+  /* Tag pill (Shoes / Bags com X) */
+  .zk-tag-pill {
+    @apply inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full border border-base-300 bg-base-300 text-base-content;
+    border-width: var(--border, 1px);
+  }
+
+  .zk-tag-pill-icon {
+    @apply h-3 w-3 text-base-content/70;
+  }
+
+  /* ZEKAI UI – tamanho padrão de checkbox nos cards de preview */
+  .zui-checkbox {
+    --size: 1.1rem;
+  }
 }
