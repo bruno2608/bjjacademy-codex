@@ -26,7 +26,7 @@ export function ThemeEditor() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(280px,0.8fr)_minmax(0,2fr)]">
-        <aside className="card border border-base-300/70 bg-base-100/95 shadow-xl">
+        <aside className="card border border-base-300/70 bg-base-200 shadow-xl">
           <div className="card-body space-y-4">
             <div className="space-y-1">
               <p className="text-xs uppercase tracking-[0.2em] text-base-content/60">Themes</p>
@@ -39,13 +39,13 @@ export function ThemeEditor() {
               <div className="divider my-2">Hold to add theme</div>
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/60">My themes</p>
-                <div className="rounded-lg border border-base-300/60 bg-base-100/80 p-3 text-xs text-base-content/70">
+                <div className="rounded-lg border border-base-300/60 bg-base-200/80 p-3 text-xs text-base-content/70">
                   Nenhum tema custom ainda.
                 </div>
               </div>
               <div className="space-y-2 pt-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/60">daisyUI themes</p>
-                <ul className="menu menu-sm rounded-box bg-base-100/80 p-2">
+                <ul className="menu menu-sm rounded-box bg-base-200/80 p-2">
                   {["light", "dark", "cupcake", "bumblebee", "emerald", "corporate"].map((item) => (
                     <li key={item}>
                       <a className="capitalize">{item}</a>
@@ -57,13 +57,13 @@ export function ThemeEditor() {
           </div>
         </aside>
 
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-2xl">
+        <div className="card border border-base-300/70 bg-base-200 shadow-2xl">
           <div className="card-body space-y-6">
             <div className="space-y-3">
               <h3 className="card-title text-base">Change Colors</h3>
               <div className="grid gap-3 md:grid-cols-2">
                 {colorTokens.map((token) => (
-                  <div key={token.label} className="flex items-center gap-3 rounded-xl border border-base-300/60 bg-base-200/60 p-3">
+                  <div key={token.label} className="flex items-center gap-3 rounded-xl border border-base-300/60 bg-base-300/60 p-3">
                     <div className={cn("h-10 w-10 rounded-lg border border-base-300/70", token.className)} />
                     <div className="flex-1">
                       <p className="text-sm font-semibold">{token.label}</p>
@@ -76,7 +76,7 @@ export function ThemeEditor() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-3 rounded-2xl border border-base-300/70 bg-base-200/60 p-4">
+              <div className="space-y-3 rounded-2xl border border-base-300/70 bg-base-300/60 p-4">
                 <h3 className="text-sm font-semibold">Radius</h3>
                 {["Boxes card, modal, alert", "Fields button, input, select, tab", "Selectors checkbox, toggle, badge"].map(
                   (label, idx) => (
@@ -91,7 +91,7 @@ export function ThemeEditor() {
                 )}
               </div>
 
-              <div className="space-y-3 rounded-2xl border border-base-300/70 bg-base-200/60 p-4">
+              <div className="space-y-3 rounded-2xl border border-base-300/70 bg-base-300/60 p-4">
                 <h3 className="text-sm font-semibold">Effects</h3>
                 {[{
                   title: "Depth Effect",
@@ -102,7 +102,7 @@ export function ThemeEditor() {
                     desc: "Noise pattern on fields & selectors",
                   },
                 ].map((item) => (
-                  <div key={item.title} className="rounded-lg border border-base-300/60 bg-base-100/80 p-3">
+                  <div key={item.title} className="rounded-lg border border-base-300/60 bg-base-200/80 p-3">
                     <label className="label cursor-pointer justify-between gap-3 p-0">
                       <div>
                         <p className="font-medium">{item.title}</p>
@@ -116,7 +116,7 @@ export function ThemeEditor() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-3">
-              <div className="space-y-3 rounded-2xl border border-base-300/70 bg-base-200/60 p-4">
+              <div className="space-y-3 rounded-2xl border border-base-300/70 bg-base-300/60 p-4">
                 <h3 className="text-sm font-semibold">Fields button, input, select, tab</h3>
                 <div className="flex flex-wrap gap-2">
                   {fieldSizes.map((size, idx) => (
@@ -132,7 +132,7 @@ export function ThemeEditor() {
                 </label>
               </div>
 
-              <div className="space-y-3 rounded-2xl border border-base-300/70 bg-base-200/60 p-4">
+              <div className="space-y-3 rounded-2xl border border-base-300/70 bg-base-300/60 p-4">
                 <h3 className="text-sm font-semibold">Selectors checkbox, toggle, badge</h3>
                 <div className="flex flex-wrap gap-2">
                   {fieldSizes.map((size, idx) => (
@@ -160,7 +160,7 @@ export function ThemeEditor() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-base-300/70 bg-base-200/60 p-4 space-y-3">
+            <div className="rounded-2xl border border-base-300/70 bg-base-300/60 p-4 space-y-3">
               <h3 className="text-sm font-semibold">Options</h3>
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="form-control w-full max-w-xs">
@@ -184,7 +184,7 @@ export function ThemeEditor() {
                 </label>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <label className="label cursor-pointer gap-2 rounded-lg border border-base-300/60 bg-base-100/80 px-3 py-2">
+                <label className="label cursor-pointer gap-2 rounded-lg border border-base-300/60 bg-base-200/80 px-3 py-2">
                   <span className="label-text">Dark color scheme</span>
                   <input type="checkbox" className="toggle toggle-primary" defaultChecked />
                 </label>
@@ -192,7 +192,7 @@ export function ThemeEditor() {
               </div>
             </div>
 
-            <div className="card border border-base-300/70 bg-base-100/90 shadow-lg">
+            <div className="card border border-base-300/70 bg-base-200 shadow-lg">
               <div className="card-body space-y-3">
                 <div className="flex items-center justify-between">
                   <div>

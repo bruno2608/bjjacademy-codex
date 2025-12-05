@@ -5,9 +5,11 @@
  */
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, Apple, ArrowRight, Loader2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
 import { ZkThemeDebug } from '@/components/ZkThemeDebug';
+import { ZkAlert } from '@/app/z-ui/_components/ui/ZkAlert';
+import { SocialLoginButtons } from './SocialLoginButtons';
 import useUserStore from '../../store/userStore';
 
 function LoginContent() {
@@ -113,8 +115,8 @@ function LoginContent() {
   };
 
   return (
-    <main className="min-h-dvh bg-base-200 text-base-content">
-      <ZkContainer className="grid min-h-dvh items-center gap-12 py-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
+    <main className="min-h-screen bg-base-100 text-base-content flex items-center justify-center">
+      <ZkContainer className="grid w-full items-center gap-12 py-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
         <section className="flex flex-col gap-4 lg:pr-6">
           <span className="badge badge-outline w-fit border-base-300 text-[0.65rem] font-semibold uppercase tracking-[0.25em]">
             <span className="flex items-center gap-1.5 text-xs">
@@ -144,8 +146,8 @@ function LoginContent() {
         </section>
 
         <section className="w-full max-w-md justify-self-center lg:justify-self-end">
-          <div className="card w-full border border-base-300/60 bg-base-100/95 shadow-2xl">
-            <div className="card-body space-y-6">
+          <div className="zk-card w-full shadow-2xl">
+            <div className="space-y-6">
               <header className="space-y-1 text-center">
                 <h2 className="text-xl font-semibold">Entrar</h2>
                 <p className="text-sm text-base-content/70">Use suas credenciais para acessar o painel.</p>
@@ -164,7 +166,7 @@ function LoginContent() {
                     value={form.identifier}
                     onChange={handleChange}
                     onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
-                    className="input input-bordered w-full bg-base-200/80 text-sm focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
+                    className={`input input-bordered w-full text-sm ${identifierError ? 'input-error' : ''}`}
                     required
                   />
                   {identifierError ? (
@@ -187,7 +189,7 @@ function LoginContent() {
                     value={form.senha}
                     onChange={handleChange}
                     onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
-                    className="input input-bordered w-full bg-base-200/80 text-sm focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
+                    className={`input input-bordered w-full text-sm ${senhaError ? 'input-error' : ''}`}
                     required
                   />
                   {senhaError ? (
@@ -213,43 +215,20 @@ function LoginContent() {
                   </a>
                 </div>
 
-                {error && <p className="text-sm text-error">{error}</p>}
+                {error && (
+                  <ZkAlert variant="error" className="text-sm">
+                    {error}
+                  </ZkAlert>
+                )}
 
-                <button type="submit" className="btn btn-secondary w-full justify-center gap-2" disabled={isSubmitting}>
+                <button type="submit" className="btn btn-primary w-full justify-center gap-2" disabled={isSubmitting}>
                   {isSubmitting ? 'Entrando...' : 'Acessar painel'}
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight size={15} />}
                 </button>
 
                 <div className="divider text-[0.7rem] uppercase text-base-content/60">ou continue com</div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1">
-                    <button
-                      type="button"
-                      className="btn btn-outline w-full justify-center gap-2"
-                      aria-disabled="true"
-                      disabled
-                    >
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-base-200 text-[13px] font-semibold">
-                        G
-                      </span>
-                      Google
-                    </button>
-                    <p className="text-center text-[0.68rem] text-base-content/60">Em breve</p>
-                  </div>
-                  <div className="space-y-1">
-                    <button
-                      type="button"
-                      className="btn btn-outline w-full justify-center gap-2"
-                      aria-disabled="true"
-                      disabled
-                    >
-                      <Apple className="h-4 w-4" />
-                      Apple
-                    </button>
-                    <p className="text-center text-[0.68rem] text-base-content/60">Em breve</p>
-                  </div>
-                </div>
+                <SocialLoginButtons />
               </form>
               <div className="space-y-3 text-center text-sm text-base-content/80">
                 <p className="text-[0.68rem] text-base-content/60">
@@ -281,7 +260,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-base-100" aria-busy="true" />}>
+    <Suspense fallback={<div className="min-h-screen bg-base-100" aria-busy="true" />}>
       <LoginContent />
     </Suspense>
   );
