@@ -79,9 +79,7 @@ export function ComponentsDemo() {
 
 function DemoCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("zk-card", className)}>
-      <div className="card-body gap-3 p-4 text-sm">{children}</div>
-    </div>
+    <section className={cn("zk-card", className)}>{children}</section>
   );
 }
 
@@ -92,18 +90,21 @@ function PreviewCard() {
       {/* Cabeçalho */}
       <div className="flex items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-base-200/80 text-base-content/70">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-base-300 text-base-content/70">
             <Icon icon="mdi:clock-outline" className="h-3.5 w-3.5" />
           </span>
           <h3 className="text-sm font-semibold leading-none">Preview</h3>
         </div>
-        <button type="button" className="btn btn-link btn-xs px-0 text-xs">
+        <button
+          type="button"
+          className="btn btn-link btn-xs px-0 text-xs font-medium text-base-content/80 underline-offset-2 hover:underline"
+        >
           more
         </button>
       </div>
 
       {/* Tags ativas */}
-      <div className="mt-3 flex flex-wrap gap-2 text-xs">
+      <div className="mt-2 flex flex-wrap gap-2 text-xs">
         {["Shoes", "Bags"].map((tag) => (
           <span key={tag} className="zk-tag-pill">
             {tag}
@@ -118,7 +119,7 @@ function PreviewCard() {
           <div
             key={category.label}
             className={cn(
-              "flex items-center justify-between gap-3 border-t border-dashed border-base-300/40 pt-3",
+              "flex items-center justify-between gap-3 border-t border-dotted border-base-300 pt-3",
               index === 0 && "border-t-0 pt-0"
             )}
           >
@@ -184,7 +185,7 @@ function CalendarCard() {
         <span className="label-text">Show all day events</span>
       </label>
 
-      <div className="p-4 border rounded-xl border-base-300/70 bg-base-100/80">
+      <div className="p-4 border rounded-xl border-base-300 bg-base-300">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="font-semibold">Team Sync Meeting</p>
@@ -201,8 +202,8 @@ function SimpleTabsCard() {
   const [active, setActive] = useState<"1" | "2" | "3">("2");
 
   return (
-    <div className="border shadow-sm card rounded-2xl border-base-300/40 bg-base-200/80">
-      <div className="gap-3 p-4 text-sm card-body">
+    <DemoCard>
+      <div className="space-y-3 text-sm">
         <div role="tablist" className="tabs tabs-lifted tabs-sm">
           <button
             type="button"
@@ -232,9 +233,9 @@ function SimpleTabsCard() {
             Tab 3
           </button>
         </div>
-        <div className="mt-4 text-sm text-base-content/80">{`Tab content ${active}`}</div>
+        <div className="text-sm text-base-content/80">{`Tab content ${active}`}</div>
       </div>
-    </div>
+    </DemoCard>
   );
 }
 
@@ -403,7 +404,7 @@ function RecentOrdersCard() {
       </div>
       <div className="space-y-2 text-sm">
         {orders.map((order) => (
-          <div key={order.name} className="flex items-center justify-between px-3 py-2 border rounded-lg border-base-300/60">
+          <div key={order.name} className="flex items-center justify-between px-3 py-2 border rounded-lg border-base-300">
             <span>{order.name}</span>
             <span
               className={cn(
@@ -506,13 +507,13 @@ function ChatCard() {
           <div className="chat-footer text-[10px] text-base-content/60">Seen at 12:46</div>
         </div>
       </div>
-      <div className="relative px-4 py-3 mt-3 border rounded-2xl border-base-300/60 bg-base-200/60 text-base-content/70">
+      <div className="relative px-4 py-3 mt-3 border rounded-[var(--radius-box)] border-base-300 bg-base-300 text-base-content/80">
         <div className="flex items-center justify-around text-base-content/80">
           <Icon icon="mdi:phone-outline" className="w-4 h-4" />
           <Icon icon="mdi:microphone-outline" className="w-4 h-4" />
           <Icon icon="mdi:cog-outline" className="w-4 h-4" />
         </div>
-        <div className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-12 -translate-x-1/2 rounded-full bg-base-300/80" />
+        <div className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-12 -translate-x-1/2 rounded-full bg-base-100/60" />
       </div>
     </DemoCard>
   );
@@ -530,7 +531,7 @@ function AdminPanelCard() {
   return (
     <DemoCard>
       <p className="text-xs font-semibold text-base-content/60">Admin panel</p>
-      <div className="overflow-hidden text-sm border divide-y divide-base-300/60 rounded-xl border-base-300/60 bg-base-200/70">
+      <div className="overflow-hidden text-sm border divide-y divide-base-300 rounded-[var(--radius-box)] border-base-300 bg-base-300">
         {items.map((item) => (
           <div key={item.label} className="flex items-center justify-between px-3 py-2">
             <div className="flex items-center gap-2">
@@ -568,7 +569,7 @@ function AudioCard() {
       </div>
       <div className="flex items-center gap-3 text-xs text-base-content/70">
         <span className="px-3 py-1 rounded-full shadow bg-base-100/90">13:39</span>
-        <div className="flex-1 px-3 py-2 rounded-full bg-base-300/60">
+        <div className="flex-1 px-3 py-2 rounded-full bg-base-300">
           <input type="range" min={0} max={120} defaultValue={45} className="w-full range range-primary range-sm" />
         </div>
         <span className="text-xs">120:00</span>
@@ -611,7 +612,7 @@ function TerminalCard() {
 
 function NotificationsBlock() {
   return (
-    <div className="space-y-3">
+    <DemoCard className="space-y-3">
       <div className="items-center gap-3 border alert alert-info border-info/60 bg-info/10 text-info-content">
         <Icon icon="mdi:email-outline" className="w-4 h-4" />
         <span className="text-sm">There are 9 new messages</span>
@@ -633,7 +634,7 @@ function NotificationsBlock() {
         </div>
         <a className="text-sm underline link text-error-content">Support</a>
       </div>
-    </div>
+    </DemoCard>
   );
 }
 

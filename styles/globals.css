@@ -7,21 +7,19 @@ body {
 
 body {
   min-height: 100vh;
-  background-color: hsl(var(--b2));
-  color: hsl(var(--bc));
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 @layer components {
   /* Card base do ZEKAI UI */
   .zk-card {
-    @apply card bg-base-200/80 border border-base-300/40 rounded-[var(--radius-box)] shadow-sm;
+    @apply flex flex-col gap-4 bg-base-100 border border-base-300 rounded-[var(--radius-box)] p-6 text-sm shadow-sm;
     border-width: var(--border, 1px);
   }
 
   /* Badge soft (usada como pill numérica 25 / 3 / 4) */
   .zk-badge-soft {
-    @apply inline-flex min-w-[2.25rem] items-center justify-center px-3 py-0.5 text-xs font-medium rounded-full border border-base-300/60 bg-base-200/80 text-base-content/80;
+    @apply inline-flex min-w-[2.25rem] items-center justify-center px-3 py-0.5 text-xs font-medium rounded-full border border-base-300 bg-base-300 text-base-content;
     border-width: var(--border, 1px);
   }
 
@@ -32,7 +30,7 @@ body {
 
   /* Tag pill (Shoes / Bags com X) */
   .zk-tag-pill {
-    @apply inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full border border-base-300/60 bg-base-200/80 text-base-content/80;
+    @apply inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full border border-base-300 bg-base-300 text-base-content;
     border-width: var(--border, 1px);
   }
 
