@@ -79,14 +79,8 @@ export function ComponentsDemo() {
 
 function DemoCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      className={cn(
-        // card Daisy + largura de borda vindo de var(--border)
-        "card rounded-2xl border-[var(--border)] border-base-300/40 bg-base-200/80 shadow-sm",
-        className
-      )}
-    >
-      <div className="gap-3 p-4 text-sm card-body">{children}</div>
+    <div className={cn("zk-card", className)}>
+      <div className="card-body gap-3 p-4 text-sm">{children}</div>
     </div>
   );
 }
@@ -94,42 +88,44 @@ function DemoCard({ children, className }: { children: React.ReactNode; classNam
 
 function PreviewCard() {
   return (
-    // força a cor da borda base-300 nesse card (DemoCard já põe "border")
-    <DemoCard className="border-base-300">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <span className="flex items-center gap-2 font-semibold">
-          {/* ícone de gráfico estilo original, via Iconify */}
-          <Icon icon="mdi:chart-arc" className="w-5 h-5 opacity-40" />
-          <span>Preview</span>
-        </span>
-
-        <button type="button" className="text-xs link">
+    <DemoCard>
+      {/* Cabeçalho */}
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-base-200/80 text-base-content/70">
+            <Icon icon="mdi:clock-outline" className="h-3.5 w-3.5" />
+          </span>
+          <h3 className="text-sm font-semibold leading-none">Preview</h3>
+        </div>
+        <button type="button" className="btn btn-link btn-xs px-0 text-xs">
           more
         </button>
       </div>
 
-      {/* Tags ativas (Shoes / Bags) */}
-      <div className="flex flex-wrap gap-2 text-xs">
+      {/* Tags ativas */}
+      <div className="mt-3 flex flex-wrap gap-2 text-xs">
         {["Shoes", "Bags"].map((tag) => (
-          <span key={tag} className="inline-flex items-center gap-1 badge badge-neutral">
+          <span key={tag} className="zk-tag-pill">
             {tag}
-            <Icon icon="mdi:close" className="w-3 h-3 opacity-80" />
+            <Icon icon="mdi:close" className="zk-tag-pill-icon" />
           </span>
         ))}
       </div>
 
       {/* Lista de categorias */}
-      <div className="flex flex-col text-sm">
-        {categories.map((category) => (
+      <div className="mt-4 space-y-3 text-sm">
+        {categories.map((category, index) => (
           <div
             key={category.label}
-            className="flex items-center justify-between gap-2 py-2 border-b border-dashed border-b-base-content/5 last:border-b-0"
+            className={cn(
+              "flex items-center justify-between gap-3 border-t border-dashed border-base-300/40 pt-3",
+              index === 0 && "border-t-0 pt-0"
+            )}
           >
-            <label className="flex items-center gap-2 cursor-pointer select-none">
+            <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                className="checkbox checkbox-sm"
+                className="checkbox checkbox-xs rounded-full"
                 defaultChecked={
                   category.label === "Hoodies" || category.label === "Bags"
                 }
@@ -139,19 +135,22 @@ function PreviewCard() {
 
             <span
               className={cn(
-                "badge badge-md font-mono",
-                category.tone === "warning" ? "badge-warning" : "badge-neutral",
+                category.tone === "warning"
+                  ? "zk-badge-soft-warning"
+                  : "zk-badge-soft"
               )}
             >
               {category.count}
             </span>
-
           </div>
         ))}
       </div>
     </DemoCard>
   );
 }
+
+// Ordem sugerida para refatorar os próximos cards com o mesmo padrão:
+// StatsCard -> ScheduleCard -> ScoreCard -> demais cards da página /z-ui
 
 
 
