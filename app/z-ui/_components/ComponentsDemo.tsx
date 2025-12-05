@@ -7,7 +7,7 @@ import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 
 const categories = [
-  { label: "Hoodies", count: 25, tone: "neutral" as const },
+  { label: "Hoodies", count: 25, tone: "badge-neutral" as const },
   { label: "Bags", count: 3, tone: "neutral" as const },
   { label: "Shoes", count: 0, tone: "warning" as const },
   { label: "Accessories", count: 4, tone: "neutral" as const },
@@ -43,8 +43,8 @@ const books = [
 
 export function ComponentsDemo() {
   return (
-    <section className="mt-8 max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 items-start">
+    <section className="max-w-6xl mx-auto mt-8">
+      <div className="grid items-start grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6">
           <PreviewCard />
           <CalendarCard />
@@ -79,56 +79,88 @@ export function ComponentsDemo() {
 
 function DemoCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("card rounded-2xl border border-base-300/40 bg-base-200/80 shadow-sm", className)}>
-      <div className="card-body gap-3 p-4 text-sm">{children}</div>
+    <div
+      className={cn(
+        // card Daisy + largura de borda vindo de var(--border)
+        "card rounded-2xl border-[var(--border)] border-base-300/40 bg-base-200/80 shadow-sm",
+        className
+      )}
+    >
+      <div className="gap-3 p-4 text-sm card-body">{children}</div>
     </div>
   );
 }
 
+
 function PreviewCard() {
   return (
-    <DemoCard>
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm font-semibold">Preview more</h3>
-        <button className="btn btn-link btn-xs px-0">more</button>
+    // força a cor da borda base-300 nesse card (DemoCard já põe "border")
+    <DemoCard className="border-base-300">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <span className="flex items-center gap-2 font-semibold">
+          {/* ícone de gráfico estilo original, via Iconify */}
+          <Icon icon="mdi:chart-arc" className="w-5 h-5 opacity-40" />
+          <span>Preview</span>
+        </span>
+
+        <button type="button" className="text-xs link">
+          more
+        </button>
       </div>
 
+      {/* Tags ativas (Shoes / Bags) */}
       <div className="flex flex-wrap gap-2 text-xs">
-        <span className="badge badge-neutral badge-sm">Shoes</span>
-        <span className="badge badge-neutral badge-sm">Bags</span>
+        {["Shoes", "Bags"].map((tag) => (
+          <span key={tag} className="inline-flex items-center gap-1 badge badge-neutral">
+            {tag}
+            <Icon icon="mdi:close" className="w-3 h-3 opacity-80" />
+          </span>
+        ))}
       </div>
 
-      <div className="space-y-2 text-sm">
+      {/* Lista de categorias */}
+      <div className="flex flex-col text-sm">
         {categories.map((category) => (
-          <label
+          <div
             key={category.label}
-            className="flex items-center justify-between gap-3 rounded-lg bg-base-200/80 px-3 py-2"
+            className="flex items-center justify-between gap-2 py-2 border-b border-dashed border-b-base-content/5 last:border-b-0"
           >
-            <div className="flex items-center gap-2">
-              <input type="checkbox" className="checkbox checkbox-xs" defaultChecked={category.label === "Hoodies"} />
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-sm"
+                defaultChecked={
+                  category.label === "Hoodies" || category.label === "Bags"
+                }
+              />
               <span>{category.label}</span>
-            </div>
+            </label>
+
             <span
               className={cn(
-                "badge badge-sm",
-                category.tone === "warning" ? "badge-warning" : "badge-outline border-base-300"
+                "badge badge-md font-mono",
+                category.tone === "warning" ? "badge-warning" : "badge-neutral",
               )}
             >
               {category.count}
             </span>
-          </label>
+
+          </div>
         ))}
       </div>
     </DemoCard>
   );
 }
 
+
+
 function CalendarCard() {
   return (
     <DemoCard>
       <div className="flex flex-wrap items-center gap-3 text-xs">
         <button className="btn btn-xs btn-ghost">
-          <Icon icon="mdi:chevron-left" className="h-4 w-4" />
+          <Icon icon="mdi:chevron-left" className="w-4 h-4" />
         </button>
         <div className="join">
           {calendarDays.map((item) => (
@@ -142,18 +174,18 @@ function CalendarCard() {
           ))}
         </div>
         <button className="btn btn-xs btn-ghost">
-          <Icon icon="mdi:chevron-right" className="h-4 w-4" />
+          <Icon icon="mdi:chevron-right" className="w-4 h-4" />
         </button>
       </div>
 
-      <input type="text" className="input input-bordered input-sm w-full" placeholder="Search for events" />
+      <input type="text" className="w-full input input-bordered input-sm" placeholder="Search for events" />
 
-      <label className="label cursor-pointer justify-start gap-2 p-0 text-sm">
+      <label className="justify-start gap-2 p-0 text-sm cursor-pointer label">
         <input type="checkbox" className="toggle toggle-primary" defaultChecked />
         <span className="label-text">Show all day events</span>
       </label>
 
-      <div className="rounded-xl border border-base-300/70 bg-base-100/80 p-4">
+      <div className="p-4 border rounded-xl border-base-300/70 bg-base-100/80">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="font-semibold">Team Sync Meeting</p>
@@ -170,8 +202,8 @@ function SimpleTabsCard() {
   const [active, setActive] = useState<"1" | "2" | "3">("2");
 
   return (
-    <div className="card rounded-2xl border border-base-300/40 bg-base-200/80 shadow-sm">
-      <div className="card-body gap-3 p-4 text-sm">
+    <div className="border shadow-sm card rounded-2xl border-base-300/40 bg-base-200/80">
+      <div className="gap-3 p-4 text-sm card-body">
         <div role="tablist" className="tabs tabs-lifted tabs-sm">
           <button
             type="button"
@@ -214,8 +246,8 @@ function PriceRangeCard() {
         <span className="badge badge-ghost">$</span>
         <span>Price range</span>
       </div>
-      <div className="text-center text-3xl font-semibold">50</div>
-      <input type="range" min={0} max={200} defaultValue={50} className="range range-primary w-full" />
+      <div className="text-3xl font-semibold text-center">50</div>
+      <input type="range" min={0} max={200} defaultValue={50} className="w-full range range-primary" />
       <div className="flex justify-between text-xs text-base-content/60">
         <span>0</span>
         <span>200</span>
@@ -230,7 +262,7 @@ function NikeShoesCard() {
       <img
         src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
         alt="Nike Shoes"
-        className="h-64 w-full rounded-2xl object-cover"
+        className="object-cover w-full h-64 rounded-2xl"
       />
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">Nike Shoes</h3>
@@ -253,7 +285,7 @@ function NikeShoesCard() {
       </div>
       <div className="flex items-baseline gap-3">
         <span className="text-xl font-semibold">$120</span>
-        <span className="text-sm text-base-content/60 line-through">$150</span>
+        <span className="text-sm line-through text-base-content/60">$150</span>
       </div>
     </DemoCard>
   );
@@ -262,10 +294,10 @@ function NikeShoesCard() {
 function SearchFindCard() {
   return (
     <DemoCard>
-      <div className="join w-full">
-        <label className="input input-bordered input-sm join-item flex items-center gap-2 text-sm">
-          <Icon icon="mdi:magnify" className="h-4 w-4 text-base-content/60" />
-          <input type="text" placeholder="Search" className="grow bg-transparent outline-none" />
+      <div className="w-full join">
+        <label className="flex items-center gap-2 text-sm input input-bordered input-sm join-item">
+          <Icon icon="mdi:magnify" className="w-4 h-4 text-base-content/60" />
+          <input type="text" placeholder="Search" className="bg-transparent outline-none grow" />
         </label>
         <button className="btn btn-primary btn-sm join-item">Find</button>
       </div>
@@ -279,33 +311,33 @@ function CreateAccountCard() {
       <h3 className="text-sm font-semibold text-base-content/80">Create new account</h3>
       <p className="text-xs text-base-content/60">Registration is free and only takes a minute.</p>
 
-      <label className="input input-bordered input-sm flex items-center gap-2">
-        <Icon icon="mdi:account-outline" className="h-4 w-4 text-base-content/60" />
+      <label className="flex items-center gap-2 input input-bordered input-sm">
+        <Icon icon="mdi:account-outline" className="w-4 h-4 text-base-content/60" />
         <input type="text" placeholder="Username" className="grow" />
       </label>
 
-      <label className="input input-bordered input-sm flex items-center gap-2">
-        <Icon icon="mdi:key-variant" className="h-4 w-4 text-base-content/60" />
+      <label className="flex items-center gap-2 input input-bordered input-sm">
+        <Icon icon="mdi:key-variant" className="w-4 h-4 text-base-content/60" />
         <input type="password" placeholder="Password" className="grow" />
       </label>
 
-      <p className="mt-1 flex items-center gap-1 text-xs text-error">
-        <span className="inline-block h-1 w-1 rounded-full bg-error" />
+      <p className="flex items-center gap-1 mt-1 text-xs text-error">
+        <span className="inline-block w-1 h-1 rounded-full bg-error" />
         Password must be 8+ characters.
       </p>
 
-      <label className="label cursor-pointer justify-start gap-2 p-0 text-sm">
+      <label className="justify-start gap-2 p-0 text-sm cursor-pointer label">
         <input type="checkbox" className="toggle toggle-sm" defaultChecked />
         <span className="label-text">Accept terms without reading</span>
       </label>
-      <label className="label cursor-pointer justify-start gap-2 p-0 text-sm">
+      <label className="justify-start gap-2 p-0 text-sm cursor-pointer label">
         <input type="checkbox" className="toggle toggle-sm" />
         <span className="label-text">Subscribe to spam emails</span>
       </label>
 
-      <button className="btn btn-primary w-full">Register</button>
-      <div className="text-center text-xs">
-        <button className="btn btn-link btn-xs px-0" type="button">
+      <button className="w-full btn btn-primary">Register</button>
+      <div className="text-xs text-center">
+        <button className="px-0 btn btn-link btn-xs" type="button">
           Or login
         </button>
       </div>
@@ -332,8 +364,8 @@ function SalesVolumeCard() {
           Sales volume reached $12,450 this week, showing a 15% increase from the previous period.
         </p>
         <div className="flex gap-2">
-          <button className="btn btn-sm flex-1 btn-neutral">Charts</button>
-          <button className="btn btn-sm flex-1 btn-primary btn-active">Details</button>
+          <button className="flex-1 btn btn-sm btn-neutral">Charts</button>
+          <button className="flex-1 btn btn-sm btn-primary btn-active">Details</button>
         </div>
       </div>
     </DemoCard>
@@ -348,7 +380,7 @@ function PageScoreCard() {
           <p className="text-xs font-semibold text-base-content/60">Page Score</p>
           <div className="text-3xl font-bold">91/100</div>
           <div className="inline-flex items-center gap-1 text-xs text-success">
-            <Icon icon="mdi:shield-check" className="h-4 w-4" />
+            <Icon icon="mdi:shield-check" className="w-4 h-4" />
             <span>All good</span>
           </div>
         </div>
@@ -366,13 +398,13 @@ function PageScoreCard() {
 function RecentOrdersCard() {
   return (
     <DemoCard>
-      <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-base-content/70">
-        <Icon icon="mdi:trending-up" className="h-4 w-4 text-base-content/60" />
+      <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-base-content/70">
+        <Icon icon="mdi:trending-up" className="w-4 h-4 text-base-content/60" />
         <span>Recent orders</span>
       </div>
       <div className="space-y-2 text-sm">
         {orders.map((order) => (
-          <div key={order.name} className="flex items-center justify-between rounded-lg border border-base-300/60 px-3 py-2">
+          <div key={order.name} className="flex items-center justify-between px-3 py-2 border rounded-lg border-base-300/60">
             <span>{order.name}</span>
             <span
               className={cn(
@@ -397,8 +429,8 @@ function DecemberRevenueCard() {
     <DemoCard>
       <p className="text-xs text-base-content/60">December Revenue</p>
       <p className="text-3xl font-semibold">$32,400</p>
-      <div className="mt-1 flex items-center gap-2">
-        <Icon icon="mdi:trending-up" className="h-4 w-4 text-success" />
+      <div className="flex items-center gap-2 mt-1">
+        <Icon icon="mdi:trending-up" className="w-4 h-4 text-success" />
         <span className="text-xs text-base-content/70">21% more than last month</span>
       </div>
     </DemoCard>
@@ -408,16 +440,16 @@ function DecemberRevenueCard() {
 function WritePostCard() {
   return (
     <DemoCard>
-      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-base-content/80">
-        <Icon icon="mdi:pencil-outline" className="h-4 w-4 text-base-content/60" />
+      <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-base-content/80">
+        <Icon icon="mdi:pencil-outline" className="w-4 h-4 text-base-content/60" />
         <span>Write a new post</span>
       </div>
 
-      <div className="mb-3 flex items-center gap-3 text-xs text-base-content/70">
+      <div className="flex items-center gap-3 mb-3 text-xs text-base-content/70">
         <div className="join">
-          <button className="btn btn-xs btn-ghost font-bold join-item">B</button>
-          <button className="btn btn-xs btn-ghost italic join-item">I</button>
-          <button className="btn btn-xs btn-ghost underline join-item">U</button>
+          <button className="font-bold btn btn-xs btn-ghost join-item">B</button>
+          <button className="italic btn btn-xs btn-ghost join-item">I</button>
+          <button className="underline btn btn-xs btn-ghost join-item">U</button>
         </div>
         <button className="ml-auto btn btn-xs btn-ghost">Add files</button>
       </div>
@@ -427,7 +459,7 @@ function WritePostCard() {
         placeholder="What's happening?"
       />
 
-      <div className="mt-2 flex items-center justify-between text-xs text-base-content/60">
+      <div className="flex items-center justify-between mt-2 text-xs text-base-content/60">
         <span>1200 characters remaining</span>
         <div className="flex gap-2">
           <button className="btn btn-ghost btn-sm">Draft</button>
@@ -446,11 +478,11 @@ function ChatCard() {
       <div className="space-y-3 text-sm">
         <div className="chat chat-start">
           <div className="chat-image avatar">
-            <div className="w-9 rounded-full">
+            <div className="rounded-full w-9">
               <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@94.webp" alt="Obi-Wan" />
             </div>
           </div>
-          <div className="chat-header text-xs text-base-content/80">
+          <div className="text-xs chat-header text-base-content/80">
             Obi-Wan Kenobi
             <time className="ml-1 opacity-70">12:45</time>
           </div>
@@ -458,7 +490,7 @@ function ChatCard() {
         </div>
         <div className="chat chat-start">
           <div className="chat-image avatar">
-            <div className="w-9 rounded-full">
+            <div className="rounded-full w-9">
               <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@94.webp" alt="Obi-Wan" />
             </div>
           </div>
@@ -467,7 +499,7 @@ function ChatCard() {
         </div>
         <div className="chat chat-end">
           <div className="chat-image avatar">
-            <div className="w-9 rounded-full">
+            <div className="rounded-full w-9">
               <img src="https://img.daisyui.com/images/profile/demo/yellingcat@94.webp" alt="Anakin" />
             </div>
           </div>
@@ -475,11 +507,11 @@ function ChatCard() {
           <div className="chat-footer text-[10px] text-base-content/60">Seen at 12:46</div>
         </div>
       </div>
-      <div className="relative mt-3 rounded-2xl border border-base-300/60 bg-base-200/60 px-4 py-3 text-base-content/70">
+      <div className="relative px-4 py-3 mt-3 border rounded-2xl border-base-300/60 bg-base-200/60 text-base-content/70">
         <div className="flex items-center justify-around text-base-content/80">
-          <Icon icon="mdi:phone-outline" className="h-4 w-4" />
-          <Icon icon="mdi:microphone-outline" className="h-4 w-4" />
-          <Icon icon="mdi:cog-outline" className="h-4 w-4" />
+          <Icon icon="mdi:phone-outline" className="w-4 h-4" />
+          <Icon icon="mdi:microphone-outline" className="w-4 h-4" />
+          <Icon icon="mdi:cog-outline" className="w-4 h-4" />
         </div>
         <div className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-12 -translate-x-1/2 rounded-full bg-base-300/80" />
       </div>
@@ -499,11 +531,11 @@ function AdminPanelCard() {
   return (
     <DemoCard>
       <p className="text-xs font-semibold text-base-content/60">Admin panel</p>
-      <div className="divide-y divide-base-300/60 overflow-hidden rounded-xl border border-base-300/60 bg-base-200/70 text-sm">
+      <div className="overflow-hidden text-sm border divide-y divide-base-300/60 rounded-xl border-base-300/60 bg-base-200/70">
         {items.map((item) => (
           <div key={item.label} className="flex items-center justify-between px-3 py-2">
             <div className="flex items-center gap-2">
-              <Icon icon={item.icon} className="h-4 w-4 text-base-content/70" />
+              <Icon icon={item.icon} className="w-4 h-4 text-base-content/70" />
               <span>{item.label}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -521,14 +553,14 @@ function AudioCard() {
   return (
     <DemoCard>
       <div className="flex items-center justify-center gap-2 text-base">
-        <button className="btn btn-square btn-ghost btn-sm border border-base-300 bg-base-100/80">
-          <Icon icon="mdi:chevron-left" className="h-4 w-4" />
+        <button className="border btn btn-square btn-ghost btn-sm border-base-300 bg-base-100/80">
+          <Icon icon="mdi:chevron-left" className="w-4 h-4" />
         </button>
-        <button className="btn btn-square btn-primary btn-sm shadow-sm">
-          <Icon icon="mdi:play" className="h-4 w-4" />
+        <button className="shadow-sm btn btn-square btn-primary btn-sm">
+          <Icon icon="mdi:play" className="w-4 h-4" />
         </button>
-        <button className="btn btn-square btn-ghost btn-sm border border-base-300 bg-base-100/80">
-          <Icon icon="mdi:chevron-right" className="h-4 w-4" />
+        <button className="border btn btn-square btn-ghost btn-sm border-base-300 bg-base-100/80">
+          <Icon icon="mdi:chevron-right" className="w-4 h-4" />
         </button>
       </div>
       <div className="text-center">
@@ -536,24 +568,24 @@ function AudioCard() {
         <p className="text-xs text-base-content/70">Project Manager talking for 2 hours.</p>
       </div>
       <div className="flex items-center gap-3 text-xs text-base-content/70">
-        <span className="rounded-full bg-base-100/90 px-3 py-1 shadow">13:39</span>
-        <div className="flex-1 rounded-full bg-base-300/60 px-3 py-2">
-          <input type="range" min={0} max={120} defaultValue={45} className="range range-primary range-sm w-full" />
+        <span className="px-3 py-1 rounded-full shadow bg-base-100/90">13:39</span>
+        <div className="flex-1 px-3 py-2 rounded-full bg-base-300/60">
+          <input type="range" min={0} max={120} defaultValue={45} className="w-full range range-primary range-sm" />
         </div>
         <span className="text-xs">120:00</span>
       </div>
       <div className="flex items-center justify-around text-base-content/70">
         <button className="btn btn-square btn-ghost btn-sm">
-          <Icon icon="mdi:volume-high" className="h-4 w-4" />
+          <Icon icon="mdi:volume-high" className="w-4 h-4" />
         </button>
         <button className="btn btn-square btn-ghost btn-sm">
-          <Icon icon="mdi:shuffle-variant" className="h-4 w-4" />
+          <Icon icon="mdi:shuffle-variant" className="w-4 h-4" />
         </button>
         <button className="btn btn-square btn-ghost btn-sm">
-          <Icon icon="mdi:repeat" className="h-4 w-4" />
+          <Icon icon="mdi:repeat" className="w-4 h-4" />
         </button>
         <button className="btn btn-square btn-ghost btn-sm">
-          <Icon icon="mdi:headphones" className="h-4 w-4" />
+          <Icon icon="mdi:headphones" className="w-4 h-4" />
         </button>
       </div>
     </DemoCard>
@@ -563,7 +595,7 @@ function AudioCard() {
 function TerminalCard() {
   return (
     <DemoCard>
-      <div className="mockup-code text-sm">
+      <div className="text-sm mockup-code">
         <pre data-prefix="$">
           <code>npm i daisyui</code>
         </pre>
@@ -581,26 +613,26 @@ function TerminalCard() {
 function NotificationsBlock() {
   return (
     <div className="space-y-3">
-      <div className="alert alert-info items-center gap-3 border border-info/60 bg-info/10 text-info-content">
-        <Icon icon="mdi:email-outline" className="h-4 w-4" />
+      <div className="items-center gap-3 border alert alert-info border-info/60 bg-info/10 text-info-content">
+        <Icon icon="mdi:email-outline" className="w-4 h-4" />
         <span className="text-sm">There are 9 new messages</span>
       </div>
-      <div className="alert alert-success items-center gap-3 border border-success/60 bg-success/10 text-success-content">
-        <Icon icon="mdi:shield-check" className="h-4 w-4" />
+      <div className="items-center gap-3 border alert alert-success border-success/60 bg-success/10 text-success-content">
+        <Icon icon="mdi:shield-check" className="w-4 h-4" />
         <span className="text-sm">Verification process completed</span>
       </div>
-      <div className="alert alert-warning items-center gap-3 border border-warning/60 bg-warning/10 text-warning-content">
-        <Icon icon="mdi:shield-check" className="h-4 w-4" />
+      <div className="items-center gap-3 border alert alert-warning border-warning/60 bg-warning/10 text-warning-content">
+        <Icon icon="mdi:shield-check" className="w-4 h-4" />
         <span className="text-sm">
           Click to verify your email
         </span>
       </div>
-      <div className="alert alert-error items-center justify-between gap-3 border border-error/60 bg-error/10 text-error-content">
+      <div className="items-center justify-between gap-3 border alert alert-error border-error/60 bg-error/10 text-error-content">
         <div className="flex items-center gap-2">
-          <Icon icon="mdi:alert-circle-outline" className="h-4 w-4" />
+          <Icon icon="mdi:alert-circle-outline" className="w-4 h-4" />
           <span className="text-sm">Access denied</span>
         </div>
-        <a className="link text-sm text-error-content underline">Support</a>
+        <a className="text-sm underline link text-error-content">Support</a>
       </div>
     </div>
   );
@@ -613,7 +645,7 @@ function HarryPotterTimeline() {
       <ul className="steps steps-vertical">
         {books.map((book, idx) => (
           <li key={book} className={cn("step", idx < 4 && "step-primary")}> 
-            <div className="flex items-center justify-between gap-2 w-full text-left">
+            <div className="flex items-center justify-between w-full gap-2 text-left">
               <span className="text-sm">{book}</span>
               <div className="rating rating-xs">
                 {Array.from({ length: 5 }).map((_, starIdx) => (
@@ -650,19 +682,19 @@ function StarterPlanCard() {
       <p className="text-sm text-base-content/70">/month</p>
       <ul className="space-y-2 text-sm">
         <li className="flex items-center gap-2 text-success">
-          <Icon icon="mdi:check-bold" className="h-4 w-4" /> 20 Tokens per day
+          <Icon icon="mdi:check-bold" className="w-4 h-4" /> 20 Tokens per day
         </li>
         <li className="flex items-center gap-2 text-success">
-          <Icon icon="mdi:check-bold" className="h-4 w-4" /> 10 Projects
+          <Icon icon="mdi:check-bold" className="w-4 h-4" /> 10 Projects
         </li>
         <li className="flex items-center gap-2 text-success">
-          <Icon icon="mdi:check-bold" className="h-4 w-4" /> API Access
+          <Icon icon="mdi:check-bold" className="w-4 h-4" /> API Access
         </li>
         <li className="flex items-center gap-2 text-error">
           <span className="font-semibold">×</span> Priority Support
         </li>
       </ul>
-      <button className="btn btn-success w-full">Buy Now</button>
+      <button className="w-full btn btn-success">Buy Now</button>
     </DemoCard>
   );
 }

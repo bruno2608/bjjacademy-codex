@@ -40,22 +40,17 @@ export default function ZUiPage() {
 
   return (
     <main className="min-h-dvh bg-base-200 text-base-content" data-theme={theme}>
-      <ZkContainer className="space-y-8 py-10">
+      <ZkContainer className="py-10 space-y-8">
         <header className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-base-content/60">Playground</p>
             <div className="space-y-2">
               <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">ZEKAI UI · Theme Playground</h1>
-              <p className="max-w-3xl text-sm text-base-content/70 lg:text-base">
-                Página neutra para validar o visual da ZEKAI UI com DaisyUI. Alterne temas, navegue pelas abas e compare
-                componentes antes de aplicar em produtos reais.
-              </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.15em] text-base-content/70">
-            <span>Tema</span>
-            <div className="join rounded-full border border-base-300/60 bg-base-100/80 shadow-sm">
+            <div className="border rounded-full shadow-sm join border-base-300/60 bg-base-100/80">
               <button
                 type="button"
                 className={cn("btn btn-xs join-item", theme === "zdark" && "btn-active btn-primary")}
@@ -76,7 +71,7 @@ export default function ZUiPage() {
           </div>
         </header>
 
-        <div className="flex flex-wrap items-center gap-3 justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="tabs tabs-boxed tabs-sm bg-base-200/80">
             <button
               className={cn("tab gap-2", activeTab === "editor" && "tab-active")}
@@ -111,7 +106,6 @@ export default function ZUiPage() {
               <span className="hidden md:inline">Color Palette</span>
             </button>
           </div>
-          <span className="text-xs text-base-content/60">Static showcase</span>
         </div>
 
         {activeTab === "editor" && <ThemeEditor />}
