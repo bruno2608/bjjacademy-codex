@@ -439,58 +439,54 @@ function WritePostCard() {
 }
 
 function ChatCard() {
+  const bubbleClass = "chat-bubble bg-neutral text-neutral-content";
+
   return (
     <DemoCard>
       <div className="space-y-3 text-sm">
         <div className="chat chat-start">
           <div className="chat-image avatar">
-            <div className="w-9 rounded-full">
-              <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@94.webp" alt="Obi-Wan" />
-            </div>
+          <div className="w-9 rounded-full">
+            <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@94.webp" alt="Obi-Wan" />
           </div>
-          <div className="chat-header text-xs text-base-content/80">
-            Obi-Wan Kenobi
-            <time className="ml-1 opacity-70">12:45</time>
-          </div>
-          <div className="chat-bubble bg-base-content text-base-100">It's over Anakin</div>
         </div>
-        <div className="chat chat-start">
-          <div className="chat-image avatar">
-            <div className="w-9 rounded-full">
-              <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@94.webp" alt="Obi-Wan" />
-            </div>
-          </div>
-          <div className="chat-bubble bg-base-content text-base-100">I have the high ground</div>
-          <div className="chat-footer text-[10px] text-base-content/60">Delivered</div>
+        <div className="chat-header text-xs text-base-content/80">
+          Obi-Wan Kenobi
+          <time className="ml-1 opacity-70">12:45</time>
         </div>
-        <div className="chat chat-end">
-          <div className="chat-image avatar">
-            <div className="w-9 rounded-full">
-              <img src="https://img.daisyui.com/images/profile/demo/yellingcat@94.webp" alt="Anakin" />
-            </div>
-          </div>
-          <div className="chat-bubble bg-primary text-primary-content">You underestimate my power</div>
-          <div className="chat-footer text-[10px] text-base-content/60">Seen at 12:46</div>
-        </div>
+        <div className={bubbleClass}>It's over Anakin</div>
       </div>
-      <div className="mt-3 rounded-xl border border-base-300/50 bg-base-200/70 px-3 py-2 text-base-content/70">
-        <div className="flex items-center justify-around">
-          <button className="btn btn-ghost btn-sm" type="button">
-            <Icon icon="mdi:phone-outline" className="h-4 w-4" />
-          </button>
-          <button className="btn btn-ghost btn-sm" type="button">
-            <Icon icon="mdi:microphone-outline" className="h-4 w-4" />
-          </button>
-          <button className="btn btn-ghost btn-sm" type="button">
-            <Icon icon="mdi:cog-outline" className="h-4 w-4" />
-          </button>
+      <div className="chat chat-start">
+        <div className="chat-image avatar">
+          <div className="w-9 rounded-full">
+            <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@94.webp" alt="Obi-Wan" />
+          </div>
         </div>
-        <div className="mt-2 flex justify-center">
-          <div className="h-0.5 w-12 rounded-full bg-base-100/70" />
-        </div>
+        <div className={bubbleClass}>I have the high ground</div>
+        <div className="chat-footer text-[10px] text-base-content/60">Delivered</div>
       </div>
-    </DemoCard>
-  );
+      <div className="chat chat-end">
+        <div className="chat-image avatar">
+          <div className="w-9 rounded-full">
+            <img src="https://img.daisyui.com/images/profile/demo/yellingcat@94.webp" alt="Anakin" />
+          </div>
+        </div>
+        <div className={bubbleClass}>You underestimate my power</div>
+        <div className="chat-footer text-[10px] text-base-content/60">Seen at 12:46</div>
+      </div>
+    </div>
+    <div className="mt-3 rounded-xl border border-base-300/50 bg-base-200/70 px-4 py-3 text-base-content/70">
+      <div className="flex items-center justify-around text-base-content/70">
+        <Icon icon="mdi:phone-outline" className="h-4 w-4" />
+        <Icon icon="mdi:microphone-outline" className="h-4 w-4" />
+        <Icon icon="mdi:cog-outline" className="h-4 w-4" />
+      </div>
+      <div className="mt-2 flex justify-center">
+        <div className="h-0.5 w-12 rounded-full bg-base-100/70" />
+      </div>
+    </div>
+  </DemoCard>
+);
 }
 
 function AdminPanelCard() {
