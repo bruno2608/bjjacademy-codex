@@ -13,7 +13,7 @@ body {
 @layer components {
   /* Card base do ZEKAI UI */
   .zk-card {
-    @apply flex flex-col gap-4 bg-base-100 border border-base-300 rounded-[var(--radius-box)] p-6 text-sm shadow-sm;
+    @apply flex flex-col gap-4 bg-base-200 border border-base-300 rounded-[var(--radius-box)] p-6 text-sm shadow-sm;
     border-width: var(--border, 1px);
   }
 
@@ -36,10 +36,5 @@ body {
 
   .zk-tag-pill-icon {
     @apply h-3 w-3 text-base-content/70;
-  }
-
-  /* ZEKAI UI – tamanho padrão de checkbox nos cards de preview */
-  .zui-checkbox {
-    --size: 1.1rem;
   }
 }

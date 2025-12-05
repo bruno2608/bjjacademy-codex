@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 
 import { cn } from "@/lib/utils";
+import { ZkAlert } from "./ui/ZkAlert";
 
 const categories = [
   { label: "Hoodies", count: 25, tone: "badge-neutral" as const },
@@ -123,14 +124,14 @@ function PreviewCard() {
               index === 0 && "border-t-0 pt-0"
             )}
           >
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                className="checkbox zui-checkbox"
-                defaultChecked={
-                  category.label === "Hoodies" || category.label === "Bags"
-                }
-              />
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  className="checkbox checkbox-sm"
+                  defaultChecked={
+                    category.label === "Hoodies" || category.label === "Bags"
+                  }
+                />
               <span>{category.label}</span>
             </label>
 
@@ -613,27 +614,21 @@ function TerminalCard() {
 function NotificationsBlock() {
   return (
     <DemoCard className="space-y-3">
-      <div className="items-center gap-3 border alert alert-info border-info/60 bg-info/10 text-info-content">
-        <Icon icon="mdi:email-outline" className="w-4 h-4" />
-        <span className="text-sm">There are 9 new messages</span>
-      </div>
-      <div className="items-center gap-3 border alert alert-success border-success/60 bg-success/10 text-success-content">
-        <Icon icon="mdi:shield-check" className="w-4 h-4" />
-        <span className="text-sm">Verification process completed</span>
-      </div>
-      <div className="items-center gap-3 border alert alert-warning border-warning/60 bg-warning/10 text-warning-content">
-        <Icon icon="mdi:shield-check" className="w-4 h-4" />
-        <span className="text-sm">
-          Click to verify your email
-        </span>
-      </div>
-      <div className="items-center justify-between gap-3 border alert alert-error border-error/60 bg-error/10 text-error-content">
-        <div className="flex items-center gap-2">
-          <Icon icon="mdi:alert-circle-outline" className="w-4 h-4" />
-          <span className="text-sm">Access denied</span>
+      <ZkAlert variant="info" className="items-center gap-3 text-sm">
+        There are 9 new messages
+      </ZkAlert>
+      <ZkAlert variant="success" className="items-center gap-3 text-sm">
+        Verification process completed
+      </ZkAlert>
+      <ZkAlert variant="warning" className="items-center gap-3 text-sm">
+        Click to verify your email
+      </ZkAlert>
+      <ZkAlert variant="error" className="items-center text-sm">
+        <div className="flex items-center justify-between gap-2">
+          <span>Access denied</span>
+          <a className="underline link text-error-content">Support</a>
         </div>
-        <a className="text-sm underline link text-error-content">Support</a>
-      </div>
+      </ZkAlert>
     </DemoCard>
   );
 }

@@ -36,7 +36,7 @@ export function ComponentVariants() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+        <div className="card border border-base-300/70 bg-base-200 shadow-lg">
           <div className="card-body space-y-3">
             <h3 className="card-title text-base">Buttons</h3>
             <div className="flex flex-wrap gap-2">
@@ -49,7 +49,7 @@ export function ComponentVariants() {
           </div>
         </div>
 
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+        <div className="card border border-base-300/70 bg-base-200 shadow-lg">
           <div className="card-body space-y-3">
             <h3 className="card-title text-base">Inputs & Forms</h3>
             <label className="form-control w-full">
@@ -64,7 +64,7 @@ export function ComponentVariants() {
               <option>Option A</option>
             </select>
             <label className="label cursor-pointer gap-2">
-              <input type="checkbox" className="checkbox checkbox-primary" defaultChecked />
+              <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" defaultChecked />
               <span className="label-text">Checkbox primary</span>
             </label>
             <label className="label cursor-pointer gap-2">
@@ -74,7 +74,7 @@ export function ComponentVariants() {
           </div>
         </div>
 
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+        <div className="card border border-base-300/70 bg-base-200 shadow-lg">
           <div className="card-body space-y-3">
             <h3 className="card-title text-base">Badges & Chips</h3>
             <div className="flex flex-wrap gap-2">
@@ -87,19 +87,19 @@ export function ComponentVariants() {
           </div>
         </div>
 
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+        <div className="card border border-base-300/70 bg-base-200 shadow-lg">
           <div className="card-body space-y-3">
             <h3 className="card-title text-base">Alerts & Feedback</h3>
             <div className="space-y-2 text-sm">
-              <div className="alert alert-info">Info message</div>
-              <div className="alert alert-success">Success state</div>
-              <div className="alert alert-warning">Warning notice</div>
-              <div className="alert alert-error">Error message</div>
+              <ZkAlert variant="info">Info message</ZkAlert>
+              <ZkAlert variant="success">Success state</ZkAlert>
+              <ZkAlert variant="warning">Warning notice</ZkAlert>
+              <ZkAlert variant="error">Error message</ZkAlert>
             </div>
           </div>
         </div>
 
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+        <div className="card border border-base-300/70 bg-base-200 shadow-lg">
           <div className="card-body space-y-3">
             <h3 className="card-title text-base">Tabs & Navigation</h3>
             <div className="tabs tabs-bordered">
@@ -122,7 +122,7 @@ export function ComponentVariants() {
           </div>
         </div>
 
-        <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+        <div className="card border border-base-300/70 bg-base-200 shadow-lg">
           <div className="card-body space-y-3">
             <h3 className="card-title text-base">Cards & Stats</h3>
             <div className="card border border-base-300/60 bg-base-200/60">
@@ -142,3 +142,4 @@ export function ComponentVariants() {
     </section>
   );
 }
+import { ZkAlert } from "./ui/ZkAlert";
