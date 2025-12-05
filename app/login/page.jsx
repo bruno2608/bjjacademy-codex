@@ -55,6 +55,15 @@ function LoginContent() {
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'zdark');
+    try {
+      localStorage.setItem('zekai-ui-theme', 'zdark');
+    } catch (err) {
+      // ignore storage errors (e.g., SSR or blocked storage)
+    }
+  }, []);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!form.identifier || !form.senha) {
