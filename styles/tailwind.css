@@ -1,8 +1,16 @@
+/* styles/tailwind.css — ENTRY PRINCIPAL DO DESIGN SYSTEM */
+
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: zdark --default, zlight --prefersdark;
+}
+
+/* DaisyUI Theme Generator tokens */
 @plugin "daisyui/theme" {
   name: "zdark";
   default: true;
   prefersdark: true;
-  color-scheme: "dark";
+  color-scheme: dark;
   --color-base-100: oklch(25.33% 0.016 252.42);
   --color-base-200: oklch(23.26% 0.014 253.1);
   --color-base-300: oklch(55% 0.027 264.364);
@@ -35,9 +43,7 @@
 
 @plugin "daisyui/theme" {
   name: "zlight";
-  default: false;
-  prefersdark: false;
-  color-scheme: "light";
+  color-scheme: light;
   --color-base-100: oklch(92% 0.003 48.717);
   --color-base-200: oklch(95% 0 0);
   --color-base-300: oklch(95% 0 0);
