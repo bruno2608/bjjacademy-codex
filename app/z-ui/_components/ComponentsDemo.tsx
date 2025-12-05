@@ -126,7 +126,7 @@ function PreviewCard() {
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                className="checkbox checkbox-xs rounded-full"
+                className="checkbox zui-checkbox"
                 defaultChecked={
                   category.label === "Hoodies" || category.label === "Bags"
                 }

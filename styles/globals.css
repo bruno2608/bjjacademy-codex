@@ -35,6 +35,11 @@ body {
   }
 
   .zk-tag-pill-icon {
-    @apply h-3 w-3 opacity-80;
+    @apply h-3 w-3 text-base-content/70;
+  }
+
+  /* ZEKAI UI – tamanho padrão de checkbox nos cards de preview */
+  .zui-checkbox {
+    --size: 1.1rem;
   }
 }

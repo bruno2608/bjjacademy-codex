@@ -20,8 +20,7 @@
       "@/*": [
         "./*",
         "./src/*"
-      ],
-      "@iconify/react": ["./src/lib/iconify"]
+      ]
     },
     "noEmit": true,
     "incremental": true,
