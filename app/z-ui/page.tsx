@@ -117,7 +117,7 @@ export default function ZUiPage() {
         {activeTab === "editor" && <ThemeEditor />}
         {activeTab === "demo" && <ComponentsDemo />}
         {activeTab === "variants" && <ComponentVariants />}
-        {activeTab === "palette" && <ColorPalette />}
+        {activeTab === "palette" && <ColorPalette theme={theme} />}
       </ZkContainer>
     </main>
   );
