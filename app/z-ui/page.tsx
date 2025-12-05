@@ -39,7 +39,7 @@ export default function ZUiPage() {
   const tabIcon = useMemo(() => "h-4 w-4", []);
 
   return (
-    <main className="min-h-dvh bg-base-200 text-base-content" data-theme={theme}>
+    <main className="min-h-dvh bg-base-100 text-base-content" data-theme={theme}>
       <ZkContainer className="py-10 space-y-8">
         <header className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-3">

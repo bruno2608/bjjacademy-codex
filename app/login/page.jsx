@@ -5,9 +5,11 @@
  */
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, Apple, ArrowRight, Loader2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
 import { ZkThemeDebug } from '@/components/ZkThemeDebug';
+import { ZkAlert } from '@/app/z-ui/_components/ui/ZkAlert';
+import { SocialLoginButtons } from './SocialLoginButtons';
 import useUserStore from '../../store/userStore';
 
 function LoginContent() {
@@ -113,7 +115,7 @@ function LoginContent() {
   };
 
   return (
-    <main className="min-h-screen bg-base-200 text-base-content flex items-center justify-center">
+    <main className="min-h-screen bg-base-100 text-base-content flex items-center justify-center">
       <ZkContainer className="grid w-full items-center gap-12 py-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
         <section className="flex flex-col gap-4 lg:pr-6">
           <span className="badge badge-outline w-fit border-base-300 text-[0.65rem] font-semibold uppercase tracking-[0.25em]">
@@ -164,7 +166,7 @@ function LoginContent() {
                     value={form.identifier}
                     onChange={handleChange}
                     onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
-                    className="input input-bordered w-full text-sm"
+                    className={`input input-bordered w-full text-sm ${identifierError ? 'input-error' : ''}`}
                     required
                   />
                   {identifierError ? (
@@ -187,7 +189,7 @@ function LoginContent() {
                     value={form.senha}
                     onChange={handleChange}
                     onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
-                    className="input input-bordered w-full text-sm"
+                    className={`input input-bordered w-full text-sm ${senhaError ? 'input-error' : ''}`}
                     required
                   />
                   {senhaError ? (
@@ -213,7 +215,11 @@ function LoginContent() {
                   </a>
                 </div>
 
-                {error && <p className="text-sm text-error">{error}</p>}
+                {error && (
+                  <ZkAlert variant="error" className="text-sm">
+                    {error}
+                  </ZkAlert>
+                )}
 
                 <button type="submit" className="btn btn-primary w-full justify-center gap-2" disabled={isSubmitting}>
                   {isSubmitting ? 'Entrando...' : 'Acessar painel'}
@@ -222,34 +228,7 @@ function LoginContent() {
 
                 <div className="divider text-[0.7rem] uppercase text-base-content/60">ou continue com</div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1">
-                    <button
-                      type="button"
-                      className="btn btn-outline w-full justify-center gap-2"
-                      aria-disabled="true"
-                      disabled
-                    >
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-base-200 text-[13px] font-semibold">
-                        G
-                      </span>
-                      Google
-                    </button>
-                    <p className="text-center text-[0.68rem] text-base-content/60">Em breve</p>
-                  </div>
-                  <div className="space-y-1">
-                    <button
-                      type="button"
-                      className="btn btn-outline w-full justify-center gap-2"
-                      aria-disabled="true"
-                      disabled
-                    >
-                      <Apple className="h-4 w-4" />
-                      Apple
-                    </button>
-                    <p className="text-center text-[0.68rem] text-base-content/60">Em breve</p>
-                  </div>
-                </div>
+                <SocialLoginButtons />
               </form>
               <div className="space-y-3 text-center text-sm text-base-content/80">
                 <p className="text-[0.68rem] text-base-content/60">
@@ -281,7 +260,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-base-200" aria-busy="true" />}>
+    <Suspense fallback={<div className="min-h-screen bg-base-100" aria-busy="true" />}>
       <LoginContent />
     </Suspense>
   );

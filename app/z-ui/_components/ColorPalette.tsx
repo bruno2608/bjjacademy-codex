@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { ZkAlert } from "./ui/ZkAlert";
 
 type PaletteToken = {
   label: string;
@@ -80,9 +81,9 @@ export function ColorPalette({ theme }: ColorPaletteProps) {
         <PaletteCard title="Feedback" tokens={stateTokens} values={values} />
       </div>
 
-      <div className="alert alert-info text-sm">
+      <ZkAlert variant="info" className="text-sm">
         Alternar o tema no topo da página para validar contraste e legibilidade em zdark e zlight.
-      </div>
+      </ZkAlert>
     </section>
   );
 }
@@ -97,7 +98,7 @@ function PaletteCard({
   values: Record<string, string>;
 }) {
   return (
-    <div className="card border border-base-300/70 bg-base-100/95 shadow-lg">
+    <div className="card border border-base-300/70 bg-base-200 shadow-lg">
       <div className="card-body space-y-3">
         <h3 className="card-title text-base">{title}</h3>
         <div className="space-y-2">
