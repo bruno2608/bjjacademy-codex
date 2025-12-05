@@ -2,6 +2,7 @@
  * Root layout for the BJJ Academy PWA.
  * Applies the global Tailwind styles and defines metadata used for the PWA install prompt.
  */
+import '../styles/tailwind.css';
 import '../styles/globals.css';
 import AppShell from '../components/ui/AppShell';
 

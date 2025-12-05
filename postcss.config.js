@@ -1,10 +1,5 @@
-/**
- * PostCSS configuration enabling Tailwind CSS processing
- * and autoprefixer for consistent styling across browsers.
- */
-module.exports = {
+export default {
   plugins: {
-    tailwindcss: {},
-    autoprefixer: {}
-  }
+    "@tailwindcss/postcss": {},
+  },
 };
