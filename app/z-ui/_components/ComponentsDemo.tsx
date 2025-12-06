@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 
 import { cn } from "@/lib/utils";
-import { ZkAlert } from "./ui/ZkAlert";
+import { ZCard } from "./ZCard";
 
 const categories = [
   { label: "Hoodies", count: 25, tone: "badge-neutral" as const },
@@ -80,7 +80,9 @@ export function ComponentsDemo() {
 
 function DemoCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <section className={cn("zk-card", className)}>{children}</section>
+    <ZCard className={className}>
+      {children}
+    </ZCard>
   );
 }
 

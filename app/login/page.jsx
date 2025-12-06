@@ -96,7 +96,7 @@ function LoginContent() {
     } catch (err) {
       if (err instanceof Error) {
         if (err.message === 'USUARIO_NAO_HABILITADO_PILOTO') {
-          setError('E-mail/usuário ou senha inválidos.');
+          setError('Procure o administrador da academia.');
         } else if (err.message === 'CREDENCIAIS_INVALIDAS') {
           setError('E-mail/usuário ou senha inválidos.');
         } else if (err.message === 'USUARIO_CONVITE_PENDENTE') {
@@ -118,7 +118,7 @@ function LoginContent() {
     <main className="flex items-center justify-center min-h-screen bg-base-100 text-base-content">
       <ZkContainer className="grid w-full items-center gap-12 py-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
         <section className="flex flex-col gap-4 lg:pr-6">
-          <span className="badge badge-outline w-fit border-base-300 text-[0.65rem] font-semibold uppercase tracking-[0.25em]">
+          <span className="badge badge-outline w-fit border-base-200 text-[0.65rem] font-semibold uppercase tracking-[0.25em]">
             <span className="flex items-center gap-1.5 text-xs">
               <ShieldCheck size={14} className="text-primary" /> Portal autenticado
             </span>
@@ -129,20 +129,6 @@ function LoginContent() {
               Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
             </p>
           </div>
-          <ul className="space-y-2 text-sm text-base-content/80 lg:max-w-xl">
-            <li className="flex gap-2">
-              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
-              <span>Login por e-mail ou usuário (case-insensitive).</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
-              <span>Perfis aluno e staff já configurados para o piloto.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
-              <span>Fluxos de convite, cadastro público e reset documentados.</span>
-            </li>
-          </ul>
         </section>
 
         <section className="w-full max-w-md justify-self-center lg:justify-self-end">
@@ -169,10 +155,8 @@ function LoginContent() {
                     className={`input input-bordered w-full text-sm ${identifierError ? 'input-error' : ''}`}
                     required
                   />
-                  {identifierError ? (
+                  {identifierError && (
                     <p className="text-xs text-error">{identifierError}</p>
-                  ) : (
-                    <p className="text-[0.68rem] text-base-content/60">Login aceita e-mail ou username (case-insensitive).</p>
                   )}
                 </div>
 
@@ -192,10 +176,8 @@ function LoginContent() {
                     className={`input input-bordered w-full text-sm ${senhaError ? 'input-error' : ''}`}
                     required
                   />
-                  {senhaError ? (
+                  {senhaError && (
                     <p className="text-xs text-error">{senhaError}</p>
-                  ) : (
-                    <p className="text-[0.68rem] text-base-content/60">Mínimo 10 caracteres; senha piloto: BJJ@pilot2025</p>
                   )}
                 </div>
 
@@ -208,7 +190,7 @@ function LoginContent() {
                       onChange={handleChange}
                       className="checkbox checkbox-sm checkbox-primary"
                     />
-                    Lembrar de mim nesta sessão
+                    Lembrar de mim
                   </label>
                   <a href="/esqueci-senha" className="text-xs font-semibold link link-primary">
                     Esqueci minha senha
@@ -226,14 +208,11 @@ function LoginContent() {
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight size={15} />}
                 </button>
 
-                <div className="divider text-[0.7rem] uppercase text-base-content/60">ou continue com</div>
+                <div className="divider text-[0.7rem] uppercase text-base-content/60">ou</div>
 
                 <SocialLoginButtons />
               </form>
               <div className="space-y-3 text-sm text-center text-base-content/80">
-                <p className="text-[0.68rem] text-base-content/60">
-                  Use um e-mail ou usuário habilitado no piloto e a senha padrão para acessar.
-                </p>
                 <div className="flex flex-col gap-1 text-xs">
                   <p>
                     Não tem conta?{' '}
@@ -247,6 +226,7 @@ function LoginContent() {
                       Primeiro acesso
                     </a>
                   </p>
+                <p className="text-[0.88rem] text-base-content/60 text-center">Senha piloto: BJJ@pilot2025</p>
                 </div>
               </div>
             </div>
