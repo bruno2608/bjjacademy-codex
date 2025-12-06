@@ -10,7 +10,7 @@ import TabletNav from './TabletNav';
 import ShellFooter from '../layouts/ShellFooter';
 import ImpersonationBanner from './ImpersonationBanner';
 
-const BARE_PATHS = ['/login', '/unauthorized'];
+const BARE_PATHS = ['/login', '/unauthorized', '/z-ui'];
 
 export default function AppShell({ children }) {
   const router = useRouter();
@@ -39,10 +39,11 @@ export default function AppShell({ children }) {
   );
 
   useEffect(() => {
-    if (hydrated && !storeUser) {
+    // Skip auth redirect for bare/public layouts like login, unauthorized, and z-ui.
+    if (!isBareLayout && hydrated && !storeUser) {
       router.replace('/login');
     }
-  }, [hydrated, router, storeUser]);
+  }, [hydrated, router, storeUser, isBareLayout]);
 
   if (isBareLayout) {
     return children;

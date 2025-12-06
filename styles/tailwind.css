@@ -1,133 +1,77 @@
-/* Tailwind base, components, and utilities layers. */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* styles/tailwind.css — ENTRY PRINCIPAL DO DESIGN SYSTEM */
 
-/* Custom layer para estilos reutilizáveis. */
-@layer components {
-  .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-bjj-gray-800 px-4 py-2 text-sm font-semibold text-bjj-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bjj-red/40 disabled:cursor-not-allowed disabled:opacity-50;
-  }
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: zdark --default, zlight --prefersdark;
+}
 
-  .btn-sm {
-    @apply px-3 py-1.5 text-xs;
-  }
+/* DaisyUI Theme Generator tokens */
+@plugin "daisyui/theme" {
+  name: "zdark";
+  default: true;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(27.8% 0.018 258.100);
+  --color-base-200: oklch(19.8% 0.014 253.100);
+  --color-base-300: oklch(55% 0.027 264.364);
+  --color-base-content: oklch(100.0% 0.000 360.000);
+  --color-primary: oklch(98% 0.003 247.858);
+  --color-primary-content: oklch(14% 0.004 49.25);
+  --color-secondary: oklch(44% 0.017 285.786);
+  --color-secondary-content: oklch(100% 0 0);
+  --color-accent: oklch(58% 0.253 17.585);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(44% 0.03 256.802);
+  --color-neutral-content: oklch(100% 0 0);
+  --color-info: oklch(74% 0.16 232.661);
+  --color-info-content: oklch(29% 0.066 243.157);
+  --color-success: oklch(79% 0.209 151.711);
+  --color-success-content: oklch(26% 0.065 152.934);
+  --color-warning: oklch(85% 0.199 91.936);
+  --color-warning-content: oklch(41% 0.112 45.904);
+  --color-error: oklch(54.2% 0.236 17.585);
+  --color-error-content: oklch(100% 0 0);
+  --radius-selector: 0.40rem;
+  --radius-field: 2rem;
+  --radius-box: 2rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.23875rem;
+  --border: 4px;
+  --depth: 1;
+  --noise: 0;
+}
 
-  .btn-md {
-    @apply px-4 py-2 text-sm;
-  }
-
-  .btn-ghost {
-    @apply bg-transparent text-bjj-gray-200 hover:bg-bjj-gray-800;
-  }
-
-  .btn-outline {
-    @apply bg-transparent border border-bjj-gray-700 text-bjj-gray-200;
-  }
-
-  .card {
-    @apply relative overflow-hidden rounded-2xl border border-bjj-gray-800/60 bg-bjj-gray-900/80 p-5 text-bjj-white shadow-[0_18px_35px_-18px_rgba(0,0,0,0.5)];
-  }
-
-  .btn-primary {
-    @apply bg-bjj-red text-bjj-white border-transparent hover:bg-bjj-red/90;
-  }
-
-  .btn-secondary {
-    @apply btn bg-transparent border border-bjj-gray-700 text-bjj-gray-200 hover:border-bjj-red hover:text-bjj-red;
-  }
-
-  .input-field {
-    @apply w-full rounded-lg border border-bjj-gray-700 bg-bjj-gray-900/70 px-3.5 py-2.5 text-sm text-bjj-white placeholder:text-bjj-gray-200/70 focus:border-bjj-red focus:outline-none focus:ring-1 focus:ring-bjj-red/40 disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
-  .select {
-    @apply w-full rounded-lg border border-bjj-gray-700 bg-bjj-gray-900/70 px-3.5 py-2.5 text-sm text-bjj-white focus:border-bjj-red focus:outline-none focus:ring-1 focus:ring-bjj-red/40;
-  }
-
-  .select-bordered {
-    @apply border-bjj-gray-700;
-  }
-
-  .badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide;
-  }
-
-  .badge-sm {
-    @apply px-2 py-0.5 text-[10px];
-  }
-
-  .badge-success {
-    @apply bg-emerald-500/20 text-emerald-200;
-  }
-
-  .badge-primary {
-    @apply bg-bjj-red/20 text-bjj-red;
-  }
-
-  .badge-warning {
-    @apply bg-amber-500/20 text-amber-200;
-  }
-
-  .badge-error {
-    @apply bg-bjj-red/20 text-bjj-white;
-  }
-
-  .badge-outline {
-    @apply border border-bjj-gray-700 bg-transparent text-bjj-gray-200;
-  }
-
-  .modal {
-    @apply fixed inset-0 z-50 flex items-center justify-center bg-bjj-black/80 px-4 py-6 backdrop-blur;
-  }
-
-  .modal-box {
-    @apply w-full max-w-2xl rounded-2xl border border-bjj-gray-800/70 bg-bjj-gray-900 p-6 text-bjj-white shadow-[0_18px_35px_-18px_rgba(0,0,0,0.6)];
-  }
-
-  /*
-   * Os navegadores aplicam ícones próprios em campos de data e hora. Em temas
-   * escuros esses ícones costumam ficar pretos, prejudicando o contraste.
-   * A regra abaixo inverte a cor dos indicadores e também força o esquema de
-   * cor dark para manter o seletor nativo legível.
-   */
-  .input-field[type='date'],
-  .input-field[type='time'] {
-    color-scheme: dark;
-  }
-
-  .input-field::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.85;
-    transition: opacity 150ms ease;
-  }
-
-  .input-field:focus::-webkit-calendar-picker-indicator,
-  .input-field:hover::-webkit-calendar-picker-indicator {
-    opacity: 1;
-  }
-
-  .scrollbar-dark {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(96, 96, 96, 0.8) rgba(18, 18, 18, 0.85);
-  }
-
-  .scrollbar-dark::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .scrollbar-dark::-webkit-scrollbar-track {
-    background: rgba(14, 14, 14, 0.9);
-    border-radius: 9999px;
-  }
-
-  .scrollbar-dark::-webkit-scrollbar-thumb {
-    background: rgba(120, 120, 120, 0.8);
-    border-radius: 9999px;
-  }
-
-  .scrollbar-dark::-webkit-scrollbar-thumb:hover {
-    background: rgba(225, 6, 0, 0.75);
-  }
-
+@plugin "daisyui/theme" {
+  name: "zlight";
+  default: false;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(81.6% 0.011 257.500);
+  --color-base-200: oklch(95% 0 0);
+  --color-base-300: oklch(61.1% 0.028 268.900);
+  --color-base-content: oklch(21% 0.006 285.885);
+  --color-primary: oklch(37% 0.034 259.733);
+  --color-primary-content: oklch(100% 0 0);
+  --color-secondary: oklch(27% 0.006 286.033);
+  --color-secondary-content: oklch(100% 0 0);
+  --color-accent: oklch(54.2% 0.236 17.585);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(44% 0.03 256.802);
+  --color-neutral-content: oklch(92% 0.004 286.32);
+  --color-info: oklch(58% 0.158 241.966);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(62% 0.194 149.214);
+  --color-success-content: oklch(98% 0.018 155.826);
+  --color-warning: oklch(82% 0.189 84.429);
+  --color-warning-content: oklch(27% 0.077 45.635);
+  --color-error: oklch(54.2% 0.236 17.585);
+  --color-error-content: oklch(100% 0 0);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 5px;
+  --depth: 1;
+  --noise: 0;
 }
