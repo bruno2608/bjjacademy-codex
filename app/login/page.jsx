@@ -115,7 +115,7 @@ function LoginContent() {
   };
 
   return (
-    <main className="min-h-screen bg-base-100 text-base-content flex items-center justify-center">
+    <main className="flex items-center justify-center min-h-screen bg-base-100 text-base-content">
       <ZkContainer className="grid w-full items-center gap-12 py-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
         <section className="flex flex-col gap-4 lg:pr-6">
           <span className="badge badge-outline w-fit border-base-300 text-[0.65rem] font-semibold uppercase tracking-[0.25em]">
@@ -125,7 +125,7 @@ function LoginContent() {
           </span>
           <div className="space-y-4">
             <h1 className="text-4xl font-bold lg:text-5xl">BJJ Academy</h1>
-            <p className="max-w-prose text-base text-base-content/80 lg:text-lg">
+            <p className="text-base max-w-prose text-base-content/80 lg:text-lg">
               Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
             </p>
           </div>
@@ -146,15 +146,15 @@ function LoginContent() {
         </section>
 
         <section className="w-full max-w-md justify-self-center lg:justify-self-end">
-          <div className="zk-card w-full shadow-2xl">
+          <div className="w-full shadow-2xl zk-card">
             <div className="space-y-6">
               <header className="space-y-1 text-center">
                 <h2 className="text-xl font-semibold">Entrar</h2>
                 <p className="text-sm text-base-content/70">Use suas credenciais para acessar o painel.</p>
               </header>
               <form className="space-y-5" onSubmit={handleSubmit}>
-                <div className="form-control space-y-2">
-                  <label className="label pb-0">
+                <div className="space-y-2 form-control">
+                  <label className="pb-0 label">
                     <span className="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/80">
                       E-mail ou usuário
                     </span>
@@ -176,8 +176,8 @@ function LoginContent() {
                   )}
                 </div>
 
-                <div className="form-control space-y-2">
-                  <label className="label pb-0">
+                <div className="space-y-2 form-control">
+                  <label className="pb-0 label">
                     <span className="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/80">
                       Senha
                     </span>
@@ -210,7 +210,7 @@ function LoginContent() {
                     />
                     Lembrar de mim nesta sessão
                   </label>
-                  <a href="/esqueci-senha" className="link link-primary text-xs font-semibold">
+                  <a href="/esqueci-senha" className="text-xs font-semibold link link-primary">
                     Esqueci minha senha
                   </a>
                 </div>
@@ -221,29 +221,29 @@ function LoginContent() {
                   </ZkAlert>
                 )}
 
-                <button type="submit" className="btn btn-primary w-full justify-center gap-2" disabled={isSubmitting}>
+                <button type="submit" className="justify-center w-full gap-2 btn btn-primary" disabled={isSubmitting}>
                   {isSubmitting ? 'Entrando...' : 'Acessar painel'}
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight size={15} />}
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight size={15} />}
                 </button>
 
                 <div className="divider text-[0.7rem] uppercase text-base-content/60">ou continue com</div>
 
                 <SocialLoginButtons />
               </form>
-              <div className="space-y-3 text-center text-sm text-base-content/80">
+              <div className="space-y-3 text-sm text-center text-base-content/80">
                 <p className="text-[0.68rem] text-base-content/60">
                   Use um e-mail ou usuário habilitado no piloto e a senha padrão para acessar.
                 </p>
                 <div className="flex flex-col gap-1 text-xs">
                   <p>
                     Não tem conta?{' '}
-                    <a href="/cadastro" className="link link-primary font-semibold">
+                    <a href="/cadastro" className="font-semibold link link-primary">
                       Cadastre-se
                     </a>
                   </p>
                   <p>
                     Recebeu um convite?{' '}
-                    <a href="/acesso-convite" className="link link-primary font-semibold">
+                    <a href="/acesso-convite" className="font-semibold link link-primary">
                       Primeiro acesso
                     </a>
                   </p>

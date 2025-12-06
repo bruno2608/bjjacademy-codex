@@ -91,21 +91,21 @@ function PreviewCard() {
       {/* Cabeçalho */}
       <div className="flex items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-base-300 text-base-content/70">
-            <Icon icon="mdi:clock-outline" className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-base-300 text-base-content/70">
+            <Icon icon="mdi:chart-arc" className="w-6 h-6" />
           </span>
           <h3 className="text-sm font-semibold leading-none">Preview</h3>
         </div>
         <button
           type="button"
-          className="btn btn-link btn-xs px-0 text-xs font-medium text-base-content/80 underline-offset-2 hover:underline"
+          className="px-0 text-xs font-medium btn btn-link btn-xs text-base-content/80 underline-offset-2 hover:underline"
         >
           more
         </button>
       </div>
 
       {/* Tags ativas */}
-      <div className="mt-2 flex flex-wrap gap-2 text-xs">
+      <div className="flex flex-wrap gap-2 mt-2 text-xs">
         {["Shoes", "Bags"].map((tag) => (
           <span key={tag} className="zk-tag-pill">
             {tag}
@@ -613,25 +613,37 @@ function TerminalCard() {
 
 function NotificationsBlock() {
   return (
-    <DemoCard className="space-y-3">
-      <ZkAlert variant="info" className="items-center gap-3 text-sm">
-        There are 9 new messages
-      </ZkAlert>
-      <ZkAlert variant="success" className="items-center gap-3 text-sm">
-        Verification process completed
-      </ZkAlert>
-      <ZkAlert variant="warning" className="items-center gap-3 text-sm">
-        Click to verify your email
-      </ZkAlert>
-      <ZkAlert variant="error" className="items-center text-sm">
-        <div className="flex items-center justify-between gap-2">
-          <span>Access denied</span>
-          <a className="underline link text-error-content">Support</a>
+    <DemoCard>
+      <div className="space-y-2">
+        <div className="alert alert-info">
+          <Icon icon="mdi:email" className="w-5 h-5" />
+          <span>There are 9 new messages</span>
         </div>
-      </ZkAlert>
+
+        <div className="alert alert-success">
+          <Icon icon="mdi:check-circle-outline" className="w-5 h-5" />
+          <span>Verification process completed</span>
+        </div>
+
+        <div className="alert alert-warning">
+          <Icon icon="mdi:shield-alert-outline" className="w-5 h-5" />
+          <span>
+            <a className="link">Click to verify your email</a>
+          </span>
+        </div>
+
+        <div className="alert alert-error">
+          <Icon icon="mdi:lock-outline" className="w-5 h-5" />
+          <div className="flex items-center justify-between flex-1 gap-2">
+            <span>Access denied</span>
+            <button className="px-0 btn btn-link btn-xs">Support</button>
+          </div>
+        </div>
+      </div>
     </DemoCard>
   );
 }
+
 
 function HarryPotterTimeline() {
   return (
