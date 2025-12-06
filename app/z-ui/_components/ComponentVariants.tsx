@@ -1,3 +1,4 @@
+import { ZAlert } from "./ZAlert";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = [
@@ -91,10 +92,10 @@ export function ComponentVariants() {
           <div className="card-body space-y-3">
             <h3 className="card-title text-base">Alerts & Feedback</h3>
             <div className="space-y-2 text-sm">
-              <ZkAlert variant="info">Info message</ZkAlert>
-              <ZkAlert variant="success">Success state</ZkAlert>
-              <ZkAlert variant="warning">Warning notice</ZkAlert>
-              <ZkAlert variant="error">Error message</ZkAlert>
+              <ZAlert variant="info">Info message</ZAlert>
+              <ZAlert variant="success">Success state</ZAlert>
+              <ZAlert variant="warning">Warning notice</ZAlert>
+              <ZAlert variant="error">Error message</ZAlert>
             </div>
           </div>
         </div>
@@ -142,4 +143,3 @@ export function ComponentVariants() {
     </section>
   );
 }
-import { ZkAlert } from "./ui/ZkAlert";

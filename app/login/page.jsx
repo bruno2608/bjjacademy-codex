@@ -8,7 +8,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
 import { ZkThemeDebug } from '@/components/ZkThemeDebug';
-import { ZkAlert } from '@/app/z-ui/_components/ui/ZkAlert';
+import { ZCard } from '@/app/z-ui/_components/ZCard';
+import { ZAlert } from '@/app/z-ui/_components/ZAlert';
+import { ZInputField } from '@/app/z-ui/_components/ZInputField';
 import { SocialLoginButtons } from './SocialLoginButtons';
 import useUserStore from '../../store/userStore';
 
@@ -146,58 +148,37 @@ function LoginContent() {
         </section>
 
         <section className="w-full max-w-md justify-self-center lg:justify-self-end">
-          <div className="w-full shadow-2xl zk-card">
+          <ZCard className="w-full shadow-2xl" variant="subtle">
             <div className="space-y-6">
               <header className="space-y-1 text-center">
                 <h2 className="text-xl font-semibold">Entrar</h2>
                 <p className="text-sm text-base-content/70">Use suas credenciais para acessar o painel.</p>
               </header>
               <form className="space-y-5" onSubmit={handleSubmit}>
-                <div className="space-y-2 form-control">
-                  <label className="pb-0 label">
-                    <span className="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/80">
-                      E-mail ou usuário
-                    </span>
-                  </label>
-                  <input
-                    name="identifier"
-                    type="text"
-                    placeholder="voce@bjj.academy ou seu usuário"
-                    value={form.identifier}
-                    onChange={handleChange}
-                    onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
-                    className={`input input-bordered w-full text-sm ${identifierError ? 'input-error' : ''}`}
-                    required
-                  />
-                  {identifierError ? (
-                    <p className="text-xs text-error">{identifierError}</p>
-                  ) : (
-                    <p className="text-[0.68rem] text-base-content/60">Login aceita e-mail ou username (case-insensitive).</p>
-                  )}
-                </div>
+                <ZInputField
+                  label="E-mail ou usuário"
+                  name="identifier"
+                  placeholder="voce@bjj.academy ou seu usuário"
+                  value={form.identifier}
+                  onChange={handleChange}
+                  onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
+                  error={identifierError || undefined}
+                  helperText="Login aceita e-mail ou username (case-insensitive)."
+                  required
+                />
 
-                <div className="space-y-2 form-control">
-                  <label className="pb-0 label">
-                    <span className="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/80">
-                      Senha
-                    </span>
-                  </label>
-                  <input
-                    name="senha"
-                    type="password"
-                    placeholder="••••••••"
-                    value={form.senha}
-                    onChange={handleChange}
-                    onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
-                    className={`input input-bordered w-full text-sm ${senhaError ? 'input-error' : ''}`}
-                    required
-                  />
-                  {senhaError ? (
-                    <p className="text-xs text-error">{senhaError}</p>
-                  ) : (
-                    <p className="text-[0.68rem] text-base-content/60">Mínimo 10 caracteres; senha piloto: BJJ@pilot2025</p>
-                  )}
-                </div>
+                <ZInputField
+                  type="password"
+                  label="Senha"
+                  name="senha"
+                  placeholder="••••••••"
+                  value={form.senha}
+                  onChange={handleChange}
+                  onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
+                  error={senhaError || undefined}
+                  helperText="Mínimo 10 caracteres; senha piloto: BJJ@pilot2025"
+                  required
+                />
 
                 <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-base-content/80">
                   <label className="flex items-center gap-2">
@@ -216,9 +197,12 @@ function LoginContent() {
                 </div>
 
                 {error && (
-                  <ZkAlert variant="error" className="text-sm">
+                  <ZAlert
+                    variant="error"
+                    title="E-mail/usuário ou senha inválidos."
+                  >
                     {error}
-                  </ZkAlert>
+                  </ZAlert>
                 )}
 
                 <button type="submit" className="justify-center w-full gap-2 btn btn-primary" disabled={isSubmitting}>
@@ -250,7 +234,7 @@ function LoginContent() {
                 </div>
               </div>
             </div>
-          </div>
+          </ZCard>
         </section>
       </ZkContainer>
       <ZkThemeDebug />
