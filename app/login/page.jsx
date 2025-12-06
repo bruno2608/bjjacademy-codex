@@ -117,17 +117,14 @@ function LoginContent() {
   return (
     <main className="flex items-center justify-center min-h-screen bg-base-100 text-base-content">
       <ZkContainer className="grid w-full items-center gap-12 py-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
-        <section className="flex flex-col gap-4 lg:pr-6">
+        <section className="flex flex-col gap-4 lg:pr-6 center">
           <span className="badge badge-outline w-fit border-base-200 text-[0.65rem] font-semibold uppercase tracking-[0.25em]">
             <span className="flex items-center gap-1.5 text-xs">
-              <ShieldCheck size={14} className="text-primary" /> Portal autenticado
+              <ShieldCheck size={14} className="text-center text-primary" /> Portal autenticado
             </span>
           </span>
           <div className="space-y-4">
             <h1 className="text-4xl font-bold lg:text-5xl">BJJ Academy</h1>
-            <p className="text-base max-w-prose text-base-content/80 lg:text-lg">
-              Acesse o painel progressivo da academia, acompanhe graduações, presenças e mantenha os cadastros sempre atualizados.
-            </p>
           </div>
         </section>
 
