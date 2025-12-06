@@ -1,7 +1,10 @@
 # ZEKAI UI
 
+> **Status:** Atualizado em 06/12/2025  
+> **Fonte principal:** [01-visao-geral-bjjacademy-codex.md](./01-visao-geral-bjjacademy-codex.md)
+
 ## 1. Visão geral
-O ZEKAI UI é o design system oficial do bjjacademy-codex, construído sobre Tailwind CSS + DaisyUI. Ele organiza o visual em torno dos temas **zdark** (padrão) e **zlight** (futuro toggle), define wrappers base (`ZkContainer`, `ZkPage`) e dita o modelo de responsividade para telas públicas e de dashboard. A intenção é manter um visual moderno, escuro por padrão, coerente com o preview do DaisyUI Theme Generator.
+O ZEKAI UI é o design system oficial do bjjacademy-codex, construído sobre Tailwind CSS + DaisyUI 5. Ele organiza o visual em torno dos temas **zdark** (padrão) e **zlight** (toggle interno do playground), define wrappers base (`ZkContainer`, `ZkPage`) e dita o modelo de responsividade para telas públicas e de dashboard. A intenção é manter um visual moderno, escuro por padrão, coerente com o preview do DaisyUI Theme Generator.
 
 ## 2. Temas (zdark / zlight)
 - **zdark (padrão, dark):** fundo escuro usando `base-100/200/300`, texto claro em `base-content`, CTA neutro em `primary` (claro) e destaque em `secondary`. `accent` permanece profundo, `neutral` é azul escuro e estados usam `info/success/warning/error` da paleta oficial.
@@ -11,7 +14,7 @@ O ZEKAI UI é o design system oficial do bjjacademy-codex, construído sobre Tai
   - **CTAs:** `btn-primary` para ações neutras, `btn-secondary` para destaque vermelho brand; `btn-ghost`/`btn-outline` para ações secundárias.
   - **Mensagens e status:** `alert-info/success/warning/error`, `badge-*` seguindo a paleta.
   - **Inputs:** `input input-bordered bg-base-200` como padrão; foco com `focus-visible:ring-primary`.
-- **Fonte da verdade:** os temas vivem no `tailwind.config.js` em `daisyui.themes` (apenas `zdark` e `zlight`, com `darkTheme: "zdark"`). O tema ativo vem de `data-theme="zdark"` no `<html>`; trocar para zlight basta alterar esse atributo quando o toggle for liberado.
+- **Fonte da verdade:** os temas são definidos em `styles/tailwind.css` via `@plugin "daisyui"` e dois blocos `@plugin "daisyui/theme"` (zdark/zlight). O `tailwind.config.js` permanece mínimo, apenas carregando Tailwind 4. Consulte o [relatório de tema](./zekai-theme-report.md) para a lista completa de tokens. O tema ativo vem de `data-theme="zdark"` no `<html>`; trocar para zlight basta alterar esse atributo ou usar o toggle do `/z-ui`.
 
 ## 3. Layout e responsividade
 - **Wrapper global:** `ZkContainer` centraliza e limita largura (`w-full max-w-6xl mx-auto px-4 md:px-6 lg:px-8`).
@@ -27,10 +30,10 @@ O ZEKAI UI é o design system oficial do bjjacademy-codex, construído sobre Tai
 - **Feedbacks:** `alert-*` e `badge-*` seguem a paleta do tema; prefira badges outline para marcadores discretos.
 
 ## Estado atual do tema (zdark / zlight)
-- DaisyUI está configurado com os temas personalizados `zdark` (default) e `zlight` exclusivamente no `tailwind.config.js` (`daisyui.themes`).
-- O `<html>` aplica `data-theme="zdark"`, tornando o dark o tema ativo global.
-- A tela `/login` usa somente tokens do tema (`bg-base-*`, `text-base-content`, `btn-*`), sem cores fixas.
-- Overrides antigos baseados em `bjj-*` ou cores hardcoded foram removidos ou convertidos para tokens do tema.
+- DaisyUI está configurado no entry `styles/tailwind.css`, que registra o plugin e os tokens customizados de `zdark` (default/prefersdark) e `zlight` (light).【F:styles/tailwind.css†L1-L74】
+- O `<html>` aplica `data-theme="zdark"`, tornando o dark o tema ativo global; `/z-ui` permite alternar temporariamente e persiste em `localStorage` (`zekai-ui-theme`).【F:app/layout.jsx†L18-L25】【F:app/z-ui/page.tsx†L80-L141】
+- A tela `/login` usa somente tokens do tema (`bg-base-*`, `text-base-content`, `btn-*`), sem cores fixas, e força `data-theme="zdark"` ao carregar.【F:app/login/page.jsx†L95-L137】【F:app/login/page.jsx†L133-L219】
+- Overrides antigos baseados em `bjj-*` ou cores hardcoded foram substituídos por tokens; resquícios permanecem apenas em telas legadas fora do fluxo `/z-ui` e login.
 
 ## Checklist rápido para novas telas
 - Use `ZkContainer` para centralizar e limitar a largura; em auth, combine com grids responsivos (2 colunas no desktop, colunas empilhadas no mobile).

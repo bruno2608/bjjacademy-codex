@@ -1,5 +1,8 @@
 # Prompt: Implementação do Check-in Manual
 
+> **Status:** Em revisão / contém visão futura. Atualizado em 06/12/2025  
+> **Fonte principal:** [auth-and-checkin-flow.md](./auth-and-checkin-flow.md)
+
 Use este prompt em uma nova conversa no Codex/Lovable. Ele descreve a implementação completa do módulo de check-in manual de presença (visões aluno e staff) para o projeto **bjjacademy-codex**.
 
 ---

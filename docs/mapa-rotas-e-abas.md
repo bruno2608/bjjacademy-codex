@@ -1,5 +1,8 @@
 # Mapa de rotas e abas
 
+> **Status:** Atualizado em 06/12/2025  
+> **Fonte principal:** [01-visao-geral-bjjacademy-codex.md](./01-visao-geral-bjjacademy-codex.md)
+
 Visão geral das rotas atuais (App Router) com tabs internas e blocos principais por página.
 
 ## Rotas públicas
@@ -20,6 +23,7 @@ Visão geral das rotas atuais (App Router) com tabs internas e blocos principais
 | `/graduacoes` | Tabs internas: **Próximas** (`proximas`) e **Histórico** (`historico`). | Filtros (nome, faixa, status, tipo, período); cards resumidos (contadores); lista de graduações futuras; linha do tempo/histórico com faixas. |
 | `/relatorios` | Não há tabs. | Header e card placeholder para painéis analíticos. |
 | `/configuracoes` | Não há tabs; hub de links. | Header de acesso administrativo; grid de cartões para **Regras de graduação**, **Horários de treino**, **Tipos de treino**. |
+| `/qrcode` (professor/admin/ti) | Tabs implícitas via navegação: **QR Code da Academia**, **Histórico**, **Validar** (oculta no MVP). | QR dinâmico da aula atual, consulta de histórico e placeholder para validar QR (futuro). |
 
 ## Área ALUNO (topo com pills/tabs)
 

@@ -1,10 +1,14 @@
 # Navegação e menus propostos
 
+> **Status:** Atualizado em 06/12/2025  
+> **Fonte principal:** [01-visao-geral-bjjacademy-codex.md](./01-visao-geral-bjjacademy-codex.md)
+
 Consolidações para manter a navegação alinhada ao layout aprovado (sidebar STAFF + pills ALUNO) com ajustes mínimos.
 
 ## Mapa de rotas x perfis
 
 - **STAFF (professor/instrutor/admin/ti):** `/dashboard`, `/presencas`, `/alunos`, `/graduacoes`, `/relatorios`, `/configuracoes/*`, `/perfil`, `/historico-presencas`.
+- **STAFF (professor/instrutor/admin/ti):** `/dashboard`, `/presencas` (com subpaths `check-in`, `pendencias`, `revisao`), `/alunos`, `/graduacoes/proximas`, `/graduacoes/historico`, `/relatorios`, `/configuracoes/*`, `/perfil`, `/historico-presencas`; `QR Code` é injetado após Presenças para professor/admin/ti (`/qrcode`, `/qrcode/historico`, `/qrcode/validar`).
 - **ALUNO:** `/dashboard`, `/checkin`, `/treinos`, `/evolucao`, `/historico-presencas`, `/perfil` (acesso pessoal). Dashboard decide layout conforme papéis.
 - **Públicas:** `/login`, `/unauthorized`, `/` (redirect).
 

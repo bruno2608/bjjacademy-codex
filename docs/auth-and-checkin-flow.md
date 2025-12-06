@@ -1,5 +1,8 @@
 # Autenticação e Check-in — Guia Central (MVP + visão futura)
 
+> **Status:** Atualizado em 06/12/2025  
+> **Fonte principal:** [01-visao-geral-bjjacademy-codex.md](./01-visao-geral-bjjacademy-codex.md)
+
 Documento mestre para o PWA de gestão de academias de Jiu-Jitsu (Next.js 14 + Tailwind + DaisyUI + Zustand). Serve como contrato funcional entre front (mocks/services/stores atuais) e o backend futuro (Supabase + API própria). Todas as sprints de autenticação e check-in devem partir daqui.
 
 ## 1. Visão geral
