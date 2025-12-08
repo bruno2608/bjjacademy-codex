@@ -1,5 +1,5 @@
 import { BjjBeltStrip } from "./BjjBeltStrip"
-import type { BjjBeltProgressCardProps } from "../../types/bjjBelt"
+import type { BjjBeltProgressCardProps } from "@/types/bjjBelt"
 
 export function BjjBeltProgressCard({
   config,
@@ -11,7 +11,7 @@ export function BjjBeltProgressCard({
   if (!config) {
     return (
       <div className={`w-full rounded-xl border border-bjj-gray-800 bg-bjj-gray-900/80 p-5 text-sm text-bjj-gray-200 ${className}`}>
-        Configuração de faixa não encontrada
+        Configuracao de faixa nao encontrada
       </div>
     )
   }
@@ -24,12 +24,12 @@ export function BjjBeltProgressCard({
   const rawPercent = hasMeta ? (aulasFeitasNoGrau / safeMeta) * 100 : 0
   const percentage = Math.min(100, Math.max(0, rawPercent))
 
-  const progressBarColor = config.progressBarClass || config.beltColorClass
+  const progressBarColor = config.progressBarClass ?? config.beltColorClass ?? "bg-bjj-gray-700"
   const isProfessor = config.tipoPreta === "professor"
 
   return (
     <div className={`w-full p-5 bg-zinc-900 rounded-xl border border-zinc-800/60 shadow-sm font-sans ${className}`}>
-      {/* Cabeçalho */}
+      {/* Cabecalho */}
       <div className="flex justify-between items-end mb-3">
         <div>
           <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-0.5">
@@ -67,7 +67,7 @@ export function BjjBeltProgressCard({
       {/* Barra de progresso */}
       <div className="space-y-2">
         <div className="flex justify-between text-xs font-medium text-zinc-400">
-          <span>Progresso para o próximo nível</span>
+          <span>Progresso para o proximo nivel</span>
           <span className="text-zinc-200">
             {hasMeta ? (
               <>
@@ -76,7 +76,7 @@ export function BjjBeltProgressCard({
                 {aulasFeitasNoGrau} de {safeMeta} aulas
               </>
             ) : (
-              <span className="text-zinc-500 italic">Meta de aulas não definida</span>
+              <span className="text-zinc-500 italic">Meta de aulas nao definida</span>
             )}
           </span>
         </div>

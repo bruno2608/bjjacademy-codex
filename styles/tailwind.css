@@ -1,9 +1,15 @@
 /* styles/tailwind.css — ENTRY PRINCIPAL DO DESIGN SYSTEM */
+@config "../tailwind.config.js";
 
 @import "tailwindcss";
 @plugin "daisyui" {
   themes: zdark --default, zlight --prefersdark;
 }
+
+@source "./app/**/*.{js,jsx,ts,tsx,mdx}";
+@source "./components/**/*.{js,jsx,ts,tsx}";
+@source "./data/**/*.{js,jsx,ts,tsx}";
+@source "./src/**/*.{js,jsx,ts,tsx}";
 
 /* DaisyUI Theme Generator tokens */
 @plugin "daisyui/theme" {
@@ -11,6 +17,9 @@
   default: true;
   prefersdark: true;
   color-scheme: "dark";
+  /* Importante: manter apenas tokens do tema global aqui.
+     Paletas BJJ (bg-bjj-*, bg-bjj-belt-*) vivem em tailwind.config.js -> extend.colors
+     para evitar que bg-base-100/base-content sejam sobrescritos. */
   --color-base-100: oklch(27.8% 0.018 258.100);
   --color-base-200: oklch(19.8% 0.014 253.100);
   --color-base-300: oklch(55% 0.027 264.364);

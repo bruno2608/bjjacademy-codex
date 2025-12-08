@@ -51,8 +51,8 @@ export default function AppShell({ children }) {
 
   if (!hydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bjj-black text-bjj-white">
-        <div className="text-sm text-bjj-gray-200">Carregando ambiente...</div>
+      <div className="flex min-h-screen items-center justify-center bg-base-100 text-base-content">
+        <div className="text-sm text-base-content/70">Carregando ambiente...</div>
       </div>
     );
   }
@@ -62,7 +62,7 @@ export default function AppShell({ children }) {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-bjj-black text-bjj-white">
+    <div className="min-h-screen overflow-x-hidden bg-base-100 text-base-content">
       <TabletNav />
       <ImpersonationBanner />
 
