@@ -206,7 +206,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
-    textColorClass: "text-bg-bjj-white",
+    textColorClass: "text-bjj-white",
     progressBarClass: "bg-gray-500"
   },
   
@@ -223,7 +223,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
-    textColorClass: "text-bg-bjj-white",
+    textColorClass: "text-bjj-white",
     progressBarClass: "bg-gray-500"
   },
   
@@ -273,7 +273,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
-    textColorClass: "text-bg-bjj-white",
+    textColorClass: "text-bjj-white",
     progressBarClass: "bg-yellow-500"
   },
   
@@ -323,7 +323,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
-    textColorClass: "text-bg-bjj-white",
+    textColorClass: "text-bjj-white",
     progressBarClass: "bg-orange-500"
   },
 
@@ -356,7 +356,7 @@ export const MOCK_FAIXAS: BjjBeltVisualConfig[] = [
     tipColorClass: "bg-bjj-black",
     stripeColorClass: "bg-bjj-white",
     stripeInactiveClass: "bg-bjj-gray-700",
-    textColorClass: "text-bg-bjj-white",
+    textColorClass: "text-bjj-white",
     progressBarClass: "bg-green-600"
   },
   
