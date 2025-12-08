@@ -3,69 +3,85 @@ import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 
 export type ZAlertVariant = "info" | "success" | "warning" | "error";
+export type ZAlertTone = "inline" | "banner";
 
-export interface ZAlertProps
-  extends React.HTMLAttributes<HTMLDivElement> {
-  /** Tipo de feedback: info / success / warning / error */
+export type ZAlertProps = {
   variant?: ZAlertVariant;
-  /** Icone Iconify, ex: "mdi:alert-circle-outline" */
+  tone?: ZAlertTone;
+  title?: string;
+  children?: React.ReactNode;
   icon?: string;
-  /** Texto principal em destaque */
-  title?: React.ReactNode;
-  /** Ação à direita (ex: link “Support”) */
-  action?: React.ReactNode;
-}
+  actions?: React.ReactNode;
+  dismissible?: boolean;
+  onDismiss?: () => void;
+  className?: string;
+} & React.HTMLAttributes<HTMLDivElement>;
 
-export function ZAlert(props: ZAlertProps) {
-  const {
-    variant = "info",
-    icon,
-    title,
-    action,
-    children,
-    className,
-    ...rest
-  } = props;
+export function ZAlert({
+  variant = "info",
+  tone = "inline",
+  title,
+  children,
+  icon,
+  actions,
+  dismissible,
+  onDismiss,
+  className,
+  ...rest
+}: ZAlertProps) {
+  const baseVariantClass =
+    variant === "info"
+      ? "alert-info"
+      : variant === "success"
+      ? "alert-success"
+      : variant === "warning"
+      ? "alert-warning"
+      : "alert-error";
+
+  const toneClass =
+    tone === "banner"
+      ? "rounded-2xl border-2 border-base-300/80 bg-base-200/80 shadow-lg px-4 py-3"
+      : "rounded-xl border border-base-300/60 bg-base-100/90 shadow-sm";
 
   return (
     <div
       role="alert"
-      className={cn(
-        "alert rounded-xl border border-base-300/70",
-        // mapeia para as cores do DaisyUI 5
-        {
-          info: "alert-info",
-          success: "alert-success",
-          warning: "alert-warning",
-          error: "alert-error",
-        }[variant],
-        className,
-      )}
+      className={cn("alert items-start gap-3", baseVariantClass, toneClass, className)}
       {...rest}
     >
       {icon && (
-        <span className="flex items-center justify-center w-5 h-5">
-          <Icon icon={icon} className="w-5 h-5" />
-        </span>
+        <div className="mt-0.5">
+          <Icon icon={icon} className="text-lg" />
+        </div>
       )}
 
-      <div className="flex flex-col gap-0.5">
+      <div className="flex-1">
         {title && (
-          <span className="text-sm font-medium">
+          <h4 className="text-sm font-semibold mb-0.5">
             {title}
-          </span>
+          </h4>
         )}
         {children && (
-          <span className="text-xs leading-snug opacity-90">
+          <p className="text-xs leading-snug text-base-content/80">
             {children}
-          </span>
+          </p>
+        )}
+        {actions && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {actions}
+          </div>
         )}
       </div>
 
-      {action && (
-        <div className="ml-auto text-xs font-medium">
-          {action}
-        </div>
+      {dismissible && (
+        <button
+          type="button"
+          className="btn btn-ghost btn-xs"
+          onClick={onDismiss}
+          aria-label="Dismiss alert"
+        >
+          &times;
+        </button>
       )}
     </div>
   );

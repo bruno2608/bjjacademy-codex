@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
 import { ZkThemeDebug } from '@/components/ZkThemeDebug';
-import { ZkAlert } from '@/app/z-ui/_components/ui/ZkAlert';
+import { ZAlert } from '@/app/z-ui/_components/ZAlert';
 import { SocialLoginButtons } from './SocialLoginButtons';
 import useUserStore from '../../store/userStore';
 
@@ -195,9 +195,13 @@ function LoginContent() {
                 </div>
 
                 {error && (
-                  <ZkAlert variant="error" className="text-sm">
-                    {error}
-                  </ZkAlert>
+                  <ZAlert
+                    variant="error"
+                    tone="inline"
+                    title={error || 'E-mail ou senha inválidos.'}
+                  >
+                    Verifique seus dados e tente novamente.
+                  </ZAlert>
                 )}
 
                 <button type="submit" className="justify-center w-full gap-2 btn btn-primary" disabled={isSubmitting}>
@@ -223,8 +227,16 @@ function LoginContent() {
                       Primeiro acesso
                     </a>
                   </p>
-                <p className="text-[0.88rem] text-base-content/60 text-center">Senha piloto: BJJ@pilot2025</p>
                 </div>
+                <ZAlert
+                  variant="warning"
+                  tone="banner"
+                  title="Ambiente de piloto"
+                  className="text-left"
+                >
+                  Use as credenciais de teste fornecidas para acessar o painel.
+                  Não utilize dados reais de alunos.
+                </ZAlert>
               </div>
             </div>
           </div>
