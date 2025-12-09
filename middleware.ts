@@ -42,7 +42,11 @@ export function middleware(request: NextRequest) {
 
   if (!hasAccess) {
     const allowedRoutes = allowedRoutesForRoles(roles);
-    const fallback = allowedRoutes.includes('/dashboard') ? '/dashboard' : allowedRoutes[0] || '/unauthorized';
+    const fallback = allowedRoutes.includes('/home')
+      ? '/home'
+      : allowedRoutes.includes('/dashboard')
+        ? '/dashboard'
+        : allowedRoutes[0] || '/unauthorized';
     const redirectUrl = new URL(fallback, request.url);
     return NextResponse.redirect(redirectUrl);
   }

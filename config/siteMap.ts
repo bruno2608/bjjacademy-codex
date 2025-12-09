@@ -3,6 +3,7 @@ import { ROLE_KEYS } from './roles';
 
 export const siteMap = {
   [ROLE_KEYS.aluno]: [
+    '/home',
     '/dashboard',
     '/checkin',
     '/aluno/checkin',
@@ -15,6 +16,7 @@ export const siteMap = {
     '/perfil'
   ],
   [ROLE_KEYS.instrutor]: [
+    '/home',
     '/dashboard',
     '/checkin',
     '/aluno/checkin',
@@ -36,6 +38,7 @@ export const siteMap = {
     '/presencas/revisao'
   ],
   [ROLE_KEYS.professor]: [
+    '/home',
     '/dashboard',
     '/checkin',
     '/aluno/checkin',

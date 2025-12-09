@@ -12,6 +12,8 @@ import { ZAlert } from '@/app/z-ui/_components/ZAlert';
 import { SocialLoginButtons } from './SocialLoginButtons';
 import useUserStore from '../../store/userStore';
 
+const DEFAULT_AFTER_LOGIN_PATH = '/home';
+
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,8 +37,6 @@ function LoginContent() {
 
   useEffect(() => {
     if (!hydrated || !user) return;
-    const isStaff = user.roles.some((role) => role !== 'ALUNO');
-    const isAlunoOnly = user.roles.length === 1 && user.roles[0] === 'ALUNO';
 
     const redirectParam = searchParams.get('redirect');
     const isInternalRedirect = redirectParam?.startsWith('/') && !redirectParam.startsWith('//');
@@ -46,11 +46,7 @@ function LoginContent() {
       return;
     }
 
-    if (isStaff) {
-      router.replace('/dashboard');
-    } else if (isAlunoOnly) {
-      router.replace('/dashboard-aluno');
-    }
+    router.replace(DEFAULT_AFTER_LOGIN_PATH);
   }, [hydrated, router, searchParams, user]);
 
   const handleChange = (event) => {
@@ -84,19 +80,13 @@ function LoginContent() {
       const authUser = await login({ identifier: form.identifier, senha: form.senha, rememberMe: form.rememberMe });
       if (!authUser) throw new Error('CREDENCIAIS_INVALIDAS');
 
-      const isStaff = authUser.roles.some((role) => role !== 'ALUNO');
-      const isAlunoOnly = authUser.roles.length === 1 && authUser.roles[0] === 'ALUNO';
       const redirectParam = searchParams.get('redirect');
       const isInternalRedirect = redirectParam?.startsWith('/') && !redirectParam.startsWith('//');
 
       if (isInternalRedirect) {
         router.push(redirectParam);
-      } else if (isStaff) {
-        router.push('/dashboard');
-      } else if (isAlunoOnly) {
-        router.push('/dashboard-aluno');
       } else {
-        router.push('/dashboard');
+        router.push(DEFAULT_AFTER_LOGIN_PATH);
       }
     } catch (err) {
       setTouched({ identifier: true, senha: true });
