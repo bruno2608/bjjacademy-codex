@@ -35,7 +35,7 @@ const ValidatedField = forwardRef<HTMLInputElement, ValidatedFieldProps>(
           <input
             ref={ref}
             type={resolvedType}
-            className={`input input-bordered w-full border-bjj-gray-800 bg-bjj-gray-900 text-sm text-bjj-gray-100 focus:border-bjj-red focus:outline-none ${shouldTogglePassword ? 'pr-12' : ''} ${className}`}
+            className={`input input-bordered w-full border-bjj-gray-800 bg-bjj-gray-900 text-base text-bjj-gray-100 focus:border-bjj-red focus:outline-none ${shouldTogglePassword ? 'pr-12' : ''} ${className}`}
             {...props}
           />
           {shouldTogglePassword && (

@@ -149,7 +149,7 @@ function LoginContent() {
                     onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
                     aria-invalid={identifierHasError}
                     disabled={isSubmitting}
-                    className={`input input-bordered w-full text-sm transition-colors ${identifierHasError ? 'input-error' : ''}`}
+                    className={`input input-bordered w-full text-base transition-colors ${identifierHasError ? 'input-error' : ''}`}
                     required
                   />
                   {identifierError && (
@@ -173,7 +173,7 @@ function LoginContent() {
                       onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
                       aria-invalid={senhaHasError}
                       disabled={isSubmitting}
-                      className={`input input-bordered w-full pr-12 text-sm transition-colors ${senhaHasError ? 'input-error' : ''}`}
+                      className={`input input-bordered w-full pr-12 text-base transition-colors ${senhaHasError ? 'input-error' : ''}`}
                       required
                     />
                     <button

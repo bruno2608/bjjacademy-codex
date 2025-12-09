@@ -38,7 +38,7 @@ export function ZInputField(props: ZInputFieldProps) {
         id={inputId}
         {...inputProps}
         className={cn(
-          "input input-bordered w-full bg-base-100/70 text-sm",
+          "input input-bordered w-full bg-base-100/70 text-base",
           hasError && "input-error border-error/80",
           className,
         )}
