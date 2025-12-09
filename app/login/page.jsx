@@ -5,7 +5,7 @@
  */
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, ArrowRight } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
 import { ZkThemeDebug } from '@/components/ZkThemeDebug';
 import { ZAlert } from '@/app/z-ui/_components/ZAlert';
@@ -22,6 +22,7 @@ function LoginContent() {
   const [error, setError] = useState('');
   const [touched, setTouched] = useState({ identifier: false, senha: false });
   const [isSubmitting, setIsSubmitting] = useState(false); // simple loading flag to reuse in other async flows
+  const [showPassword, setShowPassword] = useState(false);
   const hasGlobalError = Boolean(error);
 
   const identifierError = !form.identifier && touched.identifier ? 'Informe e-mail ou usuário.' : '';
@@ -162,18 +163,29 @@ function LoginContent() {
                       Senha
                     </span>
                   </label>
-                  <input
-                    name="senha"
-                    type="password"
-                    placeholder="********"
-                    value={form.senha}
-                    onChange={handleChange}
-                    onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
-                    aria-invalid={senhaHasError}
-                    disabled={isSubmitting}
-                    className={`input input-bordered w-full text-sm transition-colors ${senhaHasError ? 'input-error' : ''}`}
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      name="senha"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="********"
+                      value={form.senha}
+                      onChange={handleChange}
+                      onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
+                      aria-invalid={senhaHasError}
+                      disabled={isSubmitting}
+                      className={`input input-bordered w-full pr-12 text-sm transition-colors ${senhaHasError ? 'input-error' : ''}`}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                      aria-pressed={showPassword}
+                      className="absolute inset-y-0 right-2 my-auto inline-flex h-9 w-9 items-center justify-center rounded-lg text-base-content/80 transition hover:bg-base-200 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/60"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   {senhaError && (
                     <p className="text-xs text-error">{senhaError}</p>
                   )}
@@ -247,7 +259,7 @@ function LoginContent() {
                   title="Ambiente de piloto"
                   className="text-left"
                 >
-                  Use as credenciais de teste fornecidas para acessar o painel.
+                  BJJ@pilot2025
                   Não utilize dados reais de alunos.
                 </ZAlert>
               </div>
