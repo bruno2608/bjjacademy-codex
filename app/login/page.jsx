@@ -20,9 +20,12 @@ function LoginContent() {
   const [error, setError] = useState('');
   const [touched, setTouched] = useState({ identifier: false, senha: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasGlobalError = Boolean(error);
 
   const identifierError = !form.identifier && touched.identifier ? 'Informe e-mail ou usuário.' : '';
   const senhaError = !form.senha && touched.senha ? 'Informe a senha.' : '';
+  const identifierHasError = Boolean(identifierError || hasGlobalError);
+  const senhaHasError = Boolean(senhaError || hasGlobalError);
 
   useEffect(() => {
     if (!hydrated) {
@@ -54,6 +57,7 @@ function LoginContent() {
     const { name, value } = event.target;
     const nextValue = name === 'rememberMe' ? event.target.checked : value;
     setForm((prev) => ({ ...prev, [name]: nextValue }));
+    setError('');
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
@@ -70,6 +74,7 @@ function LoginContent() {
     event.preventDefault();
     if (!form.identifier || !form.senha) {
       setError('Informe e-mail/usuário e senha.');
+      setTouched({ identifier: true, senha: true });
       return;
     }
     setError('');
@@ -94,6 +99,7 @@ function LoginContent() {
         router.push('/dashboard');
       }
     } catch (err) {
+      setTouched({ identifier: true, senha: true });
       if (err instanceof Error) {
         if (err.message === 'USUARIO_NAO_HABILITADO_PILOTO') {
           setError('Procure o administrador da academia.');
@@ -149,7 +155,8 @@ function LoginContent() {
                     value={form.identifier}
                     onChange={handleChange}
                     onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
-                    className={`input input-bordered w-full text-sm ${identifierError ? 'input-error' : ''}`}
+                    aria-invalid={identifierHasError}
+                    className={`input input-bordered w-full text-sm transition-colors ${identifierHasError ? 'input-error' : ''}`}
                     required
                   />
                   {identifierError && (
@@ -166,11 +173,12 @@ function LoginContent() {
                   <input
                     name="senha"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="********"
                     value={form.senha}
                     onChange={handleChange}
                     onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
-                    className={`input input-bordered w-full text-sm ${senhaError ? 'input-error' : ''}`}
+                    aria-invalid={senhaHasError}
+                    className={`input input-bordered w-full text-sm transition-colors ${senhaHasError ? 'input-error' : ''}`}
                     required
                   />
                   {senhaError && (
@@ -198,7 +206,9 @@ function LoginContent() {
                   <ZAlert
                     variant="error"
                     tone="inline"
-                    title={error || 'E-mail ou senha inválidos.'}
+                    icon="mdi:lock-outline"
+                    title={error || 'E-mail/usuário ou senha inválidos.'}
+                    className="!rounded-2xl !border-error/30 !bg-error !text-error-content !shadow-lg"
                   >
                     Verifique seus dados e tente novamente.
                   </ZAlert>
