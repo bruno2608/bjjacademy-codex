@@ -489,7 +489,7 @@ function ChatCard() {
             Obi-Wan Kenobi
             <time className="ml-1 opacity-70">12:45</time>
           </div>
-          <div className={bubbleClass}>It's over Anakin</div>
+          <div className={bubbleClass}>It&apos;s over Anakin</div>
         </div>
         <div className="chat chat-start">
           <div className="chat-image avatar">

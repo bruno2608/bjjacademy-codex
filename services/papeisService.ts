@@ -1,9 +1,9 @@
-import { MOCK_PAPEIS } from '@/data/mocks/mockPapeis';
+import { mockDb } from '@/data/mocks/db';
 import type { Papel } from '@/types';
 
 const clone = <T>(items: T[]): T[] => items.map((item) => ({ ...item }));
 
-let papeisDb: Papel[] = clone(MOCK_PAPEIS);
+let papeisDb: Papel[] = clone(mockDb.papeis);
 
 export async function listarPapeis(): Promise<Papel[]> {
   return clone(papeisDb);
@@ -15,5 +15,5 @@ export async function buscarPapelPorCodigo(codigo: Papel['codigo']): Promise<Pap
 }
 
 export function resetPapeisMock(): void {
-  papeisDb = clone(MOCK_PAPEIS);
+  papeisDb = clone(mockDb.papeis);
 }

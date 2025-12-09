@@ -141,3 +141,7 @@ export const mockDb = {
 - Criar mocks de `faixas` (domínio) e `regrasGraduacao` alinhados aos slugs existentes em `bjjBeltMocks`.
 - Adicionar `mockDb` exportado para facilitar consumo futuro por Supabase/API.
 - Manter sistema visual de faixas intacto; apenas referenciá-lo por slug para renderização.
+
+## Atualizacao: mock DB centralizado
+- Pasta data/mocks/db/ com mocks por entidade + agregador index.ts exportando mockDb (academias, usuarios, papeis, usuariosPapeis, matriculas, faixas, regrasGraduacao, graduacoes, turmas, aulas, presencas, convites).
+- Services devem consumir mockDb em vez de mocks dispersos; futuro swap para Supabase/API pode manter mesmas assinaturas.

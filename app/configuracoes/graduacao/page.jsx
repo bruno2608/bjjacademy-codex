@@ -15,6 +15,9 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
 import { ROLE_KEYS } from '@/config/roles';
 
+// TODO: substituir pelo componente oficial de visualização de faixa (BjjBeltStrip/BjjBeltProgressCard)
+const FaixaVisual = () => null;
+
 /**
  * Permite editar os requisitos mockados de cada faixa sem impactar o módulo principal.
  */

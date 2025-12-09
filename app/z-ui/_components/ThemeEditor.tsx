@@ -201,7 +201,7 @@ export function ThemeEditor() {
                   </div>
                   <button className="btn btn-ghost btn-sm">Copy to clipboard</button>
                 </div>
-                <p className="text-xs text-base-content/60">Add it after @plugin "daisyui";</p>
+                <p className="text-xs text-base-content/60">Add it after @plugin &quot;daisyui&quot;;</p>
                 <pre className="mockup-code text-left text-sm">
                   <code>{`"zdark": {
   "base-100": "oklch(25.33% 0.016 252.42)",

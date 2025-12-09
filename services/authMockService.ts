@@ -1,7 +1,7 @@
 import { ROLE_KEYS, normalizeRoles } from '../config/roles';
-import { MOCK_PAPEIS } from '@/data/mocks/mockPapeis';
-import { MOCK_USUARIOS } from '@/data/mocks/mockUsuarios';
-import { MOCK_USUARIOS_PAPEIS } from '@/data/mocks/mockUsuariosPapeis';
+import { mockDb } from '@/data/mocks/db';
+import type { PapelCodigo, UserRole } from '@/types/auth';
+import { ROLE_BY_PAPEL_CODIGO } from '@/types/auth';
 import type { AuthUser, Usuario } from '@/types';
 
 export type AuthMockLoginInput = {
@@ -13,22 +13,33 @@ const DEFAULT_AVATAR =
   'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=320&q=80';
 const PILOT_PASSWORD = 'BJJ@pilot2025';
 
-const papelCodigoById = new Map(MOCK_PAPEIS.map((papel) => [papel.id, papel.codigo]));
+const papelCodigoById = new Map<string, PapelCodigo>(
+  mockDb.papeis.map((papel) => [
+    papel.id,
+    papel.codigo.toString().toLowerCase() as PapelCodigo,
+  ]),
+);
 
-const buildRolesFromMocks = (usuarioId: string, usuarioRoles?: string[]): (keyof typeof ROLE_KEYS)[] => {
-  const papeisDoUsuario = MOCK_USUARIOS_PAPEIS.filter((rel) => rel.usuarioId === usuarioId)
+function buildRolesFromMocks(
+  usuarioId: string,
+  extraRoles: UserRole[] = [],
+): UserRole[] {
+  const papeisDoUsuario = mockDb.usuariosPapeis
+    .filter((rel) => rel.usuarioId === usuarioId)
     .map((rel) => papelCodigoById.get(rel.papelId))
-    .filter((codigo): codigo is keyof typeof ROLE_KEYS => Boolean(codigo));
+    .filter((codigo): codigo is PapelCodigo => Boolean(codigo));
 
-  const fromUsuario = (usuarioRoles || [])
-    .map((role) => role?.toString().toUpperCase())
-    .filter((role): role is keyof typeof ROLE_KEYS => role in ROLE_KEYS);
+  const rolesFromMocks = papeisDoUsuario.map((codigo) => ROLE_BY_PAPEL_CODIGO[codigo]);
+  const merged = [...rolesFromMocks, ...extraRoles];
 
-  return normalizeRoles([...papeisDoUsuario, ...fromUsuario]);
-};
+  return Array.from(new Set(normalizeRoles(merged)));
+}
 
 const mapUsuarioToAuthUser = (usuario: Usuario): AuthUser => {
-  const roles = buildRolesFromMocks(usuario.id, usuario.roles as string[] | undefined);
+  const roles = buildRolesFromMocks(
+    usuario.id,
+    (usuario.roles as UserRole[] | undefined) || [],
+  );
   return {
     id: usuario.id,
     email: usuario.email.toLowerCase(),
@@ -49,7 +60,7 @@ const mapUsuarioToAuthUser = (usuario: Usuario): AuthUser => {
   };
 };
 
-export const allowedPilotUsers: AuthUser[] = MOCK_USUARIOS.map(mapUsuarioToAuthUser);
+export const allowedPilotUsers: AuthUser[] = mockDb.usuarios.map(mapUsuarioToAuthUser);
 
 export async function authMockLogin({ identifier, senha }: AuthMockLoginInput): Promise<AuthUser> {
   const normalizedIdentifier = identifier.trim().toLowerCase();

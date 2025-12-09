@@ -1,4 +1,4 @@
-import { MOCK_PRESENCAS } from '@/data/mockPresencas'
+import { mockDb } from '@/data/mocks/db'
 import type { PresencaOrigem, PresencaRegistro, PresencaStatus } from '@/types/presenca'
 
 type RegistrarPresencaPayload = {
@@ -10,7 +10,7 @@ type RegistrarPresencaPayload = {
   data?: string | null
 }
 
-let presencasDb: PresencaRegistro[] = [...MOCK_PRESENCAS]
+let presencasDb: PresencaRegistro[] = [...mockDb.presencas]
 
 const clone = (lista: PresencaRegistro[]) => lista.map((item) => ({ ...item }))
 const agoraIso = () => new Date().toISOString()
@@ -235,7 +235,7 @@ export async function fecharAula(aulaId: string): Promise<void> {
 }
 
 export function resetPresencasMock(): void {
-  presencasDb = [...MOCK_PRESENCAS]
+  presencasDb = [...mockDb.presencas]
 }
 
 export async function getPresencasUltimos30Dias(): Promise<PresencaRegistro[]> {

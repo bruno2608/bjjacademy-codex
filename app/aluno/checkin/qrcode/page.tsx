@@ -127,7 +127,7 @@ export default function CheckinQrCodeAlunoPage() {
           <ul className="space-y-2 text-bjj-amber-50/90">
             <li>1. Abra o card de Check-in por QR Code e clique na área da câmera para simular a leitura.</li>
             <li>2. O sistema registra sua presença imediatamente usando um QR Code mock.</li>
-            <li>3. O status da sua presença aparece em "Check-ins Recentes" na home.</li>
+            <li>3. O status da sua presença aparece em &quot;Check-ins Recentes&quot; na home.</li>
             <li>4. Você pode acessar novamente para conferir se já está marcado.</li>
             <li>5. Quando a leitura real estiver disponível, este fluxo ficará ainda mais rápido.</li>
           </ul>

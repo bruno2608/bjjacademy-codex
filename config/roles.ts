@@ -1,14 +1,15 @@
+import type { UserRole } from "@/types/auth";
+
 export const ROLE_KEYS = {
-  aluno: 'ALUNO',
-  instrutor: 'INSTRUTOR',
-  professor: 'PROFESSOR',
-  admin: 'ADMIN',
-  adminTi: 'ADMIN_TI',
+  aluno: "ALUNO" as UserRole,
+  instrutor: "INSTRUTOR" as UserRole,
+  professor: "PROFESSOR" as UserRole,
+  admin: "ADMIN" as UserRole,
+  adminTi: "ADMIN_TI" as UserRole,
   // Compatibilidade: manter a chave `ti`, mas agora mapeando para ADMIN_TI.
-  ti: 'ADMIN_TI'
+  ti: "ADMIN_TI" as UserRole,
 } as const;
 
-export type UserRole = (typeof ROLE_KEYS)[keyof typeof ROLE_KEYS];
 export type Role = UserRole;
 
 export const ROLE_ALIASES: Record<string, UserRole> = {
@@ -22,9 +23,9 @@ export const ROLE_ALIASES: Record<string, UserRole> = {
   administrador: ROLE_KEYS.admin,
   ti: ROLE_KEYS.adminTi,
   admin_ti: ROLE_KEYS.adminTi,
-  'admin-ti': ROLE_KEYS.adminTi,
+  "admin-ti": ROLE_KEYS.adminTi,
   adminti: ROLE_KEYS.adminTi,
-  technology: ROLE_KEYS.adminTi
+  technology: ROLE_KEYS.adminTi,
 };
 
 export const STUDENT_ROLES: UserRole[] = [ROLE_KEYS.aluno];
@@ -34,7 +35,7 @@ export const STAFF_ROLES: UserRole[] = [
   ROLE_KEYS.instrutor,
   ROLE_KEYS.professor,
   ROLE_KEYS.admin,
-  ROLE_KEYS.adminTi
+  ROLE_KEYS.adminTi,
 ];
 export const ADMIN_ROLES: UserRole[] = [ROLE_KEYS.admin, ROLE_KEYS.adminTi];
 
@@ -42,28 +43,28 @@ export const ROLE_PERMISSIONS = {
   [ROLE_KEYS.aluno]: {
     canEditSelf: true,
     canEditGraduation: false,
-    canSeeAdmin: false
+    canSeeAdmin: false,
   },
   [ROLE_KEYS.instrutor]: {
     canEditSelf: true,
     canEditGraduation: true,
-    canSeeAdmin: false
+    canSeeAdmin: false,
   },
   [ROLE_KEYS.professor]: {
     canEditSelf: true,
     canEditGraduation: true,
-    canSeeAdmin: false
+    canSeeAdmin: false,
   },
   [ROLE_KEYS.admin]: {
     canEditSelf: true,
     canEditGraduation: true,
-    canSeeAdmin: true
+    canSeeAdmin: true,
   },
   [ROLE_KEYS.adminTi]: {
     canEditSelf: true,
     canEditGraduation: true,
-    canSeeAdmin: true
-  }
+    canSeeAdmin: true,
+  },
 } as const;
 
 export function normalizeRoles(values: unknown): UserRole[] {

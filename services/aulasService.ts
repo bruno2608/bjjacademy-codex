@@ -1,12 +1,12 @@
-import { MOCK_AULAS_INSTANCIAS } from '@/data/mocks/mockAulasInstancias';
-import { MOCK_TURMAS } from '@/data/mocks/mockTurmas';
+import { mockDb } from '@/data/mocks/db';
 import type { AulaInstancia } from '@/types';
 
 const clone = <T>(items: T[]): T[] => items.map((item) => ({ ...item }));
 
-let aulasDb: AulaInstancia[] = clone(MOCK_AULAS_INSTANCIAS);
+let aulasDb: AulaInstancia[] = clone(mockDb.aulas);
 
-const buildAulaId = (turmaId: string, data: string) => `aula_${turmaId}_${data.replaceAll('-', '_')}`;
+const buildAulaId = (turmaId: string, data: string) =>
+  `aula_${turmaId}_${data.replace(/-/g, '_')}`;
 
 export async function listarAulas(): Promise<AulaInstancia[]> {
   return clone(aulasDb);
@@ -17,7 +17,7 @@ export async function listarAulasDaTurma(turmaId: string): Promise<AulaInstancia
 }
 
 export async function listarAulasDaAcademia(academiaId: string): Promise<AulaInstancia[]> {
-  const turmaIds = MOCK_TURMAS.filter((turma) => turma.academiaId === academiaId).map((turma) => turma.id);
+  const turmaIds = mockDb.turmas.filter((turma) => turma.academiaId === academiaId).map((turma) => turma.id);
   return clone(aulasDb.filter((aula) => turmaIds.includes(aula.turmaId)));
 }
 
@@ -58,5 +58,5 @@ export async function atualizarStatusAula(
 }
 
 export function resetAulasMock(): void {
-  aulasDb = clone(MOCK_AULAS_INSTANCIAS);
+  aulasDb = clone(mockDb.aulas);
 }

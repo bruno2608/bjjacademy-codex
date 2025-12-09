@@ -1,13 +1,11 @@
-import { MOCK_PAPEIS } from '@/data/mocks/mockPapeis';
-import { MOCK_USUARIOS } from '@/data/mocks/mockUsuarios';
-import { MOCK_USUARIOS_PAPEIS } from '@/data/mocks/mockUsuariosPapeis';
+import { mockDb } from '@/data/mocks/db';
 import type { Papel, Usuario, UsuarioPapel } from '@/types';
 
 const clone = <T>(items: T[]): T[] => items.map((item) => ({ ...item }));
 
-let usuariosDb: Usuario[] = clone(MOCK_USUARIOS);
-let papeisDb: Papel[] = clone(MOCK_PAPEIS);
-let usuariosPapeisDb: UsuarioPapel[] = clone(MOCK_USUARIOS_PAPEIS);
+let usuariosDb: Usuario[] = clone(mockDb.usuarios);
+let papeisDb: Papel[] = clone(mockDb.papeis);
+let usuariosPapeisDb: UsuarioPapel[] = clone(mockDb.usuariosPapeis);
 
 export type UsuarioComPapeis = Usuario & { papeis: Papel[] };
 
@@ -29,7 +27,7 @@ export async function listarUsuariosComPapeis(): Promise<UsuarioComPapeis[]> {
 }
 
 export function resetUsuariosMock(): void {
-  usuariosDb = clone(MOCK_USUARIOS);
-  papeisDb = clone(MOCK_PAPEIS);
-  usuariosPapeisDb = clone(MOCK_USUARIOS_PAPEIS);
+  usuariosDb = clone(mockDb.usuarios);
+  papeisDb = clone(mockDb.papeis);
+  usuariosPapeisDb = clone(mockDb.usuariosPapeis);
 }

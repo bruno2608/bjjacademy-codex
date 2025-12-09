@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { AlertTriangle, EyeOff } from 'lucide-react';
 
@@ -23,10 +23,10 @@ export default function ImpersonationBanner() {
           </span>
           <div className="space-y-1">
             <p className="text-sm font-semibold text-amber-50">
-              Você está visualizando o sistema como {target.nomeCompleto || target.name}
+              Voce esta visualizando o sistema como {target.nomeCompleto || target.name}
             </p>
             <p className="text-xs text-amber-100/90">
-              Perfil em teste: {roleLabel || 'Usuário piloto'}. Clique em "Voltar para meu usuário" para sair do modo teste.
+              Perfil em teste: {roleLabel || 'Usuario piloto'}. Clique em &quot;Voltar para meu usuario&quot; para sair do modo teste.
             </p>
           </div>
         </div>
@@ -35,7 +35,7 @@ export default function ImpersonationBanner() {
           onClick={stopImpersonation}
           className="inline-flex items-center gap-2 rounded-xl border border-amber-300/70 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-50 transition hover:bg-amber-400/20"
         >
-          <EyeOff size={14} /> Voltar para meu usuário
+          <EyeOff size={14} /> Voltar para meu usuario
         </button>
       </div>
     </div>

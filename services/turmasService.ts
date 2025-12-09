@@ -1,9 +1,9 @@
-import { MOCK_TURMAS } from '@/data/mocks/mockTurmas';
+import { mockDb } from '@/data/mocks/db';
 import type { Turma } from '@/types';
 
 const clone = <T>(items: T[]): T[] => items.map((item) => ({ ...item }));
 
-let turmasDb: Turma[] = clone(MOCK_TURMAS);
+let turmasDb: Turma[] = clone(mockDb.turmas);
 
 export async function listarTurmas(): Promise<Turma[]> {
   return clone(turmasDb);
@@ -19,5 +19,5 @@ export async function buscarTurmaPorId(id: string): Promise<Turma | null> {
 }
 
 export function resetTurmasMock(): void {
-  turmasDb = clone(MOCK_TURMAS);
+  turmasDb = clone(mockDb.turmas);
 }
