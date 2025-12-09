@@ -11,26 +11,33 @@ const CACHE_NAME = 'bjj-academy-cache-v1';
 const OFFLINE_URLS = ['/', '/login', '/dashboard'];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(OFFLINE_URLS);
-    })
-  );
+  const shouldActivateImmediately = !self.registration || !self.registration.active;
+  const preCache = caches.open(CACHE_NAME).then((cache) => cache.addAll(OFFLINE_URLS));
+  const forceActivate = shouldActivateImmediately ? self.skipWaiting() : Promise.resolve();
+
+  event.waitUntil(Promise.all([preCache, forceActivate]));
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-          return null;
-        })
-      )
+  const clearOldCaches = caches.keys().then((keys) =>
+    Promise.all(
+      keys.map((key) => {
+        if (key !== CACHE_NAME) {
+          return caches.delete(key);
+        }
+        return null;
+      })
     )
   );
+  const claimClients = self.clients && self.clients.claim ? self.clients.claim() : Promise.resolve();
+
+  event.waitUntil(Promise.all([clearOldCaches, claimClients]));
+});
+
+self.addEventListener('message', (event) => {
+  if (event?.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', (event) => {

@@ -5,7 +5,7 @@
  */
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight } from 'lucide-react';
 import { ZkContainer } from '@/components/zekai-ui/ZkContainer';
 import { ZkThemeDebug } from '@/components/ZkThemeDebug';
 import { ZAlert } from '@/app/z-ui/_components/ZAlert';
@@ -21,7 +21,7 @@ function LoginContent() {
   const [form, setForm] = useState({ identifier: '', senha: '', rememberMe: false });
   const [error, setError] = useState('');
   const [touched, setTouched] = useState({ identifier: false, senha: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // simple loading flag to reuse in other async flows
   const hasGlobalError = Boolean(error);
 
   const identifierError = !form.identifier && touched.identifier ? 'Informe e-mail ou usuário.' : '';
@@ -66,6 +66,7 @@ function LoginContent() {
     }
   }, []);
 
+  // Reusable async submit pattern: validate, set loading, handle feedback, reset in finally.
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!form.identifier || !form.senha) {
@@ -146,6 +147,7 @@ function LoginContent() {
                     onChange={handleChange}
                     onBlur={() => setTouched((prev) => ({ ...prev, identifier: true }))}
                     aria-invalid={identifierHasError}
+                    disabled={isSubmitting}
                     className={`input input-bordered w-full text-sm transition-colors ${identifierHasError ? 'input-error' : ''}`}
                     required
                   />
@@ -168,6 +170,7 @@ function LoginContent() {
                     onChange={handleChange}
                     onBlur={() => setTouched((prev) => ({ ...prev, senha: true }))}
                     aria-invalid={senhaHasError}
+                    disabled={isSubmitting}
                     className={`input input-bordered w-full text-sm transition-colors ${senhaHasError ? 'input-error' : ''}`}
                     required
                   />
@@ -183,6 +186,7 @@ function LoginContent() {
                       name="rememberMe"
                       checked={form.rememberMe}
                       onChange={handleChange}
+                      disabled={isSubmitting}
                       className="checkbox checkbox-sm checkbox-primary"
                     />
                     Lembrar de mim
@@ -204,9 +208,18 @@ function LoginContent() {
                   </ZAlert>
                 )}
 
-                <button type="submit" className="justify-center w-full gap-2 btn btn-primary" disabled={isSubmitting}>
-                  {isSubmitting ? 'Entrando...' : 'Acessar painel'}
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight size={15} />}
+                <button type="submit" className="w-full btn btn-primary" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <span className="inline-flex items-center justify-center gap-2">
+                      <span className="loading loading-spinner loading-sm" aria-hidden="true" />
+                      Acessando painel...
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center gap-2">
+                      Acessar painel
+                      <ArrowRight size={15} />
+                    </span>
+                  )}
                 </button>
 
                 <div className="divider text-[0.7rem] uppercase text-base-content/60">ou</div>

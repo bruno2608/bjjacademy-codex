@@ -39,7 +39,25 @@ body {
   }
 
   /* ZEKAI UI – tamanho padrão de checkbox nos cards de preview */
-  .zui-checkbox {
-    --size: 1.1rem;
+.zui-checkbox {
+  --size: 1.1rem;
+}
+}
+
+@keyframes nav-progress {
+  0% {
+    transform: translateX(-110%);
+  }
+  50% {
+    transform: translateX(-10%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@layer utilities {
+  .animate-nav-progress {
+    animation: nav-progress 1.1s ease-in-out infinite;
   }
 }

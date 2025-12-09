@@ -6,7 +6,7 @@
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
-  skipWaiting: true,
+  skipWaiting: false, // keep new SW in "waiting" so the UI can decide when to promote it
   disable: process.env.NODE_ENV === 'development',
   swSrc: 'public/service-worker.js',
 });

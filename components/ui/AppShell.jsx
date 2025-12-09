@@ -6,9 +6,12 @@ import { usePathname, useRouter } from 'next/navigation';
 import useUserStore from '../../store/userStore';
 import { useCurrentAluno } from '@/hooks/useCurrentAluno';
 import { useCurrentStaff } from '@/hooks/useCurrentStaff';
+import { useNavigationLoading } from '@/hooks/useNavigationLoading';
 import TabletNav from './TabletNav';
 import ShellFooter from '../layouts/ShellFooter';
 import ImpersonationBanner from './ImpersonationBanner';
+import GlobalNavigationLoader from './GlobalNavigationLoader';
+import PwaUpdateBanner from './PwaUpdateBanner';
 
 const BARE_PATHS = ['/login', '/unauthorized', '/z-ui'];
 
@@ -18,6 +21,7 @@ export default function AppShell({ children }) {
   const { hydrateFromStorage, hydrated, updateUser, user: storeUser, impersonation } = useUserStore();
   const { aluno } = useCurrentAluno();
   const { staff } = useCurrentStaff();
+  const { isNavigating } = useNavigationLoading();
 
   useEffect(() => {
     if (!hydrated) {
@@ -46,7 +50,13 @@ export default function AppShell({ children }) {
   }, [hydrated, router, storeUser, isBareLayout]);
 
   if (isBareLayout) {
-    return children;
+    return (
+      <>
+        <GlobalNavigationLoader active={isNavigating} />
+        <PwaUpdateBanner />
+        {children}
+      </>
+    );
   }
 
   if (!hydrated) {
@@ -63,6 +73,8 @@ export default function AppShell({ children }) {
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-base-100 text-base-content">
+      <GlobalNavigationLoader active={isNavigating} />
+      <PwaUpdateBanner />
       <TabletNav />
       <ImpersonationBanner />
 
