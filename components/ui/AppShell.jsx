@@ -62,12 +62,12 @@ export default function AppShell({ children }) {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-base-100 text-base-content">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-base-100 text-base-content">
       <TabletNav />
       <ImpersonationBanner />
 
       {/* Top padding keeps content clear of the fixed header above. */}
-      <main className="mx-auto w-full max-w-6xl px-4 pb-12 pt-24 md:px-6 xl:px-8">{children}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-12 pt-24 md:px-6 xl:px-8">{children}</main>
 
       <ShellFooter />
     </div>
